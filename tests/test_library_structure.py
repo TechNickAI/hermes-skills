@@ -210,3 +210,99 @@ def test_pii_scanner_boundaries(text, flagged, tmp_path):
     probe.write_text(text)
     hits = [h for h in pii.scan(probe) if h[1] == "agent-name"]
     assert bool(hits) == flagged, f"{text!r}: expected flagged={flagged}, got {hits}"
+
+
+# ---------------------------------------------------------------------------
+# README catalog
+# ---------------------------------------------------------------------------
+
+README = ROOT / "README.md"
+
+# A catalog row: | `name` | description | requirements |
+CATALOG_ROW = re.compile(r"^\|\s*`([a-z0-9-]+)`\s*\|[^|]*\|\s*(.*?)\s*\|\s*$", re.M)
+
+
+def catalog_rows() -> dict[str, str]:
+    return {m.group(1): m.group(2) for m in CATALOG_ROW.finditer(README.read_text())}
+
+
+def test_readme_catalog_lists_every_skill():
+    """The README table is what a human reads instead of the manifest. If a
+    skill is missing from it, the library looks smaller than it is."""
+    listed = set(catalog_rows())
+    actual = {e["name"] for e in manifest()["skills"]}
+    assert listed == actual, (
+        f"missing from README: {sorted(actual - listed)}; "
+        f"in README but not the library: {sorted(listed - actual)}"
+    )
+
+
+# Each manifest requirement maps to the token(s) its README row must contain.
+# A compound "A and B" requirement lists both: naming only one lets the other
+# disappear from the README without failing anything.
+# This is an explicit table rather than a heuristic: deriving a keyword from
+# prose yielded useless keys ("read", "network", "full") that a substring check
+# would satisfy while the real dependency went undocumented. A new requirement
+# fails the test below until it is declared here, which is the point.
+REQUIREMENT_KEYS = {
+    "env: XAI_API_KEY (xAI console)": "XAI_API_KEY",
+    "env: TELEGRAM_BOT_TOKEN (for the living board)": "TELEGRAM_BOT_TOKEN",
+    "env: VAPI_API_KEY (Vapi dashboard \u2192 API Keys, private key)": "VAPI_API_KEY",
+    "Python 3.9+ (stdlib only, no third-party packages)": "Python 3.9+",
+    "Read access to the target agent's HERMES_HOME": "HERMES_HOME",
+    "gh CLI, authenticated": "`gh` CLI",
+    "chromium binary on PATH (or CHROMIUM_BIN) for local rasterize": "chromium",
+    "network access to a Kroki host (KROKI_BASE) and QuickChart (QUICKCHART_BASE)": [
+        "Kroki",
+        "QuickChart",
+    ],
+    "host services: Caddy + PM2": ["Caddy", "PM2"],
+    "Tailscale Serve/Funnel": "Tailscale",
+    "Hermes delegation toolset enabled": "Hermes-native",
+    "Hermes cron + delegation toolsets enabled": ["Hermes-native", "cron"],
+    "email CLI: gog or himalaya": "himalaya",
+    "gog CLI, authorized via `gog auth login`": "`gog` CLI",
+    "gog CLI, authorized for Google Sheets and Drive": "`gog` CLI",
+    "python3": "python3",
+    "pdftoppm (poppler-utils), for multipage visual QA rasterization": "pdftoppm",
+    "uv, to run the XLSX verification snippets": "uv",
+    "openpyxl, via `uv run --with openpyxl` (not a standing install)": "openpyxl",
+    "pandoc (for markdown conversion)": "pandoc",
+    "macOS with Messages.app signed into iMessage": ["macOS", "Messages.app"],
+    "BlueBubbles server app (installed by scripts/setup-bluebubbles.sh)": "BlueBubbles",
+    "Full Disk Access granted by hand (macOS permission prompts cannot be scripted)": "Full Disk Access",
+    "python3 with the requests package": "requests",
+}
+
+
+def test_every_requirement_has_a_declared_readme_key():
+    """A requirement with no entry above would be silently unchecked."""
+    undeclared = {
+        req
+        for entry in manifest()["skills"]
+        for req in entry["requires"]
+        if req not in REQUIREMENT_KEYS
+    }
+    assert not undeclared, (
+        f"add these to REQUIREMENT_KEYS with the token their README row must "
+        f"contain: {sorted(undeclared)}"
+    )
+
+
+def test_readme_catalog_declares_every_requirement():
+    """Every hard requirement in the manifest must be visible in the README
+    row. A row that understates its needs tells a reader the skill is ready
+    when its first run will fail.
+    """
+    rows = catalog_rows()
+    for entry in manifest()["skills"]:
+        row = rows.get(entry["name"], "")
+        for req in entry["requires"]:
+            keys = REQUIREMENT_KEYS.get(req)
+            if keys is None:
+                continue  # reported by the test above
+            for key in [keys] if isinstance(keys, str) else keys:
+                assert key.lower() in row.lower(), (
+                    f"{entry['name']}: README row does not mention {key!r} "
+                    f"(from requirement {req!r})\n  row: {row!r}"
+                )
