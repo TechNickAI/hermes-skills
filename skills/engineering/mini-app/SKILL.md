@@ -84,14 +84,26 @@ Tailnet host: <machine>.<your-tailnet>.ts.net
 
 > **`<reg>` is `router/` or `_registry/` — check before you edit.** The current
 > installer creates `router/`; hosts installed before that carry `_registry/`. Both
-> are in the wild, so resolve it once at the start of any task and reuse it:
+> are in the wild, so resolve it once at the start of any task and reuse it.
+>
+> Resolve the operator's real home first — under a Hermes tool environment `$HOME`
+> may point at the profile home, where `~/mini-apps` does not exist even though the
+> router is running (see "The router dir may have been renamed" below):
 >
 > ```bash
-> REG=$(ls -d ~/mini-apps/router ~/mini-apps/_registry 2>/dev/null | head -1)
-> echo "$REG"      # empty means the router is not installed here
+> # anchor on the caddy BINARY path so this cannot match your own shell
+> APPS=$(ps -eo args= | grep '^/[^ ]*caddy run' \
+>     | sed -n 's#.*--config \(.*\)/[^/]*/Caddyfile.*#\1#p' | head -1)
+> APPS=${APPS:-$(ls -d /Users/*/mini-apps /home/*/mini-apps 2>/dev/null | head -1)}
+> REG=$(ls -d "$APPS"/router "$APPS"/_registry 2>/dev/null | head -1)
+> echo "apps=$APPS reg=$REG"
 > ```
 >
-> Examples below write `_registry/`. Substitute `$REG` on a host that uses `router/`.
+> An empty `REG` with a running Caddy means the probe missed, NOT that the router is
+> uninstalled — fall back to the ground-truth search below before concluding anything.
+>
+> Examples below write `$APPS` and `$REG`. On a host you have already identified you
+> can substitute the literal paths.
 
 Never run ad-hoc `tailscale serve …` commands. Edit the JSON, run the apply script.
 
@@ -109,22 +121,27 @@ The installer copies templates into `~/mini-apps/`, renders the Caddyfile with t
 paths, installs auth-service deps, and stages the launchd plist (macOS only). Re-running
 is safe; `--force` overwrites existing files.
 
-**Then by hand:**
+**Then by hand.** A fresh install from the current installer creates `router/`, so
+set `REG` before following these steps:
+
+```bash
+REG=$(ls -d ~/mini-apps/router ~/mini-apps/_registry 2>/dev/null | head -1)
+```
 
 1. Edit `~/mini-apps/ecosystem.config.js`:
    - Set `AUTH_SECRET` to `openssl rand -hex 32` (one per machine)
    - Add `APP_PASSWORD_<SLUG>` / `APP_TITLE_<SLUG>` / `APP_DESC_<SLUG>` for any gated
      apps
-2. Edit `~/mini-apps/_registry/Caddyfile` to declare each app's route
-3. Edit `~/mini-apps/_registry/tailscale-serve.json` if you want a non-default serve
-   layout (default exposes Caddy on `:443`)
+2. Edit `$REG/Caddyfile` to declare each app's route
+3. Edit `$REG/tailscale-serve.json` if you want a non-default serve layout (default
+   exposes Caddy on `:443`)
 
 **Start everything under PM2:**
 
 ```bash
 pm2 start ~/mini-apps/ecosystem.config.js
 pm2 start /opt/homebrew/bin/caddy --name caddy --interpreter none -- \
-  run --config ~/mini-apps/_registry/Caddyfile --adapter caddyfile
+  run --config "$REG/Caddyfile" --adapter caddyfile
 pm2 save
 pm2 startup    # paste the printed sudo command — needed for resurrect-on-reboot
 ```
@@ -132,7 +149,7 @@ pm2 startup    # paste the printed sudo command — needed for resurrect-on-rebo
 **Apply Tailscale Serve:**
 
 ```bash
-~/mini-apps/_registry/apply-tailscale-serve.sh
+"$REG"/apply-tailscale-serve.sh
 # macOS launchd that replays on login:
 launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.hermes.mini-app-router-serve.plist
 ```
