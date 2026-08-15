@@ -1,0 +1,337 @@
+#!/usr/bin/env python3
+"""gworkspace.py — stdlib-only Google Drive/Docs/Sheets/Slides helper.
+
+Auth: reuses the OAuth refresh token already stored by `gog` (steipete/gogcli),
+so no extra Python packages and no second OAuth dance. Works regardless of gog
+version, because it talks to the Google REST APIs directly.
+
+Token source resolution (first hit wins):
+  1. --refresh-token-file / --client-secret-file flags (accepted before or after subcommand)
+  2. env GOOGLE_REFRESH_TOKEN + GOOGLE_CLIENT_ID + GOOGLE_CLIENT_SECRET
+  3. gog: exports a temporary refresh-token JSON with `gog auth tokens export` + gog credentials.json
+
+Optional gog selectors:
+  --gog-client / GOG_CLIENT     named OAuth client (credentials-<client>.json)
+  --gog-home / GOG_HOME         gog config root override
+  --gog-account / GOG_ACCOUNT   account email override
+
+Commands:
+  token                                  print a fresh access token
+  upload   <path> --as doc|sheet|slide|raw [--name N] [--parent FOLDER]
+  export   <fileId> --mime MIME [--out PATH]
+  mkdir    <name> [--parent FOLDER]
+  share    <fileId> --email E --role reader|writer|commenter
+  meta     <fileId>
+
+Exit code is non-zero on any API error; errors print JSON to stderr.
+"""
+import argparse, json, os, sys, urllib.request, urllib.parse, uuid, subprocess, mimetypes, shutil
+
+GOOGLE_TYPES = {
+    "doc": "application/vnd.google-apps.document",
+    "sheet": "application/vnd.google-apps.spreadsheet",
+    "slide": "application/vnd.google-apps.presentation",
+}
+# Best source MIME per source extension for clean conversion.
+SRC_MIME = {
+    ".md": "text/markdown", ".markdown": "text/markdown",
+    ".docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    ".csv": "text/csv",
+    ".tsv": "text/tab-separated-values",
+    ".xlsx": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    ".pptx": "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+    ".html": "text/html", ".htm": "text/html", ".txt": "text/plain",
+}
+
+
+def _gog_bin():
+    """Resolve the gog binary via PATH; never trust a bare relative name.
+
+    Returns None when gog is not installed. gog is only ever a credential
+    *fallback* here (explicit files and env vars take precedence), so a missing
+    gog must not abort — it should let credential resolution fall through to a
+    clean missing_credentials error.
+    """
+    return shutil.which("gog")
+
+
+def _gog_client(args):
+    return getattr(args, "gog_client", None) or os.environ.get("GOG_CLIENT") or ""
+
+
+def _gog_home(args):
+    home = getattr(args, "gog_home", None) or os.environ.get("GOG_HOME")
+    return os.path.expanduser(home) if home else None
+
+
+def _gog_global_args(args):
+    """gog global flags that are stable across versions (only --client)."""
+    client = _gog_client(args)
+    return ["--client", client] if client else []
+
+
+def _gog_env(args):
+    """Subprocess env for gog. Pass the home override via GOG_HOME rather than a
+    --home flag: older gog (e.g. v0.9.0) does not accept --home, but GOG_HOME is
+    honored across versions."""
+    env = os.environ.copy()
+    home = _gog_home(args)
+    if home:
+        env["GOG_HOME"] = home
+    return env
+
+
+def _gog_account(args):
+    return getattr(args, "gog_account", None) or os.environ.get("GOG_ACCOUNT") or _default_gog_account(args)
+
+
+def _default_gog_account(args):
+    gog = _gog_bin()
+    if not gog:
+        return None
+    try:
+        out = subprocess.run([gog, *_gog_global_args(args), "auth", "list", "--plain"],
+                             capture_output=True, text=True, timeout=20, env=_gog_env(args))
+        line = out.stdout.strip().splitlines()[0]
+        return line.split("\t")[0]
+    except Exception:
+        return None
+
+
+def _read_secret_json(path):
+    """Read a JSON secret file, refusing world/group-readable or other-owned files."""
+    real = os.path.realpath(os.path.expanduser(path))
+    try:
+        st = os.stat(real)
+    except OSError as e:
+        sys.exit(json.dumps({"error": "credential_file_unreadable",
+                             "detail": f"{path}: {e.strerror}"}))
+    if st.st_uid != os.getuid():
+        sys.exit(json.dumps({"error": "insecure_credential_file",
+                             "detail": f"{path} is not owned by the current user"}))
+    if st.st_mode & 0o077:
+        sys.exit(json.dumps({"error": "insecure_credential_file",
+                             "detail": f"{path} is group/world accessible; chmod 600 it"}))
+    if st.st_size > 1_000_000:
+        sys.exit(json.dumps({"error": "credential_file_too_large", "detail": path}))
+    try:
+        with open(real) as fh:
+            return json.load(fh)
+    except (OSError, json.JSONDecodeError) as e:
+        sys.exit(json.dumps({"error": "credential_file_invalid", "detail": f"{path}: {e}"}))
+
+
+def _load_creds(args):
+    # 1. explicit files
+    rt = cid = csec = None
+    refresh_token_file = getattr(args, "refresh_token_file", None)
+    client_secret_file = getattr(args, "client_secret_file", None)
+    if refresh_token_file:
+        d = _read_secret_json(refresh_token_file)
+        rt = d.get("refresh_token", d.get("refreshToken"))
+    if client_secret_file:
+        d = _read_secret_json(client_secret_file)
+        d = d.get("installed", d.get("web", d)); cid = d["client_id"]; csec = d["client_secret"]
+    # 2. env
+    rt = rt or os.environ.get("GOOGLE_REFRESH_TOKEN")
+    cid = cid or os.environ.get("GOOGLE_CLIENT_ID")
+    csec = csec or os.environ.get("GOOGLE_CLIENT_SECRET")
+    # 3. gog
+    if not rt:
+        gog = _gog_bin()
+        acct = _gog_account(args) if gog else None
+        if gog and acct:
+            import tempfile
+            fd, tmp_path = tempfile.mkstemp(suffix=".json")
+            os.close(fd)
+            try:
+                os.unlink(tmp_path)  # gog v0.9 refuses to overwrite an existing temp path in some modes
+            except OSError:
+                pass
+            try:
+                r = subprocess.run([gog, *_gog_global_args(args), "auth", "tokens", "export", acct, "--output", tmp_path, "--force"],
+                                   capture_output=True, text=True, timeout=30, env=_gog_env(args))
+                if r.returncode == 0 and os.path.exists(tmp_path):
+                    with open(tmp_path) as fh:
+                        rt = json.load(fh).get("refresh_token")
+            except Exception:
+                pass
+            finally:
+                try:
+                    os.unlink(tmp_path)
+                except OSError:
+                    pass
+    if not (cid and csec):
+        # gog OAuth client credentials. Honor GOG_HOME/--gog-home root overrides and
+        # named clients (GOG_CLIENT/--gog-client -> credentials-<client>.json), then
+        # fall back to the default credentials.json in the standard config dirs.
+        client = _gog_client(args)
+        names = []
+        if client:
+            names.append(f"credentials-{client}.json")
+        names.append("credentials.json")
+        roots = []
+        gog_home = _gog_home(args)
+        if gog_home:
+            # gog resolves a home override into home/{config,data,...}; OAuth client
+            # files live under data. Search those plus the home root for robustness.
+            roots += [
+                os.path.join(gog_home, "data", "gogcli"),
+                os.path.join(gog_home, "data"),
+                os.path.join(gog_home, "config", "gogcli"),
+                os.path.join(gog_home, "config"),
+                gog_home,
+            ]
+        roots += [
+            os.path.expanduser("~/Library/Application Support/gogcli"),
+            os.path.expanduser("~/.config/gogcli"),
+        ]
+        candidates = [os.path.join(root, name) for name in names for root in roots]
+        for p in candidates:
+            if not os.path.exists(p):
+                continue
+            try:
+                with open(p) as fh:
+                    d = json.load(fh)
+            except (OSError, json.JSONDecodeError):
+                continue
+            d = d.get("installed", d.get("web", d))
+            cid = cid or d.get("client_id")
+            csec = csec or d.get("client_secret")
+            if cid and csec:
+                break
+    if not (rt and cid and csec):
+        sys.exit(json.dumps({"error": "missing_credentials",
+                             "have": {"refresh_token": bool(rt), "client_id": bool(cid), "client_secret": bool(csec)}}))
+    return rt, cid, csec
+
+
+def access_token(args):
+    rt, cid, csec = _load_creds(args)
+    data = urllib.parse.urlencode({"client_id": cid, "client_secret": csec,
+                                   "refresh_token": rt, "grant_type": "refresh_token"}).encode()
+    req = urllib.request.Request("https://oauth2.googleapis.com/token", data=data)
+    try:
+        with urllib.request.urlopen(req) as r:
+            return json.load(r)["access_token"]
+    except urllib.error.HTTPError as e:
+        sys.exit(json.dumps({"error": "token_refresh_failed", "code": e.code, "body": e.read().decode()[:300]}))
+
+
+def _api(token, method, url, body=None, headers=None, raw=False):
+    req = urllib.request.Request(url, data=body, method=method)
+    req.add_header("Authorization", f"Bearer {token}")
+    for k, v in (headers or {}).items():
+        req.add_header(k, v)
+    try:
+        with urllib.request.urlopen(req) as r:
+            return r.read() if raw else json.load(r)
+    except urllib.error.HTTPError as e:
+        sys.exit(json.dumps({"error": "api_error", "code": e.code, "url": url, "body": e.read().decode()[:400]}))
+
+
+def cmd_token(args):
+    print(access_token(args))
+
+
+def cmd_upload(args):
+    token = access_token(args)
+    ext = os.path.splitext(args.path)[1].lower()
+    src_mime = SRC_MIME.get(ext) or mimetypes.guess_type(args.path)[0] or "application/octet-stream"
+    target = None if args.as_ == "raw" else GOOGLE_TYPES[args.as_]
+    name = args.name or os.path.splitext(os.path.basename(args.path))[0]
+    meta = {"name": name}
+    if args.parent:
+        meta["parents"] = [args.parent]
+    if target:
+        meta["mimeType"] = target
+    boundary = "----b" + uuid.uuid4().hex
+    with open(args.path, "rb") as fh:
+        file_body = fh.read()
+    payload = b"".join([
+        f"--{boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n".encode(),
+        json.dumps(meta).encode(),
+        f"\r\n--{boundary}\r\nContent-Type: {src_mime}\r\n\r\n".encode(),
+        file_body,
+        f"\r\n--{boundary}--\r\n".encode()])
+    url = ("https://www.googleapis.com/upload/drive/v3/files"
+           "?uploadType=multipart&fields=id,name,mimeType,webViewLink&supportsAllDrives=true")
+    res = _api(token, "POST", url, body=payload,
+               headers={"Content-Type": f"multipart/related; boundary={boundary}"})
+    print(json.dumps(res, indent=2))
+
+
+def cmd_export(args):
+    token = access_token(args)
+    url = (f"https://www.googleapis.com/drive/v3/files/{args.file_id}/export"
+           f"?mimeType={urllib.parse.quote(args.mime)}&supportsAllDrives=true")
+    data = _api(token, "GET", url, raw=True)
+    if args.out:
+        with open(args.out, "wb") as fh:
+            fh.write(data)
+        print(json.dumps({"status": "exported", "fileId": args.file_id, "path": args.out, "bytes": len(data)}))
+    else:
+        sys.stdout.buffer.write(data)
+
+
+def cmd_mkdir(args):
+    token = access_token(args)
+    meta = {"name": args.name, "mimeType": "application/vnd.google-apps.folder"}
+    if args.parent:
+        meta["parents"] = [args.parent]
+    res = _api(token, "POST", "https://www.googleapis.com/drive/v3/files?fields=id,name,webViewLink&supportsAllDrives=true",
+               body=json.dumps(meta).encode(), headers={"Content-Type": "application/json"})
+    print(json.dumps(res, indent=2))
+
+
+def cmd_share(args):
+    token = access_token(args)
+    body = {"role": args.role, "type": "user", "emailAddress": args.email}
+    url = (f"https://www.googleapis.com/drive/v3/files/{args.file_id}/permissions"
+           f"?fields=id,role,type&sendNotificationEmail={'true' if args.notify else 'false'}&supportsAllDrives=true")
+    res = _api(token, "POST", url, body=json.dumps(body).encode(),
+               headers={"Content-Type": "application/json"})
+    print(json.dumps(res, indent=2))
+
+
+def cmd_meta(args):
+    token = access_token(args)
+    url = (f"https://www.googleapis.com/drive/v3/files/{args.file_id}"
+           "?fields=id,name,mimeType,webViewLink,modifiedTime,size,parents&supportsAllDrives=true")
+    print(json.dumps(_api(token, "GET", url), indent=2))
+
+
+def main():
+    # Credential flags are shared via a parent parser so they are accepted BOTH
+    # before the subcommand (gworkspace.py --refresh-token-file F upload ...) and
+    # after it (gworkspace.py upload ... --refresh-token-file F). Defaults are
+    # argparse.SUPPRESS so the attribute is set ONLY when the flag is actually
+    # given — otherwise the subparser's parse would overwrite a root-set value
+    # with None. Helpers read these with getattr(args, name, None).
+    creds = argparse.ArgumentParser(add_help=False)
+    creds.add_argument("--refresh-token-file", default=argparse.SUPPRESS)
+    creds.add_argument("--client-secret-file", default=argparse.SUPPRESS)
+    creds.add_argument("--gog-client", default=argparse.SUPPRESS, help="gog named OAuth client (or set GOG_CLIENT)")
+    creds.add_argument("--gog-home", default=argparse.SUPPRESS, help="gog config root override (or set GOG_HOME)")
+    creds.add_argument("--gog-account", default=argparse.SUPPRESS, help="gog account email (or set GOG_ACCOUNT)")
+
+    p = argparse.ArgumentParser(
+        description="stdlib-only Google Workspace helper (reuses gog auth)",
+        parents=[creds])
+    sub = p.add_subparsers(dest="cmd", required=True)
+    sub.add_parser("token", parents=[creds])
+    up = sub.add_parser("upload", parents=[creds]); up.add_argument("path")
+    up.add_argument("--as", dest="as_", required=True, choices=["doc", "sheet", "slide", "raw"])
+    up.add_argument("--name"); up.add_argument("--parent")
+    ex = sub.add_parser("export", parents=[creds]); ex.add_argument("file_id"); ex.add_argument("--mime", required=True); ex.add_argument("--out")
+    mk = sub.add_parser("mkdir", parents=[creds]); mk.add_argument("name"); mk.add_argument("--parent")
+    sh = sub.add_parser("share", parents=[creds]); sh.add_argument("file_id"); sh.add_argument("--email", required=True)
+    sh.add_argument("--role", default="reader", choices=["reader", "writer", "commenter"]); sh.add_argument("--notify", action="store_true")
+    mt = sub.add_parser("meta", parents=[creds]); mt.add_argument("file_id")
+    args = p.parse_args()
+    {"token": cmd_token, "upload": cmd_upload, "export": cmd_export,
+     "mkdir": cmd_mkdir, "share": cmd_share, "meta": cmd_meta}[args.cmd](args)
+
+
+if __name__ == "__main__":
+    main()
