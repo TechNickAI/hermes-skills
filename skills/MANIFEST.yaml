@@ -231,7 +231,7 @@ skills:
   path: skills/engineering/address-pr-comments
 - name: diagram-rendering
   pack: engineering
-  version: 1.0.0
+  version: 1.1.0
   scope: solo
   summary: Use when a fast hosted-render path is needed to turn D2, Mermaid, Graphviz, or Chart.js text into an inline-ready PNG for chat (Telegram, Discord, Slack) or a saved image.
   use_when: a fast hosted-render path is needed to turn D2, Mermaid, Graphviz, or Chart.js text into an inline-ready PNG for chat (Telegram, Discord, Slack) or a saved image. Handles the hosted-render + local-rasterize plumbing and platform gotchas (snap-chromium sandbox, D2-is-SVG-only, blank-render detection…
@@ -251,7 +251,7 @@ skills:
   path: skills/engineering/diagram-rendering
 - name: mini-app
   pack: engineering
-  version: 0.3.0
+  version: 0.4.0
   scope: fleet
   summary: Use when adding, removing, password-protecting, or troubleshooting a mini-app served by the openclaw-config app-router (Caddy + PM2 + auth sidecar + Tailscale Serve/Funnel) on a fleet machine.
   use_when: adding, removing, password-protecting, or troubleshooting a mini-app served by the openclaw-config app-router (Caddy + PM2 + auth sidecar + Tailscale Serve/Funnel) on a fleet machine. Covers install, the Caddy route pattern, the auth sidecar conventions, exposing apps publicly via Funnel, Hermes das…

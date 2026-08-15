@@ -8,7 +8,7 @@ description:
   retries) so any fleet agent gets a clean picture on the first try. Prefer excalidraw
   for hand-drawn whiteboards and architecture-diagram for offline, pixel-controlled dark
   SVG cards; do not send sensitive content to public render hosts."
-version: 1.0.0
+version: 1.1.0
 author: Hermes Agent
 license: MIT
 platforms: [linux, macos]

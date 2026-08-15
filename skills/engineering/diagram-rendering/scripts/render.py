@@ -293,6 +293,13 @@ def _chromium_screenshot(src_url: str, out_png: str, w: int, h: int) -> str:
             # used: snap Chromium is already per-invocation isolated and rejects
             # dot-prefixed profile dirs under $HOME with a SingletonLock error.)
             "--disable-javascript", "--disable-remote-fonts", "--disable-extensions",
+            # Hard network cutoff for the rasterization pass. _neutralize_external_refs
+            # rewrites href/src/url(), but a regex over untrusted markup cannot be the
+            # SSRF boundary: @import, srcset, and CSS image-set() all survive it and
+            # Chromium fetches them even with JavaScript disabled (verified — all three
+            # reached a local listener). Failing DNS for every host makes the boundary
+            # structural instead of pattern-based; local file:// content still renders.
+            "--host-resolver-rules=MAP * ~NOTFOUND",
             "--no-first-run", "--no-default-browser-check",
             f"--force-device-scale-factor={_scale()}", f"--window-size={w},{h}",
             "--default-background-color=00000000",

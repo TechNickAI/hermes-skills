@@ -7,7 +7,7 @@ description: >
   sidecar conventions, exposing apps publicly via Funnel, Hermes dashboards behind a
   password, and the recurring pitfalls (Tailscale "serve reset" wars, the PM2 $HOME
   trap, funnel-eligible ports, strip-prefix requirements).
-version: 0.3.0
+version: 0.4.0
 license: MIT
 metadata:
   hermes:
@@ -953,7 +953,12 @@ cloudflared tunnel route dns <name> sub.example.com
 cloudflared tunnel ingress validate
 
 # 4. supervise under PM2 (reboot-safe, same as Caddy) and save
-pm2 start /opt/homebrew/bin/cloudflared --name cloudflared --interpreter none -- \
+# Resolve the binary from PATH rather than hardcoding the Apple-Silicon Homebrew
+# prefix — on Linux and Intel macOS cloudflared lives elsewhere (/usr/local/bin,
+# /usr/bin), and PM2 needs an absolute path, so a hardcoded prefix fails even when
+# cloudflared is installed and on PATH.
+CLOUDFLARED=$(command -v cloudflared || echo /opt/homebrew/bin/cloudflared)
+pm2 start "$CLOUDFLARED" --name cloudflared --interpreter none -- \
   tunnel --config /Users/<user>/.cloudflared/config.yml run <name>
 pm2 save
 ```
