@@ -11,7 +11,7 @@
 #   use_when              the trigger conditions, for selective installation
 _generated_by: scripts/generate_manifest.py
 _do_not_edit: Regenerate with `python scripts/generate_manifest.py`; CI checks it.
-count: 21
+count: 22
 packs:
 - core
 - engineering
@@ -116,7 +116,7 @@ skills:
   path: skills/core/mob-check
 - name: multi-review
   pack: core
-  version: 1.1.0
+  version: 1.2.0
   scope: solo
   summary: Use when reviewing almost any meaningful artifact, decision, action, plan, code change, prompt, skill, research summary, outbound message, or public-facing content.
   use_when: reviewing almost any meaningful artifact, decision, action, plan, code change, prompt, skill, research summary, outbound message, or public-facing content. Runs a small panel of diverse review lenses across model families when available, synthesizes findings into fix/ask/defer/wontfix decisions, and…
@@ -148,7 +148,7 @@ skills:
   path: skills/core/project-steward
 - name: recall
   pack: core
-  version: 0.2.1
+  version: 0.3.0
   scope: solo
   summary: Restore context from prior sessions, memories, and transcripts.
   use_when: a bare-pronoun follow-up like "ship it", "do it", or "send that" likely points at a prior-session artifact. Designed to never dead-end — if one source has nothing, keep searching others until you have a useful picture.
@@ -229,12 +229,32 @@ skills:
   - triage
   - automation
   path: skills/engineering/address-pr-comments
+- name: diagram-rendering
+  pack: engineering
+  version: 1.0.0
+  scope: solo
+  summary: Use when a fast hosted-render path is needed to turn D2, Mermaid, Graphviz, or Chart.js text into an inline-ready PNG for chat (Telegram, Discord, Slack) or a saved image.
+  use_when: a fast hosted-render path is needed to turn D2, Mermaid, Graphviz, or Chart.js text into an inline-ready PNG for chat (Telegram, Discord, Slack) or a saved image. Handles the hosted-render + local-rasterize plumbing and platform gotchas (snap-chromium sandbox, D2-is-SVG-only, blank-render detection…
+  requires:
+  - chromium binary on PATH (or CHROMIUM_BIN) for local rasterize
+  - network access to a Kroki host (KROKI_BASE) and QuickChart (QUICKCHART_BASE)
+  works_out_of_the_box: false
+  tags:
+  - diagrams
+  - charts
+  - visualization
+  - telegram
+  - mermaid
+  - d2
+  - graphviz
+  - quickchart
+  path: skills/engineering/diagram-rendering
 - name: mini-app
   pack: engineering
   version: 0.3.0
   scope: fleet
-  summary: Use when adding, removing, password-protecting, or troubleshooting a mini-app served by the Hermes app-router (Caddy + PM2 + an Express auth sidecar + Tailscale Serve/Funnel) on a host.
-  use_when: adding, removing, password-protecting, or troubleshooting a mini-app served by the Hermes app-router (Caddy + PM2 + an Express auth sidecar + Tailscale Serve/Funnel) on a host. Covers install, the Caddy route pattern, the auth sidecar conventions, exposing Hermes dashboards behind a password, the we…
+  summary: Use when adding, removing, password-protecting, or troubleshooting a mini-app served by the openclaw-config app-router (Caddy + PM2 + auth sidecar + Tailscale Serve/Funnel) on a fleet machine.
+  use_when: adding, removing, password-protecting, or troubleshooting a mini-app served by the openclaw-config app-router (Caddy + PM2 + auth sidecar + Tailscale Serve/Funnel) on a fleet machine. Covers install, the Caddy route pattern, the auth sidecar conventions, exposing apps publicly via Funnel, Hermes das…
   requires:
   - 'host services: Caddy + PM2'
   - Tailscale Serve/Funnel
@@ -304,7 +324,7 @@ skills:
   path: skills/productivity/google-docs
 - name: google-sheets
   pack: productivity
-  version: 1.0.0
+  version: 1.1.0
   scope: solo
   summary: Use when creating, populating, formatting, importing, exporting, or quality-checking Google Sheets from CSV, JSON arrays, or computed tabular data.
   use_when: creating, populating, formatting, importing, exporting, or quality-checking Google Sheets from CSV, JSON arrays, or computed tabular data.
@@ -325,7 +345,7 @@ skills:
   path: skills/productivity/google-sheets
 - name: google-slides
   pack: productivity
-  version: 1.0.0
+  version: 1.1.0
   scope: solo
   summary: Use when creating, importing, exporting, or quality-checking Google Slides decks via markdown-to-PPTX conversion and Drive import.
   use_when: creating, importing, exporting, or quality-checking Google Slides decks via markdown-to-PPTX conversion and Drive import.
