@@ -6,7 +6,7 @@ description: >
   Runs a small panel of diverse review lenses across model families when available,
   synthesizes findings into fix/ask/defer/wontfix decisions, and iterates until the
   result is ready.
-version: 1.3.0
+version: 1.4.0
 license: MIT
 metadata:
   hermes:
@@ -71,6 +71,11 @@ A good multi-review run does these things, in order:
    audience, and the stakes.
 2. **Choose review depth.** Pick quick, balanced, or deep based on risk.
 3. **Choose a diverse panel.** Select lenses and model families appropriate to the task.
+   Whenever the run has **two or more seats**, staff for both generation and
+   verification — those are usually different seats, not one strong seat (see
+   "Verification and originality are usually different seats"). A single-seat run
+   cannot split the roles; it carries the generator/verifier tension inside one prompt
+   and is stamped degraded accordingly.
 4. **Run reviewers independently.** Keep reviewer prompts isolated so they do not anchor
    on each other's conclusions.
 5. **Synthesize.** Deduplicate findings, classify each as fix / ask / defer / wontfix,
@@ -191,30 +196,166 @@ deliberate until you have checked why.
 
 ### Family strengths
 
+The notes below combine general observation with one **measured** data point: a
+multi-model bake-off where eight models were given the same open-ended research and
+ideation brief, and their outputs were scored across seven weighted dimensions
+(mandate discipline, evidence quality, originality, verification, usability, and
+related axes). Findings from that run are marked **[measured]**. Everything else is
+ordinary heuristic.
+
+Read the scope honestly: that was **one task, scored once, N=1 per model**, and the
+task was _research and ideation_, not _critique of an existing artifact_. Behaviors
+that are themselves review-shaped — adversarial pressure-testing, mandate discipline,
+verification effort — transfer to reviewing with reasonable confidence. Generative
+traits like originality are a **hypothesis** about review behavior, not an established
+one. Treat the whole section as a prior to check against the artifact in front of you,
+not as fixed model properties.
+
 - **Claude / Anthropic** — best for synthesis, nuanced tradeoffs, voice, empathy, policy
-  interpretation, and turning messy findings into a coherent final answer. Avoid using
-  only Claude if the calling agent is already Claude-family.
+  interpretation, and turning messy findings into a coherent final answer. **[measured]**
+  Also the strongest self-critic in the run: it pressure-tested its own output
+  adversarially, which is review behavior directly. **Its limit is divergence** — it
+  scored lowest of the frontier models on originality, and every idea it produced also
+  appeared on another model's list. It is a convergence engine, not a divergence engine.
+  A panel staffed only with Claude models will produce a well-written consensus and miss
+  the objection nobody else thought of. Avoid using only Claude if the calling agent is
+  already Claude-family.
 - **GPT / OpenAI** — strong structured reviewer: code correctness, API contracts, tests,
-  consistency, deterministic triage, and concise fix recommendations.
-- **Gemini / Google** — strong long-context reader: large diffs, logs, docs, research,
-  cross-file consistency, evidence extraction, and "did the artifact cover the whole
-  source?" checks.
+  consistency, and concise fix recommendations. **[measured] Best at building the
+  evaluation scaffold, weakest at then executing it.** It produced the best decision
+  framework in the corpus — a crisp set of screening questions others should have been
+  measured against — and then over-filtered its own candidates and delivered almost no
+  verification behind them. Give GPT the job of defining the review criteria, or the job
+  of applying them, but do not assume one seat does both well.
+- **Gemini / Google** — strong long-context reader: large diffs, logs, docs, and
+  cross-file consistency checks. **[measured] Do not rely on it for evidence
+  extraction**, despite the long-context strength: its evidence was correct but generic
+  and thin, list-shaped with no numbers behind the claims. **Operational warning:** in
+  that run a Gemini seat silently fell back to a different underlying model mid-thread
+  and kept answering as if nothing had changed. A reviewer that swaps model families
+  without telling you breaks the independence guarantee the entire panel rests on.
+  Verify which model actually answered before counting it as family coverage.
 - **Grok / xAI** — strong contrarian/red-team reviewer: assumptions, edge cases, blunt
   risk, adversarial misuse, policy gaps, and "what would embarrass us if true?" checks.
-  High variance is useful for surfacing issues, not for final wording. Grok is also the
-  family most likely to offer **native live X-graph retrieval** (via xAI's `x_search`
-  server-side tool) rather than general web search, which helps when the question is
-  "how are people reacting right now?" — public-facing copy, launch posts, naming,
-  positioning, and reputational blast radius. Live retrieval applies only when the
-  selected route actually enables that tool; otherwise treat Grok as cutoff-bound like
-  any other model.
-- **Local or small models** — useful for cheap/private quick passes, syntax/style
-  checks, and obvious inconsistencies. Do not rely on them alone for high-stakes
-  judgment.
+  **[measured] The best mandate discipline in the run** — it was the one model willing to
+  answer the question actually asked rather than the more flattering adjacent question,
+  and it rejected the framing it had been handed when the framing was wrong. That is
+  precisely what a red-team seat is for. **[measured] Its failure mode is delivery:** it
+  scored worst in the run on usability, producing genuinely excellent analysis and then
+  leaving nearly all of it in scratch files while its actual reply led with process
+  commentary. Grok needs an explicit output path and a demand for the artifact more than
+  any other family (see rule 7). High variance is useful for surfacing issues, not for
+  final wording.
+
+  Grok is also the family most likely to offer **native live X-graph retrieval** (via
+  xAI's `x_search` server-side tool) rather than general web search, which helps when the
+  question is "how are people reacting right now?" — public-facing copy, launch posts,
+  naming, positioning, and reputational blast radius. Live retrieval applies only when
+  the selected route actually enables that tool; otherwise treat Grok as cutoff-bound
+  like any other model.
+
+- **Open-weight models** (Kimi, Qwen, MiniMax, DeepSeek, Llama, and similar) — **the
+  divergence seats.** **[measured]** In that run the open-weight models produced the
+  genuinely novel material: the mechanisms and framings that appeared on no frontier
+  model's list. If a panel needs an idea the consensus will not generate — an unlisted
+  failure mode, an approach nobody considered, a structurally different objection — this
+  is where it comes from, and it is a real reason to seat one even when a frontier model
+  is available. **[measured] They pair novelty with almost no verification:** the same
+  seats that generated the new material asserted it without checking, and one of them
+  also scored near the bottom on usability. Their output is a lead to be verified, never
+  a finding to be trusted as-is. Cost and privacy (local or self-hosted execution) are
+  secondary reasons to use them; capability diversity is the primary one.
+- **Small or local models** — useful for cheap/private quick passes, syntax/style checks,
+  and obvious inconsistencies. Do not rely on them alone for high-stakes judgment. This
+  is a size/deployment distinction, not the open-weight distinction above: a large
+  open-weight model run through a hosted router is a full-strength seat.
+
+**Newer is not automatically stronger.** A vendor's latest flagship, including one
+marketed as a reasoning improvement over the previous flagship, may not outperform the
+model it supersedes on your actual work. Two Anthropic frontier models in that run
+finished close together despite one being positioned as the clear successor. Check the
+newer model on a task you have already scored before promoting it to a panel seat by
+reputation.
 
 These family strengths are **observed heuristics, not guarantees** — they shift with
 model versions and prompting. Verify against the artifact in front of you rather than
 treating them as fixed properties.
+
+### Verification and originality are usually different seats
+
+The single most useful structural finding from that run: **the models that verified
+heavily generated almost nothing new, and the models that generated the novel material
+verified almost none of it.** The correlation ran in opposite directions across the
+whole field, frontier and open-weight alike.
+
+Do not fight this by asking one seat to do both. Whenever the run has two or more
+seats, staff for it:
+
+- Seat at least one **generator** (open-weight models are the measured pick) whose job
+  is to produce candidate findings, including speculative ones.
+- Seat at least one **verifier** (frontier models, Claude and GPT in that run) whose job
+  is to check the generator's claims against the artifact and kill the unsupported ones.
+- Let the verifiers grade the generators. An unverified novel finding is a lead, not a
+  result, and it should be labeled that way in synthesis until someone checks it.
+
+A panel of only verifiers returns a tidy consensus that misses the unlisted problem. A
+panel of only generators returns a pile of confident claims you cannot act on. The
+review is the interaction between them.
+
+**Single-seat runs are the documented exception.** A quick-depth check or the
+`degraded: single-reviewer` fallback has one seat and cannot split these roles. Do not
+try to fake a panel out of it. Instead, make the tension explicit inside the one
+prompt — ask for candidate findings _and_ a verification pass over them, in that order
+— and treat its novel-but-unchecked claims as leads, exactly as you would from a
+generator seat. This is weaker than two seats, which is what the degradation stamp is
+telling the reader.
+
+### Demand the artifact, not the summary
+
+**[measured]** In that run the single largest score gap was not analysis quality but
+delivery: one model did roughly 94KB of excellent work, published about 1.2KB of it, and
+opened its reply with commentary about its own tooling — leaving a reasonable reader to
+conclude it had accomplished nothing. The work existed. It was simply never handed over.
+
+This is the same failure class as rule 7 (incremental findings files), seen from the
+other end, and it changes what you ask for:
+
+- Give every reviewer an explicit output path and require the findings to land there.
+- Judge a seat by the file it produced, not by the chat message it returned. A thin
+  reply over a substantial file is a delivery failure, not a weak review — go read the
+  file.
+- Treat process commentary in a reviewer's response as a smell. A seat narrating its
+  helper scripts is usually a seat that has not yet told you what it found.
+
+### Retrieval is the weak link — paste the prior decisions in
+
+**[measured]** In that run, none of the eight models consulted the existing record of
+what had already been tried, and several confidently re-proposed approaches that had
+already been evaluated and rejected, with the measured verdicts sitting in an accessible
+store the whole time.
+
+Assume a reviewer will not find your prior decisions on its own, even when it has the
+tools and the access. A reviewer that re-raises a settled question burns a seat and adds
+noise to synthesis. Paste the relevant history — the graveyard of rejected approaches,
+the constraints already agreed, the decisions already made and why — directly into the
+reviewer prompt as part of the bounded brief. Retrieval you did not verify is retrieval
+that did not happen.
+
+### Job-to-family quick reference
+
+Measured on one research task, N=1 per model. A starting prior, not a routing table —
+and never a substitute for the different-family independence rule above.
+
+| Job                                             | Start with                                                     |
+| ----------------------------------------------- | -------------------------------------------------------------- |
+| Synthesize findings into a coherent verdict     | Claude                                                         |
+| Write the evaluation framework or rubric        | GPT                                                            |
+| Apply a rubric and verify claims                | Claude or GPT (not the one that wrote it)                      |
+| Generate novel objections and unlisted failures | Open-weight (Kimi, Qwen, MiniMax, ...)                         |
+| Adversarial kill / mandate discipline           | Grok                                                           |
+| Read a large diff or corpus for coverage        | Gemini                                                         |
+| Extract evidence with numbers behind it         | Not Gemini — Claude or GPT                                     |
+| Anything where the deliverable itself matters   | Any seat — but give an explicit output path and check the file |
 
 ### When Grok is the right pick
 
@@ -690,6 +831,24 @@ smallest path to unblock.
     writing the seat off.
 13. **Accepting a self-reported tool failure at face value.** "The file was empty" is a
     claim, not an observation. Stat it. See rule 8.
+14. **Staffing a multi-seat panel entirely with verifiers.** An all-frontier panel
+    converges: it produces a well-written consensus and misses the objection nobody
+    listed. Seat a divergence source (open-weight models are the measured pick) and let
+    the verifiers grade it. This applies to real panels; a single-seat quick check is a
+    documented degraded path, not a violation of it.
+15. **Treating an open-weight seat's novel finding as a result.** Those seats generate
+    the new material and verify almost none of it. Novel plus unverified is a lead;
+    label it that way until a verifier checks it.
+16. **Counting a seat as family coverage without checking which model answered.** A
+    route can silently fall back to a different underlying model mid-run and keep
+    answering as if nothing changed, which quietly collapses your model diversity to
+    one family while the report still claims several.
+17. **Assuming a reviewer found your prior decisions.** It almost certainly did not.
+    Paste the rejected-approach graveyard and settled constraints into the brief, or
+    expect a confident re-proposal of something you already killed.
+18. **Promoting a model to a panel seat on reputation.** A newer flagship marketed as a
+    reasoning upgrade may not beat the model it supersedes on your work. Score it on a
+    task you have already measured first.
 
 ## Verification Checklist
 
@@ -698,6 +857,10 @@ smallest path to unblock.
 - [ ] Lenses selected for the scenario, not from habit
 - [ ] At least two model families used when available (or degradation stamped if not)
 - [ ] Privacy/PII constraints re-injected into every isolated reviewer prompt
+- [ ] Panel staffed for both generation and verification (2+ seats), or single-seat run
+      stamped degraded with both roles carried in one prompt
+- [ ] Prior decisions / rejected approaches pasted into the reviewer brief
+- [ ] Confirmed which model actually answered each seat before claiming family coverage
 - [ ] Every reviewer call passed an explicit timeout scaled to scope (never inherited)
 - [ ] Each seat wrote findings to its own file incrementally
 - [ ] Any failed seat's partial output was read before the seat was declared lost
