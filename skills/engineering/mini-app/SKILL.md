@@ -91,8 +91,9 @@ Tailnet host: <machine>.<your-tailnet>.ts.net
 > router is running (see "The router dir may have been renamed" below):
 >
 > ```bash
-> # anchor on the caddy BINARY path so this cannot match your own shell
-> APPS=$(ps -eo args= | grep '^/[^ ]*caddy run' \
+> # anchor on the caddy BINARY path so this cannot match your own shell.
+> # -ww keeps long argv from being width-clipped on platforms that do that.
+> APPS=$(ps -eww -o args= | grep '^/[^ ]*caddy run' \
 >     | sed -n 's#.*--config \(.*\)/[^/]*/Caddyfile.*#\1#p' | head -1)
 > APPS=${APPS:-$(ls -d /Users/*/mini-apps /home/*/mini-apps 2>/dev/null | head -1)}
 > REG=$(ls -d "$APPS"/router "$APPS"/_registry 2>/dev/null | head -1)
