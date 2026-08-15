@@ -237,26 +237,66 @@ def test_readme_catalog_lists_every_skill():
     )
 
 
-def test_readme_catalog_declares_every_requirement():
-    """Every hard requirement in the manifest must be discoverable in the
-    README row. A row that understates its needs tells a reader the skill is
-    ready when its first run will fail.
+# Each manifest requirement maps to the token its README row must contain.
+# This is an explicit table rather than a heuristic: deriving a keyword from
+# prose yielded useless keys ("read", "network", "full") that a substring check
+# would satisfy while the real dependency went undocumented. A new requirement
+# fails the test below until it is declared here, which is the point.
+REQUIREMENT_KEYS = {
+    "env: XAI_API_KEY (xAI console)": "XAI_API_KEY",
+    "env: TELEGRAM_BOT_TOKEN (for the living board)": "TELEGRAM_BOT_TOKEN",
+    "env: VAPI_API_KEY (Vapi dashboard \u2192 API Keys, private key)": "VAPI_API_KEY",
+    "Python 3.9+ (stdlib only, no third-party packages)": "Python 3.9+",
+    "Read access to the target agent's HERMES_HOME": "HERMES_HOME",
+    "gh CLI, authenticated": "`gh` CLI",
+    "chromium binary on PATH (or CHROMIUM_BIN) for local rasterize": "chromium",
+    "network access to a Kroki host (KROKI_BASE) and QuickChart (QUICKCHART_BASE)": "Kroki",
+    "host services: Caddy + PM2": "Caddy",
+    "Tailscale Serve/Funnel": "Tailscale",
+    "Hermes delegation toolset enabled": "Hermes-native",
+    "Hermes cron + delegation toolsets enabled": "Hermes-native",
+    "email CLI: gog or himalaya": "himalaya",
+    "gog CLI, authorized via `gog auth login`": "`gog` CLI",
+    "gog CLI, authorized for Google Sheets and Drive": "`gog` CLI",
+    "python3": "python3",
+    "pdftoppm (poppler-utils), for multipage visual QA rasterization": "pdftoppm",
+    "uv, to run the XLSX verification snippets": "uv",
+    "openpyxl, via `uv run --with openpyxl` (not a standing install)": "openpyxl",
+    "pandoc (for markdown conversion)": "pandoc",
+    "macOS with Messages.app signed into iMessage": "macOS",
+    "BlueBubbles server app (installed by scripts/setup-bluebubbles.sh)": "BlueBubbles",
+    "Full Disk Access granted by hand (macOS permission prompts cannot be scripted)": "Full Disk Access",
+    "python3 with the requests package": "requests",
+}
 
-    Matching is on the significant token of each requirement (the binary, env
-    var, or service), not the full sentence, so prose may differ.
+
+def test_every_requirement_has_a_declared_readme_key():
+    """A requirement with no entry above would be silently unchecked."""
+    undeclared = {
+        req
+        for entry in manifest()["skills"]
+        for req in entry["requires"]
+        if req not in REQUIREMENT_KEYS
+    }
+    assert not undeclared, (
+        f"add these to REQUIREMENT_KEYS with the token their README row must "
+        f"contain: {sorted(undeclared)}"
+    )
+
+
+def test_readme_catalog_declares_every_requirement():
+    """Every hard requirement in the manifest must be visible in the README
+    row. A row that understates its needs tells a reader the skill is ready
+    when its first run will fail.
     """
     rows = catalog_rows()
     for entry in manifest()["skills"]:
-        row = rows.get(entry["name"], "").lower()
+        row = rows.get(entry["name"], "")
         for req in entry["requires"]:
-            # The identifying token: first word-ish run, minus a leading
-            # "env:" / "host services:" style label.
-            token = req.split("(")[0].strip()
-            token = token.split(":")[-1].strip() if ":" in token else token
-            key = re.split(r"[,;\s]+", token)[0].strip("`.,").lower()
-            if not key:
-                continue
-            assert key in row, (
+            key = REQUIREMENT_KEYS.get(req)
+            if key is None:
+                continue  # reported by the test above
+            assert key.lower() in row.lower(), (
                 f"{entry['name']}: README row does not mention {key!r} "
-                f"(from requirement {req!r})"
+                f"(from requirement {req!r})\n  row: {row!r}"
             )
