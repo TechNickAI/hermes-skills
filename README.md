@@ -47,8 +47,11 @@ hermes skills install multi-review # copy into ~/.hermes/skills/ and activate
 Tapping makes a skill **discoverable**; installing puts it in the agent's index
 and costs context. That split is deliberate — tap broadly, install narrowly.
 
-Not running Hermes? Every skill is plain markdown. Copy the folder into whatever
-your agent reads and it works.
+Not running Hermes? Every skill is plain markdown, so another agent can read
+them directly. The ones marked **Hermes-native** below lean on Hermes runtime
+features — subagent delegation, cron, the `/moa` fan-out — and need an
+equivalent in your runtime before they will execute as written. The rest are
+runtime-agnostic procedures.
 
 > **Multiple packs from one repo** needs a Hermes build with `(repo, path)` tap
 > identity. Older builds dedupe on repo alone and silently keep only your first
@@ -59,43 +62,44 @@ your agent reads and it works.
 
 ### `core` — every agent, whatever its job
 
-| Skill              | What it does                                                                               | Needs                |
-| ------------------ | ------------------------------------------------------------------------------------------ | -------------------- |
-| `deep-dive`        | Research a question across every relevant source and come back with a decision, not links  | —                    |
-| `multi-review`     | Review any artifact through a panel of diverse lenses across model families, then converge | —                    |
-| `moa-solve`        | Throw several models at one hard problem and synthesize the best answer out of the spread  | —                    |
-| `mob-check`        | What real people are actually saying right now — Reddit, X, HN, YouTube — ranked, not SEO  | —                    |
-| `grok-search`      | Real-time web and X search via xAI's Grok, for when general web search misses              | `XAI_API_KEY`        |
-| `recall`           | Rebuild context from prior sessions, memories, and transcripts after `/new`                | —                    |
-| `memory-cleanup`   | Shrink a bloated `MEMORY.md` without losing facts — compress, relocate, offload            | —                    |
-| `project-steward`  | Run a portfolio of long-running projects like a chief of staff instead of a task runner    | `TELEGRAM_BOT_TOKEN` |
-| `trust-framework`  | Govern your own autonomy: act vs. ask, one-way vs. two-way doors, earn freedom over time   | —                    |
-| `robustify-doctor` | Is this agent actually healthy? Collects facts across twelve subsystems, then reads them   | Python 3.9+          |
-| `keep-going`       | `/keep_going` — re-anchor an agent that asked a question instead of doing the work         | —                    |
-| `report`           | File a bug or piece of feedback from any session, routed for triage                        | —                    |
+| Skill              | What it does                                                                               | Needs                                                        |
+| ------------------ | ------------------------------------------------------------------------------------------ | ------------------------------------------------------------ |
+| `deep-dive`        | Research a question across every relevant source and come back with a decision, not links  | —                                                            |
+| `multi-review`     | Review any artifact through a panel of diverse lenses across model families, then converge | Hermes-native (subagent delegation)                          |
+| `moa-solve`        | Throw several models at one hard problem and synthesize the best answer out of the spread  | Hermes-native (`/moa` fan-out)                               |
+| `mob-check`        | What real people are actually saying right now — Reddit, X, HN, YouTube — ranked, not SEO  | —                                                            |
+| `grok-search`      | Real-time web and X search via xAI's Grok, for when general web search misses              | `XAI_API_KEY`                                                |
+| `recall`           | Rebuild context from prior sessions, memories, and transcripts after `/new`                | —                                                            |
+| `memory-cleanup`   | Shrink a bloated `MEMORY.md` without losing facts — compress, relocate, offload            | —                                                            |
+| `project-steward`  | Run a portfolio of long-running projects like a chief of staff instead of a task runner    | `TELEGRAM_BOT_TOKEN`                                         |
+| `trust-framework`  | Govern your own autonomy: act vs. ask, one-way vs. two-way doors, earn freedom over time   | —                                                            |
+| `robustify-doctor` | Is this agent actually healthy? Collects facts across twelve subsystems, then reads them   | Python 3.9+, read access to the target agent's `HERMES_HOME` |
+| `keep-going`       | `/keep_going` — re-anchor an agent that asked a question instead of doing the work         | —                                                            |
+| `report`           | File a bug or piece of feedback from any session, routed for triage                        | —                                                            |
 
 ### `engineering` — agents that write and ship code
 
-| Skill                 | What it does                                                                              | Needs                 |
-| --------------------- | ----------------------------------------------------------------------------------------- | --------------------- |
-| `address-pr-comments` | Triage bot and human PR feedback, fix what's valid, push back on what isn't, reply to all | `gh` CLI              |
-| `pr-review-sweep`     | Nightly sweep of merged PRs for review comments nobody handled                            | `gh` CLI              |
-| `diagram-rendering`   | D2, Mermaid, Graphviz, and Chart.js text into a chat-ready PNG, with the render gotchas   | chromium, network     |
-| `mini-app`            | Operate the Caddy + PM2 + Tailscale app-router that serves small apps at clean URLs       | Caddy, PM2, Tailscale |
+| Skill                 | What it does                                                                              | Needs                                                      |
+| --------------------- | ----------------------------------------------------------------------------------------- | ---------------------------------------------------------- |
+| `address-pr-comments` | Triage bot and human PR feedback, fix what's valid, push back on what isn't, reply to all | `gh` CLI, authenticated                                    |
+| `pr-review-sweep`     | Nightly sweep of merged PRs for review comments nobody handled                            | `gh` CLI authenticated; Hermes-native (delegation toolset) |
+| `diagram-rendering`   | D2, Mermaid, Graphviz, and Chart.js text into a chat-ready PNG, with the render gotchas   | chromium on `PATH`; network to Kroki + QuickChart          |
+| `mini-app`            | Operate the Caddy + PM2 + Tailscale app-router that serves small apps at clean URLs       | Caddy, PM2, Tailscale Serve/Funnel                         |
 
 ### `productivity` — documents, comms, scheduling
 
-| Skill                  | What it does                                                                            | Needs              |
-| ---------------------- | --------------------------------------------------------------------------------------- | ------------------ |
-| `email-steward`        | Scheduled inbox triage: kill debris, quarantine promos, surface only what needs a human | `gog`/`himalaya`   |
-| `google-docs`          | Create, format, edit, export, and quality-check Google Docs from markdown               | `gog` CLI          |
-| `google-sheets`        | Build and verify Sheets from CSV, JSON, or computed tables                              | `gog` CLI, python3 |
-| `google-slides`        | Markdown to a real Slides deck, with a visual QA pass                                   | `gog` CLI, pandoc  |
-| `imessage-bluebubbles` | Send, read, and search iMessage from an agent on macOS via the BlueBubbles bridge       | macOS, BlueBubbles |
-| `vapi-calls`           | Place real outbound phone calls — reminders, confirmations, booking an appointment      | `VAPI_API_KEY`     |
+| Skill                  | What it does                                                                            | Needs                                                                                            |
+| ---------------------- | --------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| `email-steward`        | Scheduled inbox triage: kill debris, quarantine promos, surface only what needs a human | `gog` or `himalaya`; Hermes-native (cron + delegation)                                           |
+| `google-docs`          | Create, format, edit, export, and quality-check Google Docs from markdown               | `gog` CLI, authorized                                                                            |
+| `google-sheets`        | Build and verify Sheets from CSV, JSON, or computed tables                              | `gog` CLI authorized; python3; pdftoppm; uv; openpyxl                                            |
+| `google-slides`        | Markdown to a real Slides deck, with a visual QA pass                                   | `gog` CLI authorized; pandoc                                                                     |
+| `imessage-bluebubbles` | Send, read, and search iMessage from an agent on macOS via the BlueBubbles bridge       | macOS + Messages.app; BlueBubbles server; Full Disk Access (granted by hand); python3 `requests` |
+| `vapi-calls`           | Place real outbound phone calls — reminders, confirmations, booking an appointment      | `VAPI_API_KEY`                                                                                   |
 
 `skills/MANIFEST.yaml` is the machine-readable version of this table, generated
-and CI-verified. A skill lives in exactly one pack; if two packs both seem right,
+from the skills themselves. CI asserts that every skill appears here and that
+this table's requirements match the manifest, so the two cannot drift. A skill lives in exactly one pack; if two packs both seem right,
 it is probably two skills.
 
 ## Contributing

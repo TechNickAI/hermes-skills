@@ -210,3 +210,53 @@ def test_pii_scanner_boundaries(text, flagged, tmp_path):
     probe.write_text(text)
     hits = [h for h in pii.scan(probe) if h[1] == "agent-name"]
     assert bool(hits) == flagged, f"{text!r}: expected flagged={flagged}, got {hits}"
+
+
+# ---------------------------------------------------------------------------
+# README catalog
+# ---------------------------------------------------------------------------
+
+README = ROOT / "README.md"
+
+# A catalog row: | `name` | description | requirements |
+CATALOG_ROW = re.compile(r"^\|\s*`([a-z0-9-]+)`\s*\|[^|]*\|\s*(.*?)\s*\|\s*$", re.M)
+
+
+def catalog_rows() -> dict[str, str]:
+    return {m.group(1): m.group(2) for m in CATALOG_ROW.finditer(README.read_text())}
+
+
+def test_readme_catalog_lists_every_skill():
+    """The README table is what a human reads instead of the manifest. If a
+    skill is missing from it, the library looks smaller than it is."""
+    listed = set(catalog_rows())
+    actual = {e["name"] for e in manifest()["skills"]}
+    assert listed == actual, (
+        f"missing from README: {sorted(actual - listed)}; "
+        f"in README but not the library: {sorted(listed - actual)}"
+    )
+
+
+def test_readme_catalog_declares_every_requirement():
+    """Every hard requirement in the manifest must be discoverable in the
+    README row. A row that understates its needs tells a reader the skill is
+    ready when its first run will fail.
+
+    Matching is on the significant token of each requirement (the binary, env
+    var, or service), not the full sentence, so prose may differ.
+    """
+    rows = catalog_rows()
+    for entry in manifest()["skills"]:
+        row = rows.get(entry["name"], "").lower()
+        for req in entry["requires"]:
+            # The identifying token: first word-ish run, minus a leading
+            # "env:" / "host services:" style label.
+            token = req.split("(")[0].strip()
+            token = token.split(":")[-1].strip() if ":" in token else token
+            key = re.split(r"[,;\s]+", token)[0].strip("`.,").lower()
+            if not key:
+                continue
+            assert key in row, (
+                f"{entry['name']}: README row does not mention {key!r} "
+                f"(from requirement {req!r})"
+            )
