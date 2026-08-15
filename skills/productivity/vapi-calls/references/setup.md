@@ -85,10 +85,17 @@ call time, not in a duplicate assistant.
     "waitSeconds": 0.2,
     "smartEndpointingPlan": { "provider": "vapi" },
   },
-  "stopSpeakingPlan": { "numWords": 0, "voiceSeconds": 0.15, "backoffSeconds": 0.8 },
+  "stopSpeakingPlan": {
+    "numWords": 0,
+    "voiceSeconds": 0.15,
+    "backoffSeconds": 0.8,
+  },
 
   "analysisPlan": { "summaryPlan": { "enabled": true } },
-  "artifactPlan": { "recordingEnabled": true, "transcriptPlan": { "enabled": true } },
+  "artifactPlan": {
+    "recordingEnabled": true,
+    "transcriptPlan": { "enabled": true },
+  },
   "monitorPlan": { "listenEnabled": true, "controlEnabled": true },
 }
 ```

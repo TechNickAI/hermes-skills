@@ -11,7 +11,8 @@ license: MIT
 metadata:
   hermes:
     tags: [context, session, recovery, telegram, gateway, productivity]
-    related_skills: [cron-healthcheck, pr-review-sweep]
+    related_skills: [pr-review-sweep]
+    # referenced but not shipped here (private fleet-ops pack): cron-healthcheck
 ---
 
 # Recall

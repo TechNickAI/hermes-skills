@@ -17,8 +17,10 @@ metadata:
   hermes:
     requires:
       - "env: TELEGRAM_BOT_TOKEN (for the living board)"
-    tags: [orchestration, cron, portfolio, notifications, cost-control, delegation]
-    related_skills: [multi-review, cron-healthcheck, trust-framework, keep-going]
+    tags:
+      [orchestration, cron, portfolio, notifications, cost-control, delegation]
+    related_skills: [multi-review, trust-framework, keep-going]
+    # referenced but not shipped here (private fleet-ops pack): cron-healthcheck
 ---
 
 # Project steward

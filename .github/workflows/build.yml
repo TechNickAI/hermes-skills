@@ -1,0 +1,56 @@
+---
+name: Build
+on: [push, pull_request]
+permissions: read-all
+
+jobs:
+  pre-commit:
+    name: Pre-commit (linting)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v5
+
+      - name: Run pre-commit
+        uses: pre-commit/action@v3.0.1
+
+  test:
+    name: Tests (Python ${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    strategy:
+      fail-fast: false
+      matrix:
+        # Hermes requires 3.11+. Test the floor and a current release.
+        python-version: ["3.11", "3.13"]
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install test dependencies
+        # Deliberately NOT installing hermes-agent: these tests must pass from a
+        # bare clone, which is what a new contributor actually has.
+        run: python -m pip install --upgrade pip pytest pyyaml
+
+      - name: Run tests
+        run: python -m pytest -q
+
+      - name: Check the generated skills manifest is current
+        # skills/MANIFEST.yaml is what an installing agent reads instead of
+        # opening every SKILL.md. A stale manifest is worse than none.
+        run: python scripts/generate_manifest.py --check
+
+      - name: Scan for PII and fleet identifiers
+        # This repo is public. The scan is also asserted from the test suite,
+        # but it runs as its own step so a failure names itself in the UI
+        # instead of hiding inside a pytest summary.
+        run: python scripts/pii_scan.py skills/

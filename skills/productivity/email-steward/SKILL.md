@@ -13,8 +13,10 @@ metadata:
     requires:
       - "email CLI: gog or himalaya"
       - Hermes cron + delegation toolsets enabled
-    tags: [email, inbox, triage, cron, delegation, prompt-injection, productivity]
-    related_skills: [cron-healthcheck]
+    tags:
+      [email, inbox, triage, cron, delegation, prompt-injection, productivity]
+    related_skills: []
+    # referenced but not shipped here (private fleet-ops pack): cron-healthcheck
 ---
 
 # Email steward

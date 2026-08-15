@@ -14,8 +14,10 @@ metadata:
     requires:
       - Python 3.9+ (stdlib only, no third-party packages)
       - Read access to the target agent's HERMES_HOME
-    tags: [monitoring, diagnostics, reliability, health-check, fleet, observability]
-    related_skills: [cron-healthcheck]
+    tags:
+      [monitoring, diagnostics, reliability, health-check, fleet, observability]
+    related_skills: []
+    # referenced but not shipped here (private fleet-ops pack): cron-healthcheck
 ---
 
 # Robustify Doctor
