@@ -5,6 +5,7 @@ Use this reference when Nick asks to recall a named person together with a proje
 ## Trigger
 
 Examples:
+
 - "Gil Penchina, my relationship with him, and the personal AI infrastructure ideas"
 - "Recall Alice and the product ideas we discussed"
 - "What did we know about X and the repo/prototype around them?"
@@ -35,6 +36,7 @@ Examples:
 ## Example from Gil plus Bob Steele
 
 Gil recall required combining:
+
 - relationship memory files for Gil as friend, advisor, client, housemate, and negotiation support
 - <agent-d> financial memory for the current arrangement
 - gilpai/gilpia repos for Personal AI Infrastructure specs

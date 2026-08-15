@@ -25,7 +25,7 @@ whole turn searching the filesystem, clipboard, and session history for "the dra
 came back empty-handed, correctly refusing to fabricate a review of text it never
 received. Wasted a full round-trip.
 
-**Fix:** inline the complete artifact text into *every* task's own `context` field,
+**Fix:** inline the complete artifact text into _every_ task's own `context` field,
 even when it's identical across all 3-4 tasks. Don't rely on a shared top-level field
 in batch mode. If the artifact is long, it's fine to repeat it verbatim in each task —
 subagents are isolated and cheap.
@@ -47,7 +47,7 @@ Synthesize the three summaries yourself into one merged set of edits, same as th
 
 A background subagent that exceeds its wall-clock budget returns **nothing** — not partial
 findings, not a summary. All of its work is lost. Worked case: a reviewer asked to verify
-eight distinct adversarial properties *and* run a full isolated test suite timed out at 1200s
+eight distinct adversarial properties _and_ run a full isolated test suite timed out at 1200s
 after 49 API calls with zero usable output. A second reviewer given a narrower brief against
 the same code returned a complete verdict in 568s.
 
@@ -63,7 +63,7 @@ the same code returned a complete verdict in 568s.
 - **Open-ended web research is the highest-risk reviewer shape.** It has no natural stopping
   point, so it burns the whole budget and returns nothing. In one batch of three, the two
   "go find historical examples" / "research what practitioners actually do" tasks both timed out
-  at 1200s (37 and 33 API calls, zero output), while the bounded *methodology critique* task
+  at 1200s (37 and 33 API calls, zero output), while the bounded _methodology critique_ task
   completed with a full verdict. If you need broad discovery, do it in the parent with normal
   tools and hand the child a bounded brief.
 - **When a batch times out, retry with `hermes -z` headless one-shots instead.** They are
@@ -83,8 +83,8 @@ What made the lenses carve cleanly for a chief-of-staff system:
 2. **Orchestration / autonomy** — the loop, attention allocation, runaway detection, budget
 3. **Human experience** — where the principal speaks, how decisions surface, anti-noise
 
-Give each the same background but a *different question*, and state the constraints negatively
+Give each the same background but a _different question_, and state the constraints negatively
 where it matters ("do not design a database", "do not propose JSON as the primary store") —
 otherwise all three converge on the same familiar architecture and you've paid for one answer
-three times. Synthesize to one coherent design, explicitly not a merge; Nick's framing: *"This
-is not a Frankenstein, this is go wide for ideas and then come up with an elegant system."*
+three times. Synthesize to one coherent design, explicitly not a merge; Nick's framing: _"This
+is not a Frankenstein, this is go wide for ideas and then come up with an elegant system."_

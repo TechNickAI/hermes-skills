@@ -6,13 +6,13 @@
 merge-if-clean with squash+delete-branch. Each PR had 2-4 bot comments, some
 already handled by TechNickAI replies.
 
-| PR | Repo | Comments | Bots | Notes |
-|----|------|----------|------|-------|
-| #4 | carmentacollective/antevorta | 2 | gemini, codex | Trading bot — money-path code |
-| #9 | carmentacollective/antevorta | 2 (1 replied) | gemini | WONTFIX reply already present |
-| #9 | carmentacollective/<agent-f> | 2 | gemini | Both had -1 reactions |
-| #154 | carmentacollective/mcp-hubby | 4 (2 replied) | gemini, codex | TechNickAI replies already present |
-| #128 | TechNickAI/openclaw-config | 3 | cursor, codex | Tests failing (not just claude-review) |
+| PR   | Repo                         | Comments      | Bots          | Notes                                  |
+| ---- | ---------------------------- | ------------- | ------------- | -------------------------------------- |
+| #4   | carmentacollective/antevorta | 2             | gemini, codex | Trading bot — money-path code          |
+| #9   | carmentacollective/antevorta | 2 (1 replied) | gemini        | WONTFIX reply already present          |
+| #9   | carmentacollective/<agent-f> | 2             | gemini        | Both had -1 reactions                  |
+| #154 | carmentacollective/mcp-hubby | 4 (2 replied) | gemini, codex | TechNickAI replies already present     |
+| #128 | TechNickAI/openclaw-config   | 3             | cursor, codex | Tests failing (not just claude-review) |
 
 ## Key lessons
 
@@ -62,6 +62,7 @@ finding. Updated assertion: `assert len(findings) == 1` and
 
 PR changed `KNOWLEDGE_CATEGORIES` from `entities/concepts/summaries/synthesis/decisions/how-to`
 to `people/ventures/topics/synthesis/decisions/learning/research`. But:
+
 - `schema-template.md` still referenced old dirs (entities/, concepts/, summaries/, how-to/)
 - Test fixtures created `entities/` and `concepts/` dirs
 - `rebuild-index` command looked for `people/index.md` but tests created `entities/`
@@ -82,18 +83,21 @@ is the fastest pattern for multi-PR batches.
 ## Bot comment patterns
 
 ### gemini-code-assist[bot] — already seen, confirmed
+
 - `![high](...)` / `![medium](...)` badges
 - Often provides suggestion blocks with concrete code
 - High: real bugs (scope gaps, midnight-wrapping logic gaps)
 - Medium: code style (encoding="utf-8", loop simplification)
 
 ### chatgpt-codex-connector[bot] — already seen, confirmed
+
 - P1/P2 badge images
 - P2: test/contract issues (test asserting old behavior after code change)
 - P1: schema/template synchronization mismatches
 - "Useful? React with 👍 / 👎." footer
 
 ### cursor[bot] — already seen, confirmed
+
 - `### Title` headers with severity badges
 - `<!-- BUGBOT_BUG_ID: <uuid> -->` markers
 - Medium: schema-template mismatch with category list
@@ -133,10 +137,10 @@ gh pr merge $N --repo $R --squash --delete-branch
 
 ## Final state
 
-| PR | Outcome | Detail |
-|----|---------|--------|
-| antevorta #4 | Pushed fix, replied, merged pending | Test updated, bot comments replied+reacted |
-| antevorta #9 | Merged | WONTFIX reply already present, added 👍 |
-| <agent-f> #9 | Merged | WONTFIX replies posted, 👍 added |
-| mcp-hubby #154 | Merged | Already fully handled by TechNickAI |
-| openclaw-config #128 | In progress | Schema-template + tests need fixing |
+| PR                   | Outcome                             | Detail                                     |
+| -------------------- | ----------------------------------- | ------------------------------------------ |
+| antevorta #4         | Pushed fix, replied, merged pending | Test updated, bot comments replied+reacted |
+| antevorta #9         | Merged                              | WONTFIX reply already present, added 👍    |
+| <agent-f> #9         | Merged                              | WONTFIX replies posted, 👍 added           |
+| mcp-hubby #154       | Merged                              | Already fully handled by TechNickAI        |
+| openclaw-config #128 | In progress                         | Schema-template + tests need fixing        |

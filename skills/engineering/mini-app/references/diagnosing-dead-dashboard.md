@@ -31,6 +31,7 @@ A dashboard showing old numbers is usually an UPSTREAM data-pull failure, not a 
 ## 3. Write-completeness trap (the subtle one)
 
 A refresh script can update headline totals while leaving detail tables and trend snapshots frozen. <agent-d>'s `daily_pull.py` updated `cash_position`/`net_worth`/cash tier but never wrote back individual `cash_accounts` rows or appended a `net_worth_snapshots` row — so the hero refreshed while detail rows and the sparkline stayed at the May baseline. When fixing a stale dashboard, verify EVERY surface the data feeds, not just the headline:
+
 - headline/aggregate row(s)
 - per-item detail tables (with their own `as_of`)
 - time-series/snapshot tables that power trend charts

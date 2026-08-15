@@ -8,7 +8,7 @@ gated go/no-go: ship a release, approve a spend, greenlight a candidate, publish
 ## Why this variant exists (the core failure it prevents)
 
 If ANY seat can hard-veto, the panel NEVER acts. Give N critics a mandate to find a reason not to
-act and all N find one — the system trends to permanent inaction, which is a failure *identical* to
+act and all N find one — the system trends to permanent inaction, which is a failure _identical_ to
 acting on junk. Nick's exact framing: "if you give 15 agents a reason to not trade an evaluation,
 they're all gonna be able to find at least one reason to not trade." The aggregator must be
 engineered against this bias, mechanically, not by vibes.
@@ -61,6 +61,7 @@ def count_valid(points):   # the anti-doom filter
 ```
 
 Key invariants (each has a regression test):
+
 - A **bear/priced-in/disconfirmation `hard_veto=true` is IGNORED**. Only catalyst_verifier vetoes.
 - **Generic doom → weight 0.** A "specific" but **already-priced-in** risk → weight 0 too (no free ride).
 - A real, specific, unpriced bear point **lowers** the score but cannot **veto**.
@@ -71,7 +72,7 @@ Target act-rate ~15-35% of panels reach TRADE/SMALL. If a whole batch passes not
 PROCESS ALARM (miscalibrated judge or bad candidate feed) — surface and fix it. "Nothing qualified"
 is NOT an acceptable steady state; an engine that never acts has failed like one that acts on junk.
 On night one of the Rumor Desk the court correctly rejected all 23 — but that was flagged as a
-*candidate-feed* problem (form-type filter had no content signal), not accepted as normal.
+_candidate-feed_ problem (form-type filter had no content signal), not accepted as normal.
 
 ## Learning loop (the moat)
 

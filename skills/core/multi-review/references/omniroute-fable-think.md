@@ -1,6 +1,6 @@
 # OmniRoute Fable `think` reviewer
 
-Use when Nick asks for a multi-review that specifically includes the “think” model, Fable, or OmniRoute.
+Use when Nick asks for a multi-review that specifically includes the "think" model, Fable, or OmniRoute.
 
 ## Routing
 
@@ -40,6 +40,7 @@ text = (d["choices"][0]["message"].get("content")
 ```
 
 So there are TWO valid surfaces for `think`:
+
 - OpenAI-compatible `/v1/chat/completions` with `stream:false` (simplest for scripts that
   already speak the OpenAI shape, e.g. the same code that talks to OpenRouter).
 - Anthropic `/v1/messages` (below), if you prefer the Anthropic body shape.
@@ -57,9 +58,7 @@ Use `/v1/messages` with an Anthropic-style body:
 {
   "model": "think",
   "max_tokens": 3500,
-  "messages": [
-    {"role": "user", "content": "...review brief..."}
-  ]
+  "messages": [{ "role": "user", "content": "...review brief..." }]
 }
 ```
 
@@ -101,7 +100,7 @@ hermes -z "$PROMPT" --provider custom:omniroute -m simple --ignore-rules -t ''
 
 - **Fable provider alias is `custom:omniroute`** (with `-m think`). `custom:omniroute-anthropic`
   is NOT a valid `hermes -z` provider and fails with `AuthError: Unknown provider
-  'custom:omniroute-anthropic'`. The config has a single `omniroute` provider; check with
+'custom:omniroute-anthropic'`. The config has a single `omniroute` provider; check with
   `grep -n "custom:omniroute" config.yaml`.
 - **Gemini slug is `google/gemini-2.5-pro`.** This reverses the earlier note: it is
   `google/gemini-pro-latest` that is now stale and returns a 400. Use `gemini-2.5-pro`.
@@ -144,6 +143,7 @@ for name, text in results.items():
 ```
 
 For short single-line prompts (under ~200 chars, no special chars), inline is fine:
+
 ```bash
 hermes -z "What is 2+2?" --provider openrouter -m x-ai/grok-4.3 --ignore-rules -t ''
 ```
@@ -165,6 +165,7 @@ discovery work without a tight scope and bounded output.
 
 Fable via `hermes -z ... -m think` with a very long brief (~3,700 char) can timeout at
 120 seconds (observed once in production). If this happens:
+
 1. Shorten the brief significantly -- cut to core facts + the specific questions.
 2. Re-run with the shorter brief. Fable completed successfully on a brief ~1/3 the length.
 3. Do NOT increase the timeout past 120s -- it's more likely the model is just taking

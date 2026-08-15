@@ -6,7 +6,7 @@ Session context: nightly PR review sweep across `carmentacollective` and `TechNi
 
 ### Treat reactions as the operational closure signal
 
-The human-facing description may say “no author reply, zero reactions,” but the runnable sweep heuristic is root non-author comments with zero reactions. Do **not** suppress a root review comment just because the PR author replied somewhere in the thread. Author replies are useful context for the sub-agent, but a zero-reaction root comment still re-flags on the next sweep unless it is reacted to.
+The human-facing description may say "no author reply, zero reactions," but the runnable sweep heuristic is root non-author comments with zero reactions. Do **not** suppress a root review comment just because the PR author replied somewhere in the thread. Author replies are useful context for the sub-agent, but a zero-reaction root comment still re-flags on the next sweep unless it is reacted to.
 
 Practical rule:
 
@@ -24,7 +24,7 @@ issue_comments = [
 ]
 ```
 
-If an earlier discovery table used “no author reply” filtering, expect the sub-agent to find more comments than the table showed. The authoritative success check remains the post-run zero-reaction query returning zero.
+If an earlier discovery table used "no author reply" filtering, expect the sub-agent to find more comments than the table showed. The authoritative success check remains the post-run zero-reaction query returning zero.
 
 ### Packaged scripts live with the skill
 
@@ -41,7 +41,7 @@ The useful report included:
 - per-processed-PR table: initial unhandled, outcome, follow-up artifact, final unhandled;
 - deferred PR list with counts;
 - workspace cleanup/orphan status;
-- explicit “No merges performed.”
+- explicit "No merges performed."
 
 This gave the user enough operational detail without dumping Claude transcripts.
 

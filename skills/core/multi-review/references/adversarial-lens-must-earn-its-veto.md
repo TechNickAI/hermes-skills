@@ -5,7 +5,7 @@ risky change, approve a spend), the red-team / bear / adversarial lens has a str
 failure mode Nick named directly (2026-07-21):
 
 > "Don't just fall victim to always listening to the BEAR case or we will never trade.
->  Find a way to balance that."
+> Find a way to balance that."
 
 If you give N reviewers a mandate to find reasons NOT to act, all N will find at least
 one — every real action has a plausible risk. A naive panel that lets any reviewer veto
@@ -22,13 +22,14 @@ Do NOT vote-count and do NOT let the adversarial lens veto on pessimism. Instead
              - (correctness_ok ? 0 : hard_veto)
 
 A bear/adversarial point counts toward the subtraction **only if it is ALL of**:
-  1. **Specific** — names a concrete mechanism, not "it could go down / this is risky."
-  2. **Falsifiable** — a checkable claim, not a vibe.
-  3. **Not already priced in** — the risk isn't already reflected in current state/price.
-     (A "specific, falsifiable" risk that's already discounted gets NO free ride —
-     this is the subtle case that keeps the bear honest.)
-  4. **Carries a disconfirmer** — the reviewer must state *what evidence would make this
-     NOT a risk*. No disconfirmer ⇒ generic doom ⇒ **weight 0**.
+
+1. **Specific** — names a concrete mechanism, not "it could go down / this is risky."
+2. **Falsifiable** — a checkable claim, not a vibe.
+3. **Not already priced in** — the risk isn't already reflected in current state/price.
+   (A "specific, falsifiable" risk that's already discounted gets NO free ride —
+   this is the subtle case that keeps the bear honest.)
+4. **Carries a disconfirmer** — the reviewer must state _what evidence would make this
+   NOT a risk_. No disconfirmer ⇒ generic doom ⇒ **weight 0**.
 
 Generic pessimism collapses to zero automatically. A real, unpriced, falsifiable risk
 lowers conviction proportionally but cannot single-handedly kill the decision.
@@ -36,11 +37,12 @@ lowers conviction proportionally but cannot single-handedly kill the decision.
 ## HARD VETO is correctness-only, never caution
 
 Reserve the one true veto for **correctness**, not risk-aversion:
-  - the signal isn't real / can't be verified,
-  - the artifact is structurally invalid (e.g. "activist 13D" whose filer is the
-    company's own founder — insider, not activist),
-  - already-resolved / stale,
-  - a genuine safety/legal line (MNPI, secrets, irreversible harm).
+
+- the signal isn't real / can't be verified,
+- the artifact is structurally invalid (e.g. "activist 13D" whose filer is the
+  company's own founder — insider, not activist),
+- already-resolved / stale,
+- a genuine safety/legal line (MNPI, secrets, irreversible harm).
 
 Only the **verifier lens** (the seat that reads the actual source) may trigger it. A
 pessimist lens cannot veto. In tests: a correctness hard-veto beats even a maximally
@@ -56,11 +58,12 @@ judge or a bad candidate feed — and that must be surfaced as an alarm, NOT acc
 ## Separate three questions so a "no" on one doesn't masquerade as a "no" on all
 
 Give distinct lenses distinct jobs and keep their answers separate:
-  - **Is it real?** (verifier) — retrieval/classification correctness.
-  - **Is there money left?** (priced-in / market-structure) — has the move happened.
-  - **Should we act?** (bull vs valid-bear) — the decision itself.
-A candidate can be real, have upside left, and still be a PASS on specific unpriced risk
-— but "it might not work" only bites at the decision step, and only when specific.
+
+- **Is it real?** (verifier) — retrieval/classification correctness.
+- **Is there money left?** (priced-in / market-structure) — has the move happened.
+- **Should we act?** (bull vs valid-bear) — the decision itself.
+  A candidate can be real, have upside left, and still be a PASS on specific unpriced risk
+  — but "it might not work" only bites at the decision step, and only when specific.
 
 ## Where this was proven
 

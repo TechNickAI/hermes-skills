@@ -5,13 +5,13 @@
 5 PRs across 3 repos, each with 1-4 unresolved bot comments. User authorized
 merge-if-clean with squash+delete-branch.
 
-| PR | Repo | Comments | Bots |
-|----|------|----------|------|
-| #4 | hangl-dashboard | 1 | gemini-code-assist |
-| #8 | hangl-dashboard | 3 | gemini-code-assist, chatgpt-codex-connector |
-| #1 | OmniRoute | 1 | chatgpt-codex-connector |
-| #26 | <agent-f> | 3 | cursor, gemini-code-assist |
-| #28 | <agent-f> | 4 | gemini-code-assist, cursor, chatgpt-codex-connector |
+| PR  | Repo            | Comments | Bots                                                |
+| --- | --------------- | -------- | --------------------------------------------------- |
+| #4  | hangl-dashboard | 1        | gemini-code-assist                                  |
+| #8  | hangl-dashboard | 3        | gemini-code-assist, chatgpt-codex-connector         |
+| #1  | OmniRoute       | 1        | chatgpt-codex-connector                             |
+| #26 | <agent-f>       | 3        | cursor, gemini-code-assist                          |
+| #28 | <agent-f>       | 4        | gemini-code-assist, cursor, chatgpt-codex-connector |
 
 ## Workflow that worked
 
@@ -24,18 +24,21 @@ merge-if-clean with squash+delete-branch.
 ## Bot comment patterns encountered
 
 ### gemini-code-assist[bot]
+
 - Uses `![medium](...)` / `![high](...)` / `![security-high](...)` badges.
 - Often provides ````suggestion` blocks with concrete code.
 - Medium-priority comments can be minor optimizations (hoist a variable, deduplicate lookups).
 - High-priority comments are usually real bugs (falsy-zero `or` chains, security bypasses).
 
 ### chatgpt-codex-connector[bot]
+
 - Uses `P1`/`P2` badge images.
 - P1: test-seam issues (patching wrong function), correctness bugs.
 - P2: security hardening (backslash in redirect validation).
 - Often provides "Useful? React with 👍 / 👎." footer.
 
 ### cursor[bot]
+
 - Uses `### Title` headers with severity badges.
 - Embeds `<!-- DESCRIPTION START -->` / `<!-- DESCRIPTION END -->` markers.
 - High-severity findings on trading code (falsy-zero bugs, IoC cover logic).
@@ -43,15 +46,18 @@ merge-if-clean with squash+delete-branch.
 ## Fix patterns
 
 ### Backslash open-redirect bypass (hangl-dashboard #8)
+
 Browsers normalize `\` to `/`, so `X-Forwarded-Prefix: /\evil.com` passes a `startswith("/")`
 and `not startswith("//")` check but redirects to `//evil.com`.
 Fix: add `"\\" in raw` to the guard predicate.
 
 ### Test patching wrong function (hangl-dashboard #8)
+
 Test monkeypatches `import_crawdad.main` but code calls `import_crawdad.import_trades`.
 Fix: update the test to patch `import_trades` with matching keyword arguments.
 
 ### Shared module-level constant with env override (OmniRoute #1)
+
 `CLAUDE_CLI_USER_AGENT = claudeCliUserAgent(CLAUDE_CLI_VERSION)` evaluated at import time
 with `getClaudeEntrypoint()`, so `CLAUDE_CC_ENTRYPOINT=sdk-cli` affects ALL consumers including
 API-key providers. Fix: make the constant always use `"cli"`, and only call the function

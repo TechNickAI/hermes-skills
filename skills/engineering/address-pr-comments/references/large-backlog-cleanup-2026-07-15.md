@@ -14,6 +14,7 @@ process by priority.
 ### Step 1: Batch-poll all PRs
 
 Use `execute_code` to iterate all open PRs in a single pass. For each, fetch:
+
 - `mergeable` / `mergeStateStatus` (MERGEABLE/CLEAN, CONFLICTING/DIRTY, UNKNOWN)
 - `statusCheckRollup` (which CI checks pass/fail/pending)
 - Unresolved comment count (bot comments with 0 reactions, not from PR author,
@@ -40,13 +41,13 @@ rc = terminal(
 
 ### Step 2: Sort into tiers
 
-| Tier | Criteria | Action |
-|------|----------|--------|
-| 0 | GREEN, CLEAN/MERGEABLE, 0 comments | Review diff, merge immediately |
-| 1 | GREEN, CLEAN, has comments | Address comments (fix/reply+react), merge |
-| 2 | FAIL — only `claude-review` (bot reviewer, not a quality gate) | Address comments, merge if lint+tests green |
-| 3 | FAIL — lint or test failures | Clone, fix lint/test, push, wait for green, merge |
-| 4 | CONFLICTING/DIRTY | Rebase (check merge base first!), resolve, merge or close |
+| Tier | Criteria                                                       | Action                                                    |
+| ---- | -------------------------------------------------------------- | --------------------------------------------------------- |
+| 0    | GREEN, CLEAN/MERGEABLE, 0 comments                             | Review diff, merge immediately                            |
+| 1    | GREEN, CLEAN, has comments                                     | Address comments (fix/reply+react), merge                 |
+| 2    | FAIL — only `claude-review` (bot reviewer, not a quality gate) | Address comments, merge if lint+tests green               |
+| 3    | FAIL — lint or test failures                                   | Clone, fix lint/test, push, wait for green, merge         |
+| 4    | CONFLICTING/DIRTY                                              | Rebase (check merge base first!), resolve, merge or close |
 
 ### Step 3: Process tiers in order, dispatching subagents for parallel work
 
@@ -62,6 +63,7 @@ rc = terminal(
 
 With 23 PRs, the tiered approach took ~45 min total (including subagent wait time).
 Serial processing would have taken 3+ hours. The parallelism comes from:
+
 1. Batch-polling all PRs in one `execute_code` pass (30s)
 2. Merging Tier 0 PRs while Tier 1-3 subagents run in background
 3. Handling Tier 4 (conflicts) directly while subagents work
@@ -112,6 +114,7 @@ int), Python's `or` skips it and falls through to `remaining_count_fp`, potentia
 overcounting cover contracts.
 
 Fix: replace `or` chain with explicit None check:
+
 ```python
 rc = o.get("remaining_count")
 raw = rc if rc is not None else (o.get("remaining_count_fp") or o.get("count_fp") or "0")
@@ -139,7 +142,8 @@ the fixes were added later in the same PR.
 
 Detection: read the PR diff, find the guard/fix the bot is asking for. If it's
 already present in the current code, reply "Already fixed in this PR — <explain how>"
-+ react 👍.
+
+- react 👍.
 
 ## Pre-commit lint fix pattern (cryptoai #793, antevorta #17)
 

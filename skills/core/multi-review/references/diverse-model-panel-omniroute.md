@@ -119,7 +119,6 @@ prefix per attempt (`r2_*`) instead of deleting the first attempt's files. Two s
 across two families (GPT-5.6 + Gemini) is a real multi-family review; say so
 plainly rather than implying a full panel ran.
 
-
 ```bash
 export HOME=/home/ubuntu
 hermes -z "$PROMPT" --provider custom:grok -m openrouter/x-ai/grok-4.3 --ignore-rules -t ''
@@ -141,14 +140,17 @@ Important details:
   `timeout: failed to run command ... No such file or directory`.
 
   Resolve it once at the top of every launcher instead:
+
   ```bash
   H="$(command -v hermes)"
   [ -x "$H" ] || { echo "FATAL: no hermes binary"; exit 1; }
   "$H" --version >/dev/null 2>&1 || { echo "FATAL: hermes not runnable"; exit 1; }
   ```
+
   Tell: panel "completes" in seconds and all `/tmp/review_*.txt` are 0 bytes; check the
   `.err` files — they show the broken path. Always write reviewer stderr to per-model
   `.err` files so a silent all-empty panel is diagnosable in one cat.
+
 - Set `HOME` explicitly in scripts/background jobs. In this session, some headless `hermes -z` subprocesses intermittently failed with `Could not determine home directory` until `export HOME=/home/ubuntu` was added. This is a defensive wrapper step, not a claim that Hermes is broken.
 - Use `-t ''` for every reviewer. Without it, a headless reviewer may attempt a tool call and hang waiting for approval.
 - Use `--ignore-rules` for lens independence, but paste any necessary privacy/PII constraints into the prompt/brief because ignore-rules strips them too.
@@ -157,7 +159,7 @@ Important details:
 ## Launching parallel reviewers past the terminal `&` guard (confirmed 2026-06-29)
 
 The Hermes terminal tool REFUSES any foreground command containing `&` backgrounding —
-and it inspects the raw command string, so `... &` is blocked even *inside a heredoc* or
+and it inspects the raw command string, so `... &` is blocked even _inside a heredoc_ or
 a `bash -c "..."`. You cannot fan out reviewers with `cmd1 & cmd2 & wait` in a normal
 `terminal()` call. Two confirmed-working ways around it:
 
@@ -241,6 +243,7 @@ Use `|| printf 0` (not `|| echo 0`) so a missing file yields exactly one token.
 
 **Test the loop in BOTH directions before trusting it** — a loop that always breaks
 immediately is as broken as one that never breaks, and only the second is obvious:
+
 - against three finished files it must exit in a few iterations (measured: 3 of 160)
 - against a reviewer still appending it must NOT break early (measured: waited 9s for an
   8s writer and captured all 8 chunks)

@@ -39,7 +39,7 @@ The function pattern:
 def reply_line_comment(owner, repo, pr, comment_id, body):
     # POST pulls/{pr}/comments/{id}/replies
     # POST pulls/comments/{id}/reactions (note: no {pr} in reaction path)
-    
+
 def reply_issue_comment(owner, repo, pr, comment_id, body):
     # POST issues/{pr}/comments (fresh top-level, no threaded reply endpoint)
     # POST issues/comments/{id}/reactions (DIFFERENT path from pulls/comments)

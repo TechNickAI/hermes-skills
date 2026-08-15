@@ -12,14 +12,15 @@ talks to the daemon selected by the current `PM2_HOME` (or the default `~/.pm2`)
 Observed on Nick's Mac Studio:
 
 - Mini-apps (btc-recovery, etc.) are supervised by the daemon at **`PM2_HOME=/Users/nick/.pm2`**.
-- A *separate* Hermes-profile daemon runs at
+- A _separate_ Hermes-profile daemon runs at
   `/Users/nick/.hermes/profiles/<agent-d>/home/.pm2`. Bare `pm2` in a <agent-d> shell
   frequently resolves to THIS one.
 
 ### Symptoms
+
 - `pm2 restart <app>` → `Process or Namespace <app> not found`, OR it creates a NEW
   "errored" entry that never binds the port (restart count climbs: ↺ 15, ↺ 45...).
-- Meanwhile the OLD process keeps serving stale code, because the *other* daemon keeps
+- Meanwhile the OLD process keeps serving stale code, because the _other_ daemon keeps
   respawning it. Killing the PID with `kill -9` does nothing durable — the owning
   daemon relaunches it within ~1s. You get into a kill/respawn race you cannot win
   from the wrong daemon.
@@ -27,6 +28,7 @@ Observed on Nick's Mac Studio:
   still returns a live PID.
 
 ### Diagnosis
+
 1. Find who actually owns the port and trace the parent:
    ```
    P=$(lsof -ti:3005 | head -1); PAR=$(ps -o ppid= -p $P | tr -d ' ')
@@ -39,11 +41,14 @@ Observed on Nick's Mac Studio:
    ```
 
 ### Fix
+
 Always manage the app through the daemon that owns it:
+
 ```
 PM2_HOME=/Users/nick/.pm2 pm2 restart <app>
 PM2_HOME=/Users/nick/.pm2 pm2 save
 ```
+
 Then delete any stray duplicate you accidentally created in the wrong daemon
 (`pm2 delete <app>` in the default-home shell). Editing `server.js` requires a restart
 under the CORRECT daemon to take effect — a restart on the wrong daemon is a no-op on
@@ -63,6 +68,7 @@ startup instead of trusting `os.homedir()`. (The btc-recovery dashboard does thi
 a `PROJECT_CANDIDATES` array.)
 
 ## Quick checklist when "my edit didn't take"
+
 1. `lsof -ti:<port>` → get live PID. Is it even running?
 2. Trace parent → which daemon owns it (`PM2_HOME`)?
 3. Restart through THAT daemon's `PM2_HOME`.
