@@ -251,10 +251,10 @@ skills:
   path: skills/engineering/diagram-rendering
 - name: mini-app
   pack: engineering
-  version: 0.4.0
+  version: 0.5.0
   scope: fleet
-  summary: Use when adding, removing, password-protecting, or troubleshooting a mini-app served by the openclaw-config app-router (Caddy + PM2 + auth sidecar + Tailscale Serve/Funnel) on a fleet machine.
-  use_when: adding, removing, password-protecting, or troubleshooting a mini-app served by the openclaw-config app-router (Caddy + PM2 + auth sidecar + Tailscale Serve/Funnel) on a fleet machine. Covers install, the Caddy route pattern, the auth sidecar conventions, exposing apps publicly via Funnel, Hermes das…
+  summary: Use when adding, removing, password-protecting, or troubleshooting a mini-app served by the hermes-config mini-app router (Caddy + PM2 + auth sidecar + Tailscale Serve/Funnel) on a fleet machine.
+  use_when: adding, removing, password-protecting, or troubleshooting a mini-app served by the hermes-config mini-app router (Caddy + PM2 + auth sidecar + Tailscale Serve/Funnel) on a fleet machine. Covers install, the Caddy route pattern, the auth sidecar conventions, exposing apps publicly via Funnel, Hermes…
   requires:
   - 'host services: Caddy + PM2'
   - Tailscale Serve/Funnel

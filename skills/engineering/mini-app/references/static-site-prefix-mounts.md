@@ -128,5 +128,5 @@ a 200 HTML response can still be visually broken if absolute assets were not rew
   reachable."
 - In this user's current setup, the active app-router config lives under
   `/Users/<user>/mini-apps/` (`_registry/Caddyfile`, `ecosystem.config.js`), not the
-  older documented `~/openclaw-apps/` path. Prefer confirming the running Caddy process
+  older `~/openclaw-apps/` path. Prefer confirming the running Caddy process
   args before editing.

@@ -17,7 +17,7 @@ Use this when exposing Hermes dashboards as public mini-apps across fleet machin
 Fleet machines drift between router layouts. Do not assume the skill's default path.
 
 - Newer layout: `~/mini-apps/ecosystem.config.js` + `~/mini-apps/router/Caddyfile`.
-- Older layout: `~/openclaw-apps/ecosystem.config.js` +
+- Legacy layout (pre-Hermes hosts): `~/openclaw-apps/ecosystem.config.js` +
   `~/openclaw-apps/_registry/Caddyfile`.
 - The canonical answer on a live host is PM2's caddy process args (`pm2 jlist` /
   `pm2 list`) plus `tailscale serve status`.
