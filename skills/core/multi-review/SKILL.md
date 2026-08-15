@@ -70,10 +70,12 @@ A good multi-review run does these things, in order:
 1. **Define the target.** Identify the artifact or action being reviewed, the intended
    audience, and the stakes.
 2. **Choose review depth.** Pick quick, balanced, or deep based on risk.
-3. **Choose a diverse panel.** Select lenses and model families appropriate to the task,
-   and staff for **both generation and verification** — those are usually different
-   seats, not one strong seat (see "Verification and originality are usually different
-   seats").
+3. **Choose a diverse panel.** Select lenses and model families appropriate to the task.
+   Whenever the run has **two or more seats**, staff for both generation and
+   verification — those are usually different seats, not one strong seat (see
+   "Verification and originality are usually different seats"). A single-seat run
+   cannot split the roles; it carries the generator/verifier tension inside one prompt
+   and is stamped degraded accordingly.
 4. **Run reviewers independently.** Keep reviewer prompts isolated so they do not anchor
    on each other's conclusions.
 5. **Synthesize.** Deduplicate findings, classify each as fix / ask / defer / wontfix,
@@ -286,7 +288,8 @@ heavily generated almost nothing new, and the models that generated the novel ma
 verified almost none of it.** The correlation ran in opposite directions across the
 whole field, frontier and open-weight alike.
 
-Do not fight this by asking one seat to do both. Staff for it:
+Do not fight this by asking one seat to do both. Whenever the run has two or more
+seats, staff for it:
 
 - Seat at least one **generator** (open-weight models are the measured pick) whose job
   is to produce candidate findings, including speculative ones.
@@ -298,6 +301,14 @@ Do not fight this by asking one seat to do both. Staff for it:
 A panel of only verifiers returns a tidy consensus that misses the unlisted problem. A
 panel of only generators returns a pile of confident claims you cannot act on. The
 review is the interaction between them.
+
+**Single-seat runs are the documented exception.** A quick-depth check or the
+`degraded: single-reviewer` fallback has one seat and cannot split these roles. Do not
+try to fake a panel out of it. Instead, make the tension explicit inside the one
+prompt — ask for candidate findings _and_ a verification pass over them, in that order
+— and treat its novel-but-unchecked claims as leads, exactly as you would from a
+generator seat. This is weaker than two seats, which is what the degradation stamp is
+telling the reader.
 
 ### Demand the artifact, not the summary
 
@@ -820,10 +831,11 @@ smallest path to unblock.
     writing the seat off.
 13. **Accepting a self-reported tool failure at face value.** "The file was empty" is a
     claim, not an observation. Stat it. See rule 8.
-14. **Staffing a panel entirely with verifiers.** An all-frontier panel converges: it
-    produces a well-written consensus and misses the objection nobody listed. Seat a
-    divergence source (open-weight models are the measured pick) and let the verifiers
-    grade it.
+14. **Staffing a multi-seat panel entirely with verifiers.** An all-frontier panel
+    converges: it produces a well-written consensus and misses the objection nobody
+    listed. Seat a divergence source (open-weight models are the measured pick) and let
+    the verifiers grade it. This applies to real panels; a single-seat quick check is a
+    documented degraded path, not a violation of it.
 15. **Treating an open-weight seat's novel finding as a result.** Those seats generate
     the new material and verify almost none of it. Novel plus unverified is a lead;
     label it that way until a verifier checks it.
@@ -845,7 +857,8 @@ smallest path to unblock.
 - [ ] Lenses selected for the scenario, not from habit
 - [ ] At least two model families used when available (or degradation stamped if not)
 - [ ] Privacy/PII constraints re-injected into every isolated reviewer prompt
-- [ ] Panel staffed for both generation and verification, not one seat doing both
+- [ ] Panel staffed for both generation and verification (2+ seats), or single-seat run
+      stamped degraded with both roles carried in one prompt
 - [ ] Prior decisions / rejected approaches pasted into the reviewer brief
 - [ ] Confirmed which model actually answered each seat before claiming family coverage
 - [ ] Every reviewer call passed an explicit timeout scaled to scope (never inherited)
