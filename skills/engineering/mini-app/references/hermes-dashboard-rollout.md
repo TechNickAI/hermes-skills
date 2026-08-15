@@ -59,7 +59,7 @@ door (e.g. `tailscale serve --http=4243`) can never complete login.
 **Fix:** serve the dashboard over an HTTPS door. Options, in order of preference:
 
 - Public funnel `:443` (HTTPS) — if Caddy owns it (Mac Studio model).
-- **Tailnet-only HTTPS** when something else (e.g. the openclaw gateway) already owns
+- **Tailnet-only HTTPS** when another service already owns
   `:443`:
   ```bash
   tailscale serve --bg --https=8443 http://127.0.0.1:8080
@@ -80,7 +80,7 @@ curl -sk -o /dev/null -w "%{http_code}\n" -b $JAR "$BASE/<slug>/"   # 200 = WORK
 
 ## Check who owns :443 BEFORE making exposure decisions
 
-Do not assume Caddy owns the public door. On hosts running the openclaw gateway, the
+Do not assume Caddy owns the public door. On hosts where another service holds it, the
 gateway often owns the `:443` funnel (→ its own gateway port, e.g. 18080), and the Caddy
 router is only on a tailnet port. Check first:
 

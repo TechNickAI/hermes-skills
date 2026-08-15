@@ -3,7 +3,8 @@
 the operator's rule: **NO symlinks for path migrations.** Symlinks rot and hide drift.
 Do the real rename and update every reference.
 
-This is the playbook used 2026-05-27 to rename `~/openclaw-apps` → `~/mini-apps`. Same
+This is the playbook for renaming a framework root, as used for
+`~/openclaw-apps` → `~/mini-apps`. Same
 shape applies to any future framework root move.
 
 ## Pre-flight: find every reference BEFORE you touch anything
@@ -37,7 +38,7 @@ ps -p $(pgrep -f "caddy run" | head -1) -o ppid=,command=
 # If no plist, you'll restart it as a background process (see below).
 ```
 
-Historical journal/memory files (e.g. `.openclaw/workspace-nova/memory/**`) — **don't
+Historical journal/memory files (e.g. a legacy runtime's `workspace-*/memory/**`) — **don't
 patch**. Those are dated notes, not active config. Let them age.
 
 ## The rename
@@ -131,7 +132,7 @@ usually a missed path patch.
   Use `terminal(background=true, watch_patterns=[...])` for Caddy.
 - **Don't recursive-grep all of `/Users/<user>`.** Times out on node_modules. Target
   known config files instead.
-- **Skip historical memory/journal files.** `.openclaw/workspace-*/memory/**` are dated
+- **Skip historical memory/journal files.** A legacy runtime's `workspace-*/memory/**` are dated
   notes; patching them rewrites history for no benefit.
 - **`.next/` build artifacts will have stale paths** (e.g.
   `markdown-viewer/.next/required-server-files.json`). Don't patch them — they

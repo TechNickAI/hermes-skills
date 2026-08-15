@@ -2,12 +2,12 @@
 name: mini-app
 description: >
   Use when adding, removing, password-protecting, or troubleshooting a mini-app served
-  by the openclaw-config app-router (Caddy + PM2 + auth sidecar + Tailscale
+  by the hermes-config mini-app router (Caddy + PM2 + auth sidecar + Tailscale
   Serve/Funnel) on a fleet machine. Covers install, the Caddy route pattern, the auth
   sidecar conventions, exposing apps publicly via Funnel, Hermes dashboards behind a
   password, and the recurring pitfalls (Tailscale "serve reset" wars, the PM2 $HOME
   trap, funnel-eligible ports, strip-prefix requirements).
-version: 0.4.0
+version: 0.5.0
 license: MIT
 metadata:
   hermes:
@@ -21,7 +21,7 @@ metadata:
 
 # Mini-App
 
-**Mission:** Operate the openclaw-config app-router on this machine — the lightweight
+**Mission:** Operate the hermes-config mini-app router on this machine — the lightweight
 stack that exposes one or more named "mini-apps" at clean URL paths on a single
 Tailscale HTTPS host, with optional per-app password gating. One front door, many apps,
 no cloud.
@@ -36,7 +36,7 @@ fronts them all with Caddy and gives each one:
 - PM2 supervision so it survives crashes and reboots
 
 The router stack lives upstream in
-[openclaw-config](https://github.com/TechNickAI/openclaw-config) under
+[hermes-config](https://github.com/TechNickAI/hermes-config) under
 `devops/app-router/`. This skill is the operator playbook — what to do once it's
 installed.
 
@@ -55,7 +55,7 @@ Load this skill when you (a Hermes fleet agent) are asked to:
 - Verify the front door is up after a reboot or upgrade
 
 **Don't use for:** writing the mini-app's code itself (that's a normal app), or changing
-the auth sidecar's source (that's an upstream PR in openclaw-config).
+the auth sidecar's source (that's an upstream PR in hermes-config).
 
 ## Stack at a glance
 
@@ -76,11 +76,35 @@ Tailnet host: <machine>.<your-tailnet>.ts.net
 
 **Single sources of truth on this machine** (after install):
 
-| File                                         | What it controls                                           |
-| -------------------------------------------- | ---------------------------------------------------------- |
-| `~/mini-apps/ecosystem.config.js`            | PM2 process list + ALL env vars (incl. auth passwords)     |
-| `~/mini-apps/_registry/Caddyfile`            | Path → upstream routing                                    |
-| `~/mini-apps/_registry/tailscale-serve.json` | Public/tailnet exposure (huJSON; compiled by apply script) |
+| File                                     | What it controls                                           |
+| ---------------------------------------- | ---------------------------------------------------------- |
+| `~/mini-apps/ecosystem.config.js`        | PM2 process list + ALL env vars (incl. auth passwords)     |
+| `~/mini-apps/<reg>/Caddyfile`            | Path → upstream routing                                    |
+| `~/mini-apps/<reg>/tailscale-serve.json` | Public/tailnet exposure (huJSON; compiled by apply script) |
+
+> **`<reg>` is `router/` or `_registry/` — check before you edit.** The current
+> installer creates `router/`; hosts installed before that carry `_registry/`. Both
+> are in the wild, so resolve it once at the start of any task and reuse it.
+>
+> Resolve the operator's real home first — under a Hermes tool environment `$HOME`
+> may point at the profile home, where `~/mini-apps` does not exist even though the
+> router is running (see "The router dir may have been renamed" below):
+>
+> ```bash
+> # anchor on the caddy BINARY path so this cannot match your own shell.
+> # -ww keeps long argv from being width-clipped on platforms that do that.
+> APPS=$(ps -eww -o args= | grep '^/[^ ]*caddy run' \
+>     | sed -n 's#.*--config \(.*\)/[^/]*/Caddyfile.*#\1#p' | head -1)
+> APPS=${APPS:-$(ls -d /Users/*/mini-apps /home/*/mini-apps 2>/dev/null | head -1)}
+> REG=$(ls -d "$APPS"/router "$APPS"/_registry 2>/dev/null | head -1)
+> echo "apps=$APPS reg=$REG"
+> ```
+>
+> An empty `REG` with a running Caddy means the probe missed, NOT that the router is
+> uninstalled — fall back to the ground-truth search below before concluding anything.
+>
+> Examples below write `$APPS` and `$REG`. On a host you have already identified you
+> can substitute the literal paths.
 
 Never run ad-hoc `tailscale serve …` commands. Edit the JSON, run the apply script.
 
@@ -90,7 +114,7 @@ Never run ad-hoc `tailscale serve …` commands. Edit the JSON, run the apply sc
 brew install caddy            # macOS — use the equivalent on Linux
 npm install -g pm2
 
-cd ~/src/openclaw-config       # clone if you don't have it
+cd ~/src/hermes-config         # clone if you don't have it
 bash devops/app-router/scripts/install.sh
 ```
 
@@ -98,22 +122,27 @@ The installer copies templates into `~/mini-apps/`, renders the Caddyfile with t
 paths, installs auth-service deps, and stages the launchd plist (macOS only). Re-running
 is safe; `--force` overwrites existing files.
 
-**Then by hand:**
+**Then by hand.** A fresh install from the current installer creates `router/`, so
+set `REG` before following these steps:
+
+```bash
+REG=$(ls -d ~/mini-apps/router ~/mini-apps/_registry 2>/dev/null | head -1)
+```
 
 1. Edit `~/mini-apps/ecosystem.config.js`:
    - Set `AUTH_SECRET` to `openssl rand -hex 32` (one per machine)
    - Add `APP_PASSWORD_<SLUG>` / `APP_TITLE_<SLUG>` / `APP_DESC_<SLUG>` for any gated
      apps
-2. Edit `~/mini-apps/_registry/Caddyfile` to declare each app's route
-3. Edit `~/mini-apps/_registry/tailscale-serve.json` if you want a non-default serve
-   layout (default exposes Caddy on `:443`)
+2. Edit `$REG/Caddyfile` to declare each app's route
+3. Edit `$REG/tailscale-serve.json` if you want a non-default serve layout (default
+   exposes Caddy on `:443`)
 
 **Start everything under PM2:**
 
 ```bash
 pm2 start ~/mini-apps/ecosystem.config.js
 pm2 start /opt/homebrew/bin/caddy --name caddy --interpreter none -- \
-  run --config ~/mini-apps/_registry/Caddyfile --adapter caddyfile
+  run --config "$REG/Caddyfile" --adapter caddyfile
 pm2 save
 pm2 startup    # paste the printed sudo command — needed for resurrect-on-reboot
 ```
@@ -121,16 +150,21 @@ pm2 startup    # paste the printed sudo command — needed for resurrect-on-rebo
 **Apply Tailscale Serve:**
 
 ```bash
-~/mini-apps/_registry/apply-tailscale-serve.sh
+"$REG"/apply-tailscale-serve.sh
 # macOS launchd that replays on login:
-launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/ai.openclaw.app-router-serve.plist
+launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.hermes.mini-app-router-serve.plist
 ```
 
-**If this host also runs the openclaw gateway**, set this in `~/.openclaw/openclaw.json`
-under `gateway` BEFORE the gateway restarts, or it will wipe your serve config:
+**If another tool on this host manages Tailscale Serve, disable that first.** The
+usual failure is a second process running `tailscale serve reset` on startup, which
+wipes these routes. Hermes' own gateway has no Tailscale integration and does not
+touch serve config, so a Hermes-only host needs no opt-out. A legacy agent runtime
+on the same machine may still own it — check what else drives serve:
 
-```json
-"tailscale": { "mode": "off", "resetOnExit": false }
+```bash
+tailscale serve status                                    # what is configured now
+grep -rl "tailscale serve" ~/Library/LaunchAgents \
+    ~/.config/systemd/user 2>/dev/null                    # who else replays it
 ```
 
 ## Adding a mini-app
@@ -281,8 +315,8 @@ sudo env PATH=$PATH PM2_HOME=/Users/<user>/.pm2 pm2 startup launchd -u <user> --
 
 ## The router dir may have been renamed (find it, never assume)
 
-The historical path was `~/openclaw-apps/`; it has been renamed to `~/mini-apps/` on at
-least one host. Hardcoded paths in this skill or in old notes will `stat: No such file`
+The historical path was `~/openclaw-apps/` (pre-Hermes); the current one is
+`~/mini-apps/`. Older hosts may still carry the legacy directory name. Hardcoded paths in this skill or in old notes will `stat: No such file`
 even though the stack is alive. Locate the real one from ground truth rather than
 guessing:
 
@@ -292,7 +326,8 @@ find /Users/<user> -maxdepth 4 -name ecosystem.config.js 2>/dev/null | grep -v n
 find /Users/<user> -maxdepth 5 -name Caddyfile 2>/dev/null | grep -v node_modules
 ```
 
-The Caddyfile commonly lives at `<router-dir>/_registry/Caddyfile`, not directly in the
+The Caddyfile lives one level down, at `<router-dir>/router/Caddyfile` (current
+installer) or `<router-dir>/_registry/Caddyfile` (older hosts) — not directly in the
 router dir. Note also: under a Hermes tool environment, `$HOME` is rewritten to the
 profile home, so `~/mini-apps` and bare `ls`/`grep` may fail to see the real dir — use
 absolute `/Users/<user>/...` paths, and the Read/Grep tools (which resolve absolute
@@ -499,12 +534,27 @@ inside `:8080` would 404 every asset.
 
 ## Hooks / webhooks (optional)
 
-If this host runs the openclaw gateway, you can let Caddy front the gateway's `/hooks/*`
-endpoint with bearer-token injection. Set `OPENCLAW_HOOK_TOKEN` in the Caddy process env
-(via the PM2 ecosystem env block), uncomment the `handle /hooks/* { ... }` block in the
-Caddyfile, and reload Caddy. External callers can then
-`POST https://<host>/hooks/<name>` with no `Authorization` header — Caddy injects
-`Bearer <token>` before forwarding.
+Caddy can front a local agent gateway's webhook endpoint so external callers reach it
+over the same HTTPS door.
+
+**Hermes** runs its own webhook listener (`WEBHOOK_ENABLED=true`, `WEBHOOK_PORT`,
+default `8644`) and authenticates callers by **HMAC signature** using `WEBHOOK_SECRET`,
+not a bearer token. Caddy does not need to inject credentials — proxy the path and let
+the gateway verify the signature itself:
+
+```caddyfile
+handle /hooks/* {
+    reverse_proxy 127.0.0.1:8644
+}
+```
+
+Point the sender at `https://<host>/hooks/<route>` and configure the same secret on
+both ends. Do **not** add the mini-app auth sidecar in front of this path — the caller
+is a machine and cannot complete a cookie login.
+
+A legacy agent runtime on the same host may instead expose a bearer-token `/hooks/*`
+endpoint, which needs token injection in the Caddy env block. Confirm which gateway
+owns the port before wiring it.
 
 ### Public exposure audit for hooks
 
@@ -595,8 +645,9 @@ pm2 start ~/mini-apps/ecosystem.config.js --only auth-service
 
 ## When Tailscale Serve goes sideways
 
-Any tool that runs `tailscale serve reset` on its own startup will wipe your config —
-most commonly the openclaw gateway's Tailscale integration if it's enabled. Diagnosis:
+Any tool that runs `tailscale serve reset` on its own startup will wipe your config.
+Hermes' gateway does not manage Tailscale, so on a Hermes-only host suspect another
+service or a legacy agent runtime. Diagnosis:
 `tailscale serve status` shows the wrong routes (or nothing), or a funnel'd port
 disappeared. Recovery is one command:
 
@@ -694,7 +745,7 @@ across hosts) will only send it back over **HTTPS**. Consequences:
   over the real HTTPS tailnet/funnel URL.
 
 **Always front gated apps with an HTTPS door.** On a machine where Caddy owns `:443`
-(funnel), that's covered. On a machine where the openclaw gateway owns `:443`, add a
+(funnel), that's covered. On a machine where another service owns `:443`, add a
 **tailnet-only HTTPS door** on `:8443` pointed at Caddy's loopback `:8080`:
 
 ```bash
@@ -722,10 +773,10 @@ Note: a box hitting its OWN tailnet hostname from inside an SSH session can hang
 
 ## When NOT to take over the public `:443` funnel
 
-If the target machine's openclaw gateway already owns the public `:443` funnel (check
-`tailscale serve status` → `:443 … proxy http://127.0.0.1:18080` and
-`~/.openclaw/openclaw.json` gateway.tailscale.mode), do NOT seize `:443` for Caddy
-without asking — it disrupts their gateway. Default to a **tailnet-only HTTPS `:8443`
+If another service already owns the public `:443` funnel — check `tailscale serve
+status` for an existing `:443 … proxy http://127.0.0.1:<port>` entry — do NOT seize
+`:443` for Caddy without asking, because it disrupts whatever is already answering
+there. Default to a **tailnet-only HTTPS `:8443`
 door** (works on any device signed into the tailnet, not public). Add a public funnel
 later only on explicit request. This is the safe, reversible resting state.
 
@@ -743,9 +794,8 @@ ls ~/.local/bin/hermes ~/.hermes/hermes-agent/venv/bin/hermes 2>/dev/null
 for db in ~/.hermes/state.db ~/.hermes/profiles/*/state.db; do
   [ -f "$db" ] && echo "$(sqlite3 "$db" 'SELECT COUNT(*) FROM sessions') $db"; done
 ls ~/.hermes/hermes-agent/hermes_cli/web_dist/index.html 2>/dev/null  # build needed?
-ls -d ~/openclaw-apps ~/mini-apps 2>/dev/null                          # existing router?
-# who owns :443?
-python3 -c "import json,os;d=json.load(open(os.path.expanduser('~/.openclaw/openclaw.json')));print(d.get('gateway',{}).get('tailscale'))"
+ls -d ~/mini-apps ~/openclaw-apps 2>/dev/null                          # existing router?
+# who owns :443 / what serve routes exist already?
 /opt/homebrew/bin/tailscale serve status
 ```
 
@@ -763,9 +813,9 @@ fails ("Unrecognized archive format") and base64-through-heredoc fails (the here
 consumes stdin so the piped data never arrives). Reliable pattern:
 
 ```bash
-ssh src 'cd ~/openclaw-apps && tar czf - --exclude=node_modules auth-service' > /tmp/a.tgz
+ssh src 'cd ~/mini-apps && tar czf - --exclude=node_modules auth-service' > /tmp/a.tgz
 scp /tmp/a.tgz dst:/tmp/a.tgz
-ssh dst 'cd ~/openclaw-apps && tar xzf /tmp/a.tgz && cd auth-service && npm install --no-audit --no-fund'
+ssh dst 'cd ~/mini-apps && tar xzf /tmp/a.tgz && cd auth-service && npm install --no-audit --no-fund'
 ```
 
 Then write `ecosystem.config.js` (fresh per-host `AUTH_SECRET` via
@@ -832,10 +882,11 @@ across reboots natively, so only PM2 needs this.
    public. Move them to `:8443` (tailnet-only) by adding a `Web` entry without an
    `AllowFunnel` entry.
 
-6. **Forgetting to disable the openclaw gateway's Tailscale integration on a host that
-   runs openclaw.** It will call `tailscale serve reset` on every restart and wipe your
-   config. Set `gateway.tailscale.mode: "off"` and
-   `gateway.tailscale.resetOnExit: false` in `~/.openclaw/openclaw.json`.
+6. **Letting a second process manage Tailscale Serve.** Anything that runs
+   `tailscale serve reset` on startup wipes these routes on every restart. Hermes'
+   gateway has no Tailscale integration, so on a Hermes-only host look for another
+   service or a legacy agent runtime; disable its serve management, then re-apply
+   with `apply-tailscale-serve.sh`.
 
 7. **Calling PM2 from inside a Hermes tool environment without exporting `PM2_HOME`.**
    You talk to a shadow daemon that supervises nothing. Export first, every time.
@@ -985,7 +1036,7 @@ show `CN=<your-domain>` issued by Let's Encrypt (Cloudflare). PM2 logs should sh
 
 ## Reference
 
-- Source of truth for the stack: `~/src/openclaw-config/devops/app-router/`
+- Source of truth for the stack: `~/src/hermes-config/devops/app-router/`
   (`README.md`, `templates/`, `scripts/`, `auth-service/`)
 - `references/hermes-dashboard-rollout.md` — standing up a Hermes dashboard behind the
   router: slug choice, root-vs-profile DB, door type, and index-page markup. Keep your
