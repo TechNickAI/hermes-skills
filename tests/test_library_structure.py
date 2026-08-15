@@ -237,7 +237,9 @@ def test_readme_catalog_lists_every_skill():
     )
 
 
-# Each manifest requirement maps to the token its README row must contain.
+# Each manifest requirement maps to the token(s) its README row must contain.
+# A compound "A and B" requirement lists both: naming only one lets the other
+# disappear from the README without failing anything.
 # This is an explicit table rather than a heuristic: deriving a keyword from
 # prose yielded useless keys ("read", "network", "full") that a substring check
 # would satisfy while the real dependency went undocumented. A new requirement
@@ -250,11 +252,14 @@ REQUIREMENT_KEYS = {
     "Read access to the target agent's HERMES_HOME": "HERMES_HOME",
     "gh CLI, authenticated": "`gh` CLI",
     "chromium binary on PATH (or CHROMIUM_BIN) for local rasterize": "chromium",
-    "network access to a Kroki host (KROKI_BASE) and QuickChart (QUICKCHART_BASE)": "Kroki",
-    "host services: Caddy + PM2": "Caddy",
+    "network access to a Kroki host (KROKI_BASE) and QuickChart (QUICKCHART_BASE)": [
+        "Kroki",
+        "QuickChart",
+    ],
+    "host services: Caddy + PM2": ["Caddy", "PM2"],
     "Tailscale Serve/Funnel": "Tailscale",
     "Hermes delegation toolset enabled": "Hermes-native",
-    "Hermes cron + delegation toolsets enabled": "Hermes-native",
+    "Hermes cron + delegation toolsets enabled": ["Hermes-native", "cron"],
     "email CLI: gog or himalaya": "himalaya",
     "gog CLI, authorized via `gog auth login`": "`gog` CLI",
     "gog CLI, authorized for Google Sheets and Drive": "`gog` CLI",
@@ -263,7 +268,7 @@ REQUIREMENT_KEYS = {
     "uv, to run the XLSX verification snippets": "uv",
     "openpyxl, via `uv run --with openpyxl` (not a standing install)": "openpyxl",
     "pandoc (for markdown conversion)": "pandoc",
-    "macOS with Messages.app signed into iMessage": "macOS",
+    "macOS with Messages.app signed into iMessage": ["macOS", "Messages.app"],
     "BlueBubbles server app (installed by scripts/setup-bluebubbles.sh)": "BlueBubbles",
     "Full Disk Access granted by hand (macOS permission prompts cannot be scripted)": "Full Disk Access",
     "python3 with the requests package": "requests",
@@ -293,10 +298,11 @@ def test_readme_catalog_declares_every_requirement():
     for entry in manifest()["skills"]:
         row = rows.get(entry["name"], "")
         for req in entry["requires"]:
-            key = REQUIREMENT_KEYS.get(req)
-            if key is None:
+            keys = REQUIREMENT_KEYS.get(req)
+            if keys is None:
                 continue  # reported by the test above
-            assert key.lower() in row.lower(), (
-                f"{entry['name']}: README row does not mention {key!r} "
-                f"(from requirement {req!r})\n  row: {row!r}"
-            )
+            for key in [keys] if isinstance(keys, str) else keys:
+                assert key.lower() in row.lower(), (
+                    f"{entry['name']}: README row does not mention {key!r} "
+                    f"(from requirement {req!r})\n  row: {row!r}"
+                )
