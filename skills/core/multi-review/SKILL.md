@@ -6,7 +6,7 @@ description: >
   Runs a small panel of diverse review lenses across model families when available,
   synthesizes findings into fix/ask/defer/wontfix decisions, and iterates until the
   result is ready.
-version: 1.2.0
+version: 1.3.0
 license: MIT
 metadata:
   hermes:
@@ -108,18 +108,26 @@ shape:
 1. **Native subagents with per-task model override** when the runtime supports selecting
    provider/model per child agent **and the reviewer task is bounded reasoning**: a
    self-contained artifact, a clear lens, and no exploratory I/O. This is best because
-   prompts, context, and failures are naturally isolated.
+   prompts, context, and failures are naturally isolated. **Know the tradeoff before
+   choosing this path: a subagent's runtime almost certainly gives you no per-call
+   timeout control.** The delegation tool schema exposes goal, context, role, and output
+   schema — not a deadline. Any wall-clock cap is process-wide configuration read at call
+   time, so a skill cannot scale it to the size of the artifact. If this review needs a
+   deadline proportional to its scope, use path 2 or 3, where the launching tool call
+   does take a timeout.
 2. **Headless Hermes one-shots** (`hermes -z ... --provider ... -m ... -t ''`) for pure
    text-in/text-out reviewer calls, especially when subagents cannot select model
-   families. This is the most portable Hermes pattern. Use a higher timeout than the
-   default for real reviews; 300-600 seconds is usually reasonable, and deep/slow model
-   panels may need the upper end.
+   families. This is the most portable Hermes pattern, and **the only path where you can
+   size the timeout to the job.** Use a higher timeout than the default for real reviews;
+   300-600 seconds is usually reasonable, and deep/slow model panels may need the upper
+   end. See execution rule 3 — the default is very likely lower than you want.
 3. **Parent-gathered I/O + reviewer one-shots** for open-ended or I/O-heavy review work
    (large filesystem searches, email/search crawls, binary downloads, multi-step data
    collection). Do the I/O in the parent with normal tools, reduce it to a bounded
-   brief, then send that brief to reviewers. Do **not** hand an open-ended crawl to
-   subagents — many runtimes enforce a child timeout (often about 600 seconds), and the
-   review will fail before synthesis.
+   brief, then send that brief to reviewers. Do **not** hand an open-ended crawl to a
+   subagent whose deadline you do not control: if a wall-clock cap is configured, the
+   child is killed mid-task and its findings die with it, and if none is configured a
+   wedged child stalls the panel instead. Either way the review fails before synthesis.
 4. **Same-model subagents with different lenses** when only one model family is
    available. Increase lens diversity, include at least one contrarian reviewer and one
    meta-review, and stamp `degraded: model-diversity unavailable`.
@@ -257,15 +265,32 @@ execution rules that prevent silent failures:**
 2. **Always disable tools with `-t ''`.** A headless reviewer that tries to call a tool
    will hang waiting for an approval that never comes. `-t ''` keeps it a pure text-in /
    text-out review. Do not remove it when customizing.
-3. **Use a higher timeout than the default for real reviews.** Review models often take
-   longer than normal chat, especially with long prompts or slow/deep models. When
-   launching via an agent terminal tool, set the tool timeout to **300 seconds for
-   normal reviews** and **600 seconds for deep/slow panels**. If the run still times
-   out, first try to recover the coverage — shrink the artifact, split the panel, or
-   replace the seat — rather than accepting the loss. Only when that fails does the
-   degradation rule in the Core Contract apply: synthesize solely if the completed seats
-   still meet this target's depth floor, and label the gap. Never silently fall back to
-   a partial review.
+3. **Set the timeout explicitly on every reviewer call. Never inherit the default.**
+   Review models take longer than normal chat, especially with long prompts or
+   slow/deep models — but an agent terminal tool's default timeout is typically sized
+   for ordinary shell commands (a few minutes at most) and will cut a healthy reviewer
+   off long before it finishes. **An omitted timeout is not "the value this skill
+   recommends," it is whatever the environment happens to default to.** Pass it on the
+   tool call every time, scaled to scope:
+
+   | Scope                                                | Timeout                      |
+   | ---------------------------------------------------- | ---------------------------- |
+   | Single small artifact, one lens                      | 300s                         |
+   | Normal review, multi-file or multi-lens              | 300-600s                     |
+   | Deep panel, slow/reasoning models, large brief       | 600s                         |
+   | Anything you expect to exceed the foreground ceiling | background + poll, no fg cap |
+
+   Foreground tool calls usually have a hard ceiling of their own (commonly around
+   600s), so a review genuinely bigger than that must run as a background process and
+   be polled — not squeezed into a foreground call that will be killed. Check your
+   runtime's actual foreground maximum rather than assuming 600s is available.
+
+   If a run still times out, first try to recover the coverage — shrink the artifact,
+   split the panel, or replace the seat — rather than accepting the loss. Only when
+   that fails does the degradation rule in the Core Contract apply: synthesize solely
+   if the completed seats still meet this target's depth floor, and label the gap.
+   Never silently fall back to a partial review.
+
 4. **Use `--ignore-rules` deliberately, and re-inject any safety rules you still need.**
    It stops the calling profile's persona from washing out the review lens — but it also
    strips project rules. If the artifact may contain private data (real names, host
@@ -295,11 +320,41 @@ execution rules that prevent silent failures:**
    for deep). Early-degrade on slowness is the classic bug this rule exists to prevent.
    Confirmed in practice; parallel default reaffirmed after a later recurrence.
 
+7. **Have every reviewer write findings to a file as it goes, not only at the end.**
+   A reviewer that is killed — by a timeout, a wedged tool call, a crashed child, a
+   dropped connection — takes everything it found with it if its only output channel is
+   the final return value. This is a real and expensive failure: a review can identify
+   a genuine bug and then die before reporting it, leaving no trace that the bug was
+   ever seen. Give each seat its own output file and have it append findings
+   incrementally, highest-severity first, so a partial file is still useful evidence.
+   Then, when a seat fails, **read its partial file before declaring the seat lost.**
+   Findings recovered this way are real findings — carry them into synthesis, attributed
+   to a seat marked incomplete, and let the depth floor decide whether the panel still
+   stands. Never discard a dead reviewer's output unread.
+
+   This applies to every execution path, but it matters most where you do not control
+   the deadline (path 1): a file on disk is the only thing that survives a child the
+   runtime decides to kill.
+
+8. **Never trust a reviewer's self-report about its own tool failures — stat the file.**
+   When a reviewer says it could not read a seat's output, that its input was empty, or
+   that a file was 0 bytes, verify the claim against the filesystem before acting on it.
+   Self-reported tool failures are biased: they fail in the direction that flatters the
+   reporter, because "the input was missing" excuses an omission that "I did not read
+   it" would not. This is not theoretical — in a real panel, a synthesizing model
+   reported a peer's critique as "a 0-byte file" when the file on disk was over 7KB,
+   and the dropped objection was the one that would have caught a regulatory risk on
+   its own top-ranked recommendation. Check size and mtime yourself. A synthesis built
+   on an unverified claim of missing input is not a synthesis, and the seat it silently
+   dropped was usually the disagreeing one.
+
 ```bash
 # Provider/model names are PLACEHOLDERS — resolve them from the local config.
 # Suitable for normal-sized artifacts; for large inputs, chunk or send a bounded brief.
-# When running these through an agent terminal tool, set timeout=300 for normal reviews
-# and timeout=600 for deep/slow model panels.
+# When running these through an agent terminal tool, ALWAYS pass the timeout explicitly
+# (see execution rule 3): ~300s normal, ~600s deep/slow panels, background+poll beyond
+# the foreground ceiling. An omitted timeout inherits the environment default, which is
+# usually sized for ordinary shell commands and will kill a healthy reviewer early.
 hermes -z "$PROMPT_GROK"   --provider <grok-provider>   -m <current-grok-model>   --ignore-rules -t ''
 hermes -z "$PROMPT_GEMINI" --provider <gemini-provider> -m <current-gemini-model> --ignore-rules -t ''
 hermes -z "$PROMPT_GPT"    --provider <gpt-provider>    -m <current-gpt-model>    --ignore-rules -t ''
@@ -629,6 +684,12 @@ smallest path to unblock.
     aliases, private endpoints, key env names, and owner-specific panel recipes belong
     in private profile references, not the public repo. Public guidance should describe
     the pattern and safety constraints, not private infrastructure.
+12. **Treating a killed reviewer as a reviewer that found nothing.** A seat cut off by a
+    timeout has usually done real work. If it wrote nothing incrementally you have no
+    way to know, which is why rule 7 exists; if it did, read the partial file before
+    writing the seat off.
+13. **Accepting a self-reported tool failure at face value.** "The file was empty" is a
+    claim, not an observation. Stat it. See rule 8.
 
 ## Verification Checklist
 
@@ -637,6 +698,10 @@ smallest path to unblock.
 - [ ] Lenses selected for the scenario, not from habit
 - [ ] At least two model families used when available (or degradation stamped if not)
 - [ ] Privacy/PII constraints re-injected into every isolated reviewer prompt
+- [ ] Every reviewer call passed an explicit timeout scaled to scope (never inherited)
+- [ ] Each seat wrote findings to its own file incrementally
+- [ ] Any failed seat's partial output was read before the seat was declared lost
+- [ ] Reviewer claims of missing/empty input were verified against the filesystem
 - [ ] Reviewers ran independently
 - [ ] Findings synthesized into auto-fix / ask / defer / wontfix
 - [ ] Safe auto-fixes applied when authorized
