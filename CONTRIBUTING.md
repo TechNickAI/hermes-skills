@@ -7,15 +7,15 @@ private network. CI runs a scanner on every PR and blocks the merge.
 
 ### Substitution table
 
-| Instead of | Write |
-|---|---|
-| a real person's name | `<user>`, or a neutral placeholder (`atlas`, `scout`, `vega`) |
-| a real hostname | `<host>`, `mac-mini`, `build-box` |
-| a tailnet address (`100.x.y.z`) | `100.100.100.100` or `<tailnet-ip>` |
-| a private domain | `example.com` |
-| `/Users/yourname/...` | `/Users/<user>/...` |
-| an agent or persona name | a neutral placeholder |
-| an exact incident date tied to a real outage | "on one occasion", or drop it |
+| Instead of                                   | Write                                                         |
+| -------------------------------------------- | ------------------------------------------------------------- |
+| a real person's name                         | `<user>`, or a neutral placeholder (`atlas`, `scout`, `vega`) |
+| a real hostname                              | `<host>`, `mac-mini`, `build-box`                             |
+| a tailnet address (`100.x.y.z`)              | `100.100.100.100` or `<tailnet-ip>`                           |
+| a private domain                             | `example.com`                                                 |
+| `/Users/yourname/...`                        | `/Users/<user>/...`                                           |
+| an agent or persona name                     | a neutral placeholder                                         |
+| an exact incident date tied to a real outage | "on one occasion", or drop it                                 |
 
 Agent and persona names count as fleet identifiers. A public skill that names
 the roster leaks it just as surely as one that lists hostnames.
@@ -57,7 +57,7 @@ Three tests. Any one of them is disqualifying:
    deployment, and placeholders would leave nothing useful.
 2. **Proprietary or alpha-bearing** — publishing destroys the value. Trading
    strategy, screening criteria, financial decision rules.
-3. **Unavoidably PII-dense** — the content *is* an inventory of who runs what,
+3. **Unavoidably PII-dense** — the content _is_ an inventory of who runs what,
    not merely a doc that mentions a hostname.
 
 "Contains a hostname" is not one of these. Scrub it and publish.
