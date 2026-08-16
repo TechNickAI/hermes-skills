@@ -99,6 +99,7 @@ class Skill:
     body_lines: int
     platforms: list = field(default_factory=list)
     environments: list = field(default_factory=list)
+    name_declared: bool = True
     related: list = field(default_factory=list)
     errors: list = field(default_factory=list)
 
@@ -151,8 +152,9 @@ def collect(roots: list[tuple[str, Path]]) -> list[Skill]:
             envs = fm.get("environments")
             if isinstance(envs, str):
                 envs = [x.strip() for x in envs.strip("[]-").split(",") if x.strip()]
+            declared = str(fm.get("name") or "").strip()
             out.append(Skill(
-                name=str(fm.get("name") or smd.parent.name).strip(),
+                name=declared or smd.parent.name,
                 dir_name=smd.parent.name,
                 path=str(smd),
                 root=label,
@@ -162,6 +164,7 @@ def collect(roots: list[tuple[str, Path]]) -> list[Skill]:
                 body_lines=len(body.splitlines()),
                 platforms=list(plats or []),
                 environments=list(envs or []),
+                name_declared=bool(declared),
                 related=list(rel or []),
                 errors=[err] if err else [],
             ))
@@ -180,6 +183,10 @@ def check_mechanical(skills: list[Skill]) -> list[Finding]:
     for s in skills:
         for e in s.errors:
             f.append(Finding("frontmatter.parse", "error", e, s.name, s.path))
+        if not s.name_declared:
+            f.append(Finding("frontmatter.name_required", "error",
+                             "frontmatter has no `name:` field - directory name used as "
+                             "a fallback for reporting only", s.name, s.path))
         if not s.description:
             f.append(Finding("frontmatter.description_required", "error",
                              "missing description", s.name, s.path))
@@ -205,7 +212,7 @@ def check_mechanical(skills: list[Skill]) -> list[Finding]:
                              s.name, s.path))
         # name vs the TRUE skill dir (not the category dir). This is the check
         # skill-check gets wrong on nested layouts: 170/175 false positives.
-        if s.name != s.dir_name:
+        if s.name_declared and s.name != s.dir_name:
             f.append(Finding("frontmatter.name_matches_directory", "error",
                              f"frontmatter name '{s.name}' != directory '{s.dir_name}'",
                              s.name, s.path))
@@ -276,9 +283,23 @@ def check_collisions(skills: list[Skill]) -> list[Finding]:
         elif len(live) >= 2:
             sev, why = "warn", (f"live copies across roots {sorted(roots)} - verify which "
                                 "the runtime resolves")
+        elif arch and any(g.root == "profile" for g in arch) and \
+                live and all(g.root == "bundled" for g in live):
+            # THE SILENT-VANISH CASE. An archived PROFILE copy beside a live
+            # BUNDLED copy of the same name can make BOTH disappear from the
+            # index with no error -- this is how a real agent lost `plan`
+            # entirely. It is NOT the benign coexistence case, because there is
+            # no live profile copy to win the resolution.
+            sev, why = "error", ("archived PROFILE copy shares a name with a live "
+                                 "BUNDLED skill - both can vanish from the index "
+                                 "silently; delete or rename the archived copy")
+        elif live and arch and any(g.root == "profile" and not g.archived
+                                   for g in live):
+            sev, why = "info", ("archived copy coexists with a live copy in the same "
+                                "root - benign, index resolves the live path")
         elif live and arch:
-            sev, why = "info", ("archived copy coexists with a live copy - benign, index "
-                                "resolves the live path")
+            sev, why = "warn", ("archived copy shares a name with a live copy in "
+                                "another root - verify the index still resolves it")
         else:
             sev, why = "error", ("only archived copies exist - if a bundled skill shares "
                                  "this name, BOTH may vanish from the index")
@@ -435,6 +456,7 @@ def check_runtime(skills: list[Skill], ad: HermesAdapter) -> tuple[list[Finding]
         sys.platform, sys.platform)
 
     disabled, err = ad.disabled()
+    disabled_known = err is None
     if err:
         skipped.append(f"disabled-set: {err}")
     else:
@@ -459,6 +481,15 @@ def check_runtime(skills: list[Skill], ad: HermesAdapter) -> tuple[list[Finding]
     live, err = ad.live_index()
     if err:
         skipped.append(f"live-index: {err}")
+    elif not disabled_known:
+        # Without the disabled set, every deliberately-disabled skill looks
+        # like a silent collision. A degraded audit must not manufacture
+        # findings -- report UNCHECKED instead.
+        skipped.append("index comparison: skipped, disabled set unknown")
+        findings.append(Finding(
+            "index.enabled_but_absent", "info",
+            "unchecked - cannot distinguish disabled from missing without the "
+            "disabled set", None, None, {"status": "unchecked"}))
     else:
         # a skill declaring platforms that exclude this OS is filtered by design
         wrong_platform = {s.name for s in profile_skills
@@ -502,7 +533,15 @@ def check_runtime(skills: list[Skill], ad: HermesAdapter) -> tuple[list[Finding]
             "provenance resolved - decides which skills this agent may edit in place",
             None, None,
             {"counts": {p: sum(1 for v in prov.values() if v["provenance"] == p)
-                        for p in {v["provenance"] for v in prov.values()}}}))
+                        for p in {v["provenance"] for v in prov.values()}},
+             # per-skill mapping is the load-bearing part: the write boundary is
+             # applied to ONE skill at a time, so aggregate counts are useless
+             "by_skill": {k: v["provenance"] for k, v in sorted(prov.items())},
+             "editable_in_place": sorted(k for k, v in prov.items()
+                                         if v["provenance"] == "agent"),
+             "upstream_only": sorted(k for k, v in prov.items()
+                                     if v["provenance"] in ("built-in", "hub")),
+             "pinned": sorted(k for k, v in prov.items() if v.get("pinned"))}))
     return findings, skipped
 
 

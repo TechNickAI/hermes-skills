@@ -278,3 +278,55 @@ def test_environments_block_syntax_parsed(tmp_path):
     )
     s = audit.collect([("profile", tmp_path)])[0]
     assert "kanban" in s.environments
+
+
+# ------------------------------------------------- PR #7 bot review findings
+
+
+def test_archived_profile_copy_shadowing_live_bundled_is_an_error(tmp_path):
+    """P1 from two independent reviewers, reproduced before fixing.
+
+    A profile `.archive/plan/` beside a live BUNDLED `plan` can make BOTH
+    vanish from the index. This is how a real agent lost plan mode entirely.
+    It must NOT be classified as benign coexistence: there is no live profile
+    copy to win the resolution.
+    """
+    prof, bund = tmp_path / "p", tmp_path / "b"
+    write_skill(prof, ".archive", "plan")
+    write_skill(bund, "core", "plan")
+    f = audit.check_collisions(audit.collect([("profile", prof), ("bundled", bund)]))
+    errs = checks(f, "collision.duplicate_name", "error")
+    assert errs, "archived profile copy + live bundled copy is the silent-vanish bug"
+    assert "vanish" in errs[0].message
+
+
+def test_archive_beside_live_in_same_root_stays_benign(tmp_path):
+    """NEGATIVE CONTROL for the fix above - must not become an error."""
+    write_skill(tmp_path, "cat", "thing")
+    write_skill(tmp_path, ".archive", "thing")
+    f = audit.check_collisions(audit.collect([("profile", tmp_path)]))
+    assert not checks(f, "collision.duplicate_name", "error")
+    assert checks(f, "collision.duplicate_name", "info")
+
+
+def test_missing_name_field_is_reported_not_masked(tmp_path):
+    """The directory-name fallback must not make an invalid skill look healthy."""
+    d = tmp_path / "cat" / "nameless"
+    d.mkdir(parents=True)
+    (d / "SKILL.md").write_text(
+        "---\ndescription: Use when something happens that needs handling.\n"
+        "version: 1.0.0\n---\n\nbody\n"
+    )
+    f = audit.check_mechanical(audit.collect([("profile", tmp_path)]))
+    assert checks(f, "frontmatter.name_required", "error"), \
+        "absent name: must be an error, not silently replaced by the dir name"
+    assert not checks(f, "frontmatter.name_matches_directory"), \
+        "must not also report a mismatch against a name we invented"
+
+
+def test_declared_name_still_checked_against_directory(tmp_path):
+    """NEGATIVE CONTROL: a real mismatch must still be caught."""
+    write_skill(tmp_path, "cat", "the-dir", declared_name="other-name")
+    f = audit.check_mechanical(audit.collect([("profile", tmp_path)]))
+    assert checks(f, "frontmatter.name_matches_directory", "error")
+    assert not checks(f, "frontmatter.name_required")
