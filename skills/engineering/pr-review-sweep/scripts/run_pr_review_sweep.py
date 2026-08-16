@@ -64,15 +64,34 @@ def gh_text(args: list[str], *, timeout: int = 60) -> subprocess.CompletedProces
 
 
 def zero_reaction_unhandled(owner_repo: str, pr: int, author: str) -> dict[str, list[dict]]:
-    pulls = gh_json(["api", f"repos/{owner_repo}/pulls/{pr}/comments"], timeout=90)
-    issues = gh_json(["api", f"repos/{owner_repo}/issues/{pr}/comments"], timeout=90)
+    # --paginate: without it gh returns only the first 30 comments, so a
+    # busy PR looks fully handled while later pages hold unanswered roots.
+    pulls = gh_json(
+        ["api", "--paginate", f"repos/{owner_repo}/pulls/{pr}/comments"], timeout=90
+    )
+    issues = gh_json(
+        ["api", "--paginate", f"repos/{owner_repo}/issues/{pr}/comments"], timeout=90
+    )
+    # Some gh versions emit one array per page; flatten if so.
+    if pulls and isinstance(pulls[0], list):
+        pulls = [c for page in pulls for c in page]
+    if issues and isinstance(issues[0], list):
+        issues = [c for page in issues for c in page]
 
+    # SKILL.md's definition of unhandled includes author engagement, not just
+    # reactions: a root the author already replied to inline is handled.
+    replied_to = {
+        c.get("in_reply_to_id")
+        for c in pulls
+        if (c.get("user") or {}).get("login") == author and c.get("in_reply_to_id") is not None
+    }
     line = [
         c
         for c in pulls
         if c.get("in_reply_to_id") is None
         and ((c.get("user") or {}).get("login") != author)
         and (((c.get("reactions") or {}).get("total_count") or 0) == 0)
+        and c.get("id") not in replied_to
     ]
     issue = [
         c

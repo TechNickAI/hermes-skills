@@ -54,12 +54,59 @@ if len(prs) >= SEARCH_LIMIT:
 
 def gh_count(url, jq):
     """Return an int count from a gh api call, or (None, err) on failure."""
-    r = subprocess.run(["gh", "api", url, "--jq", jq], capture_output=True, text=True)
+    # --paginate: gh returns 30 comments per page by default, so a busy PR
+    # undercounts unhandled roots and the sweep can call the run "ok" while
+    # later pages still hold unanswered comments.
+    #
+    # With --jq, gh applies the filter to EACH page and concatenates the
+    # results, so a `| length` filter emits one number per page. Select the
+    # objects here and count them in Python instead of summing jq output.
+    # (`--slurp` would give one combined document but does not exist before
+    # gh 2.40; this works on older CLIs too.)
+    r = subprocess.run(
+        ["gh", "api", "--paginate", url, "--jq", jq],
+        capture_output=True,
+        text=True,
+    )
     if r.returncode != 0:
         return None, r.stderr.strip()[:120]
+    # One id per matching comment, one per line, across every page.
+    return len([ln for ln in r.stdout.splitlines() if ln.strip()]), None
+
+
+def gh_count_slurped(url, jq):
+    """Count with a filter that needs EVERY page in one document.
+
+    The author-engagement rules compare each comment against the whole set (was
+    this root replied to? is this older than the author's last comment?), so a
+    per-page filter would give a wrong answer at page boundaries. Fetch all
+    pages, concatenate into one array, then apply jq once.
+    """
+    r = subprocess.run(
+        ["gh", "api", "--paginate", url], capture_output=True, text=True
+    )
+    if r.returncode != 0:
+        return None, r.stderr.strip()[:120]
+    # --paginate emits one JSON array per page, concatenated. Flatten them.
+    dec, docs, s, i = json.JSONDecoder(), [], r.stdout.strip(), 0
     try:
-        return json.loads(r.stdout or "0"), None
+        while i < len(s):
+            obj, j = dec.raw_decode(s, i)
+            docs.append(obj)
+            i = j
+            while i < len(s) and s[i] in " \n\r\t":
+                i += 1
     except Exception as e:  # noqa: BLE001
+        return None, f"pagination parse: {str(e)[:100]}"
+    flat = [c for d in docs for c in (d if isinstance(d, list) else [d])]
+    j = subprocess.run(
+        ["jq", jq], input=json.dumps(flat), capture_output=True, text=True
+    )
+    if j.returncode != 0:
+        return None, j.stderr.strip()[:120]
+    try:
+        return int(j.stdout.strip() or 0), None
+    except ValueError as e:
         return None, str(e)[:120]
 
 
@@ -76,15 +123,26 @@ for pr in prs:
     num = pr["number"]
     author = pr["author"]["login"]
 
-    line, e1 = gh_count(
+    # Line comments: drop any root the author already replied to inline.
+    # Needs the whole page set at once, so slurp with -s inside jq rather than
+    # filtering per comment.
+    line, e1 = gh_count_slurped(
         f"repos/{owner}/{name}/pulls/{num}/comments",
-        f'[.[] | select(.user.login != "{author}" and .in_reply_to_id == null '
-        f'and (.reactions.total_count // 0) == 0)] | length',
+        f'(map(select(.user.login == "{author}" and .in_reply_to_id != null) '
+        f'| .in_reply_to_id) | unique) as $replied '
+        f'| map(select(.user.login != "{author}" and .in_reply_to_id == null '
+        f'and ((.reactions.total_count // 0) == 0) '
+        f'and (.id as $id | $replied | index($id) | not))) | length',
     )
-    issue, e2 = gh_count(
+    # Issue comments are flat, so use the skill's timestamp heuristic: drop any
+    # comment the author posted an issue comment AFTER (they saw it, moved on).
+    issue, e2 = gh_count_slurped(
         f"repos/{owner}/{name}/issues/{num}/comments",
-        f'[.[] | select(.user.login != "{author}" '
-        f'and (.reactions.total_count // 0) == 0)] | length',
+        f'(map(select(.user.login == "{author}") | .created_at) | sort | last // "0") '
+        f'as $author_last '
+        f'| map(select(.user.login != "{author}" '
+        f'and ((.reactions.total_count // 0) == 0) '
+        f'and (.created_at > $author_last))) | length',
     )
     lc = line if isinstance(line, int) else 0
     ic = issue if isinstance(issue, int) else 0

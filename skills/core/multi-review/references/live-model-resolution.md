@@ -71,7 +71,7 @@ def select(fam, ids):
 
 def validate(model, key):
     body = json.dumps({'model': model, 'messages': [{'role': 'user', 'content': 'Reply OK'}],
-                       'max_tokens': 200}).encode()  # headroom for reasoning models
+                       'max_tokens': 3500}).encode()  # reasoning models burn hidden tokens
     req = urllib.request.Request(CHAT, data=body,
         headers={'Authorization': 'Bearer ' + key, 'Content-Type': 'application/json'})
     try:
