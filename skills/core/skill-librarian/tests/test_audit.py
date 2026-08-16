@@ -156,11 +156,20 @@ def test_archive_only_copy_is_an_error(tmp_path):
     assert skills and skills[0].archived
 
 
-def test_archive_only_duplicate_is_an_error(tmp_path):
+def test_archive_only_duplicate_is_info_not_error(tmp_path):
+    """Archive-only copies are the normal end state of deliberate archiving.
+
+    Verified on a real fleet: `omnirouter` appeared as an archive-only orphan
+    on 7 agents and every one was a deliberate role-fit archive, not a loss.
+    Reporting deliberate curation as an error trains the reader to ignore the
+    check. The live-index check catches the case that actually matters.
+    """
     write_skill(tmp_path, ".archive/one", "ghost")
     write_skill(tmp_path, ".archive/two", "ghost")
     f = audit.check_collisions(audit.collect([("profile", tmp_path)]))
-    assert checks(f, "collision.duplicate_name", "error")
+    assert not checks(f, "collision.duplicate_name", "error"), \
+        "deliberate archiving must not be an error"
+    assert checks(f, "collision.duplicate_name", "info")
 
 
 # ------------------------------------------------------------- shadowing
