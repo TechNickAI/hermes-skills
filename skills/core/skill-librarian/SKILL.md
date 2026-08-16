@@ -120,12 +120,13 @@ another tool, re-grade its output the same way.
 was built, its own first run produced 69 errors; 64 were false positives. Each
 class was caught only by checking:
 
-| the tool said              | the truth was                                            |
-| -------------------------- | -------------------------------------------------------- |
-| 63 name collisions         | profile-over-bundled override — intended behaviour       |
-| 19 skills silently missing | 18 were bundled/opt-in; absence is normal                |
-| 1 skill missing            | `platforms: [linux]` on a macOS host — correct filtering |
-| 12 shadowing pairs         | 3 real pairs, each counted four times                    |
+| the tool said                | the truth was                                            |
+| ---------------------------- | -------------------------------------------------------- |
+| 63 name collisions           | profile-over-bundled override — intended behaviour       |
+| 19 skills silently missing   | 18 were bundled/opt-in; absence is normal                |
+| 1 skill missing              | `platforms: [linux]` on a macOS host — correct filtering |
+| 3 skills missing (2nd agent) | `environments: [kanban]` — gated to a runtime context    |
+| 12 shadowing pairs           | 3 real pairs, each counted four times                    |
 
 So: for each finding, ask what _else_ would produce this signal, and check that
 before reporting. A finding you have not tried to falsify is not a finding.

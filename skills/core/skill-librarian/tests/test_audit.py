@@ -249,3 +249,32 @@ def test_platforms_parsed(tmp_path):
 
 def test_empty_tree_is_not_a_crash(tmp_path):
     assert audit.collect([("profile", tmp_path)]) == []
+
+
+def test_environments_parsed(tmp_path):
+    """Env-gated skills (e.g. kanban) are filtered by design, not missing.
+
+    Fourth false-positive class for index.enabled_but_absent, found on a real
+    agent: 3 skills declaring `environments: [kanban]` were reported missing.
+    """
+    d = tmp_path / "cat" / "kanban-thing"
+    d.mkdir(parents=True)
+    (d / "SKILL.md").write_text(
+        "---\nname: kanban-thing\ndescription: Use when running a kanban lane task.\n"
+        "version: 1.0.0\nenvironments: [kanban]\n---\n\nbody\n"
+    )
+    s = audit.collect([("profile", tmp_path)])[0]
+    assert s.environments == ["kanban"], \
+        "environments gating must be parsed or gated skills look broken"
+
+
+def test_environments_block_syntax_parsed(tmp_path):
+    """Both `environments: [x]` and YAML block `- x` appear in the wild."""
+    d = tmp_path / "cat" / "block-style"
+    d.mkdir(parents=True)
+    (d / "SKILL.md").write_text(
+        "---\nname: block-style\ndescription: Use when the block syntax appears.\n"
+        "version: 1.0.0\nenvironments:\n  - kanban\n---\n\nbody\n"
+    )
+    s = audit.collect([("profile", tmp_path)])[0]
+    assert "kanban" in s.environments

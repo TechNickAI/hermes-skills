@@ -98,6 +98,7 @@ class Skill:
     version: str | None
     body_lines: int
     platforms: list = field(default_factory=list)
+    environments: list = field(default_factory=list)
     related: list = field(default_factory=list)
     errors: list = field(default_factory=list)
 
@@ -145,6 +146,11 @@ def collect(roots: list[tuple[str, Path]]) -> list[Skill]:
             plats = fm.get("platforms")
             if isinstance(plats, str):
                 plats = [x.strip() for x in plats.strip("[]").split(",") if x.strip()]
+            # `environments:` gates a skill to a runtime context (e.g. kanban).
+            # Accepts both inline-list and YAML-block syntax.
+            envs = fm.get("environments")
+            if isinstance(envs, str):
+                envs = [x.strip() for x in envs.strip("[]-").split(",") if x.strip()]
             out.append(Skill(
                 name=str(fm.get("name") or smd.parent.name).strip(),
                 dir_name=smd.parent.name,
@@ -155,6 +161,7 @@ def collect(roots: list[tuple[str, Path]]) -> list[Skill]:
                 version=str(ver) if ver is not None else None,
                 body_lines=len(body.splitlines()),
                 platforms=list(plats or []),
+                environments=list(envs or []),
                 related=list(rel or []),
                 errors=[err] if err else [],
             ))
@@ -456,7 +463,11 @@ def check_runtime(skills: list[Skill], ad: HermesAdapter) -> tuple[list[Finding]
         # a skill declaring platforms that exclude this OS is filtered by design
         wrong_platform = {s.name for s in profile_skills
                           if s.platforms and this_os not in s.platforms}
-        expected = on_disk - disabled - wrong_platform
+        # `environments:` gates a skill to a runtime context (e.g. kanban).
+        # Verified on a real agent: 3 "missing" skills were kanban-gated and
+        # correctly filtered. Fourth false-positive class for this check.
+        env_gated = {s.name for s in profile_skills if s.environments}
+        expected = on_disk - disabled - wrong_platform - env_gated
         missing = sorted(expected - live)
         if missing:
             findings.append(Finding(
@@ -464,6 +475,12 @@ def check_runtime(skills: list[Skill], ad: HermesAdapter) -> tuple[list[Finding]
                 f"{len(missing)} profile skills are on disk, not disabled, and valid for "
                 f"this platform ({this_os}) yet MISSING from the live index - likely "
                 "silent name collision", None, None, {"names": missing}))
+        if env_gated:
+            findings.append(Finding(
+                "index.environment_gated", "info",
+                f"{len(env_gated)} skills gated by `environments:` and absent unless "
+                "that runtime context is active - expected", None, None,
+                {"names": sorted(env_gated)}))
         if wrong_platform:
             findings.append(Finding(
                 "index.platform_filtered", "info",
