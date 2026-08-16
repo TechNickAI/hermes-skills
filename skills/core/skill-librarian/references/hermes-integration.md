@@ -6,8 +6,8 @@ never as passing.
 
 ## Live index — ask the runtime, never infer from disk
 
-The single most important check. A config parse tells you what *should* load; only
-the runtime tells you what *did*.
+The single most important check. A config parse tells you what _should_ load; only
+the runtime tells you what _did_.
 
 ```python
 import os, sys
@@ -21,7 +21,7 @@ Run it with `HERMES_HOME=<profile-dir>` set, using the runtime's own interpreter
 version and will not import the agent package.
 
 `get_skill_commands()` returns a **dict**; each value carries `skill_md_path`,
-which is how you prove *which copy* won a name collision.
+which is how you prove _which copy_ won a name collision.
 
 **Verify both directions.** Every enabled skill present, every disabled skill
 absent. A one-directional check passes vacuously.
@@ -32,7 +32,7 @@ absent. A one-directional check passes vacuously.
 - Named profiles live at `~/.hermes/profiles/<name>/`.
 - **The `-p <profile>` flag is required.** `HERMES_PROFILE` as an env var is
   silently ignored — the CLI keeps using the calling profile while reporting
-  success for the named one. Silent *and* destructive for per-agent automation.
+  success for the named one. Silent _and_ destructive for per-agent automation.
 - Have the run print the absolute path it resolved, rather than trusting the
   invocation.
 
@@ -72,7 +72,7 @@ They complement each other.
 
 **Critical semantics, verified 2026-08-16:**
 
-- Curator **`stale` is a label only** and does *not* remove a skill from the
+- Curator **`stale` is a label only** and does _not_ remove a skill from the
   prompt. On one agent, 26 of 69 stale skills were still fully live. Only
   **`archive`** (which moves the directory into `skills/.archive/`) excludes.
 - **Never read a stale count as context savings.** Curator state and
@@ -90,11 +90,11 @@ They complement each other.
 
 From `hermes curator usage --json`:
 
-| provenance | meaning | editable in place? |
-| --- | --- | --- |
-| `agent` | created locally by this agent | yes |
-| `built-in` | ships with Hermes | no — upgrades overwrite |
-| `hub` | installed from a tapped repo | no — fix upstream |
+| provenance | meaning                       | editable in place?      |
+| ---------- | ----------------------------- | ----------------------- |
+| `agent`    | created locally by this agent | yes                     |
+| `built-in` | ships with Hermes             | no — upgrades overwrite |
+| `hub`      | installed from a tapped repo  | no — fix upstream       |
 
 Do not infer provenance from the path alone.
 

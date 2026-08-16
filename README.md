@@ -67,7 +67,7 @@ keeps every other skill honest.
 
 An agent picks a skill using **only its name and description** — bodies stay
 hidden until invocation. So when two skills describe themselves similarly, the
-agent picks between them close to blind, and picking wrong is *silent*: a bad
+agent picks between them close to blind, and picking wrong is _silent_: a bad
 tool call throws an error, a bad skill quietly injects confident, wrong
 reasoning.
 
@@ -82,8 +82,8 @@ Measured on a real 194-skill agent: its own first run produced 69 errors, of
 which **64 were false positives** — every class was found by falsifying the tool
 against reality before reporting. That discipline is baked into the skill.
 
-| Skill             | What it does                                                                              | Needs |
-| ----------------- | ----------------------------------------------------------------------------------------- | ----- |
+| Skill             | What it does                                                                               | Needs |
+| ----------------- | ------------------------------------------------------------------------------------------ | ----- |
 | `skill-librarian` | Audit a skill library: broken skills, shadowing descriptions, bad frontmatter, role misfit | —     |
 
 ### `core` — every agent, whatever its job
