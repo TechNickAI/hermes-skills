@@ -315,8 +315,22 @@ def check_collisions(skills: list[Skill]) -> list[Finding]:
             sev, why = "warn", ("archived copy shares a name with a live copy in "
                                 "another root - verify the index still resolves it")
         else:
-            sev, why = "error", ("only archived copies exist - if a bundled skill shares "
-                                 "this name, BOTH may vanish from the index")
+            # Only archived copies remain. This is the NORMAL end state of
+            # deliberate archiving: a skill retired for role fit leaves its
+            # archived copy behind by design.
+            #
+            # Verified on a real fleet: `omnirouter` showed as an archive-only
+            # orphan on 7 agents. On every one it had been deliberately archived
+            # (single-skill archive batches, dated, provenance=agent) because an
+            # ops skill did not fit a finance or monitoring agent. Zero were
+            # losses. Reporting deliberate curation as an error trains the
+            # reader to ignore the check.
+            #
+            # It only matters if a BUNDLED skill shares the name, which is the
+            # collision the live-index check catches with real evidence.
+            sev, why = "info", ("only archived copies exist - normal after deliberate "
+                                "archiving; check the live index if this name should "
+                                "still load")
 
         out.append(Finding("collision.duplicate_name", sev, f"'{name}': {why}", name,
                            None, {"paths": [g.path for g in group]}))
