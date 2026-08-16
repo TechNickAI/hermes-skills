@@ -200,7 +200,12 @@ def check_mechanical(skills: list[Skill]) -> list[Finding]:
                 f.append(Finding("description.too_long", "warn",
                                  f"description {n} chars (>{DESC_MAX})", s.name, s.path))
             # trigger-lens: does it say WHEN, or only WHAT?
-            if not re.search(r"\buse (when|for)\b|\bwhen\b|\btrigger", s.description, re.I):
+            # `\bwhen\b` does NOT match "whenever" -- the word boundary blocks it,
+            # so "Use whenever X happens" was reported as having no trigger.
+            # Measured on a real agent: 8 false positives out of 104 flagged.
+            if not re.search(r"\bwhen(ever)?\b|\buse (for|if|after|before|during)\b"
+                             r"|\btrigger|\bafter (a|an|the|any)\b|\bif you\b",
+                             s.description, re.I):
                 f.append(Finding("description.no_trigger", "warn",
                                  "description does not state WHEN to invoke "
                                  "(no 'use when'/'when'/trigger phrasing)",

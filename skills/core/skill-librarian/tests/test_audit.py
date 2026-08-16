@@ -337,3 +337,35 @@ def test_declared_name_still_checked_against_directory(tmp_path):
     f = audit.check_mechanical(audit.collect([("profile", tmp_path)]))
     assert checks(f, "frontmatter.name_matches_directory", "error")
     assert not checks(f, "frontmatter.name_required")
+
+
+def test_whenever_counts_as_a_trigger(tmp_path):
+    """`\\bwhen\\b` does not match "whenever" - 8 false positives on a real agent."""
+    write_skill(tmp_path, "cat", "whenever-skill",
+                description="Drive a real browser from any script. Use whenever a "
+                            "task needs to navigate a site or fill a form.")
+    f = audit.check_mechanical(audit.collect([("profile", tmp_path)]))
+    assert not checks(f, "description.no_trigger"), \
+        "'Use whenever ...' states a trigger and must not be flagged"
+
+
+def test_other_trigger_phrasings_accepted(tmp_path):
+    """Real descriptions use several trigger forms, not just 'Use when'."""
+    for i, desc in enumerate([
+        "Recover the fleet after a host reboot leaves agents down.",
+        "Use before you buy, send, or delete anything.",
+        "Use if you need to verify a claim against live data.",
+    ]):
+        write_skill(tmp_path, "cat", f"phrasing-{i}", description=desc)
+    f = audit.check_mechanical(audit.collect([("profile", tmp_path)]))
+    assert not checks(f, "description.no_trigger"), \
+        f"valid trigger phrasings flagged: {[x.skill for x in f]}"
+
+
+def test_pure_what_description_still_flagged(tmp_path):
+    """NEGATIVE CONTROL: a description with no trigger at all must still fire."""
+    write_skill(tmp_path, "cat", "whatty-two",
+                description="A collection of helpful utilities and reference "
+                            "material covering widgets and gadget operations.")
+    f = audit.check_mechanical(audit.collect([("profile", tmp_path)]))
+    assert checks(f, "description.no_trigger", "warn")
