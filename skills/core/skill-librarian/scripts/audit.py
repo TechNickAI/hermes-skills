@@ -497,7 +497,21 @@ def check_runtime(skills: list[Skill], ad: HermesAdapter) -> tuple[list[Finding]
         # `environments:` gates a skill to a runtime context (e.g. kanban).
         # Verified on a real agent: 3 "missing" skills were kanban-gated and
         # correctly filtered. Fourth false-positive class for this check.
-        env_gated = {s.name for s in profile_skills if s.environments}
+        #
+        # But excluding EVERY env-tagged skill creates a blind spot: when the
+        # audit runs inside a matching context, a genuinely vanished env-tagged
+        # skill would never be reported. So only exclude skills whose context is
+        # NOT active, and report the rest as unverifiable when we cannot tell.
+        active_env = {e for e in (os.environ.get("HERMES_ENVIRONMENT", ""),
+                                  os.environ.get("HERMES_ENV", "")) if e}
+        env_gated = {s.name for s in profile_skills
+                     if s.environments and not (active_env & set(s.environments))}
+        env_active = {s.name for s in profile_skills
+                      if s.environments and (active_env & set(s.environments))}
+        # env-tagged skills we cannot adjudicate: no active context declared, so
+        # absence is expected but a real vanish would look identical
+        env_unverifiable = {s.name for s in profile_skills
+                            if s.environments and not active_env}
         expected = on_disk - disabled - wrong_platform - env_gated
         missing = sorted(expected - live)
         if missing:
@@ -512,6 +526,19 @@ def check_runtime(skills: list[Skill], ad: HermesAdapter) -> tuple[list[Finding]
                 f"{len(env_gated)} skills gated by `environments:` and absent unless "
                 "that runtime context is active - expected", None, None,
                 {"names": sorted(env_gated)}))
+        env_missing = sorted(env_active - live)
+        if env_missing:
+            findings.append(Finding(
+                "index.enabled_but_absent", "error",
+                f"{len(env_missing)} skills declare an ACTIVE environment yet are "
+                "missing from the live index", None, None, {"names": env_missing}))
+        if env_unverifiable:
+            findings.append(Finding(
+                "index.environment_unverifiable", "info",
+                f"{len(env_unverifiable)} env-tagged skills could not be adjudicated - "
+                "no active environment declared, so absence is expected but a genuine "
+                "vanish would look identical (status: unchecked)", None, None,
+                {"names": sorted(env_unverifiable), "status": "unchecked"}))
         if wrong_platform:
             findings.append(Finding(
                 "index.platform_filtered", "info",
