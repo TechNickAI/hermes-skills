@@ -283,21 +283,28 @@ def test_environments_block_syntax_parsed(tmp_path):
 # ------------------------------------------------- PR #7 bot review findings
 
 
-def test_archived_profile_copy_shadowing_live_bundled_is_an_error(tmp_path):
-    """P1 from two independent reviewers, reproduced before fixing.
+def test_archived_profile_copy_beside_bundled_is_warn_not_error(tmp_path):
+    """Archived profile copy + bundled copy: WARN, never error.
 
-    A profile `.archive/plan/` beside a live BUNDLED `plan` can make BOTH
-    vanish from the index. This is how a real agent lost plan mode entirely.
-    It must NOT be classified as benign coexistence: there is no live profile
-    copy to win the resolution.
+    Two reviewers flagged this as benign-when-it-should-be-fatal, and the first
+    fix made it an error. Running that on a real fleet agent produced 59 false
+    alarms: all 64 such names were absent from the index, but so were 108
+    bundled names with NO archived copy. Bundled skills are opt-in, so absence
+    is normal and archiving was not the cause.
+
+    The filesystem cannot decide this. It is a warn; the live-index check
+    promotes it to an error when the skill is genuinely expected and missing.
     """
     prof, bund = tmp_path / "p", tmp_path / "b"
     write_skill(prof, ".archive", "plan")
     write_skill(bund, "core", "plan")
     f = audit.check_collisions(audit.collect([("profile", prof), ("bundled", bund)]))
-    errs = checks(f, "collision.duplicate_name", "error")
-    assert errs, "archived profile copy + live bundled copy is the silent-vanish bug"
-    assert "vanish" in errs[0].message
+    assert not checks(f, "collision.duplicate_name", "error"), \
+        "must not error: 59 false alarms on a real agent when it did"
+    warns = checks(f, "collision.duplicate_name", "warn")
+    assert warns, "must still surface as a warning worth checking"
+    assert "live index" in warns[0].message, \
+        "must tell the reader how to adjudicate it"
 
 
 def test_archive_beside_live_in_same_root_stays_benign(tmp_path):

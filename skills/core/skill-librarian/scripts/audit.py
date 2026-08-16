@@ -285,14 +285,23 @@ def check_collisions(skills: list[Skill]) -> list[Finding]:
                                 "the runtime resolves")
         elif arch and any(g.root == "profile" for g in arch) and \
                 live and all(g.root == "bundled" for g in live):
-            # THE SILENT-VANISH CASE. An archived PROFILE copy beside a live
-            # BUNDLED copy of the same name can make BOTH disappear from the
-            # index with no error -- this is how a real agent lost `plan`
-            # entirely. It is NOT the benign coexistence case, because there is
-            # no live profile copy to win the resolution.
-            sev, why = "error", ("archived PROFILE copy shares a name with a live "
-                                 "BUNDLED skill - both can vanish from the index "
-                                 "silently; delete or rename the archived copy")
+            # Archived PROFILE copy + bundled copy of the same name. This CAN be
+            # the silent-vanish bug, but it usually is not, and the difference
+            # cannot be decided from the filesystem alone.
+            #
+            # Measured on a real agent with 64 such pairs: all 64 names were
+            # absent from the index -- but so were 108 bundled names with NO
+            # archived copy at all. Bundled skills are OPT-IN, so absence is the
+            # normal state and archiving was not the cause. Reporting these as
+            # errors produced 59 false alarms on one agent and buried the 3 real
+            # findings.
+            #
+            # Severity is therefore `warn`, and the live-index check is what
+            # promotes it: if the name is genuinely expected and missing,
+            # index.enabled_but_absent fires with the evidence.
+            sev, why = "warn", ("archived PROFILE copy shares a name with a bundled "
+                                "skill - only a real problem if that skill is expected "
+                                "to load; check the live index before acting")
         elif live and arch and any(g.root == "profile" and not g.archived
                                    for g in live):
             sev, why = "info", ("archived copy coexists with a live copy in the same "
