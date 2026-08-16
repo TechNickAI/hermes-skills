@@ -217,7 +217,12 @@ def check_mechanical(skills: list[Skill]) -> list[Finding]:
                              s.name, s.path))
         # name vs the TRUE skill dir (not the category dir). This is the check
         # skill-check gets wrong on nested layouts: 170/175 false positives.
-        if s.name_declared and s.name != s.dir_name:
+        # ARCHIVED copies are exempt. Archiving deliberately renames the
+        # directory (timestamp suffix, e.g. `plan-merged-20260816-114638`)
+        # while the frontmatter keeps the original name, so every archived
+        # skill would report a mismatch forever. Verified on a real fleet:
+        # 3 of the 4 non-obvious mismatches were archive/backup directories.
+        if s.name_declared and not s.archived and s.name != s.dir_name:
             f.append(Finding("frontmatter.name_matches_directory", "error",
                              f"frontmatter name '{s.name}' != directory '{s.dir_name}'",
                              s.name, s.path))

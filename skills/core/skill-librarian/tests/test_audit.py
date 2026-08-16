@@ -378,3 +378,25 @@ def test_pure_what_description_still_flagged(tmp_path):
                             "material covering widgets and gadget operations.")
     f = audit.check_mechanical(audit.collect([("profile", tmp_path)]))
     assert checks(f, "description.no_trigger", "warn")
+
+
+def test_archived_copy_exempt_from_name_dir_check(tmp_path):
+    """Archiving renames the DIRECTORY but not the frontmatter name.
+
+    An archived skill lands in e.g. `.archive/plan-merged-20260816-114638/`
+    while still declaring `name: plan`, so it would report a mismatch forever.
+    Verified on a real fleet: 3 of 4 non-obvious mismatches were archive or
+    backup directories.
+    """
+    write_skill(tmp_path, ".archive", "my-skill-merged-20260816-114638",
+                declared_name="my-skill")
+    f = audit.check_mechanical(audit.collect([("profile", tmp_path)]))
+    assert not checks(f, "frontmatter.name_matches_directory"), \
+        "archived copies keep their original name by design"
+
+
+def test_live_copy_still_checked_for_name_dir(tmp_path):
+    """NEGATIVE CONTROL: exempting archives must not disable the check."""
+    write_skill(tmp_path, "cat", "actual-dir", declared_name="declared-name")
+    f = audit.check_mechanical(audit.collect([("profile", tmp_path)]))
+    assert checks(f, "frontmatter.name_matches_directory", "error")
