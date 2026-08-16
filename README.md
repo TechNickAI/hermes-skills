@@ -1,6 +1,6 @@
 # hermes-skills
 
-A library of **22 skills** for [Hermes](https://github.com/NousResearch/hermes-agent)
+A library of **23 skills** for [Hermes](https://github.com/NousResearch/hermes-agent)
 agents, grouped into role packs so an agent installs what its job needs and
 nothing else.
 
@@ -59,6 +59,32 @@ runtime-agnostic procedures.
 > row, your build predates that fix.
 
 ## The catalog
+
+### Start here — `skill-librarian`
+
+If you install one skill from this repo, install this one. It is the skill that
+keeps every other skill honest.
+
+An agent picks a skill using **only its name and description** — bodies stay
+hidden until invocation. So when two skills describe themselves similarly, the
+agent picks between them close to blind, and picking wrong is *silent*: a bad
+tool call throws an error, a bad skill quietly injects confident, wrong
+reasoning.
+
+`skill-librarian` audits for exactly that. It finds skills that vanished from
+the index without warning, descriptions that shadow each other, frontmatter rot,
+dangling references, deny rules people mistake for dead config, and skills that
+do not fit the agent's job. It runs **as the agent**, so it inspects its own live
+index instead of guessing from a directory listing, and it is **report-only**
+until a human approves each change.
+
+Measured on a real 194-skill agent: its own first run produced 69 errors, of
+which **64 were false positives** — every class was found by falsifying the tool
+against reality before reporting. That discipline is baked into the skill.
+
+| Skill             | What it does                                                                              | Needs |
+| ----------------- | ----------------------------------------------------------------------------------------- | ----- |
+| `skill-librarian` | Audit a skill library: broken skills, shadowing descriptions, bad frontmatter, role misfit | —     |
 
 ### `core` — every agent, whatever its job
 

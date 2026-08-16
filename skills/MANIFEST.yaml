@@ -11,7 +11,7 @@
 #   use_when              the trigger conditions, for selective installation
 _generated_by: scripts/generate_manifest.py
 _do_not_edit: Regenerate with `python scripts/generate_manifest.py`; CI checks it.
-count: 22
+count: 23
 packs:
 - core
 - engineering
@@ -196,6 +196,23 @@ skills:
   - fleet
   - observability
   path: skills/core/robustify-doctor
+- name: skill-librarian
+  pack: core
+  version: 1.0.0
+  scope: solo
+  summary: Use when an agent's skill library needs auditing, cleaning, or triage - "audit my skills", "are my skills healthy", "find duplicate skills", "why didn't it use that skill", "clean up my skills", "which skills should this agent have", or after an upgrade adds new skills.
+  use_when: an agent's skill library needs auditing, cleaning, or triage - "audit my skills", "are my skills healthy", "find duplicate skills", "why didn't it use that skill", "clean up my skills", "which skills should this agent have", or after an upgrade adds new skills. Finds broken skills that silently vani…
+  requires: []
+  works_out_of_the_box: true
+  tags:
+  - skills
+  - audit
+  - curation
+  - duplicates
+  - frontmatter
+  - shadowing
+  - maintenance
+  path: skills/core/skill-librarian
 - name: trust-framework
   pack: core
   version: 2.0.0
