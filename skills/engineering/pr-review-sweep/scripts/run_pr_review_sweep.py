@@ -93,11 +93,23 @@ def zero_reaction_unhandled(owner_repo: str, pr: int, author: str) -> dict[str, 
         and (((c.get("reactions") or {}).get("total_count") or 0) == 0)
         and c.get("id") not in replied_to
     ]
+    # Issue comments are flat, so SKILL.md uses a timestamp heuristic: if the
+    # author posted an issue comment AFTER this one, treat it as seen. Without
+    # this the runner disagreed with triage_scan.py and with SKILL.md itself.
+    author_last = max(
+        [
+            c.get("created_at") or ""
+            for c in issues
+            if (c.get("user") or {}).get("login") == author
+        ],
+        default="",
+    )
     issue = [
         c
         for c in issues
         if ((c.get("user") or {}).get("login") != author)
         and (((c.get("reactions") or {}).get("total_count") or 0) == 0)
+        and (c.get("created_at") or "") > author_last
     ]
     return {"line": line, "issue": issue, "pulls_all": pulls, "issues_all": issues}
 
