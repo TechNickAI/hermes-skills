@@ -3,7 +3,7 @@ name: pr-review-sweep
 description:
   Nightly sweep of recently-merged PRs to address unhandled review comments via a Claude
   Code sub-agent.
-version: 0.1.0
+version: 0.1.1
 license: MIT
 metadata:
   hermes:

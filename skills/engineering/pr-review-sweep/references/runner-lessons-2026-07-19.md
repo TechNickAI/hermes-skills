@@ -1,6 +1,6 @@
 # Runner lessons — 2026-07-19
 
-Session context: nightly PR review sweep across `carmentacollective` and `TechNickAI`,
+Session context: nightly PR review sweep across `example-org` and `TechNickAI`,
 lookback 7 days, max 10 PRs, excluding `TechNickAI/openclaw-config`. Scanned 34 merged
 PRs, found 2 flagged, dispatched 2 to Claude Code (hand-dispatched — under the 5-PR
 dispatcher threshold), opened 2 follow-up PRs. Both PRs verified at zero residual
@@ -17,7 +17,7 @@ string-substring guards that exist explicitly to prevent a specific past inciden
 recurring. The distinguishing signal is an **inline comment referencing the incident**,
 not just a general "keep for clarity" note.
 
-Real example (hangl-dashboard #16): gemini flagged two string assertions in
+Real example (sample-dashboard #16): gemini flagged two string assertions in
 `tests/test_capture_sidecar.py` as "fragile":
 
 ```python
@@ -54,8 +54,8 @@ Both dispatches this session used the prompt line:
 
 Combined with `--dangerously-skip-permissions`, both runs self-terminated cleanly:
 
-- cryptoai #800 (10 comments): ~9 min, 6 fixes + 8 declines, 16/16 tests pass
-- hangl-dashboard #16 (3 comments): ~3 min, 1 fix + 2 declines
+- market-service #800 (10 comments): ~9 min, 6 fixes + 8 declines, 16/16 tests pass
+- sample-dashboard #16 (3 comments): ~3 min, 1 fix + 2 declines
 
 Zero manual kills, zero CI-polling tails, zero `process(action=kill)` interventions.
 This is now confirmed across 12+ PRs total (10 from 2026-07-11 + 2 here). The
@@ -66,7 +66,7 @@ not an optional optimization.
 
 Passing the orchestrator's Contents-API findings into the dispatch prompt (as
 "Triage guidance from the orchestrator's review") helped the sub-agent reach correct
-decisions faster. For hangl-dashboard #16, the prompt noted the incident comment at
+decisions faster. For sample-dashboard #16, the prompt noted the incident comment at
 line 167 and suggested "declined as deliberate design choice" as a valid outcome —
 the sub-agent adopted this reasoning directly. This is a lightweight way to steer the
 sub-agent without overriding its autonomy on the actual code changes.
@@ -79,9 +79,9 @@ results file) would have added friction without benefit at this scale.
 
 ## Session-specific artifacts created
 
-- `carmentacollective/cryptoai#801` — follow-up PR for backtest smoke-test fixture bugs
+- `example-org/market-service#801` — follow-up PR for backtest smoke-test fixture bugs
   (tick rate unit, auto_now_add bypass, tick range, dead re-export, docstring).
-- `carmentacollective/hangl-dashboard#17` — follow-up PR for empty-string env guard.
+- `example-org/sample-dashboard#17` — follow-up PR for empty-string env guard.
 
 Do not hard-code these artifact numbers into future sweeps; they are examples of the
 report content, not reusable targets.

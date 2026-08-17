@@ -1,7 +1,7 @@
 # Large-Scale PR Backlog Cleanup (2026-07-15)
 
 Session log for a 23-PR backlog cleanup across 7 repos (bolty, hermes-config,
-hangl-dashboard, <agent-f>, antevorta, cryptoai, mcp-hubby, OmniRoute, openclaw-config,
+sample-dashboard, <agent-f>, trading-bot, market-service, sample-service, OmniRoute, openclaw-config,
 eqbench3). 20 PRs merged, 8 closed (fork-divergent or no merge rights), all bot
 comments addressed.
 
@@ -70,7 +70,7 @@ Serial processing would have taken 3+ hours. The parallelism comes from:
 
 ## Fork-divergent branch pattern (6 of 23 PRs)
 
-6 PRs (<agent-f> #6/#12/#28, antevorta #17, OmniRoute #3/#4) had branches with NO
+6 PRs (<agent-f> #6/#12/#28, trading-bot #17, OmniRoute #3/#4) had branches with NO
 common merge base against main. All were created by the review-sweep cron job from
 a repo state that had different initial commit history than current main.
 
@@ -130,11 +130,11 @@ This is a **genuine trading-logic design decision**, not a clear bug. The PR's i
 only highest-price covers will fill at the target price, so lower-priced ones shouldn't
 count. The bot's concern: this could cause unnecessary cancel+re-place churn.
 
-Resolution: replied explaining the design rationale, flagged as intentional, let Nick
+Resolution: replied explaining the design rationale, flagged as intentional, let the operator
 override if he disagrees. This is the right call for money-path design questions
 where the bot doesn't have enough context to judge the trading strategy.
 
-### "Already self-healed" detection (hangl-dashboard #8)
+### "Already self-healed" detection (sample-dashboard #8)
 
 3 bot comments (gemini High security, codex P1, codex P2) all flagged issues that
 were ALREADY FIXED in the PR's current diff. The bots reviewed early commits and
@@ -145,7 +145,7 @@ already present in the current code, reply "Already fixed in this PR — <explai
 
 - react 👍.
 
-## Pre-commit lint fix pattern (cryptoai #793, antevorta #17)
+## Pre-commit lint fix pattern (market-service #793, trading-bot #17)
 
 When CI fails with `✨ Lint code` and the log shows `ruff` or `ruff-format` found
 and fixed issues ("files were modified by this hook"), the fix is:
@@ -172,7 +172,7 @@ pre-commit run --all-files 2>&1 | grep -E "Passed|Failed"
 # (assuming no branch protection)
 ```
 
-**Session example:** antevorta had 129 pre-existing ruff E501/F401 errors on main.
+**Session example:** trading-bot had 129 pre-existing ruff E501/F401 errors on main.
 PR #17's lint failures were all pre-existing. Merged despite failing lint after
 confirming no branch protection required the checks.
 

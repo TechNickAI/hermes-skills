@@ -1,6 +1,6 @@
 # Person plus project recall pattern
 
-Use this reference when Nick asks to recall a named person together with a project, repo, agent, venture, or infrastructure idea.
+Use this reference when the operator asks to recall a named person together with a project, repo, agent, venture, or infrastructure idea.
 
 ## Trigger
 
@@ -19,7 +19,7 @@ Examples:
    - adjacent specialist profiles if the person belongs to a business or financial workstream
 3. Inspect local repos or project directories whose names match the person/project. Prefer README, WALKTHROUGH, AGENTS/CLAUDE.md, knowledge/, docs/, architecture/, and agent specs before source code.
 4. Separate:
-   - relationship context, why this person matters to Nick
+   - relationship context, why this person matters to the operator
    - the person's taste, trust model, and constraints
    - artifacts already built
    - concrete next actions or demos
@@ -29,8 +29,8 @@ Examples:
 ## Pitfalls
 
 - Do not treat cron/email steward hits as the answer just because they mention the person. Those are often incidental.
-- Do not flatten relationship context into business facts. Nick often asks for the human/emotional context first.
-- Do not present raw session archaeology. Synthesize into what Nick can actually do next.
+- Do not flatten relationship context into business facts. the operator often asks for the human/emotional context first.
+- Do not present raw session archaeology. Synthesize into what the operator can actually do next.
 - If there is a repo, inspect it. The repo may contain the most concrete action menu even when sessions are sparse.
 
 ## Example from Gil plus Bob Steele

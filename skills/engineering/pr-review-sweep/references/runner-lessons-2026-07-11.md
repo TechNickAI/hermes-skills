@@ -1,6 +1,6 @@
 # PR review sweep runner lessons — 2026-07-11
 
-Condensed operational lessons from a successful 10-PR sweep across `carmentacollective` and `TechNickAI`.
+Condensed operational lessons from a successful 10-PR sweep across `example-org` and `TechNickAI`.
 
 ## Scan sizing
 

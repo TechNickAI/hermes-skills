@@ -2,7 +2,7 @@
 
 When a multi-review panel governs a **go / no-go decision** (place a trade, ship a
 risky change, approve a spend), the red-team / bear / adversarial lens has a structural
-failure mode Nick named directly (2026-07-21):
+failure mode the operator named directly (2026-07-21):
 
 > "Don't just fall victim to always listening to the BEAR case or we will never trade.
 > Find a way to balance that."

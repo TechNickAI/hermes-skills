@@ -67,7 +67,7 @@ skills:
   path: skills/core/keep-going
 - name: memory-cleanup
   pack: core
-  version: 0.1.0
+  version: 0.1.1
   scope: solo
   summary: Use when a Hermes MEMORY.md or USER.md file is too large, bloated, stale, or over the recommended cap and you need to reduce prompt footprint without losing important facts.
   use_when: 'a Hermes MEMORY.md or USER.md file is too large, bloated, stale, or over the recommended cap and you need to reduce prompt footprint without losing important facts. Applies a lossless memory diet: compress, relocate to SOUL.md/USER.md/AGENTS.md/context files, offload long-tail facts to the memory pr…'
@@ -82,7 +82,7 @@ skills:
   path: skills/core/memory-cleanup
 - name: moa-solve
   pack: core
-  version: 2.0.0
+  version: 2.0.1
   scope: solo
   summary: Use when you have a HARD, open-ended, high-stakes problem worth throwing multiple AI models at and pulling the best solution out — architecture decisions, strategy design, thorny debugging, research synthesis, "what am I missing", tool/system design.
   use_when: you have a HARD, open-ended, high-stakes problem worth throwing multiple AI models at and pulling the best solution out — architecture decisions, strategy design, thorny debugging, research synthesis, "what am I missing", tool/system design. This is the SOLVE counterpart to multi-review (which criti…
@@ -116,7 +116,7 @@ skills:
   path: skills/core/mob-check
 - name: multi-review
   pack: core
-  version: 1.4.0
+  version: 1.4.1
   scope: solo
   summary: Use when reviewing almost any meaningful artifact, decision, action, plan, code change, prompt, skill, research summary, outbound message, or public-facing content.
   use_when: reviewing almost any meaningful artifact, decision, action, plan, code change, prompt, skill, research summary, outbound message, or public-facing content. Runs a small panel of diverse review lenses across model families when available, synthesizes findings into fix/ask/defer/wontfix decisions, and…
@@ -148,7 +148,7 @@ skills:
   path: skills/core/project-steward
 - name: recall
   pack: core
-  version: 0.3.0
+  version: 0.3.1
   scope: solo
   summary: Restore context from prior sessions, memories, and transcripts.
   use_when: a bare-pronoun follow-up like "ship it", "do it", or "send that" likely points at a prior-session artifact. Designed to never dead-end — if one source has nothing, keep searching others until you have a useful picture.
@@ -231,7 +231,7 @@ skills:
   path: skills/core/trust-framework
 - name: address-pr-comments
   pack: engineering
-  version: 1.0.0
+  version: 1.0.1
   scope: solo
   summary: Use when a pull request has feedback from code-review bots (Cursor Bugbot, Codex, Claude Code Review, Greptile, CodeRabbit) or humans and you need to triage it, fix what is valid, push back on what is wrong, react and reply to every comment, and drive the PR to a clean, mergeable state.
   use_when: 'a pull request has feedback from code-review bots (Cursor Bugbot, Codex, Claude Code Review, Greptile, CodeRabbit) or humans and you need to triage it, fix what is valid, push back on what is wrong, react and reply to every comment, and drive the PR to a clean, mergeable state. Trigger phrases: "add…'
@@ -268,7 +268,7 @@ skills:
   path: skills/engineering/diagram-rendering
 - name: mini-app
   pack: engineering
-  version: 0.5.0
+  version: 0.5.1
   scope: fleet
   summary: Use when adding, removing, password-protecting, or troubleshooting a mini-app served by the hermes-config mini-app router (Caddy + PM2 + auth sidecar + Tailscale Serve/Funnel) on a fleet machine.
   use_when: adding, removing, password-protecting, or troubleshooting a mini-app served by the hermes-config mini-app router (Caddy + PM2 + auth sidecar + Tailscale Serve/Funnel) on a fleet machine. Covers install, the Caddy route pattern, the auth sidecar conventions, exposing apps publicly via Funnel, Hermes…
@@ -288,7 +288,7 @@ skills:
   path: skills/engineering/mini-app
 - name: pr-review-sweep
   pack: engineering
-  version: 0.1.0
+  version: 0.1.1
   scope: fleet
   summary: Nightly sweep of recently-merged PRs to address unhandled review comments via a Claude Code sub-agent.
   use_when: ''
@@ -324,7 +324,7 @@ skills:
   path: skills/productivity/email-steward
 - name: google-docs
   pack: productivity
-  version: 1.0.0
+  version: 1.0.1
   scope: solo
   summary: Use when creating, importing, formatting, editing, exporting, or quality-checking Google Docs from agent-generated markdown or local files.
   use_when: creating, importing, formatting, editing, exporting, or quality-checking Google Docs from agent-generated markdown or local files.

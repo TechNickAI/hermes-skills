@@ -6,7 +6,7 @@ A mini-app dashboard running under PM2 loads and returns a 200, but every data p
 
 ## Root cause
 
-Hermes rewrites `$HOME` and `~` for its tool environment to the current profile's home (e.g. `/Users/nick/.hermes/profiles/<agent-d>/home/`). A Node.js process started by PM2 _while inside a Hermes tool call_ inherits this rewritten `HOME`. At runtime, `os.homedir()` returns the profile home, not `/Users/nick`. Any path built with `path.join(os.homedir(), '.openclaw/...')` silently does not exist.
+Hermes rewrites `$HOME` and `~` for its tool environment to the current profile's home (e.g. `/Users/<user>/.hermes/profiles/<agent-d>/home/`). A Node.js process started by PM2 _while inside a Hermes tool call_ inherits this rewritten `HOME`. At runtime, `os.homedir()` returns the profile home, not `/Users/<user>`. Any path built with `path.join(os.homedir(), '.openclaw/...')` silently does not exist.
 
 The app keeps running, loads fine in the browser, but reads zero bytes from its source-of-truth files.
 
@@ -24,14 +24,14 @@ Never derive data-source paths from `os.homedir()` at runtime. Instead:
 // server.js — priority chain: explicit env var > hardcoded absolute path
 const PROJECT_DIR =
   process.env.BTC_PROJECT_DIR ||
-  "/Users/nick/.openclaw/workspace-<agent-d>/memory/projects/btc-recovery-changetip";
+  "/Users/<user>/.openclaw/workspace-<agent-d>/memory/projects/sample-app-changetip";
 ```
 
 Or set in `ecosystem.config.js`:
 
 ```js
 env: {
-  BTC_PROJECT_DIR: '/Users/nick/.openclaw/workspace-<agent-d>/memory/projects/btc-recovery-changetip',
+  BTC_PROJECT_DIR: '/Users/<user>/.openclaw/workspace-<agent-d>/memory/projects/sample-app-changetip',
 }
 ```
 

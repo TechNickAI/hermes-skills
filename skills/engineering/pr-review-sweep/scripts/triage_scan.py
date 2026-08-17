@@ -25,7 +25,7 @@ import subprocess
 from pathlib import Path
 
 # --- config knobs (env overrides keep cron prompts authoritative) ---
-ORGS = [x for x in os.environ.get("ORGS", "carmentacollective,TechNickAI").split(",") if x]
+ORGS = [x for x in os.environ.get("ORGS", "example-org,example-org-2").split(",") if x]
 LOOKBACK_DAYS = int(os.environ.get("LOOKBACK_DAYS", "7"))
 SEARCH_LIMIT = int(os.environ.get("SEARCH_LIMIT", "200"))
 EXCLUDE = {x for x in os.environ.get("EXCLUDE_REPOS", "TechNickAI/openclaw-config").split(",") if x}

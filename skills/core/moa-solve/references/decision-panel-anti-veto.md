@@ -9,7 +9,7 @@ gated go/no-go: ship a release, approve a spend, greenlight a candidate, publish
 
 If ANY seat can hard-veto, the panel NEVER acts. Give N critics a mandate to find a reason not to
 act and all N find one — the system trends to permanent inaction, which is a failure _identical_ to
-acting on junk. Nick's exact framing: "if you give 15 agents a reason to not trade an evaluation,
+acting on junk. the operator's exact framing: "if you give 15 agents a reason to not trade an evaluation,
 they're all gonna be able to find at least one reason to not trade." The aggregator must be
 engineered against this bias, mechanically, not by vibes.
 

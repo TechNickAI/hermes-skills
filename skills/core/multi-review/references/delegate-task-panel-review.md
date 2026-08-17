@@ -86,5 +86,5 @@ What made the lenses carve cleanly for a chief-of-staff system:
 Give each the same background but a _different question_, and state the constraints negatively
 where it matters ("do not design a database", "do not propose JSON as the primary store") —
 otherwise all three converge on the same familiar architecture and you've paid for one answer
-three times. Synthesize to one coherent design, explicitly not a merge; Nick's framing: _"This
+three times. Synthesize to one coherent design, explicitly not a merge; the operator's framing: _"This
 is not a Frankenstein, this is go wide for ideas and then come up with an elegant system."_
