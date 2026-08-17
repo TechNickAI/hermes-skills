@@ -51,7 +51,7 @@ fenced code blocks more faithfully.
 > repo root.
 
 > **$HOME shadowing:** some agent runtimes rewrite `$HOME`to a sandbox path where gog's
-auth doesn't exist. If credential lookup fails in that environment, point`HOME` at
+> auth doesn't exist. If credential lookup fails in that environment, point`HOME` at
 > the real OS user home before invoking the helper.
 
 ## When to Use
