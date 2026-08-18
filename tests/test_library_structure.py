@@ -262,6 +262,7 @@ REQUIREMENT_KEYS = {
     "Hermes cron + delegation toolsets enabled": ["Hermes-native", "cron"],
     "email CLI: gog or himalaya": "himalaya",
     "gog CLI, authorized via `gog auth login`": "`gog` CLI",
+    "gog CLI authenticated for Gmail and Google Calendar": ["`gog` CLI", "Gmail", "Calendar"],
     "gog CLI, authorized for Google Sheets and Drive": "`gog` CLI",
     "python3": "python3",
     "pdftoppm (poppler-utils), for multipage visual QA rasterization": "pdftoppm",
@@ -272,6 +273,9 @@ REQUIREMENT_KEYS = {
     "BlueBubbles server app (installed by scripts/setup-bluebubbles.sh)": "BlueBubbles",
     "Full Disk Access granted by hand (macOS permission prompts cannot be scripted)": "Full Disk Access",
     "python3 with the requests package": "requests",
+    "public HTTPS route to the bundled confirmation service": "public HTTPS reverse proxy",
+    "read access to the user's relevant calendars": "relevant calendars",
+    "read access to at least one meeting-notes source": "meeting-notes source",
 }
 
 

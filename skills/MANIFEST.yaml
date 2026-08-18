@@ -11,7 +11,7 @@
 #   use_when              the trigger conditions, for selective installation
 _generated_by: scripts/generate_manifest.py
 _do_not_edit: Regenerate with `python scripts/generate_manifest.py`; CI checks it.
-count: 23
+count: 25
 packs:
 - core
 - engineering
@@ -303,6 +303,24 @@ skills:
   - claude-code
   - cron
   path: skills/engineering/pr-review-sweep
+- name: book-a-time
+  pack: productivity
+  version: 1.0.0
+  scope: solo
+  summary: Use when the user asks to find, offer, share, or book meeting times by email, including recurring meetings.
+  use_when: the user asks to find, offer, share, or book meeting times by email, including recurring meetings. Checks every configured calendar, sends polished booking buttons, and creates an event only after the recipient confirms.
+  requires:
+  - gog CLI authenticated for Gmail and Google Calendar
+  - public HTTPS route to the bundled confirmation service
+  works_out_of_the_box: false
+  tags:
+  - scheduling
+  - calendar
+  - email
+  - google-workspace
+  - booking
+  - productivity
+  path: skills/productivity/book-a-time
 - name: email-steward
   pack: productivity
   version: 1.0.0
@@ -399,6 +417,23 @@ skills:
   - bridge
   - tcc
   path: skills/productivity/imessage-bluebubbles
+- name: meeting-prep
+  pack: productivity
+  version: 1.0.0
+  scope: solo
+  summary: Use when the user asks to prepare for an upcoming meeting or wants prior conversation context, decisions, promises, and open loops for its attendees.
+  use_when: the user asks to prepare for an upcoming meeting or wants prior conversation context, decisions, promises, and open loops for its attendees. Produces a short evidence-backed cheat sheet from calendar and meeting-note sources.
+  requires:
+  - read access to the user's relevant calendars
+  - read access to at least one meeting-notes source
+  works_out_of_the_box: false
+  tags:
+  - meetings
+  - preparation
+  - calendar
+  - notes
+  - productivity
+  path: skills/productivity/meeting-prep
 - name: vapi-calls
   pack: productivity
   version: 1.0.0

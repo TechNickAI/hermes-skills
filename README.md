@@ -116,11 +116,13 @@ against reality before reporting. That discipline is baked into the skill.
 
 | Skill                  | What it does                                                                            | Needs                                                                                            |
 | ---------------------- | --------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| `book-a-time`          | Check all calendars, email booking buttons, and create an event only after confirmation | `gog` CLI for Gmail + Calendar; public HTTPS reverse proxy                                       |
 | `email-steward`        | Scheduled inbox triage: kill debris, quarantine promos, surface only what needs a human | `gog` or `himalaya`; Hermes-native (cron + delegation)                                           |
 | `google-docs`          | Create, format, edit, export, and quality-check Google Docs from markdown               | `gog` CLI, authorized                                                                            |
 | `google-sheets`        | Build and verify Sheets from CSV, JSON, or computed tables                              | `gog` CLI authorized; python3; pdftoppm; uv; openpyxl                                            |
 | `google-slides`        | Markdown to a real Slides deck, with a visual QA pass                                   | `gog` CLI authorized; pandoc                                                                     |
 | `imessage-bluebubbles` | Send, read, and search iMessage from an agent on macOS via the BlueBubbles bridge       | macOS + Messages.app; BlueBubbles server; Full Disk Access (granted by hand); python3 `requests` |
+| `meeting-prep`         | Build a concise, sourced cheat sheet from calendar events and prior meeting notes       | read access to relevant calendars and a meeting-notes source                                     |
 | `vapi-calls`           | Place real outbound phone calls — reminders, confirmations, booking an appointment      | `VAPI_API_KEY`                                                                                   |
 
 `skills/MANIFEST.yaml` is the machine-readable version of this table, generated
