@@ -1,0 +1,58 @@
+name: Package skills
+
+# Claude apps install skills by uploading a ZIP. Without prebuilt assets every
+# non-technical user hand-builds the same archive, which was the single manual step
+# in an otherwise automated flow. Build them once, attach to a release, and the
+# Claude-app path becomes: download, drag, done.
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build one .skill archive per skill
+        run: |
+          set -euo pipefail
+          mkdir -p dist
+          # The archive must contain the skill FOLDER (with SKILL.md inside), not the
+          # loose files, or the uploader rejects it.
+          find skills -mindepth 2 -maxdepth 2 -type d | while read -r dir; do
+            name="$(basename "$dir")"
+            (cd "$(dirname "$dir")" && zip -q -r "$GITHUB_WORKSPACE/dist/${name}.skill" "$name")
+          done
+          ls -la dist
+
+      - name: Verify each archive contains SKILL.md at the expected depth
+        run: |
+          set -euo pipefail
+          fail=0
+          for f in dist/*.skill; do
+            name="$(basename "$f" .skill)"
+            unzip -l "$f" | grep -q "$name/SKILL.md" || { echo "MISSING $name/SKILL.md in $f"; fail=1; }
+          done
+          exit $fail
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: skill-archives
+          path: dist/*.skill
+
+      - name: Attach to release
+        if: startsWith(github.ref, 'refs/tags/')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # gh release upload targets an EXISTING release; a plain tag push has none,
+          # so create it first and make the command idempotent for re-runs.
+          gh release view "${GITHUB_REF_NAME}" >/dev/null 2>&1 \
+            || gh release create "${GITHUB_REF_NAME}" --generate-notes
+          gh release upload "${GITHUB_REF_NAME}" dist/*.skill --clobber

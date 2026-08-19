@@ -4,10 +4,11 @@ These skills were written for [Hermes](https://github.com/NousResearch/hermes-ag
 they work natively. Hermes has its own skill manager with a concept other runtimes lack:
 **tapping**.
 
-Before discussing commands, fetch and follow the
-[skill-library experience](https://raw.githubusercontent.com/TechNickAI/hermes-skills/main/install/catalog-experience.md).
-It defines the warm, human-facing catalog flow: ask what the person wants, describe each
-recommended skill in plain English, invite a choice, and install only after they choose.
+> **Do this first.** Fetch and run
+> <https://raw.githubusercontent.com/TechNickAI/hermes-skills/main/install/catalog-experience.md>
+> before anything below. That file _is_ the install experience: it asks what the person
+> wants, shows a few relevant skills as plain-language cards, and waits for their choice.
+> Everything below is reference material for after they have chosen.
 
 ---
 
@@ -37,22 +38,30 @@ attention degrades faster than the token cost suggests.
 # 0. Know what you are about to change
 hermes profile list          # which profiles exist, and which is active?
 hermes skills list           # what's already installed (name collisions, stale versions)?
-hermes skills tap list       # what sources are already tapped?
 
-# 1. Tap the packs you want (discoverable, free)
-hermes skills tap add TechNickAI/hermes-skills --path skills/core/
-hermes skills tap add TechNickAI/hermes-skills --path skills/engineering/
-hermes skills tap add TechNickAI/hermes-skills --path skills/productivity/
+# 1. Preview any skill before installing it
+hermes skills inspect https://raw.githubusercontent.com/TechNickAI/hermes-skills/main/skills/core/keep-going/SKILL.md
 
-# 2. Search and preview (custom taps need --source github)
-hermes skills search review --source github
-hermes skills inspect multi-review
-
-# 3. Install into the agent's index.
-# -p <profile> is REQUIRED when targeting a named profile: the CLI otherwise
-# installs into the calling profile while reporting success for the named one.
-hermes skills install multi-review -p <profile>
+# 2. Install by direct URL. -p <profile> is REQUIRED for a named profile: the CLI
+# otherwise installs into the calling profile while reporting success for the named one.
+hermes skills install https://raw.githubusercontent.com/TechNickAI/hermes-skills/main/skills/core/keep-going/SKILL.md -p <profile>
 ```
+
+Every skill's URL follows one pattern, and
+[`skills/CATALOG.md`](https://raw.githubusercontent.com/TechNickAI/hermes-skills/main/skills/CATALOG.md)
+gives you the `path` for each:
+
+```text
+https://raw.githubusercontent.com/TechNickAI/hermes-skills/main/<path>/SKILL.md
+```
+
+> **`hermes skills search` will not find these skills, even after tapping.**
+> Verified on Hermes v0.20.1: `--source` selects a public index (`skills-sh`, `github`,
+> and friends), and there is no `--source tap`. A bare `hermes skills search keep-going`
+> returns zero results while the tap is configured correctly. Taps make a pack
+> discoverable to the runtime, not to `search`. Install by URL instead — it needs no tap
+> at all. Skills carrying `references/` or `scripts/` need the folder rather than the
+> single file; use the npx installer or copy the directory for those.
 
 Verify the file actually landed rather than trusting the exit code — an ambiguous
 `hermes skills install <name>` can print a disambiguation table and exit 0 without
@@ -90,7 +99,7 @@ is the most common self-inflicted context problem.
 Some skills run with no setup at all; the rest need a credential, external CLI, service,
 or OS permission first.
 
-Read [`skills/CATALOG.md`](../skills/CATALOG.md). It states each skill's purpose, scope,
+Read [`skills/CATALOG.md`](https://raw.githubusercontent.com/TechNickAI/hermes-skills/main/skills/CATALOG.md). It states each skill's purpose, scope,
 prerequisites, and whether it works without setup in plain language. The catalog is
 generated from the skills themselves, so it does not drift.
 
@@ -107,7 +116,7 @@ fan-out. Those are the ones that will not port cleanly to another runtime.
 
 ## Rules for an installing agent
 
-- Read [`skills/CATALOG.md`](../skills/CATALOG.md) first. It answers `scope`,
+- Read [`skills/CATALOG.md`](https://raw.githubusercontent.com/TechNickAI/hermes-skills/main/skills/CATALOG.md) first. It answers `scope`,
   `requires`, `works_out_of_the_box`, and `use_when` for every skill without opening a
   single `SKILL.md`.
 - Filter by `scope` before anything else.
