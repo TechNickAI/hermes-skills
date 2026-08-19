@@ -13,9 +13,13 @@ description: >
   returns a decision-first brief, with an explicit build-vs-adopt call when the question
   is a sourcing decision. Starts at the cheapest route that can settle the question and
   escalates only against a named gap.
-version: 1.0.0
+version: 1.1.0
 author: Hermes Agent
 license: MIT
+compatibility: >
+  Portable to Hermes and Claude Code. In Claude, map the named research tools and
+  delegation/panel mechanisms to available equivalents; unsupported source classes are
+  reported, not silently omitted.
 metadata:
   hermes:
     tags:
@@ -97,6 +101,24 @@ Do **not** use for:
 
 **The most important negative case:** invoking this skill does not make a small question
 big. An atomic question asked with the words "go figure this out" is still an L0 answer.
+
+## Runtime portability
+
+The method is portable; tool names are not. Use the runtime's native capability rather
+than trying to reproduce a Hermes command literally:
+
+| Capability in this skill         | Hermes              | Claude Code                                                                               |
+| -------------------------------- | ------------------- | ----------------------------------------------------------------------------------------- |
+| Search the current web           | `web_search`        | Claude Code's web-search tool                                                             |
+| Read a known URL                 | `web_extract`       | `WebFetch`                                                                                |
+| Inspect local files              | file/terminal tools | `Read`, `Glob`, `Grep`, `Bash`                                                            |
+| Run independent workstreams      | `delegate_task`     | Claude subagents / Agent tool                                                             |
+| Search prior Hermes sessions     | `session_search`    | No equivalent; mark unavailable unless the user supplies history                          |
+| Synthesize across model families | native MoA          | No native family-diverse equivalent; use one Claude synthesis and disclose the limitation |
+
+Never shell out to a locally installed `hermes` binary merely because it exists. The
+runtime executing the skill owns the mechanism. When a source class or mechanism has no
+equivalent, name the missing coverage in the result rather than silently skipping it.
 
 ## Effort tiers
 

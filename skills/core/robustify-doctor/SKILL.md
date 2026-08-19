@@ -7,8 +7,9 @@ description:
   across twelve subsystems, then reads those facts as an LLM to correlate symptoms into
   incidents, classify severity, and separate real breakage from things that merely look
   alarming. The script collects; the judgment is yours.
-version: 0.1.0
+version: 0.1.1
 license: MIT
+compatibility: Hermes-specific runtime and HERMES_HOME layout.
 metadata:
   hermes:
     requires:

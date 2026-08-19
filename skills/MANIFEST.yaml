@@ -19,12 +19,13 @@ packs:
 skills:
 - name: deep-dive
   pack: core
-  version: 1.0.0
+  version: 1.1.0
   scope: solo
   summary: Use when told "do a deep dive", "go figure this out", or "don't reinvent the wheel" - researches a question across every relevant source and returns a decision.
   use_when: told "do a deep dive", "go figure this out", or "don't reinvent the wheel" - researches a question across every relevant source and returns a decision. Also fires on "see what everyone else is doing", "use all the skills you have", "what's the best way to X", "should we build this or buy it", "is th…
   requires: []
   works_out_of_the_box: true
+  compatibility: Portable to Hermes and Claude Code. In Claude, map the named research tools and delegation/panel mechanisms to available equivalents; unsupported source classes are reported, not silently omitted.
   tags:
   - research
   - diligence
@@ -43,6 +44,7 @@ skills:
   requires:
   - 'env: XAI_API_KEY (xAI console)'
   works_out_of_the_box: false
+  compatibility: Agent Skills standard
   tags:
   - grok
   - xai
@@ -52,12 +54,13 @@ skills:
   path: skills/core/grok-search
 - name: keep-going
   pack: core
-  version: 1.0.0
+  version: 1.1.0
   scope: solo
-  summary: Invoked as /keep_going (or /keep-going) when the agent has stopped short — asked "which option?", narrated a plan instead of executing it, or claimed a blocker that is not real — while the user has already given clear direction.
-  use_when: the user says "keep going", "continue", "you got stuck, unstuck yourself", "why did you stop", or runs the /keep_going slash command.
+  summary: Use when the user says "/keep_going", "keep going", or "continue" after the agent has stopped short — asked "which option?", narrated a plan instead of executing it, or claimed a blocker that is not real — while the user has already given clear direction.
+  use_when: the user says "/keep_going", "keep going", or "continue" after the agent has stopped short — asked "which option?", narrated a plan instead of executing it, or claimed a blocker that is not real — while the user has already given clear direction. Also use proactively when the agent notices it is abo…
   requires: []
   works_out_of_the_box: true
+  compatibility: Portable to Hermes, Claude Code, and similar coding agents.
   tags:
   - workflow
   - continuation
@@ -67,12 +70,13 @@ skills:
   path: skills/core/keep-going
 - name: memory-cleanup
   pack: core
-  version: 0.1.0
+  version: 0.1.1
   scope: solo
   summary: Use when a Hermes MEMORY.md or USER.md file is too large, bloated, stale, or over the recommended cap and you need to reduce prompt footprint without losing important facts.
   use_when: 'a Hermes MEMORY.md or USER.md file is too large, bloated, stale, or over the recommended cap and you need to reduce prompt footprint without losing important facts. Applies a lossless memory diet: compress, relocate to SOUL.md/USER.md/AGENTS.md/context files, offload long-tail facts to the memory pr…'
   requires: []
   works_out_of_the_box: true
+  compatibility: Hermes-specific memory-file layout and conventions.
   tags:
   - memory
   - cleanup
@@ -82,12 +86,13 @@ skills:
   path: skills/core/memory-cleanup
 - name: moa-solve
   pack: core
-  version: 2.0.0
+  version: 2.0.1
   scope: solo
   summary: Use when you have a HARD, open-ended, high-stakes problem worth throwing multiple AI models at and pulling the best solution out — architecture decisions, strategy design, thorny debugging, research synthesis, "what am I missing", tool/system design.
   use_when: you have a HARD, open-ended, high-stakes problem worth throwing multiple AI models at and pulling the best solution out — architecture decisions, strategy design, thorny debugging, research synthesis, "what am I missing", tool/system design. This is the SOLVE counterpart to multi-review (which criti…
   requires: []
   works_out_of_the_box: true
+  compatibility: Hermes-specific; requires the native MoA runtime.
   tags:
   - orchestration
   - multi-model
@@ -103,6 +108,7 @@ skills:
   use_when: the user wants to know what real people are actually saying about a topic right now, not the SEO/editorial version. Pulls recent posts and engagement from Reddit, X, YouTube, Hacker News, Polymarket, GitHub, and the web, ranks by engagement and recency with a deterministic scorer, and writes one syn…
   requires: []
   works_out_of_the_box: true
+  compatibility: Agent Skills standard
   tags:
   - research
   - social
@@ -116,12 +122,13 @@ skills:
   path: skills/core/mob-check
 - name: multi-review
   pack: core
-  version: 1.4.0
+  version: 1.4.1
   scope: solo
   summary: Use when reviewing almost any meaningful artifact, decision, action, plan, code change, prompt, skill, research summary, outbound message, or public-facing content.
   use_when: reviewing almost any meaningful artifact, decision, action, plan, code change, prompt, skill, research summary, outbound message, or public-facing content. Runs a small panel of diverse review lenses across model families when available, synthesizes findings into fix/ask/defer/wontfix decisions, and…
   requires: []
   works_out_of_the_box: true
+  compatibility: Portable review method. Native multi-model orchestration examples are Hermes-specific; Claude can run the method with Claude subagents but loses model-family diversity.
   tags:
   - review
   - quality
@@ -138,6 +145,7 @@ skills:
   requires:
   - 'env: TELEGRAM_BOT_TOKEN (for the living board)'
   works_out_of_the_box: false
+  compatibility: Agent Skills standard
   tags:
   - orchestration
   - cron
@@ -148,12 +156,13 @@ skills:
   path: skills/core/project-steward
 - name: recall
   pack: core
-  version: 0.3.0
+  version: 0.3.1
   scope: solo
   summary: Restore context from prior sessions, memories, and transcripts.
   use_when: a bare-pronoun follow-up like "ship it", "do it", or "send that" likely points at a prior-session artifact. Designed to never dead-end — if one source has nothing, keep searching others until you have a useful picture.
   requires: []
   works_out_of_the_box: true
+  compatibility: Hermes-specific session and memory stores.
   tags:
   - context
   - session
@@ -164,12 +173,13 @@ skills:
   path: skills/core/recall
 - name: report
   pack: core
-  version: 0.2.0
+  version: 0.2.1
   scope: fleet
   summary: File a report or piece of feedback from any Hermes platform session.
   use_when: ''
   requires: []
   works_out_of_the_box: true
+  compatibility: Hermes-specific reporting and routing tools.
   tags:
   - bugs
   - feedback
@@ -180,7 +190,7 @@ skills:
   path: skills/core/report
 - name: robustify-doctor
   pack: core
-  version: 0.1.0
+  version: 0.1.1
   scope: solo
   summary: Use when you need to know whether a Hermes agent is actually healthy — during a scheduled health check, after an outage or reboot, when someone asks "is X working?", or when an agent has gone quiet.
   use_when: you need to know whether a Hermes agent is actually healthy — during a scheduled health check, after an outage or reboot, when someone asks "is X working?", or when an agent has gone quiet. Runs a deterministic collector that gathers facts across twelve subsystems, then reads those facts as an LLM t…
@@ -188,6 +198,7 @@ skills:
   - Python 3.9+ (stdlib only, no third-party packages)
   - Read access to the target agent's HERMES_HOME
   works_out_of_the_box: false
+  compatibility: Hermes-specific runtime and HERMES_HOME layout.
   tags:
   - monitoring
   - diagnostics
@@ -204,6 +215,7 @@ skills:
   use_when: an agent's skill library needs auditing, cleaning, or triage - "audit my skills", "are my skills healthy", "find duplicate skills", "why didn't it use that skill", "clean up my skills", "which skills should this agent have", or after an upgrade adds new skills. Finds broken skills that silently vani…
   requires: []
   works_out_of_the_box: true
+  compatibility: Agent Skills standard
   tags:
   - skills
   - audit
@@ -221,6 +233,7 @@ skills:
   use_when: ''
   requires: []
   works_out_of_the_box: true
+  compatibility: Agent Skills standard
   tags:
   - governance
   - autonomy
@@ -238,6 +251,7 @@ skills:
   requires:
   - gh CLI, authenticated
   works_out_of_the_box: false
+  compatibility: Agent Skills standard
   tags:
   - github
   - code-review
@@ -256,6 +270,7 @@ skills:
   - chromium binary on PATH (or CHROMIUM_BIN) for local rasterize
   - network access to a Kroki host (KROKI_BASE) and QuickChart (QUICKCHART_BASE)
   works_out_of_the_box: false
+  compatibility: Agent Skills standard
   tags:
   - diagrams
   - charts
@@ -276,6 +291,7 @@ skills:
   - 'host services: Caddy + PM2'
   - Tailscale Serve/Funnel
   works_out_of_the_box: false
+  compatibility: Agent Skills standard
   tags:
   - devops
   - app-router
@@ -296,6 +312,7 @@ skills:
   - gh CLI, authenticated
   - Hermes delegation toolset enabled
   works_out_of_the_box: false
+  compatibility: Agent Skills standard
   tags:
   - github
   - code-review
@@ -313,6 +330,7 @@ skills:
   - 'email CLI: gog or himalaya'
   - Hermes cron + delegation toolsets enabled
   works_out_of_the_box: false
+  compatibility: Agent Skills standard
   tags:
   - email
   - inbox
@@ -331,6 +349,7 @@ skills:
   requires:
   - gog CLI, authorized via `gog auth login`
   works_out_of_the_box: false
+  compatibility: Agent Skills standard
   tags:
   - google
   - docs
@@ -352,6 +371,7 @@ skills:
   - uv, to run the XLSX verification snippets
   - openpyxl, via `uv run --with openpyxl` (not a standing install)
   works_out_of_the_box: false
+  compatibility: Agent Skills standard
   tags:
   - google
   - sheets
@@ -370,6 +390,7 @@ skills:
   - gog CLI, authorized via `gog auth login`
   - pandoc (for markdown conversion)
   works_out_of_the_box: false
+  compatibility: Agent Skills standard
   tags:
   - google
   - slides
@@ -391,6 +412,7 @@ skills:
   - Full Disk Access granted by hand (macOS permission prompts cannot be scripted)
   - python3 with the requests package
   works_out_of_the_box: false
+  compatibility: Agent Skills standard
   tags:
   - imessage
   - bluebubbles
@@ -408,6 +430,7 @@ skills:
   requires:
   - 'env: VAPI_API_KEY (Vapi dashboard → API Keys, private key)'
   works_out_of_the_box: false
+  compatibility: Agent Skills standard
   tags:
   - vapi
   - voice

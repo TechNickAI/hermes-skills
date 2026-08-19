@@ -6,8 +6,11 @@ description: >
   Runs a small panel of diverse review lenses across model families when available,
   synthesizes findings into fix/ask/defer/wontfix decisions, and iterates until the
   result is ready.
-version: 1.4.0
+version: 1.4.1
 license: MIT
+compatibility: >
+  Portable review method. Native multi-model orchestration examples are Hermes-specific;
+  Claude can run the method with Claude subagents but loses model-family diversity.
 metadata:
   hermes:
     tags: [review, quality, multi-model, synthesis, safety]

@@ -101,6 +101,11 @@ def requirements_for(frontmatter: dict) -> list[str]:
     return [str(item) for item in declared]
 
 
+def compatibility_for(frontmatter: dict) -> str:
+    """Read the skill's runtime compatibility claim from standard frontmatter."""
+    return str(frontmatter.get("compatibility", "Agent Skills standard")).strip()
+
+
 def scope_for(name: str) -> str:
     if name in FLEET_SCOPED:
         return "fleet"
@@ -133,6 +138,7 @@ def build() -> dict:
                     "use_when": use_when(description),
                     "requires": requires,
                     "works_out_of_the_box": not requires,
+                    "compatibility": compatibility_for(frontmatter),
                     "tags": list(meta.get("tags") or []),
                     "path": f"skills/{pack_dir.name}/{skill_dir.name}",
                 }
@@ -190,6 +196,7 @@ def render_catalog(manifest: dict) -> str:
                 f"- **Use when:** {use_when_text}",
                 f"- **Prerequisites:** {requirements}",
                 f"- **Works without setup:** {'Yes' if entry['works_out_of_the_box'] else 'No'}",
+                f"- **Compatibility:** {entry['compatibility']}",
                 f"- **Path:** `{entry['path']}`",
                 "",
             ]
