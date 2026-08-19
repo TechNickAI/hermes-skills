@@ -105,7 +105,10 @@ Notes that matter:
 
 Build the person's catalog from [`skills/CATALOG.md`](../skills/CATALOG.md), using the
 presentation format in [`catalog-experience.md`](catalog-experience.md). Recommend what
-matches their desired outcome rather than relying on a fixed starter pack.
+matches their desired outcome **only after filtering the catalog's Compatibility field**.
+Never recommend a skill marked `Hermes-specific` to a Claude user. A skill marked
+portable with runtime substitutions is eligible only when you can name and use those
+substitutions.
 
 `recall` reads Hermes session state and calls a Hermes-only search tool, so it has nothing
 to restore from in Claude. Do not recommend it here.

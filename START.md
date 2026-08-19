@@ -17,7 +17,7 @@ machine:
   project environment.
 
 An installed `hermes` command does not prove the runtime is Hermes. If the answer remains
-unclear, ask: “Are you running me in Hermes, Claude Code, or a Claude app?”
+unclear, ask: "Are you running me in Hermes, Claude Code, or a Claude app?"
 
 ## Fetch one adapter
 
