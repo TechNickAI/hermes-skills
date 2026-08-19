@@ -54,7 +54,7 @@ skills:
   works_out_of_the_box: false
   compatibility: Agent Skills standard
   claude_compat: native
-  claude_note: Works in Claude once its prerequisites are met.
+  claude_note: Works in Claude once XAI_API_KEY is available.
   size:
     files: 4
     bytes_skill_md: 5499
@@ -282,11 +282,11 @@ skills:
   claude_compat: unsupported
   claude_note: Inspects a Hermes runtime and HERMES_HOME layout.
   size:
-    files: 7
+    files: 4
     bytes_skill_md: 16283
-    bytes_total: 172123
+    bytes_total: 74933
     approx_tokens_skill_md: 4071
-    approx_tokens_total: 43031
+    approx_tokens_total: 18733
   tags:
   - monitoring
   - diagnostics
@@ -307,11 +307,11 @@ skills:
   claude_compat: degraded
   claude_note: Audits Hermes skill layout; the method transfers, the paths do not.
   size:
-    files: 7
+    files: 5
     bytes_skill_md: 13065
-    bytes_total: 188707
+    bytes_total: 91532
     approx_tokens_skill_md: 3266
-    approx_tokens_total: 47177
+    approx_tokens_total: 22883
   tags:
   - skills
   - audit
@@ -331,7 +331,7 @@ skills:
   works_out_of_the_box: true
   compatibility: Agent Skills standard
   claude_compat: native
-  claude_note: Works in Claude with no additional setup.
+  claude_note: Portable governance rules; no runtime dependency.
   size:
     files: 6
     bytes_skill_md: 22932
@@ -357,7 +357,7 @@ skills:
   works_out_of_the_box: false
   compatibility: Agent Skills standard
   claude_compat: native
-  claude_note: Works in Claude once its prerequisites are met.
+  claude_note: Works in Claude Code with an authenticated gh CLI.
   size:
     files: 10
     bytes_skill_md: 19751
@@ -384,7 +384,7 @@ skills:
   works_out_of_the_box: false
   compatibility: Agent Skills standard
   claude_compat: native
-  claude_note: Works in Claude once its prerequisites are met.
+  claude_note: Works in Claude once its render prerequisites exist.
   size:
     files: 4
     bytes_skill_md: 10197
@@ -495,7 +495,7 @@ skills:
   works_out_of_the_box: false
   compatibility: Agent Skills standard
   claude_compat: native
-  claude_note: Works in Claude once its prerequisites are met.
+  claude_note: Works in Claude once the gog CLI is authorized.
   size:
     files: 5
     bytes_skill_md: 10575
@@ -525,7 +525,7 @@ skills:
   works_out_of_the_box: false
   compatibility: Agent Skills standard
   claude_compat: native
-  claude_note: Works in Claude once its prerequisites are met.
+  claude_note: Works in Claude once the gog CLI is authorized.
   size:
     files: 4
     bytes_skill_md: 14728
@@ -552,7 +552,7 @@ skills:
   works_out_of_the_box: false
   compatibility: Agent Skills standard
   claude_compat: native
-  claude_note: Works in Claude once its prerequisites are met.
+  claude_note: Works in Claude once the gog CLI is authorized.
   size:
     files: 2
     bytes_skill_md: 9307
@@ -582,7 +582,7 @@ skills:
   works_out_of_the_box: false
   compatibility: Agent Skills standard
   claude_compat: native
-  claude_note: Works in Claude once its prerequisites are met.
+  claude_note: Works in Claude on macOS once BlueBubbles is set up.
   size:
     files: 8
     bytes_skill_md: 21156
@@ -608,7 +608,7 @@ skills:
   works_out_of_the_box: false
   compatibility: Agent Skills standard
   claude_compat: native
-  claude_note: Works in Claude once its prerequisites are met.
+  claude_note: Works in Claude once VAPI_API_KEY is available.
   size:
     files: 2
     bytes_skill_md: 14218

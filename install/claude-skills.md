@@ -78,8 +78,11 @@ uploader expects that structure.
 Settings → Capabilities. On Team and Enterprise plans an owner must enable Skills for the
 organization first.
 
-1. Download the skill folder from this repo and zip it. The ZIP must contain the folder
-   with its `SKILL.md` inside.
+1. Download the ready-made archive from
+   [the latest release](https://github.com/TechNickAI/hermes-skills/releases/latest) —
+   one `<skill>.skill` file per skill, already structured for upload.
+   (No release yet? Download the skill folder from this repo and zip it so that the ZIP
+   contains the folder with its `SKILL.md` inside.)
 2. Go to **Customize → Skills**.
 3. Click **+**, then **Create skill**, then **Upload a skill**.
 4. Upload the ZIP. It appears in your skills list and can be toggled on or off.
@@ -110,13 +113,15 @@ Notes that matter:
 
 Build the person's catalog from [`skills/CATALOG.md`](https://raw.githubusercontent.com/TechNickAI/hermes-skills/main/skills/CATALOG.md), using the
 presentation format in [`catalog-experience.md`](https://raw.githubusercontent.com/TechNickAI/hermes-skills/main/install/catalog-experience.md). Recommend what
-matches their desired outcome **only after filtering the catalog's Compatibility field**.
-Never recommend a skill marked `Hermes-specific` to a Claude user. A skill marked
-portable with runtime substitutions is eligible only when you can name and use those
-substitutions.
+matches their desired outcome **only after filtering the catalog's `Claude` field**:
 
-`recall` reads Hermes session state and calls a Hermes-only search tool, so it has nothing
-to restore from in Claude. Do not recommend it here.
+- `unsupported` — never recommend it here. It depends on runtime features Claude does not
+  have, so it would install cleanly and then fail to do anything.
+- `degraded` — eligible, but say plainly what it loses in Claude before they choose.
+- `native` — recommend normally, once any listed prerequisites are met.
+
+The generic `Compatibility` field is prose for humans; the `Claude` field is the one that
+decides.
 
 ---
 
