@@ -106,6 +106,75 @@ def compatibility_for(frontmatter: dict) -> str:
     return str(frontmatter.get("compatibility", "Agent Skills standard")).strip()
 
 
+# Runtime compatibility is DECLARED, not inferred from prose.
+#
+# An earlier version of this repo carried compatibility only as sentences inside
+# install guides, and it drifted one skill at a time: `recall` was caught by hand as
+# Hermes-only while `memory-cleanup` (27 references to MEMORY.md, 27 to USER.md, 8 to
+# SOUL.md — none of which exist in Claude) was still recommended to Claude users with
+# "Setup: none". A structured field makes the whole class of bug impossible.
+#
+#   native      works fully in that runtime
+#   degraded    runs, but loses its differentiator — must be disclosed, never sold as full
+#   unsupported depends on runtime features that do not exist there; never recommend
+CLAUDE_COMPAT = {
+    # Hermes-only runtime state: session stores, memory files, agent health, MoA, routing.
+    "recall": ("unsupported", "Reads Hermes session and memory stores, which Claude does not have."),
+    "memory-cleanup": (
+        "unsupported",
+        "Cleans Hermes MEMORY.md / USER.md / SOUL.md files, which do not exist in Claude.",
+    ),
+    "moa-solve": ("unsupported", "Requires the native Hermes MoA fan-out runtime."),
+    "report": ("unsupported", "Uses Hermes reporting and routing tools."),
+    "robustify-doctor": ("unsupported", "Inspects a Hermes runtime and HERMES_HOME layout."),
+    "mini-app": ("unsupported", "Operates Hermes-config mini-app host services."),
+    "pr-review-sweep": ("unsupported", "Depends on the Hermes delegation toolset."),
+    "email-steward": ("unsupported", "Depends on Hermes cron and delegation toolsets."),
+    "project-steward": ("unsupported", "Drives a Hermes living board and cron cadence."),
+    "skill-librarian": ("degraded", "Audits Hermes skill layout; the method transfers, the paths do not."),
+    # Portable method, Hermes-specific mechanism for its headline feature.
+    "multi-review": (
+        "degraded",
+        "The review method transfers, but cross-model-family diversity needs Hermes; "
+        "in Claude it becomes Claude reviewing Claude.",
+    ),
+    "deep-dive": (
+        "degraded",
+        "Full method in Claude Code using its own web, file, and subagent tools; "
+        "prior-session search and cross-family synthesis are unavailable.",
+    ),
+}
+
+
+def claude_compat_for(name: str, requires: list[str]) -> tuple[str, str]:
+    """Return (status, note) describing how the skill behaves inside Claude."""
+    if name in CLAUDE_COMPAT:
+        return CLAUDE_COMPAT[name]
+    if requires:
+        return "native", "Works in Claude once its prerequisites are met."
+    return "native", "Works in Claude with no additional setup."
+
+
+def measure(skill_dir: pathlib.Path) -> dict:
+    """Measure real on-disk size so context cost is never a stale guess.
+
+    The published figures for multi-review were ~47KB/~12k tokens, counting only
+    SKILL.md. The directory is 131,739 B across 17 files (~33k tokens). Supporting
+    files load on demand rather than every trigger, so both numbers matter: report
+    the always-loaded body and the full footprint.
+    """
+    files = [f for f in skill_dir.rglob("*") if f.is_file()]
+    total = sum(f.stat().st_size for f in files)
+    body = (skill_dir / "SKILL.md").stat().st_size
+    return {
+        "files": len(files),
+        "bytes_skill_md": body,
+        "bytes_total": total,
+        "approx_tokens_skill_md": round(body / 4),
+        "approx_tokens_total": round(total / 4),
+    }
+
+
 def scope_for(name: str) -> str:
     if name in FLEET_SCOPED:
         return "fleet"
@@ -139,6 +208,9 @@ def build() -> dict:
                     "requires": requires,
                     "works_out_of_the_box": not requires,
                     "compatibility": compatibility_for(frontmatter),
+                    "claude_compat": claude_compat_for(skill_dir.name, requires)[0],
+                    "claude_note": claude_compat_for(skill_dir.name, requires)[1],
+                    "size": measure(skill_dir),
                     "tags": list(meta.get("tags") or []),
                     "path": f"skills/{pack_dir.name}/{skill_dir.name}",
                 }
@@ -182,10 +254,14 @@ def render_catalog(manifest: dict) -> str:
         "This file is generated from each skill's metadata. Do not edit it by hand.",
         "Use it to choose a small set of relevant skills without opening every skill file.",
         "",
+        "`Claude` values: `native` (works fully), `degraded` (runs but loses its",
+        "differentiator — say so out loud), `unsupported` (never recommend it in Claude).",
+        "",
     ]
     for entry in manifest["skills"]:
         requirements = ", ".join(entry["requires"]) or "None"
         use_when_text = entry["use_when"] or entry["summary"]
+        size = entry["size"]
         lines.extend(
             [
                 f"## {entry['name']}",
@@ -197,6 +273,12 @@ def render_catalog(manifest: dict) -> str:
                 f"- **Prerequisites:** {requirements}",
                 f"- **Works without setup:** {'Yes' if entry['works_out_of_the_box'] else 'No'}",
                 f"- **Compatibility:** {entry['compatibility']}",
+                f"- **Claude:** {entry['claude_compat']} — {entry['claude_note']}",
+                (
+                    f"- **Size:** {size['bytes_skill_md']:,} B always-loaded "
+                    f"(~{size['approx_tokens_skill_md']:,} tokens); "
+                    f"{size['bytes_total']:,} B across {size['files']} file(s) total"
+                ),
                 f"- **Path:** `{entry['path']}`",
                 "",
             ]

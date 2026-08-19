@@ -25,7 +25,7 @@ tools allow it.
 
 ## Build a personal catalog
 
-Read [`../skills/CATALOG.md`](../skills/CATALOG.md). Choose a small set that genuinely
+Read [`skills/CATALOG.md`](https://raw.githubusercontent.com/TechNickAI/hermes-skills/main/skills/CATALOG.md). Choose a small set that genuinely
 matches the person's answer **and the current runtime**. Usually three to five is enough.
 
 Treat compatibility as a filter, not a footnote:

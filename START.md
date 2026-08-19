@@ -23,9 +23,9 @@ unclear, ask: "Are you running me in Hermes, Claude Code, or a Claude app?"
 
 Follow only the adapter matching the runtime:
 
-- **Hermes:** [`install/hermes.md`](install/hermes.md)
+- **Hermes:** <https://raw.githubusercontent.com/TechNickAI/hermes-skills/main/install/hermes.md>
 - **Claude Code, Claude app, or Cowork:**
-  [`install/claude-skills.md`](install/claude-skills.md)
+  <https://raw.githubusercontent.com/TechNickAI/hermes-skills/main/install/claude-skills.md>
 
 The adapter will lead you through a friendly catalog, runtime compatibility, approval,
 installation, and verification. Do not invent a translation between runtimes; use the

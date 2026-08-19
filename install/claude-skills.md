@@ -4,15 +4,16 @@ Covers Claude Code (terminal) and the Claude apps (desktop and web). If you are 
 reading this on someone's behalf, follow the section matching your surface, then report
 what you installed and what you skipped.
 
-Before discussing installation, fetch and follow the
-[skill-library experience](https://raw.githubusercontent.com/TechNickAI/hermes-skills/main/install/catalog-experience.md).
-It defines the warm, human-facing catalog flow: ask what the person wants, describe each
-recommended skill in plain English, invite a choice, and install only after they choose.
+> **Do this first.** Fetch and run
+> <https://raw.githubusercontent.com/TechNickAI/hermes-skills/main/install/catalog-experience.md>
+> before anything below. That file _is_ the install experience: it asks what the person
+> wants, shows a few relevant skills as plain-language cards, and waits for their choice.
+> Everything below is reference material for after they have chosen.
 
 Claude Code supports the [Agent Skills](https://agentskills.io) open standard, so the
 skill _format_ works unmodified. Individual skills may still need external tools or
 Hermes-specific runtime features — check `requires` in
-[`skills/CATALOG.md`](../skills/CATALOG.md) before installing.
+[`skills/CATALOG.md`](https://raw.githubusercontent.com/TechNickAI/hermes-skills/main/skills/CATALOG.md) before installing.
 
 ---
 
@@ -107,8 +108,8 @@ Notes that matter:
 
 ## Choosing skills
 
-Build the person's catalog from [`skills/CATALOG.md`](../skills/CATALOG.md), using the
-presentation format in [`catalog-experience.md`](catalog-experience.md). Recommend what
+Build the person's catalog from [`skills/CATALOG.md`](https://raw.githubusercontent.com/TechNickAI/hermes-skills/main/skills/CATALOG.md), using the
+presentation format in [`catalog-experience.md`](https://raw.githubusercontent.com/TechNickAI/hermes-skills/main/install/catalog-experience.md). Recommend what
 matches their desired outcome **only after filtering the catalog's Compatibility field**.
 Never recommend a skill marked `Hermes-specific` to a Claude user. A skill marked
 portable with runtime substitutions is eligible only when you can name and use those

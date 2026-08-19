@@ -4,10 +4,11 @@ These skills were written for [Hermes](https://github.com/NousResearch/hermes-ag
 they work natively. Hermes has its own skill manager with a concept other runtimes lack:
 **tapping**.
 
-Before discussing commands, fetch and follow the
-[skill-library experience](https://raw.githubusercontent.com/TechNickAI/hermes-skills/main/install/catalog-experience.md).
-It defines the warm, human-facing catalog flow: ask what the person wants, describe each
-recommended skill in plain English, invite a choice, and install only after they choose.
+> **Do this first.** Fetch and run
+> <https://raw.githubusercontent.com/TechNickAI/hermes-skills/main/install/catalog-experience.md>
+> before anything below. That file _is_ the install experience: it asks what the person
+> wants, shows a few relevant skills as plain-language cards, and waits for their choice.
+> Everything below is reference material for after they have chosen.
 
 ---
 
@@ -90,7 +91,7 @@ is the most common self-inflicted context problem.
 Some skills run with no setup at all; the rest need a credential, external CLI, service,
 or OS permission first.
 
-Read [`skills/CATALOG.md`](../skills/CATALOG.md). It states each skill's purpose, scope,
+Read [`skills/CATALOG.md`](https://raw.githubusercontent.com/TechNickAI/hermes-skills/main/skills/CATALOG.md). It states each skill's purpose, scope,
 prerequisites, and whether it works without setup in plain language. The catalog is
 generated from the skills themselves, so it does not drift.
 
@@ -107,7 +108,7 @@ fan-out. Those are the ones that will not port cleanly to another runtime.
 
 ## Rules for an installing agent
 
-- Read [`skills/CATALOG.md`](../skills/CATALOG.md) first. It answers `scope`,
+- Read [`skills/CATALOG.md`](https://raw.githubusercontent.com/TechNickAI/hermes-skills/main/skills/CATALOG.md) first. It answers `scope`,
   `requires`, `works_out_of_the_box`, and `use_when` for every skill without opening a
   single `SKILL.md`.
 - Filter by `scope` before anything else.

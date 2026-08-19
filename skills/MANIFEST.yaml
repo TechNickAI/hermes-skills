@@ -26,6 +26,14 @@ skills:
   requires: []
   works_out_of_the_box: true
   compatibility: Portable to Hermes and Claude Code. In Claude, map the named research tools and delegation/panel mechanisms to available equivalents; unsupported source classes are reported, not silently omitted.
+  claude_compat: degraded
+  claude_note: Full method in Claude Code using its own web, file, and subagent tools; prior-session search and cross-family synthesis are unavailable.
+  size:
+    files: 1
+    bytes_skill_md: 34360
+    bytes_total: 34360
+    approx_tokens_skill_md: 8590
+    approx_tokens_total: 8590
   tags:
   - research
   - diligence
@@ -45,6 +53,14 @@ skills:
   - 'env: XAI_API_KEY (xAI console)'
   works_out_of_the_box: false
   compatibility: Agent Skills standard
+  claude_compat: native
+  claude_note: Works in Claude once its prerequisites are met.
+  size:
+    files: 4
+    bytes_skill_md: 5499
+    bytes_total: 23112
+    approx_tokens_skill_md: 1375
+    approx_tokens_total: 5778
   tags:
   - grok
   - xai
@@ -61,6 +77,14 @@ skills:
   requires: []
   works_out_of_the_box: true
   compatibility: Portable to Hermes, Claude Code, and similar coding agents.
+  claude_compat: native
+  claude_note: Works in Claude with no additional setup.
+  size:
+    files: 1
+    bytes_skill_md: 3453
+    bytes_total: 3453
+    approx_tokens_skill_md: 863
+    approx_tokens_total: 863
   tags:
   - workflow
   - continuation
@@ -77,6 +101,14 @@ skills:
   requires: []
   works_out_of_the_box: true
   compatibility: Hermes-specific memory-file layout and conventions.
+  claude_compat: unsupported
+  claude_note: Cleans Hermes MEMORY.md / USER.md / SOUL.md files, which do not exist in Claude.
+  size:
+    files: 8
+    bytes_skill_md: 17524
+    bytes_total: 50529
+    approx_tokens_skill_md: 4381
+    approx_tokens_total: 12632
   tags:
   - memory
   - cleanup
@@ -93,6 +125,14 @@ skills:
   requires: []
   works_out_of_the_box: true
   compatibility: Hermes-specific; requires the native MoA runtime.
+  claude_compat: unsupported
+  claude_note: Requires the native Hermes MoA fan-out runtime.
+  size:
+    files: 5
+    bytes_skill_md: 19681
+    bytes_total: 41130
+    approx_tokens_skill_md: 4920
+    approx_tokens_total: 10282
   tags:
   - orchestration
   - multi-model
@@ -109,6 +149,14 @@ skills:
   requires: []
   works_out_of_the_box: true
   compatibility: Agent Skills standard
+  claude_compat: native
+  claude_note: Works in Claude with no additional setup.
+  size:
+    files: 4
+    bytes_skill_md: 16908
+    bytes_total: 58589
+    approx_tokens_skill_md: 4227
+    approx_tokens_total: 14647
   tags:
   - research
   - social
@@ -129,6 +177,14 @@ skills:
   requires: []
   works_out_of_the_box: true
   compatibility: Portable review method. Native multi-model orchestration examples are Hermes-specific; Claude can run the method with Claude subagents but loses model-family diversity.
+  claude_compat: degraded
+  claude_note: The review method transfers, but cross-model-family diversity needs Hermes; in Claude it becomes Claude reviewing Claude.
+  size:
+    files: 17
+    bytes_skill_md: 48649
+    bytes_total: 131739
+    approx_tokens_skill_md: 12162
+    approx_tokens_total: 32935
   tags:
   - review
   - quality
@@ -146,6 +202,14 @@ skills:
   - 'env: TELEGRAM_BOT_TOKEN (for the living board)'
   works_out_of_the_box: false
   compatibility: Agent Skills standard
+  claude_compat: unsupported
+  claude_note: Drives a Hermes living board and cron cadence.
+  size:
+    files: 9
+    bytes_skill_md: 23679
+    bytes_total: 122549
+    approx_tokens_skill_md: 5920
+    approx_tokens_total: 30637
   tags:
   - orchestration
   - cron
@@ -163,6 +227,14 @@ skills:
   requires: []
   works_out_of_the_box: true
   compatibility: Hermes-specific session and memory stores.
+  claude_compat: unsupported
+  claude_note: Reads Hermes session and memory stores, which Claude does not have.
+  size:
+    files: 4
+    bytes_skill_md: 11028
+    bytes_total: 20672
+    approx_tokens_skill_md: 2757
+    approx_tokens_total: 5168
   tags:
   - context
   - session
@@ -180,6 +252,14 @@ skills:
   requires: []
   works_out_of_the_box: true
   compatibility: Hermes-specific reporting and routing tools.
+  claude_compat: unsupported
+  claude_note: Uses Hermes reporting and routing tools.
+  size:
+    files: 3
+    bytes_skill_md: 11568
+    bytes_total: 30517
+    approx_tokens_skill_md: 2892
+    approx_tokens_total: 7629
   tags:
   - bugs
   - feedback
@@ -199,6 +279,14 @@ skills:
   - Read access to the target agent's HERMES_HOME
   works_out_of_the_box: false
   compatibility: Hermes-specific runtime and HERMES_HOME layout.
+  claude_compat: unsupported
+  claude_note: Inspects a Hermes runtime and HERMES_HOME layout.
+  size:
+    files: 7
+    bytes_skill_md: 16283
+    bytes_total: 172123
+    approx_tokens_skill_md: 4071
+    approx_tokens_total: 43031
   tags:
   - monitoring
   - diagnostics
@@ -216,6 +304,14 @@ skills:
   requires: []
   works_out_of_the_box: true
   compatibility: Agent Skills standard
+  claude_compat: degraded
+  claude_note: Audits Hermes skill layout; the method transfers, the paths do not.
+  size:
+    files: 7
+    bytes_skill_md: 13065
+    bytes_total: 188707
+    approx_tokens_skill_md: 3266
+    approx_tokens_total: 47177
   tags:
   - skills
   - audit
@@ -234,6 +330,14 @@ skills:
   requires: []
   works_out_of_the_box: true
   compatibility: Agent Skills standard
+  claude_compat: native
+  claude_note: Works in Claude with no additional setup.
+  size:
+    files: 6
+    bytes_skill_md: 22932
+    bytes_total: 44717
+    approx_tokens_skill_md: 5733
+    approx_tokens_total: 11179
   tags:
   - governance
   - autonomy
@@ -252,6 +356,14 @@ skills:
   - gh CLI, authenticated
   works_out_of_the_box: false
   compatibility: Agent Skills standard
+  claude_compat: native
+  claude_note: Works in Claude once its prerequisites are met.
+  size:
+    files: 10
+    bytes_skill_md: 19751
+    bytes_total: 63432
+    approx_tokens_skill_md: 4938
+    approx_tokens_total: 15858
   tags:
   - github
   - code-review
@@ -271,6 +383,14 @@ skills:
   - network access to a Kroki host (KROKI_BASE) and QuickChart (QUICKCHART_BASE)
   works_out_of_the_box: false
   compatibility: Agent Skills standard
+  claude_compat: native
+  claude_note: Works in Claude once its prerequisites are met.
+  size:
+    files: 4
+    bytes_skill_md: 10197
+    bytes_total: 37552
+    approx_tokens_skill_md: 2549
+    approx_tokens_total: 9388
   tags:
   - diagrams
   - charts
@@ -292,6 +412,14 @@ skills:
   - Tailscale Serve/Funnel
   works_out_of_the_box: false
   compatibility: Agent Skills standard
+  claude_compat: unsupported
+  claude_note: Operates Hermes-config mini-app host services.
+  size:
+    files: 12
+    bytes_skill_md: 45652
+    bytes_total: 87321
+    approx_tokens_skill_md: 11413
+    approx_tokens_total: 21830
   tags:
   - devops
   - app-router
@@ -313,6 +441,14 @@ skills:
   - Hermes delegation toolset enabled
   works_out_of_the_box: false
   compatibility: Agent Skills standard
+  claude_compat: unsupported
+  claude_note: Depends on the Hermes delegation toolset.
+  size:
+    files: 11
+    bytes_skill_md: 8107
+    bytes_total: 52992
+    approx_tokens_skill_md: 2027
+    approx_tokens_total: 13248
   tags:
   - github
   - code-review
@@ -331,6 +467,14 @@ skills:
   - Hermes cron + delegation toolsets enabled
   works_out_of_the_box: false
   compatibility: Agent Skills standard
+  claude_compat: unsupported
+  claude_note: Depends on Hermes cron and delegation toolsets.
+  size:
+    files: 12
+    bytes_skill_md: 13873
+    bytes_total: 42428
+    approx_tokens_skill_md: 3468
+    approx_tokens_total: 10607
   tags:
   - email
   - inbox
@@ -350,6 +494,14 @@ skills:
   - gog CLI, authorized via `gog auth login`
   works_out_of_the_box: false
   compatibility: Agent Skills standard
+  claude_compat: native
+  claude_note: Works in Claude once its prerequisites are met.
+  size:
+    files: 5
+    bytes_skill_md: 10575
+    bytes_total: 35680
+    approx_tokens_skill_md: 2644
+    approx_tokens_total: 8920
   tags:
   - google
   - docs
@@ -372,6 +524,14 @@ skills:
   - openpyxl, via `uv run --with openpyxl` (not a standing install)
   works_out_of_the_box: false
   compatibility: Agent Skills standard
+  claude_compat: native
+  claude_note: Works in Claude once its prerequisites are met.
+  size:
+    files: 4
+    bytes_skill_md: 14728
+    bytes_total: 34909
+    approx_tokens_skill_md: 3682
+    approx_tokens_total: 8727
   tags:
   - google
   - sheets
@@ -391,6 +551,14 @@ skills:
   - pandoc (for markdown conversion)
   works_out_of_the_box: false
   compatibility: Agent Skills standard
+  claude_compat: native
+  claude_note: Works in Claude once its prerequisites are met.
+  size:
+    files: 2
+    bytes_skill_md: 9307
+    bytes_total: 24155
+    approx_tokens_skill_md: 2327
+    approx_tokens_total: 6039
   tags:
   - google
   - slides
@@ -413,6 +581,14 @@ skills:
   - python3 with the requests package
   works_out_of_the_box: false
   compatibility: Agent Skills standard
+  claude_compat: native
+  claude_note: Works in Claude once its prerequisites are met.
+  size:
+    files: 8
+    bytes_skill_md: 21156
+    bytes_total: 84352
+    approx_tokens_skill_md: 5289
+    approx_tokens_total: 21088
   tags:
   - imessage
   - bluebubbles
@@ -431,6 +607,14 @@ skills:
   - 'env: VAPI_API_KEY (Vapi dashboard → API Keys, private key)'
   works_out_of_the_box: false
   compatibility: Agent Skills standard
+  claude_compat: native
+  claude_note: Works in Claude once its prerequisites are met.
+  size:
+    files: 2
+    bytes_skill_md: 14218
+    bytes_total: 27996
+    approx_tokens_skill_md: 3554
+    approx_tokens_total: 6999
   tags:
   - vapi
   - voice

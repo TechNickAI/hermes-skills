@@ -3,6 +3,9 @@
 This file is generated from each skill's metadata. Do not edit it by hand.
 Use it to choose a small set of relevant skills without opening every skill file.
 
+`Claude` values: `native` (works fully), `degraded` (runs but loses its
+differentiator — say so out loud), `unsupported` (never recommend it in Claude).
+
 ## deep-dive
 
 - **Pack:** core
@@ -12,6 +15,8 @@ Use it to choose a small set of relevant skills without opening every skill file
 - **Prerequisites:** None
 - **Works without setup:** Yes
 - **Compatibility:** Portable to Hermes and Claude Code. In Claude, map the named research tools and delegation/panel mechanisms to available equivalents; unsupported source classes are reported, not silently omitted.
+- **Claude:** degraded — Full method in Claude Code using its own web, file, and subagent tools; prior-session search and cross-family synthesis are unavailable.
+- **Size:** 34,360 B always-loaded (~8,590 tokens); 34,360 B across 1 file(s) total
 - **Path:** `skills/core/deep-dive`
 
 ## grok-search
@@ -23,6 +28,8 @@ Use it to choose a small set of relevant skills without opening every skill file
 - **Prerequisites:** env: XAI_API_KEY (xAI console)
 - **Works without setup:** No
 - **Compatibility:** Agent Skills standard
+- **Claude:** native — Works in Claude once its prerequisites are met.
+- **Size:** 5,499 B always-loaded (~1,375 tokens); 23,112 B across 4 file(s) total
 - **Path:** `skills/core/grok-search`
 
 ## keep-going
@@ -34,6 +41,8 @@ Use it to choose a small set of relevant skills without opening every skill file
 - **Prerequisites:** None
 - **Works without setup:** Yes
 - **Compatibility:** Portable to Hermes, Claude Code, and similar coding agents.
+- **Claude:** native — Works in Claude with no additional setup.
+- **Size:** 3,453 B always-loaded (~863 tokens); 3,453 B across 1 file(s) total
 - **Path:** `skills/core/keep-going`
 
 ## memory-cleanup
@@ -45,6 +54,8 @@ Use it to choose a small set of relevant skills without opening every skill file
 - **Prerequisites:** None
 - **Works without setup:** Yes
 - **Compatibility:** Hermes-specific memory-file layout and conventions.
+- **Claude:** unsupported — Cleans Hermes MEMORY.md / USER.md / SOUL.md files, which do not exist in Claude.
+- **Size:** 17,524 B always-loaded (~4,381 tokens); 50,529 B across 8 file(s) total
 - **Path:** `skills/core/memory-cleanup`
 
 ## moa-solve
@@ -56,6 +67,8 @@ Use it to choose a small set of relevant skills without opening every skill file
 - **Prerequisites:** None
 - **Works without setup:** Yes
 - **Compatibility:** Hermes-specific; requires the native MoA runtime.
+- **Claude:** unsupported — Requires the native Hermes MoA fan-out runtime.
+- **Size:** 19,681 B always-loaded (~4,920 tokens); 41,130 B across 5 file(s) total
 - **Path:** `skills/core/moa-solve`
 
 ## mob-check
@@ -67,6 +80,8 @@ Use it to choose a small set of relevant skills without opening every skill file
 - **Prerequisites:** None
 - **Works without setup:** Yes
 - **Compatibility:** Agent Skills standard
+- **Claude:** native — Works in Claude with no additional setup.
+- **Size:** 16,908 B always-loaded (~4,227 tokens); 58,589 B across 4 file(s) total
 - **Path:** `skills/core/mob-check`
 
 ## multi-review
@@ -78,6 +93,8 @@ Use it to choose a small set of relevant skills without opening every skill file
 - **Prerequisites:** None
 - **Works without setup:** Yes
 - **Compatibility:** Portable review method. Native multi-model orchestration examples are Hermes-specific; Claude can run the method with Claude subagents but loses model-family diversity.
+- **Claude:** degraded — The review method transfers, but cross-model-family diversity needs Hermes; in Claude it becomes Claude reviewing Claude.
+- **Size:** 48,649 B always-loaded (~12,162 tokens); 131,739 B across 17 file(s) total
 - **Path:** `skills/core/multi-review`
 
 ## project-steward
@@ -89,6 +106,8 @@ Use it to choose a small set of relevant skills without opening every skill file
 - **Prerequisites:** env: TELEGRAM_BOT_TOKEN (for the living board)
 - **Works without setup:** No
 - **Compatibility:** Agent Skills standard
+- **Claude:** unsupported — Drives a Hermes living board and cron cadence.
+- **Size:** 23,679 B always-loaded (~5,920 tokens); 122,549 B across 9 file(s) total
 - **Path:** `skills/core/project-steward`
 
 ## recall
@@ -100,6 +119,8 @@ Use it to choose a small set of relevant skills without opening every skill file
 - **Prerequisites:** None
 - **Works without setup:** Yes
 - **Compatibility:** Hermes-specific session and memory stores.
+- **Claude:** unsupported — Reads Hermes session and memory stores, which Claude does not have.
+- **Size:** 11,028 B always-loaded (~2,757 tokens); 20,672 B across 4 file(s) total
 - **Path:** `skills/core/recall`
 
 ## report
@@ -111,6 +132,8 @@ Use it to choose a small set of relevant skills without opening every skill file
 - **Prerequisites:** None
 - **Works without setup:** Yes
 - **Compatibility:** Hermes-specific reporting and routing tools.
+- **Claude:** unsupported — Uses Hermes reporting and routing tools.
+- **Size:** 11,568 B always-loaded (~2,892 tokens); 30,517 B across 3 file(s) total
 - **Path:** `skills/core/report`
 
 ## robustify-doctor
@@ -122,6 +145,8 @@ Use it to choose a small set of relevant skills without opening every skill file
 - **Prerequisites:** Python 3.9+ (stdlib only, no third-party packages), Read access to the target agent's HERMES_HOME
 - **Works without setup:** No
 - **Compatibility:** Hermes-specific runtime and HERMES_HOME layout.
+- **Claude:** unsupported — Inspects a Hermes runtime and HERMES_HOME layout.
+- **Size:** 16,283 B always-loaded (~4,071 tokens); 172,123 B across 7 file(s) total
 - **Path:** `skills/core/robustify-doctor`
 
 ## skill-librarian
@@ -133,6 +158,8 @@ Use it to choose a small set of relevant skills without opening every skill file
 - **Prerequisites:** None
 - **Works without setup:** Yes
 - **Compatibility:** Agent Skills standard
+- **Claude:** degraded — Audits Hermes skill layout; the method transfers, the paths do not.
+- **Size:** 13,065 B always-loaded (~3,266 tokens); 188,707 B across 7 file(s) total
 - **Path:** `skills/core/skill-librarian`
 
 ## trust-framework
@@ -144,6 +171,8 @@ Use it to choose a small set of relevant skills without opening every skill file
 - **Prerequisites:** None
 - **Works without setup:** Yes
 - **Compatibility:** Agent Skills standard
+- **Claude:** native — Works in Claude with no additional setup.
+- **Size:** 22,932 B always-loaded (~5,733 tokens); 44,717 B across 6 file(s) total
 - **Path:** `skills/core/trust-framework`
 
 ## address-pr-comments
@@ -155,6 +184,8 @@ Use it to choose a small set of relevant skills without opening every skill file
 - **Prerequisites:** gh CLI, authenticated
 - **Works without setup:** No
 - **Compatibility:** Agent Skills standard
+- **Claude:** native — Works in Claude once its prerequisites are met.
+- **Size:** 19,751 B always-loaded (~4,938 tokens); 63,432 B across 10 file(s) total
 - **Path:** `skills/engineering/address-pr-comments`
 
 ## diagram-rendering
@@ -166,6 +197,8 @@ Use it to choose a small set of relevant skills without opening every skill file
 - **Prerequisites:** chromium binary on PATH (or CHROMIUM_BIN) for local rasterize, network access to a Kroki host (KROKI_BASE) and QuickChart (QUICKCHART_BASE)
 - **Works without setup:** No
 - **Compatibility:** Agent Skills standard
+- **Claude:** native — Works in Claude once its prerequisites are met.
+- **Size:** 10,197 B always-loaded (~2,549 tokens); 37,552 B across 4 file(s) total
 - **Path:** `skills/engineering/diagram-rendering`
 
 ## mini-app
@@ -177,6 +210,8 @@ Use it to choose a small set of relevant skills without opening every skill file
 - **Prerequisites:** host services: Caddy + PM2, Tailscale Serve/Funnel
 - **Works without setup:** No
 - **Compatibility:** Agent Skills standard
+- **Claude:** unsupported — Operates Hermes-config mini-app host services.
+- **Size:** 45,652 B always-loaded (~11,413 tokens); 87,321 B across 12 file(s) total
 - **Path:** `skills/engineering/mini-app`
 
 ## pr-review-sweep
@@ -188,6 +223,8 @@ Use it to choose a small set of relevant skills without opening every skill file
 - **Prerequisites:** gh CLI, authenticated, Hermes delegation toolset enabled
 - **Works without setup:** No
 - **Compatibility:** Agent Skills standard
+- **Claude:** unsupported — Depends on the Hermes delegation toolset.
+- **Size:** 8,107 B always-loaded (~2,027 tokens); 52,992 B across 11 file(s) total
 - **Path:** `skills/engineering/pr-review-sweep`
 
 ## email-steward
@@ -199,6 +236,8 @@ Use it to choose a small set of relevant skills without opening every skill file
 - **Prerequisites:** email CLI: gog or himalaya, Hermes cron + delegation toolsets enabled
 - **Works without setup:** No
 - **Compatibility:** Agent Skills standard
+- **Claude:** unsupported — Depends on Hermes cron and delegation toolsets.
+- **Size:** 13,873 B always-loaded (~3,468 tokens); 42,428 B across 12 file(s) total
 - **Path:** `skills/productivity/email-steward`
 
 ## google-docs
@@ -210,6 +249,8 @@ Use it to choose a small set of relevant skills without opening every skill file
 - **Prerequisites:** gog CLI, authorized via `gog auth login`
 - **Works without setup:** No
 - **Compatibility:** Agent Skills standard
+- **Claude:** native — Works in Claude once its prerequisites are met.
+- **Size:** 10,575 B always-loaded (~2,644 tokens); 35,680 B across 5 file(s) total
 - **Path:** `skills/productivity/google-docs`
 
 ## google-sheets
@@ -221,6 +262,8 @@ Use it to choose a small set of relevant skills without opening every skill file
 - **Prerequisites:** gog CLI, authorized for Google Sheets and Drive, python3, pdftoppm (poppler-utils), for multipage visual QA rasterization, uv, to run the XLSX verification snippets, openpyxl, via `uv run --with openpyxl` (not a standing install)
 - **Works without setup:** No
 - **Compatibility:** Agent Skills standard
+- **Claude:** native — Works in Claude once its prerequisites are met.
+- **Size:** 14,728 B always-loaded (~3,682 tokens); 34,909 B across 4 file(s) total
 - **Path:** `skills/productivity/google-sheets`
 
 ## google-slides
@@ -232,6 +275,8 @@ Use it to choose a small set of relevant skills without opening every skill file
 - **Prerequisites:** gog CLI, authorized via `gog auth login`, pandoc (for markdown conversion)
 - **Works without setup:** No
 - **Compatibility:** Agent Skills standard
+- **Claude:** native — Works in Claude once its prerequisites are met.
+- **Size:** 9,307 B always-loaded (~2,327 tokens); 24,155 B across 2 file(s) total
 - **Path:** `skills/productivity/google-slides`
 
 ## imessage-bluebubbles
@@ -243,6 +288,8 @@ Use it to choose a small set of relevant skills without opening every skill file
 - **Prerequisites:** macOS with Messages.app signed into iMessage, BlueBubbles server app (installed by scripts/setup-bluebubbles.sh), Full Disk Access granted by hand (macOS permission prompts cannot be scripted), python3 with the requests package
 - **Works without setup:** No
 - **Compatibility:** Agent Skills standard
+- **Claude:** native — Works in Claude once its prerequisites are met.
+- **Size:** 21,156 B always-loaded (~5,289 tokens); 84,352 B across 8 file(s) total
 - **Path:** `skills/productivity/imessage-bluebubbles`
 
 ## vapi-calls
@@ -254,4 +301,6 @@ Use it to choose a small set of relevant skills without opening every skill file
 - **Prerequisites:** env: VAPI_API_KEY (Vapi dashboard → API Keys, private key)
 - **Works without setup:** No
 - **Compatibility:** Agent Skills standard
+- **Claude:** native — Works in Claude once its prerequisites are met.
+- **Size:** 14,218 B always-loaded (~3,554 tokens); 27,996 B across 2 file(s) total
 - **Path:** `skills/productivity/vapi-calls`
