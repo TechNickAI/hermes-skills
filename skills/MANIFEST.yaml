@@ -305,7 +305,7 @@ skills:
   path: skills/engineering/pr-review-sweep
 - name: book-a-time
   pack: productivity
-  version: 1.0.0
+  version: 1.0.1
   scope: solo
   summary: Use when the user asks to find, offer, share, or book meeting times by email, including recurring meetings.
   use_when: the user asks to find, offer, share, or book meeting times by email, including recurring meetings. Checks every configured calendar, sends polished booking buttons, and creates an event only after the recipient confirms.

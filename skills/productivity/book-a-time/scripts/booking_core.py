@@ -26,6 +26,7 @@ UTC = timezone.utc
 EMAIL_RE = re.compile(r"^[^\s@]+@[^\s@]+\.[^\s@]+$")
 TOKEN_RE = re.compile(r"^[A-Za-z0-9_-]{40,80}$")
 OPTION_RE = re.compile(r"^[a-f0-9]{16}$")
+GMAIL_THREAD_RE = re.compile(r"^[A-Za-z0-9_-]{8,128}$")
 RRULE_RE = re.compile(r"^RRULE:FREQ=WEEKLY;UNTIL=\d{8}T235959Z$")
 ACTIVE_STATUSES = {"draft", "sent", "booking"}
 WEEKDAY_NAMES = (
@@ -120,6 +121,15 @@ def clean_text(value: str, *, label: str, maximum: int) -> str:
     if not normalized or len(normalized) > maximum:
         raise BookingError(f"{label} must be between 1 and {maximum} characters")
     return normalized
+
+
+def normalize_email_subject(value: str) -> str:
+    subject = " ".join(value.split())
+    while True:
+        stripped = re.sub(r"^(?:re|fw|fwd)\s*:\s*", "", subject, count=1, flags=re.I)
+        if stripped == subject:
+            return subject.casefold()
+        subject = stripped
 
 
 def parse_bool(value: str | None, default: bool) -> bool:
@@ -294,6 +304,8 @@ CREATE TABLE IF NOT EXISTS proposals (
     delivery_status TEXT NOT NULL DEFAULT 'creating',
     gmail_draft_id TEXT,
     gmail_message_id TEXT,
+    gmail_thread_id TEXT NOT NULL DEFAULT '',
+    reply_subject TEXT NOT NULL DEFAULT '',
     sent_at TEXT,
     last_error TEXT,
     booked_option_id TEXT,
@@ -319,6 +331,12 @@ PROPOSAL_MIGRATIONS = {
     ),
     "gmail_draft_id": "ALTER TABLE proposals ADD COLUMN gmail_draft_id TEXT",
     "gmail_message_id": "ALTER TABLE proposals ADD COLUMN gmail_message_id TEXT",
+    "gmail_thread_id": (
+        "ALTER TABLE proposals ADD COLUMN gmail_thread_id TEXT NOT NULL DEFAULT ''"
+    ),
+    "reply_subject": (
+        "ALTER TABLE proposals ADD COLUMN reply_subject TEXT NOT NULL DEFAULT ''"
+    ),
     "sent_at": "ALTER TABLE proposals ADD COLUMN sent_at TEXT",
     "last_error": "ALTER TABLE proposals ADD COLUMN last_error TEXT",
     "recurrence_rule": (
@@ -383,6 +401,8 @@ class BookingStore:
         slots: Sequence[tuple[datetime, datetime]],
         recurrence_rule: str = "",
         recurrence_until: str = "",
+        gmail_thread_id: str = "",
+        reply_subject: str = "",
     ) -> tuple[str, list[dict[str, str]]]:
         if recurrence_rule and not RRULE_RE.fullmatch(recurrence_rule):
             raise BookingError("unsupported recurrence rule")
@@ -412,8 +432,9 @@ class BookingStore:
                 INSERT INTO proposals (
                     id, dedupe_key, token_hash, guest_name, guest_email, title, note,
                     guest_timezone, duration_minutes, recurrence_rule, recurrence_until,
-                    created_at, expires_at, status, delivery_status
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'draft', 'creating')
+                    gmail_thread_id, reply_subject, created_at, expires_at, status,
+                    delivery_status
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'draft', 'creating')
                 """,
                 (
                     proposal_id,
@@ -427,6 +448,8 @@ class BookingStore:
                     duration_minutes,
                     recurrence_rule,
                     recurrence_until,
+                    gmail_thread_id,
+                    reply_subject,
                     iso_utc(created_at),
                     iso_utc(expires_at),
                 ),
@@ -741,6 +764,113 @@ class GogClient:
             return draft["id"].strip()
         return ""
 
+    @staticmethod
+    def _message_headers(message: dict[str, Any]) -> dict[str, str]:
+        payload = message.get("payload", {})
+        raw_headers = payload.get("headers", []) if isinstance(payload, dict) else []
+        if not isinstance(raw_headers, list):
+            return {}
+        return {
+            str(item.get("name", "")).casefold(): str(item.get("value", ""))
+            for item in raw_headers
+            if isinstance(item, dict) and item.get("name")
+        }
+
+    def validate_reply_thread(
+        self,
+        thread_id: str,
+        *,
+        guest_email: str,
+        expected_subject: str = "",
+    ) -> dict[str, str]:
+        if not GMAIL_THREAD_RE.fullmatch(thread_id):
+            raise BookingError("invalid Gmail thread ID")
+        payload = self.run(["gmail", "thread", "get", thread_id])
+        thread = payload.get("thread", payload)
+        if not isinstance(thread, dict):
+            raise BookingError("Gmail returned no matching thread")
+        actual_id = str(thread.get("id", ""))
+        if actual_id != thread_id:
+            raise BookingError("Gmail returned a different thread than requested")
+        messages = thread.get("messages", [])
+        if not isinstance(messages, list) or not messages:
+            raise BookingError("Gmail thread has no messages")
+
+        participants: set[str] = set()
+        latest_subject = ""
+        for message in messages:
+            if not isinstance(message, dict):
+                continue
+            headers = self._message_headers(message)
+            latest_subject = headers.get("subject", latest_subject)
+            participants.update(
+                address.casefold()
+                for _name, address in getaddresses(
+                    [headers.get("from", ""), headers.get("to", ""), headers.get("cc", "")]
+                )
+                if address
+            )
+
+        required = {
+            guest_email.casefold(),
+            self.settings.account.casefold(),
+            self.settings.owner_email.casefold(),
+        }
+        if not required.issubset(participants):
+            raise BookingError(
+                "the Gmail thread must include the guest, assistant, and calendar owner"
+            )
+        if not latest_subject:
+            raise BookingError("Gmail thread has no subject")
+        if expected_subject and normalize_email_subject(latest_subject) != normalize_email_subject(
+            expected_subject
+        ):
+            raise BookingError("Gmail thread subject changed before delivery")
+        return {"thread_id": thread_id, "subject": latest_subject}
+
+    def find_reply_thread(self, *, subject: str, guest_email: str) -> dict[str, str]:
+        normalized_subject = normalize_email_subject(subject)
+        if not normalized_subject:
+            raise BookingError("provide the source email subject for a thread reply")
+        query = (
+            f"in:anywhere newer_than:365d "
+            f"{{from:{guest_email} to:{guest_email} cc:{guest_email}}}"
+        )
+        payload = self.run(["gmail", "search", query, "--max", "20"])
+        threads = payload.get("threads", [])
+        if not isinstance(threads, list):
+            raise BookingError("Gmail search returned no thread list")
+
+        matches: list[dict[str, str]] = []
+        seen: set[str] = set()
+        for candidate in threads:
+            if not isinstance(candidate, dict):
+                continue
+            thread_id = str(candidate.get("id", ""))
+            candidate_subject = str(candidate.get("subject", ""))
+            if thread_id in seen or normalize_email_subject(candidate_subject) != normalized_subject:
+                continue
+            seen.add(thread_id)
+            try:
+                matches.append(
+                    self.validate_reply_thread(
+                        thread_id,
+                        guest_email=guest_email,
+                        expected_subject=subject,
+                    )
+                )
+            except BookingError:
+                continue
+        if not matches:
+            raise BookingError(
+                "no eligible Gmail thread matched that subject and guest; no email was sent"
+            )
+        if len(matches) != 1:
+            raise BookingError(
+                "multiple eligible Gmail threads matched; provide --reply-thread-id"
+            )
+        return matches[0]
+
     def busy_periods(self, start: datetime, end: datetime) -> list[tuple[datetime, datetime]]:
         calendar_ids = self.settings.busy_calendar_ids or (self.settings.calendar_id,)
         payload = self.run(
@@ -866,6 +996,7 @@ class GogClient:
         plain_body: str,
         html_body: str,
         state_dir: Path,
+        reply_thread_id: str = "",
     ) -> dict[str, Any]:
         state_dir.mkdir(mode=0o700, parents=True, exist_ok=True)
         with tempfile.NamedTemporaryFile(
@@ -881,13 +1012,18 @@ class GogClient:
         os.chmod(plain_path, 0o600)
         os.chmod(html_path, 0o600)
         try:
-            response = self.run(
+            arguments = ["gmail", "drafts", "create"]
+            if reply_thread_id:
+                self.validate_reply_thread(
+                    reply_thread_id,
+                    guest_email=recipient,
+                    expected_subject=subject,
+                )
+                arguments.extend(["--thread-id", reply_thread_id, "--reply-all"])
+            else:
+                arguments.extend(["--to", recipient])
+            arguments.extend(
                 [
-                    "gmail",
-                    "drafts",
-                    "create",
-                    "--to",
-                    recipient,
                     "--subject",
                     subject,
                     "--body-file",
@@ -896,6 +1032,7 @@ class GogClient:
                     str(html_path),
                 ]
             )
+            response = self.run(arguments)
             draft_id = self._draft_id(response)
             if not draft_id:
                 raise BookingError("Gmail created no durable draft ID")
@@ -919,7 +1056,14 @@ class GogClient:
                 return False
             raise
 
-    def verify_sent(self, message_id: str, *, recipient: str, subject: str) -> None:
+    def verify_sent(
+        self,
+        message_id: str,
+        *,
+        recipient: str,
+        subject: str,
+        expected_thread_id: str = "",
+    ) -> None:
         payload = self.run(
             [
                 "gmail",
@@ -928,7 +1072,7 @@ class GogClient:
                 "--format",
                 "metadata",
                 "--headers",
-                "To,Subject",
+                "To,Cc,Subject",
             ]
         )
         message = payload.get("message", payload)
@@ -942,7 +1086,8 @@ class GogClient:
             headers = {}
         actual_subject = headers.get("subject", "")
         actual_to = headers.get("to", "")
-        if not actual_subject or not actual_to:
+        actual_cc = headers.get("cc", "")
+        if not actual_subject or (not actual_to and not actual_cc):
             raw_headers = message.get("payload", {}).get("headers", [])
             if isinstance(raw_headers, list):
                 flattened = {
@@ -952,9 +1097,21 @@ class GogClient:
                 }
                 actual_subject = actual_subject or flattened.get("subject", "")
                 actual_to = actual_to or flattened.get("to", "")
-        recipients = {address.casefold() for _name, address in getaddresses([str(actual_to)])}
+                actual_cc = actual_cc or flattened.get("cc", "")
+        recipients = {
+            address.casefold()
+            for _name, address in getaddresses([str(actual_to), str(actual_cc)])
+        }
         if recipient.casefold() not in recipients or str(actual_subject) != subject:
             raise BookingError("Gmail Sent copy does not match the intended recipient and subject")
+        if expected_thread_id:
+            actual_thread_id = str(
+                message.get("threadId", message.get("thread_id", payload.get("threadId", "")))
+            )
+            if actual_thread_id != expected_thread_id:
+                raise BookingError("Gmail Sent copy was not delivered in the intended thread")
+            if self.settings.owner_email.casefold() not in recipients:
+                raise BookingError("Gmail thread reply did not keep the calendar owner copied")
 
     def gmail_ready(self) -> None:
         self.run(["gmail", "search", "in:sent newer_than:1d", "--max", "1"])

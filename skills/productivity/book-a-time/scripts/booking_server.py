@@ -102,6 +102,21 @@ class BookingHandler(BaseHTTPRequestHandler):
             if part
         ]
 
+    def reject_confirmation(self, reason: str) -> None:
+        origin = urllib.parse.urlparse(self.headers.get("Origin", ""))
+        LOGGER.warning(
+            "confirmation rejected reason=%s origin=%s",
+            reason,
+            (origin.netloc or "none")[:200],
+        )
+        self.send_html(
+            HTTPStatus.FORBIDDEN,
+            render_error_page(
+                self.settings,
+                "This confirmation could not be verified. Please return to the email and try again.",
+            ),
+        )
+
     def load_proposal(self, token: str) -> dict[str, Any] | None:
         if not TOKEN_RE.fullmatch(token):
             return None
@@ -187,12 +202,6 @@ class BookingHandler(BaseHTTPRequestHandler):
         if not TOKEN_RE.fullmatch(token) or not OPTION_RE.fullmatch(option_id):
             self.send_error(HTTPStatus.NOT_FOUND)
             return
-        origin = self.headers.get("Origin", "")
-        public_origin = urllib.parse.urlparse(self.settings.public_base_url)
-        expected_origin = f"{public_origin.scheme}://{public_origin.netloc}"
-        if origin and origin.rstrip("/") != expected_origin:
-            self.send_error(HTTPStatus.FORBIDDEN)
-            return
         try:
             length = int(self.headers.get("Content-Length", "0"))
         except ValueError:
@@ -211,7 +220,7 @@ class BookingHandler(BaseHTTPRequestHandler):
         )
         supplied = form.get("confirmation", [""])[0]
         if not valid_confirmation(self.settings, token, option_id, supplied):
-            self.send_error(HTTPStatus.FORBIDDEN)
+            self.reject_confirmation("invalid_signature")
             return
 
         retry_url = f"{self.settings.public_base_url}/{token}"

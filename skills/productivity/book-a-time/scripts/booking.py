@@ -74,6 +74,7 @@ def dedupe_key(
     guest_timezone: str,
     recurrence_rule: str = "",
     recurrence_until: str = "",
+    gmail_thread_id: str = "",
 ) -> str:
     payload = "\0".join(
         (
@@ -85,6 +86,7 @@ def dedupe_key(
             guest_timezone,
             recurrence_rule,
             recurrence_until,
+            gmail_thread_id,
         )
     )
     return hashlib.sha256(payload.encode("utf-8")).hexdigest()
@@ -101,10 +103,15 @@ def public_result(proposal: dict[str, object]) -> dict[str, object]:
         "options": proposal.get("options", []),
         "recurrence_rule": proposal.get("recurrence_rule", ""),
         "recurrence_until": proposal.get("recurrence_until", ""),
+        "delivery_mode": (
+            "thread_reply" if proposal.get("gmail_thread_id") else "new_email"
+        ),
     }
 
 
 def proposal_subject(settings: Settings, proposal: dict[str, object]) -> str:
+    if proposal.get("reply_subject"):
+        return str(proposal["reply_subject"])
     if proposal.get("recurrence_rule"):
         return f"Recurring times with {settings.owner_name}"
     return f"A few times with {settings.owner_name}"
@@ -125,6 +132,7 @@ def verify_and_finish(
                 message_id,
                 recipient=str(proposal["guest_email"]),
                 subject=subject,
+                expected_thread_id=str(proposal.get("gmail_thread_id") or ""),
             )
             last_error = None
             break
@@ -161,6 +169,7 @@ def deliver_proposal(
             message_id,
             recipient=str(proposal["guest_email"]),
             subject=subject,
+            expected_thread_id=str(proposal.get("gmail_thread_id") or ""),
         )
         return public_result(proposal)
     if delivery_status == "sending":
@@ -194,6 +203,7 @@ def deliver_proposal(
                 plain_body=plain_body,
                 html_body=html_body,
                 state_dir=state_dir,
+                reply_thread_id=str(proposal.get("gmail_thread_id") or ""),
             )
         except BookingError:
             store.delete_draft(proposal_id)
@@ -283,13 +293,34 @@ def propose(args: argparse.Namespace) -> dict[str, object]:
         raise BookingError("--weekday and --repeat-until require --weekly")
 
     client = GogClient(settings)
+    gmail_thread_id = ""
+    reply_subject = ""
+    if args.reply_thread_id:
+        reply_context = client.validate_reply_thread(
+            args.reply_thread_id,
+            guest_email=guest_email,
+        )
+        gmail_thread_id = reply_context["thread_id"]
+        reply_subject = reply_context["subject"]
+    elif args.reply_subject:
+        source_subject = clean_text(
+            args.reply_subject,
+            label="reply subject",
+            maximum=998,
+        )
+        reply_context = client.find_reply_thread(
+            subject=source_subject,
+            guest_email=guest_email,
+        )
+        gmail_thread_id = reply_context["thread_id"]
+        reply_subject = reply_context["subject"]
     store: BookingStore | None = None
     existing: dict[str, object] | None = None
     idempotency_key = ""
     if not args.preview:
         if args.idempotency_key:
             idempotency_key = hashlib.sha256(
-                f"caller\0{args.idempotency_key}".encode("utf-8")
+                f"caller\0{args.idempotency_key}\0{gmail_thread_id}".encode("utf-8")
             ).hexdigest()
         else:
             idempotency_key = dedupe_key(
@@ -301,6 +332,7 @@ def propose(args: argparse.Namespace) -> dict[str, object]:
                 guest_timezone=args.guest_timezone,
                 recurrence_rule=recurrence_rule,
                 recurrence_until=recurrence_until,
+                gmail_thread_id=gmail_thread_id,
             )
         store = BookingStore(settings.database_path)
         existing = store.get_by_dedupe_key(idempotency_key)
@@ -315,6 +347,7 @@ def propose(args: argparse.Namespace) -> dict[str, object]:
                     str(existing["gmail_message_id"]),
                     recipient=guest_email,
                     subject=subject,
+                    expected_thread_id=str(existing.get("gmail_thread_id") or ""),
                 )
                 return public_result(existing)
             return deliver_proposal(
@@ -376,6 +409,8 @@ def propose(args: argparse.Namespace) -> dict[str, object]:
             "duration_minutes": args.duration,
             "recurrence_rule": recurrence_rule,
             "recurrence_until": recurrence_until,
+            "gmail_thread_id": gmail_thread_id,
+            "reply_subject": reply_subject,
             "created_at": iso_utc(utc_now()),
             "expires_at": iso_utc(utc_now() + timedelta(hours=settings.proposal_ttl_hours)),
             "status": "draft",
@@ -427,6 +462,8 @@ def propose(args: argparse.Namespace) -> dict[str, object]:
                 slots=slots,
                 recurrence_rule=recurrence_rule,
                 recurrence_until=recurrence_until,
+                gmail_thread_id=gmail_thread_id,
+                reply_subject=reply_subject,
             )
             proposal = store.get_by_id(proposal_id)
         except sqlite3.IntegrityError:
@@ -448,6 +485,7 @@ def propose(args: argparse.Namespace) -> dict[str, object]:
                 str(proposal["gmail_message_id"]),
                 recipient=guest_email,
                 subject=subject,
+                expected_thread_id=str(proposal.get("gmail_thread_id") or ""),
             )
             return public_result(proposal)
         return deliver_proposal(
@@ -557,6 +595,15 @@ def parser() -> argparse.ArgumentParser:
     create.add_argument("--weekday", type=parse_weekday)
     create.add_argument("--repeat-until", type=parse_date)
     create.add_argument("--guest-timezone", default="America/Denver")
+    reply = create.add_mutually_exclusive_group()
+    reply.add_argument(
+        "--reply-subject",
+        help="exact source email subject; reply only when one eligible Gmail thread matches",
+    )
+    reply.add_argument(
+        "--reply-thread-id",
+        help="explicit Gmail thread ID after an ambiguous subject match",
+    )
     create.add_argument(
         "--idempotency-key",
         help="stable caller-supplied key; identical requests otherwise deduplicate automatically",

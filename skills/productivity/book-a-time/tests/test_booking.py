@@ -37,6 +37,37 @@ from booking_server import build_server  # noqa: E402
 UTC = timezone.utc
 
 
+def gmail_thread_payload(
+    thread_id: str,
+    *,
+    subject: str = "Re: Project conversation",
+    participants: tuple[str, ...] = (
+        "owner@example.com",
+        "assistant@example.com",
+        "alex@example.com",
+    ),
+) -> dict[str, object]:
+    owner, assistant, guest = participants
+    return {
+        "thread": {
+            "id": thread_id,
+            "messages": [
+                {
+                    "id": "message-source",
+                    "payload": {
+                        "headers": [
+                            {"name": "From", "value": owner},
+                            {"name": "To", "value": guest},
+                            {"name": "Cc", "value": assistant},
+                            {"name": "Subject", "value": subject},
+                        ]
+                    },
+                }
+            ],
+        }
+    }
+
+
 def settings_for(root: Path) -> Settings:
     return Settings(
         state_dir=root,
@@ -119,9 +150,12 @@ class FakeGmail:
         self.create_calls = 0
         self.send_calls = 0
         self.verify_calls = 0
+        self.create_kwargs = {}
+        self.verify_kwargs = {}
 
-    def create_email_draft(self, **_kwargs):
+    def create_email_draft(self, **kwargs):
         self.create_calls += 1
+        self.create_kwargs = kwargs
         return {"draft_id": "draft-1"}
 
     def send_draft(self, _draft_id):
@@ -136,8 +170,9 @@ class FakeGmail:
     def find_sent_reference(self, _reference):
         return ""
 
-    def verify_sent(self, _message_id, **_kwargs):
+    def verify_sent(self, _message_id, **kwargs):
         self.verify_calls += 1
+        self.verify_kwargs = kwargs
 
     @staticmethod
     def _message_id(payload):
@@ -176,6 +211,133 @@ class BookingCoreTests(unittest.TestCase):
             self.assertEqual(environment["GOG_KEYRING_PASSWORD"], "keyring-test-password")
             self.assertEqual(environment["GOG_ACCOUNT"], "assistant@example.com")
             self.assertNotIn("keyring-test-password", repr(settings))
+
+    def test_reply_thread_requires_guest_assistant_and_owner(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            client = GogClient(settings_for(Path(temporary)))
+            thread_id = "19abcdef01234567"
+            with patch.object(
+                client,
+                "run",
+                return_value=gmail_thread_payload(
+                    thread_id,
+                    participants=(
+                        "owner@example.com",
+                        "other-assistant@example.com",
+                        "alex@example.com",
+                    ),
+                ),
+            ):
+                with self.assertRaisesRegex(BookingError, "guest, assistant, and"):
+                    client.validate_reply_thread(
+                        thread_id,
+                        guest_email="alex@example.com",
+                    )
+
+    def test_reply_subject_resolves_one_exact_eligible_thread(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            client = GogClient(settings_for(Path(temporary)))
+            thread_id = "19abcdef01234567"
+            responses = [
+                {
+                    "threads": [
+                        {"id": "19aaaaaaaaaaaaaa", "subject": "Different topic"},
+                        {"id": thread_id, "subject": "Project conversation"},
+                    ]
+                },
+                gmail_thread_payload(thread_id),
+            ]
+            with patch.object(client, "run", side_effect=responses):
+                result = client.find_reply_thread(
+                    subject="Project conversation",
+                    guest_email="alex@example.com",
+                )
+
+            self.assertEqual(result["thread_id"], thread_id)
+            self.assertEqual(result["subject"], "Re: Project conversation")
+
+    def test_reply_subject_fails_closed_when_multiple_threads_match(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            client = GogClient(settings_for(Path(temporary)))
+            first = "19abcdef01234567"
+            second = "19abcdef01234568"
+            responses = [
+                {
+                    "threads": [
+                        {"id": first, "subject": "Project conversation"},
+                        {"id": second, "subject": "Re: Project conversation"},
+                    ]
+                },
+                gmail_thread_payload(first),
+                gmail_thread_payload(second),
+            ]
+            with patch.object(client, "run", side_effect=responses):
+                with self.assertRaisesRegex(BookingError, "multiple eligible"):
+                    client.find_reply_thread(
+                        subject="Project conversation",
+                        guest_email="alex@example.com",
+                    )
+
+    def test_thread_reply_draft_uses_reply_all_instead_of_new_recipient(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            client = GogClient(settings_for(Path(temporary)))
+            thread_id = "19abcdef01234567"
+            responses = [gmail_thread_payload(thread_id), {"draftId": "draft-1"}]
+            with patch.object(client, "run", side_effect=responses) as run:
+                result = client.create_email_draft(
+                    recipient="alex@example.com",
+                    subject="Re: Project conversation",
+                    plain_body="Plain",
+                    html_body="<p>HTML</p>",
+                    state_dir=Path(temporary),
+                    reply_thread_id=thread_id,
+                )
+
+            self.assertEqual(result["draft_id"], "draft-1")
+            arguments = run.call_args_list[1].args[0]
+            self.assertIn("--thread-id", arguments)
+            self.assertIn(thread_id, arguments)
+            self.assertIn("--reply-all", arguments)
+            self.assertNotIn("--to", arguments)
+
+    def test_new_email_draft_keeps_explicit_recipient(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            client = GogClient(settings_for(Path(temporary)))
+            with patch.object(client, "run", return_value={"draftId": "draft-1"}) as run:
+                client.create_email_draft(
+                    recipient="alex@example.com",
+                    subject="A few times with the calendar owner",
+                    plain_body="Plain",
+                    html_body="<p>HTML</p>",
+                    state_dir=Path(temporary),
+                )
+
+            arguments = run.call_args.args[0]
+            self.assertIn("--to", arguments)
+            self.assertNotIn("--thread-id", arguments)
+
+    def test_sent_thread_reply_accepts_guest_in_cc_and_checks_thread(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            client = GogClient(settings_for(Path(temporary)))
+            payload = {
+                "message": {
+                    "id": "message-1",
+                    "threadId": "19abcdef01234567",
+                    "labelIds": ["SENT"],
+                },
+                "headers": {
+                    "to": "Owner <owner@example.com>",
+                    "cc": "Alex <alex@example.com>",
+                    "subject": "Re: Project conversation",
+                },
+            }
+            with patch.object(client, "run", return_value=payload):
+                client.verify_sent(
+                    "message-1",
+                    recipient="alex@example.com",
+                    subject="Re: Project conversation",
+                    expected_thread_id="19abcdef01234567",
+                )
 
     def test_freebusy_merges_every_configured_calendar(self):
         with tempfile.TemporaryDirectory() as temporary:
@@ -463,6 +625,8 @@ class BookingCoreTests(unittest.TestCase):
                 guest_timezone="America/New_York",
                 duration_minutes=30,
                 expires_at=datetime.now(UTC) + timedelta(days=3),
+                gmail_thread_id="19abcdef01234567",
+                reply_subject="Re: Project conversation",
                 slots=[
                     (
                         datetime(2027, 1, 11, 17, 0, tzinfo=UTC),
@@ -490,9 +654,16 @@ class BookingCoreTests(unittest.TestCase):
             self.assertEqual(persisted["delivery_status"], "verified")
             self.assertEqual(persisted["gmail_draft_id"], "draft-1")
             self.assertEqual(persisted["gmail_message_id"], "message-1")
+            self.assertEqual(persisted["gmail_thread_id"], "19abcdef01234567")
             self.assertEqual(gmail.create_calls, 1)
             self.assertEqual(gmail.send_calls, 1)
             self.assertEqual(gmail.verify_calls, 1)
+            self.assertEqual(
+                gmail.create_kwargs["reply_thread_id"], "19abcdef01234567"
+            )
+            self.assertEqual(
+                gmail.verify_kwargs["expected_thread_id"], "19abcdef01234567"
+            )
 
     def test_uncertain_send_is_preserved_and_not_automatically_duplicated(self):
         with tempfile.TemporaryDirectory() as temporary:
@@ -557,9 +728,16 @@ class BookingServerTests(unittest.TestCase):
         thread.start()
         return server, thread
 
-    def request(self, server, method: str, path: str, body: str = ""):
+    def request(
+        self,
+        server,
+        method: str,
+        path: str,
+        body: str = "",
+        extra_headers: dict[str, str] | None = None,
+    ):
         connection = http.client.HTTPConnection("127.0.0.1", server.server_port, timeout=5)
-        headers = {}
+        headers = dict(extra_headers or {})
         if body:
             headers["Content-Type"] = "application/x-www-form-urlencoded"
             headers["Content-Length"] = str(len(body.encode("utf-8")))
@@ -569,6 +747,46 @@ class BookingServerTests(unittest.TestCase):
         headers = dict(response.getheaders())
         connection.close()
         return response.status, headers, payload
+
+    def test_signed_confirmation_works_from_an_in_app_browser_origin(self):
+        calendar = FakeCalendar()
+        server, thread = self.start_server(calendar)
+        option_id = self.options[0]["id"]
+        signature = confirmation_signature(self.settings, self.token, option_id)
+        form = urllib.parse.urlencode({"confirmation": signature})
+        try:
+            status, _headers, _payload = self.request(
+                server,
+                "POST",
+                f"/book/{self.token}/{option_id}/confirm",
+                form,
+                {"Origin": "null"},
+            )
+            self.assertEqual(status, 303)
+            self.assertEqual(calendar.create_calls, 1)
+        finally:
+            server.shutdown()
+            thread.join()
+            server.server_close()
+
+    def test_invalid_confirmation_is_rejected_with_a_helpful_page(self):
+        calendar = FakeCalendar()
+        server, thread = self.start_server(calendar)
+        option_id = self.options[0]["id"]
+        try:
+            status, _headers, payload = self.request(
+                server,
+                "POST",
+                f"/book/{self.token}/{option_id}/confirm",
+                "confirmation=invalid",
+            )
+            self.assertEqual(status, 403)
+            self.assertIn(b"could not be verified", payload)
+            self.assertEqual(calendar.create_calls, 0)
+        finally:
+            server.shutdown()
+            thread.join()
+            server.server_close()
 
     def test_get_is_safe_and_post_books_once(self):
         calendar = FakeCalendar()
