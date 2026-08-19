@@ -39,13 +39,19 @@ hermes skills tap add TechNickAI/hermes-skills --path skills/core/
 hermes skills tap add TechNickAI/hermes-skills --path skills/engineering/
 hermes skills tap add TechNickAI/hermes-skills --path skills/productivity/
 
-# 2. Search and preview
-hermes skills search review
+# 2. Search and preview (custom taps need --source github)
+hermes skills search review --source github
 hermes skills inspect multi-review
 
-# 3. Install into the agent's index
-hermes skills install multi-review
+# 3. Install into the agent's index.
+# -p <profile> is REQUIRED when targeting a named profile: the CLI otherwise
+# installs into the calling profile while reporting success for the named one.
+hermes skills install multi-review -p <profile>
 ```
+
+Verify the file actually landed rather than trusting the exit code — an ambiguous
+`hermes skills install <name>` can print a disambiguation table and exit 0 without
+installing anything.
 
 The cross-tool installer also works and auto-detects Hermes:
 

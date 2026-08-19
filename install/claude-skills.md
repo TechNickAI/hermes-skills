@@ -93,9 +93,12 @@ Notes that matter:
 | ---------------- | -------------------------------------------------------- | ----- |
 | `deep-dive`      | Researches a question across sources, returns a decision | none  |
 | `multi-review`   | Reviews a draft, plan, or diff through several lenses    | none  |
-| `recall`         | Restores context from previous sessions                  | none  |
 | `keep-going`     | Re-anchors an agent that stopped short of the work       | none  |
 | `memory-cleanup` | Trims a bloated memory file without losing facts         | none  |
+
+`recall` is listed as setup-free in the manifest, but its procedure reads Hermes session
+state and calls a Hermes-only search tool, so it has nothing to restore from in Claude.
+Skip it here.
 
 Everything in the `productivity` pack needs an external CLI or API key first. Check
 `requires` in the manifest before installing any of it.
