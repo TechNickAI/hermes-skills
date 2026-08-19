@@ -55,11 +55,15 @@ cp -r /tmp/hermes-skills/skills/core/deep-dive ~/.claude/skills/
 Any directory containing a `SKILL.md` works. Project scope is `.claude/skills/`, user
 scope is `~/.claude/skills/`.
 
-### Verify
+After the install command completes, verify three things:
 
-Start a new session and type `/` — installed skills appear as `/deep-dive`,
-`/multi-review`, and so on. Claude also loads them automatically when a request matches
-the skill's `description`.
+1. `.claude/skills/<name>/SKILL.md` exists for every selected skill.
+2. `skills-lock.json` records the selected skills and repository source.
+3. A new Claude session lists or triggers each skill.
+
+If the agent chose to copy folders manually instead of running `npx skills`, say so
+plainly: manual copying does not create `skills-lock.json`, so provenance must be recorded
+another way.
 
 ---
 
