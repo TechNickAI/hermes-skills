@@ -64,12 +64,14 @@ differentiator — say so out loud), `unsupported` (never recommend it in Claude
 
 ## memory-cleanup
 
+> **Not for Claude.** Cleans Hermes MEMORY.md / USER.md / SOUL.md files, which do not exist in Claude.
+
 - **Pack:** core
 - **Scope:** solo
 - **What it does:** Use when a Hermes MEMORY.md or USER.md file is too large, bloated, stale, or over the recommended cap and you need to reduce prompt footprint without losing important facts.
 - **Use when:** a Hermes MEMORY.md or USER.md file is too large, bloated, stale, or over the recommended cap and you need to reduce prompt footprint without losing important facts.
 - **Prerequisites:** None
-- **Works without setup:** Yes
+- **Works without setup:** Yes in Hermes (not available in Claude)
 - **Compatibility:** Hermes-specific memory-file layout and conventions.
 - **Claude:** unsupported — Cleans Hermes MEMORY.md / USER.md / SOUL.md files, which do not exist in Claude.
 - **Size:** 17,524 B body, loaded when the skill triggers (~4,381 tokens); 50,529 B across 8 file(s) total
@@ -77,12 +79,14 @@ differentiator — say so out loud), `unsupported` (never recommend it in Claude
 
 ## moa-solve
 
+> **Not for Claude.** Requires the native Hermes MoA fan-out runtime.
+
 - **Pack:** core
 - **Scope:** solo
 - **What it does:** Use when you have a HARD, open-ended, high-stakes problem worth throwing multiple AI models at and pulling the best solution out — architecture decisions, strategy design, thorny debugging, research synthesis, "what am I missing", tool/system design.
 - **Use when:** you have a HARD, open-ended, high-stakes problem worth throwing multiple AI models at and pulling the best solution out — architecture decisions, strategy design, thorny debugging, research synthesis, "what am I missing", tool/system design.
 - **Prerequisites:** None
-- **Works without setup:** Yes
+- **Works without setup:** Yes in Hermes (not available in Claude)
 - **Compatibility:** Hermes-specific; requires the native MoA runtime.
 - **Claude:** unsupported — Requires the native Hermes MoA fan-out runtime.
 - **Size:** 19,681 B body, loaded when the skill triggers (~4,920 tokens); 41,130 B across 5 file(s) total
@@ -116,12 +120,14 @@ differentiator — say so out loud), `unsupported` (never recommend it in Claude
 
 ## project-steward
 
+> **Not for Claude.** Drives a Hermes living board and cron cadence.
+
 - **Pack:** core
 - **Scope:** solo
 - **What it does:** Run a portfolio of long-running projects as a chief of staff rather than a task runner.
 - **Use when:** you have several open-ended efforts that each need periodic attention, when scheduled agent runs are producing activity without progress, when a notification channel has become an unreadable wall of updates, or when you want an agent to direct specialist agents instead of doing their work.
 - **Prerequisites:** env: TELEGRAM_BOT_TOKEN (for the living board)
-- **Works without setup:** No
+- **Works without setup:** No in Hermes (not available in Claude)
 - **Compatibility:** Agent Skills standard
 - **Claude:** unsupported — Drives a Hermes living board and cron cadence.
 - **Size:** 23,679 B body, loaded when the skill triggers (~5,920 tokens); 122,549 B across 9 file(s) total
@@ -129,12 +135,14 @@ differentiator — say so out loud), `unsupported` (never recommend it in Claude
 
 ## recall
 
+> **Not for Claude.** Reads Hermes session and memory stores, which Claude does not have.
+
 - **Pack:** core
 - **Scope:** solo
 - **What it does:** Restore context from prior sessions, memories, and transcripts.
 - **Use when:** a bare-pronoun follow-up like "ship it", "do it", or "send that" likely points at a prior-session artifact. Designed to never dead-end — if one source has nothing, keep searching others until you have a useful picture.
 - **Prerequisites:** None
-- **Works without setup:** Yes
+- **Works without setup:** Yes in Hermes (not available in Claude)
 - **Compatibility:** Hermes-specific session and memory stores.
 - **Claude:** unsupported — Reads Hermes session and memory stores, which Claude does not have.
 - **Size:** 11,028 B body, loaded when the skill triggers (~2,757 tokens); 20,672 B across 4 file(s) total
@@ -142,12 +150,14 @@ differentiator — say so out loud), `unsupported` (never recommend it in Claude
 
 ## report
 
+> **Not for Claude.** Uses Hermes reporting and routing tools.
+
 - **Pack:** core
 - **Scope:** fleet
 - **What it does:** File a report or piece of feedback from any Hermes platform session.
 - **Use when:** File a report or piece of feedback from any Hermes platform session.
 - **Prerequisites:** None
-- **Works without setup:** Yes
+- **Works without setup:** Yes in Hermes (not available in Claude)
 - **Compatibility:** Hermes-specific reporting and routing tools.
 - **Claude:** unsupported — Uses Hermes reporting and routing tools.
 - **Size:** 11,568 B body, loaded when the skill triggers (~2,892 tokens); 30,517 B across 3 file(s) total
@@ -155,12 +165,14 @@ differentiator — say so out loud), `unsupported` (never recommend it in Claude
 
 ## robustify-doctor
 
+> **Not for Claude.** Inspects a Hermes runtime and HERMES_HOME layout.
+
 - **Pack:** core
 - **Scope:** solo
 - **What it does:** Use when you need to know whether a Hermes agent is actually healthy — during a scheduled health check, after an outage or reboot, when someone asks "is X working?", or when an agent has gone quiet.
 - **Use when:** you need to know whether a Hermes agent is actually healthy — during a scheduled health check, after an outage or reboot, when someone asks "is X working?", or when an agent has gone quiet.
 - **Prerequisites:** Python 3.9+ (stdlib only, no third-party packages), Read access to the target agent's HERMES_HOME
-- **Works without setup:** No
+- **Works without setup:** No in Hermes (not available in Claude)
 - **Compatibility:** Hermes-specific runtime and HERMES_HOME layout.
 - **Claude:** unsupported — Inspects a Hermes runtime and HERMES_HOME layout.
 - **Size:** 16,283 B body, loaded when the skill triggers (~4,071 tokens); 74,933 B across 4 file(s) total
@@ -220,12 +232,14 @@ differentiator — say so out loud), `unsupported` (never recommend it in Claude
 
 ## mini-app
 
+> **Not for Claude.** Operates Hermes-config mini-app host services.
+
 - **Pack:** engineering
 - **Scope:** fleet
 - **What it does:** Use when adding, removing, password-protecting, or troubleshooting a mini-app served by the hermes-config mini-app router (Caddy + PM2 + auth sidecar + Tailscale Serve/Funnel) on a fleet machine.
 - **Use when:** adding, removing, password-protecting, or troubleshooting a mini-app served by the hermes-config mini-app router (Caddy + PM2 + auth sidecar + Tailscale Serve/Funnel) on a fleet machine.
 - **Prerequisites:** host services: Caddy + PM2, Tailscale Serve/Funnel
-- **Works without setup:** No
+- **Works without setup:** No in Hermes (not available in Claude)
 - **Compatibility:** Agent Skills standard
 - **Claude:** unsupported — Operates Hermes-config mini-app host services.
 - **Size:** 45,652 B body, loaded when the skill triggers (~11,413 tokens); 87,321 B across 12 file(s) total
@@ -233,12 +247,14 @@ differentiator — say so out loud), `unsupported` (never recommend it in Claude
 
 ## pr-review-sweep
 
+> **Not for Claude.** Depends on the Hermes delegation toolset.
+
 - **Pack:** engineering
 - **Scope:** fleet
 - **What it does:** Nightly sweep of recently-merged PRs to address unhandled review comments via a Claude Code sub-agent.
 - **Use when:** Nightly sweep of recently-merged PRs to address unhandled review comments via a Claude Code sub-agent.
 - **Prerequisites:** gh CLI, authenticated, Hermes delegation toolset enabled
-- **Works without setup:** No
+- **Works without setup:** No in Hermes (not available in Claude)
 - **Compatibility:** Agent Skills standard
 - **Claude:** unsupported — Depends on the Hermes delegation toolset.
 - **Size:** 8,107 B body, loaded when the skill triggers (~2,027 tokens); 52,992 B across 11 file(s) total
@@ -246,12 +262,14 @@ differentiator — say so out loud), `unsupported` (never recommend it in Claude
 
 ## email-steward
 
+> **Not for Claude.** Depends on Hermes cron and delegation toolsets.
+
 - **Pack:** productivity
 - **Scope:** solo
 - **What it does:** Use when triaging one or more email inboxes on a schedule, removing obvious debris, quarantining promotional mail, and surfacing only messages that need the user's attention.
 - **Use when:** triaging one or more email inboxes on a schedule, removing obvious debris, quarantining promotional mail, and surfacing only messages that need the user's attention.
 - **Prerequisites:** email CLI: gog or himalaya, Hermes cron + delegation toolsets enabled
-- **Works without setup:** No
+- **Works without setup:** No in Hermes (not available in Claude)
 - **Compatibility:** Agent Skills standard
 - **Claude:** unsupported — Depends on Hermes cron and delegation toolsets.
 - **Size:** 13,873 B body, loaded when the skill triggers (~3,468 tokens); 42,428 B across 12 file(s) total

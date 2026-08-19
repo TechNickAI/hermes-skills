@@ -326,6 +326,19 @@ def render_catalog(manifest: dict) -> str:
             [
                 f"## {entry['name']}",
                 "",
+                # Lead with the disqualifier. Two live Claude Code runs recommended
+                # skills whose `Claude:` line said not to, because `Prerequisites:
+                # None` and `Works without setup: Yes` sit ABOVE it and read as
+                # approval. An agent scanning an entry acts on the first strong
+                # signal, so the veto has to come before the green lights.
+                *(
+                    [
+                        f"> **Not for Claude.** {entry['claude_note']}",
+                        "",
+                    ]
+                    if entry["claude_compat"] == "unsupported"
+                    else []
+                ),
                 f"- **Pack:** {entry['pack']}",
                 f"- **Scope:** {entry['scope']}",
                 f"- **What it does:** {entry['summary']}",
@@ -341,7 +354,11 @@ def render_catalog(manifest: dict) -> str:
                     + (
                         ", but read the Claude note before recommending it"
                         if entry["claude_compat"] == "degraded"
-                        else ""
+                        else (
+                            " in Hermes (not available in Claude)"
+                            if entry["claude_compat"] == "unsupported"
+                            else ""
+                        )
                     )
                 ),
                 f"- **Compatibility:** {entry['compatibility']}",
