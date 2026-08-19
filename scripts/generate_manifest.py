@@ -331,7 +331,19 @@ def render_catalog(manifest: dict) -> str:
                 f"- **What it does:** {entry['summary']}",
                 f"- **Use when:** {use_when_text}",
                 f"- **Prerequisites:** {requirements}",
-                f"- **Works without setup:** {'Yes' if entry['works_out_of_the_box'] else 'No'}",
+                # A degraded skill needs no setup and still is not the full thing. A live
+                # Claude Code run offered all three degraded skills as "Works immediately,
+                # no setup" with no caveat, because a bare Yes reads as an unqualified
+                # green light and outranks a rule sitting in another file.
+                (
+                    f"- **Works without setup:** "
+                    + ("Yes" if entry["works_out_of_the_box"] else "No")
+                    + (
+                        ", but read the Claude note before recommending it"
+                        if entry["claude_compat"] == "degraded"
+                        else ""
+                    )
+                ),
                 f"- **Compatibility:** {entry['compatibility']}",
                 f"- **Claude:** {entry['claude_compat']} — {entry['claude_note']}",
                 (

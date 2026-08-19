@@ -30,7 +30,7 @@ differentiator — say so out loud), `unsupported` (never recommend it in Claude
 - **What it does:** Use when told "do a deep dive", "go figure this out", or "don't reinvent the wheel" - researches a question across every relevant source and returns a decision.
 - **Use when:** told "do a deep dive", "go figure this out", or "don't reinvent the wheel" - researches a question across every relevant source and returns a decision.
 - **Prerequisites:** None
-- **Works without setup:** Yes
+- **Works without setup:** Yes, but read the Claude note before recommending it
 - **Compatibility:** Portable to Hermes and Claude Code. In Claude, map the named research tools and delegation/panel mechanisms to available equivalents; unsupported source classes are reported, not silently omitted.
 - **Claude:** degraded — Full method in Claude Code using its own web, file, and subagent tools; prior-session search and cross-family synthesis are unavailable.
 - **Size:** 34,360 B body, loaded when the skill triggers (~8,590 tokens); 34,360 B across 1 file(s) total
@@ -108,7 +108,7 @@ differentiator — say so out loud), `unsupported` (never recommend it in Claude
 - **What it does:** Use when reviewing almost any meaningful artifact, decision, action, plan, code change, prompt, skill, research summary, outbound message, or public-facing content.
 - **Use when:** reviewing almost any meaningful artifact, decision, action, plan, code change, prompt, skill, research summary, outbound message, or public-facing content.
 - **Prerequisites:** None
-- **Works without setup:** Yes
+- **Works without setup:** Yes, but read the Claude note before recommending it
 - **Compatibility:** Portable review method. Native multi-model orchestration examples are Hermes-specific; Claude can run the method with Claude subagents but loses model-family diversity.
 - **Claude:** degraded — The review method transfers, but cross-model-family diversity needs Hermes; in Claude it becomes Claude reviewing Claude.
 - **Size:** 48,649 B body, loaded when the skill triggers (~12,162 tokens); 131,739 B across 17 file(s) total
@@ -173,7 +173,7 @@ differentiator — say so out loud), `unsupported` (never recommend it in Claude
 - **What it does:** Use when an agent's skill library needs auditing, cleaning, or triage - "audit my skills", "are my skills healthy", "find duplicate skills", "why didn't it use that skill", "clean up my skills", "which skills should this agent have", or after an upgrade adds new skills.
 - **Use when:** an agent's skill library needs auditing, cleaning, or triage - "audit my skills", "are my skills healthy", "find duplicate skills", "why didn't it use that skill", "clean up my skills", "which skills should this agent have", or after an upgrade adds new skills.
 - **Prerequisites:** None
-- **Works without setup:** Yes
+- **Works without setup:** Yes, but read the Claude note before recommending it
 - **Compatibility:** Agent Skills standard
 - **Claude:** degraded — Audits Hermes skill layout; the method transfers, the paths do not.
 - **Size:** 13,065 B body, loaded when the skill triggers (~3,266 tokens); 91,532 B across 5 file(s) total
