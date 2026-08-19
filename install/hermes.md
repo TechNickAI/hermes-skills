@@ -85,18 +85,9 @@ is the most common self-inflicted context problem.
 Some skills run with no setup at all; the rest need a credential, external CLI, service,
 or OS permission first.
 
-Rather than trusting a list here that will drift, ask the manifest:
-
-```bash
-# Skills that need nothing beyond the agent itself
-grep -A9 '^- name:' skills/MANIFEST.yaml \
-  | grep -B9 'works_out_of_the_box: true' \
-  | grep '^- name:'
-```
-
-[`skills/MANIFEST.yaml`](../skills/MANIFEST.yaml) is generated from the skills
-themselves and is the only source of truth for `requires`, `scope`, and
-`works_out_of_the_box`.
+Read [`skills/CATALOG.md`](../skills/CATALOG.md). It states each skill's purpose, scope,
+prerequisites, and whether it works without setup in plain language. The catalog is
+generated from the skills themselves, so it does not drift.
 
 ## Scope
 
@@ -111,7 +102,7 @@ fan-out. Those are the ones that will not port cleanly to another runtime.
 
 ## Rules for an installing agent
 
-- Read [`skills/MANIFEST.yaml`](../skills/MANIFEST.yaml) first. It answers `scope`,
+- Read [`skills/CATALOG.md`](../skills/CATALOG.md) first. It answers `scope`,
   `requires`, `works_out_of_the_box`, and `use_when` for every skill without opening a
   single `SKILL.md`.
 - Filter by `scope` before anything else.

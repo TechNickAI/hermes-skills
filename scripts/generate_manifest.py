@@ -30,6 +30,7 @@ except ImportError:  # pragma: no cover - yaml ships with the repo's dev deps
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 SKILLS = ROOT / "skills"
 MANIFEST = SKILLS / "MANIFEST.yaml"
+CATALOG = SKILLS / "CATALOG.md"
 
 # Requirements are DECLARED, not inferred.
 #
@@ -167,6 +168,35 @@ def render(manifest: dict) -> str:
     )
 
 
+def render_catalog(manifest: dict) -> str:
+    """Render the same source as prose designed for an LLM to read."""
+    lines = [
+        "# Skill catalog",
+        "",
+        "This file is generated from each skill's metadata. Do not edit it by hand.",
+        "Use it to choose a small set of relevant skills without opening every skill file.",
+        "",
+    ]
+    for entry in manifest["skills"]:
+        requirements = ", ".join(entry["requires"]) or "None"
+        use_when_text = entry["use_when"] or entry["summary"]
+        lines.extend(
+            [
+                f"## {entry['name']}",
+                "",
+                f"- **Pack:** {entry['pack']}",
+                f"- **Scope:** {entry['scope']}",
+                f"- **What it does:** {entry['summary']}",
+                f"- **Use when:** {use_when_text}",
+                f"- **Prerequisites:** {requirements}",
+                f"- **Works without setup:** {'Yes' if entry['works_out_of_the_box'] else 'No'}",
+                f"- **Path:** `{entry['path']}`",
+                "",
+            ]
+        )
+    return "\n".join(lines)
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
@@ -176,7 +206,9 @@ def main() -> int:
     )
     args = parser.parse_args()
 
-    rendered = render(build())
+    manifest = build()
+    rendered = render(manifest)
+    rendered_catalog = render_catalog(manifest)
 
     if args.check:
         if not MANIFEST.exists():
@@ -188,11 +220,23 @@ def main() -> int:
                 "Run `python scripts/generate_manifest.py` and commit the result."
             )
             return 1
+        if not CATALOG.exists():
+            print(f"MISSING: {CATALOG.relative_to(ROOT)} — run scripts/generate_manifest.py")
+            return 1
+        if CATALOG.read_text() != rendered_catalog:
+            print(
+                f"STALE: {CATALOG.relative_to(ROOT)} disagrees with skills/ on disk.\n"
+                "Run `python scripts/generate_manifest.py` and commit the result."
+            )
+            return 1
         print(f"OK: {MANIFEST.relative_to(ROOT)} matches disk")
+        print(f"OK: {CATALOG.relative_to(ROOT)} matches disk")
         return 0
 
     MANIFEST.write_text(rendered)
+    CATALOG.write_text(rendered_catalog)
     print(f"wrote {MANIFEST.relative_to(ROOT)}")
+    print(f"wrote {CATALOG.relative_to(ROOT)}")
     return 0
 
 
