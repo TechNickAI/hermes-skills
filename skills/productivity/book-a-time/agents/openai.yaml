@@ -1,0 +1,4 @@
+interface:
+  display_name: "Book a Time"
+  short_description: "Offer calendar times and book confirmed meetings"
+  default_prompt: "Find a few available times with this person and send a polished booking email."
