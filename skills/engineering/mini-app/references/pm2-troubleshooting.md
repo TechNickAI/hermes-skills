@@ -9,11 +9,11 @@ There can be **more than one PM2 God Daemon running on the same machine**, each 
 its own `PM2_HOME` and its own independent process table. A bare `pm2` command only
 talks to the daemon selected by the current `PM2_HOME` (or the default `~/.pm2`).
 
-Observed on Nick's Mac Studio:
+Observed on the operator's Mac Studio:
 
-- Mini-apps (btc-recovery, etc.) are supervised by the daemon at **`PM2_HOME=/Users/nick/.pm2`**.
+- Mini-apps (sample-app, etc.) are supervised by the daemon at **`PM2_HOME=/Users/<user>/.pm2`**.
 - A _separate_ Hermes-profile daemon runs at
-  `/Users/nick/.hermes/profiles/<agent-d>/home/.pm2`. Bare `pm2` in a <agent-d> shell
+  `/Users/<user>/.hermes/profiles/<agent-d>/home/.pm2`. Bare `pm2` in a <agent-d> shell
   frequently resolves to THIS one.
 
 ### Symptoms
@@ -32,12 +32,12 @@ Observed on Nick's Mac Studio:
 1. Find who actually owns the port and trace the parent:
    ```
    P=$(lsof -ti:3005 | head -1); PAR=$(ps -o ppid= -p $P | tr -d ' ')
-   ps -o pid,command= -p $PAR        # reveals "PM2 ... God Daemon (/Users/nick/.pm2)"
+   ps -o pid,command= -p $PAR        # reveals "PM2 ... God Daemon (/Users/<user>/.pm2)"
    ```
    The path in parentheses is the owning daemon's `PM2_HOME`.
 2. List that daemon's processes explicitly:
    ```
-   PM2_HOME=/Users/nick/.pm2 pm2 jlist | python3 -c "import sys,json;[print(p['pm_id'],p['name'],p['pm2_env']['status'],'pid:',p['pid']) for p in json.load(sys.stdin)]"
+   PM2_HOME=/Users/<user>/.pm2 pm2 jlist | python3 -c "import sys,json;[print(p['pm_id'],p['name'],p['pm2_env']['status'],'pid:',p['pid']) for p in json.load(sys.stdin)]"
    ```
 
 ### Fix
@@ -45,8 +45,8 @@ Observed on Nick's Mac Studio:
 Always manage the app through the daemon that owns it:
 
 ```
-PM2_HOME=/Users/nick/.pm2 pm2 restart <app>
-PM2_HOME=/Users/nick/.pm2 pm2 save
+PM2_HOME=/Users/<user>/.pm2 pm2 restart <app>
+PM2_HOME=/Users/<user>/.pm2 pm2 save
 ```
 
 Then delete any stray duplicate you accidentally created in the wrong daemon
@@ -64,7 +64,7 @@ A process launched under PM2 can see a rewritten `$HOME`, so `os.homedir()` insi
 app resolves to a profile home that may not contain the app's data files. Symptom: app
 boots fine but every data panel is empty / `/healthz` reports "project files not
 found." Fix: resolve data paths from an explicit list of absolute candidate paths at
-startup instead of trusting `os.homedir()`. (The btc-recovery dashboard does this with
+startup instead of trusting `os.homedir()`. (The sample-app dashboard does this with
 a `PROJECT_CANDIDATES` array.)
 
 ## Quick checklist when "my edit didn't take"

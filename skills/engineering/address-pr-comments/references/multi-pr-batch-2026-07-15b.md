@@ -6,13 +6,13 @@
 merge-if-clean with squash+delete-branch. Each PR had 2-4 bot comments, some
 already handled by TechNickAI replies.
 
-| PR   | Repo                         | Comments      | Bots          | Notes                                  |
-| ---- | ---------------------------- | ------------- | ------------- | -------------------------------------- |
-| #4   | carmentacollective/antevorta | 2             | gemini, codex | Trading bot — money-path code          |
-| #9   | carmentacollective/antevorta | 2 (1 replied) | gemini        | WONTFIX reply already present          |
-| #9   | carmentacollective/<agent-f> | 2             | gemini        | Both had -1 reactions                  |
-| #154 | carmentacollective/mcp-hubby | 4 (2 replied) | gemini, codex | TechNickAI replies already present     |
-| #128 | TechNickAI/openclaw-config   | 3             | cursor, codex | Tests failing (not just claude-review) |
+| PR   | Repo                       | Comments      | Bots          | Notes                                  |
+| ---- | -------------------------- | ------------- | ------------- | -------------------------------------- |
+| #4   | example-org/trading-bot    | 2             | gemini, codex | Trading bot — money-path code          |
+| #9   | example-org/trading-bot    | 2 (1 replied) | gemini        | WONTFIX reply already present          |
+| #9   | example-org/<agent-f>      | 2             | gemini        | Both had -1 reactions                  |
+| #154 | example-org/sample-service | 4 (2 replied) | gemini, codex | TechNickAI replies already present     |
+| #128 | TechNickAI/openclaw-config | 3             | cursor, codex | Tests failing (not just claude-review) |
 
 ## Key lessons
 
@@ -35,17 +35,17 @@ dirs. The user's mental model of CI state was stale.
 
 ### Already-handled comments pattern
 
-PR 4 (mcp-hubby #154): Both bot comments had TechNickAI replies confirming fixes
+PR 4 (sample-service #154): Both bot comments had TechNickAI replies confirming fixes
 (commit cf856f1), plus reactions (gemini: heart, codex: +1). These were fully
 closed — just needed to verify CI and merge.
 
-PR 2 (antevorta #9): Gemini comment had a TechNickAI WONTFIX reply with 1 reaction.
+PR 2 (trading-bot #9): Gemini comment had a TechNickAI WONTFIX reply with 1 reaction.
 Just needed to add a 👍 to the original gemini comment and merge.
 
 PR 3 (<agent-f> #9): Both gemini comments had -1 reactions (disagreement). Needed
 WONTFIX replies explaining why, plus 👍 reactions to close the loop.
 
-### Test that asserts buggy behavior (antevorta #4)
+### Test that asserts buggy behavior (trading-bot #4)
 
 Codex correctly identified that `test_non_copy_position_excluded_when_copy_scope_explicit`
 would fail after removing the guard. The test was asserting the OLD behavior (empty
@@ -139,8 +139,8 @@ gh pr merge $N --repo $R --squash --delete-branch
 
 | PR                   | Outcome                             | Detail                                     |
 | -------------------- | ----------------------------------- | ------------------------------------------ |
-| antevorta #4         | Pushed fix, replied, merged pending | Test updated, bot comments replied+reacted |
-| antevorta #9         | Merged                              | WONTFIX reply already present, added 👍    |
+| trading-bot #4       | Pushed fix, replied, merged pending | Test updated, bot comments replied+reacted |
+| trading-bot #9       | Merged                              | WONTFIX reply already present, added 👍    |
 | <agent-f> #9         | Merged                              | WONTFIX replies posted, 👍 added           |
-| mcp-hubby #154       | Merged                              | Already fully handled by TechNickAI        |
+| sample-service #154  | Merged                              | Already fully handled by TechNickAI        |
 | openclaw-config #128 | In progress                         | Schema-template + tests need fixing        |

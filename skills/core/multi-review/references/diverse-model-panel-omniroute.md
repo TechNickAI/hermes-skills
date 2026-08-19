@@ -5,7 +5,7 @@ Keep profile-specific routing details here, not in the public-facing SKILL.md bo
 
 ## Confirmed working aliases (2026-06-18)
 
-These were used successfully in a 6-reviewer Lendy strategy panel:
+These were used successfully in a 6-reviewer a strategy project strategy panel:
 
 - Grok / xAI contrarian:
   - `--provider custom:grok -m openrouter/x-ai/grok-4.3`
@@ -250,7 +250,7 @@ immediately is as broken as one that never breaks, and only the second is obviou
 
 ## Lens mix that worked well for trading/strategy analysis
 
-For Lendy profitability review, the following six lenses produced complementary findings:
+For a strategy project profitability review, the following six lenses produced complementary findings:
 
 1. Contrarian / red-team: challenge whether the roadmap optimizes the wrong variable.
 2. Fill-rate / queue-position economics: investigate right-rate-no-fill events.
@@ -283,7 +283,7 @@ hidden traps. When all three independently invent the SAME missing idea, that
 convergence is strong signal (not anchoring — they ran isolated) — promote it.
 Meta-review for double-counted impact and live-vs-after-the-fact feature overlap.
 
-Always meta-review the synthesis. The Lendy meta-review caught two material mistakes:
+Always meta-review the synthesis. The a strategy project meta-review caught two material mistakes:
 
 - Double-counting two ideas that attacked the same missed-spike pool.
 - A superficially attractive position-1 rate-floor idea that ignored high capital velocity and could reduce utilization enough to lose money.

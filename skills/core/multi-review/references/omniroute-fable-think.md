@@ -1,6 +1,6 @@
 # OmniRoute Fable `think` reviewer
 
-Use when Nick asks for a multi-review that specifically includes the "think" model, Fable, or OmniRoute.
+Use when the operator asks for a multi-review that specifically includes the "think" model, Fable, or OmniRoute.
 
 ## Routing
 
@@ -94,7 +94,7 @@ hermes -z "$PROMPT" --provider openrouter -m openai/gpt-chat-latest --ignore-rul
 hermes -z "$PROMPT" --provider custom:omniroute -m simple --ignore-rules -t ''
 ```
 
-**Config file that governs these:** `/Users/nick/.hermes/profiles/<agent-d>/config.yaml`
+**Config file that governs these:** `/Users/<user>/.hermes/profiles/<agent-d>/config.yaml`
 
 ### Provider/slug corrections (verified 2026-06-17 by direct run)
 
@@ -182,6 +182,6 @@ Use `terminal()` directly from the parent agent for hermes one-shot calls.
 
 The same error can surface intermittently even on plain parent `terminal()` runs of
 `hermes -z` / OpenRouter one-shots (observed 2026-06-17: two consecutive failures, then
-success). Fix: prefix the command with `export HOME=/Users/nick` (literal path, the
+success). Fix: prefix the command with `export HOME=/Users/<user>` (literal path, the
 sandbox rewrites `$HOME`). It cleared immediately on the next run. Treat it as a flaky
 env-resolution issue, not a broken provider -- do not abandon the reviewer over it.

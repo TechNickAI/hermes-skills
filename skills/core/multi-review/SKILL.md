@@ -6,7 +6,7 @@ description: >
   Runs a small panel of diverse review lenses across model families when available,
   synthesizes findings into fix/ask/defer/wontfix decisions, and iterates until the
   result is ready.
-version: 1.4.0
+version: 1.4.1
 license: MIT
 metadata:
   hermes:

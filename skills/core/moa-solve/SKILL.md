@@ -10,7 +10,7 @@ description: >
   writes a NEW best-of-breed answer via a component ledger — not an average, not a
   cut-and-paste splice. Also encodes WHEN NOT to use a panel (most problems), routing to
   a single strong model instead.
-version: 2.0.0
+version: 2.0.1
 author: Hermes Agent
 license: MIT
 metadata:

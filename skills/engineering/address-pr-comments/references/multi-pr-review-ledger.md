@@ -28,7 +28,7 @@ python -m pytest <suite or targeted tests> -q
 
 ## Merge-main-into-branch pattern (the #1 batch-run CI fix)
 
-When a repo's CI runs `pre-commit --all-files` (common in Nick's repos), a fix
+When a repo's CI runs `pre-commit --all-files` (common in the operator's repos), a fix
 that lands on main (e.g. trailing whitespace in a shared file) makes every
 other open PR branch fail CI on files it never touched. After subagents push
 their fixes, the orchestrator MUST merge main into each branch before checking
@@ -51,7 +51,7 @@ shared test file) when multiple PRs each added new test functions. The conflict
 is just both sides adding different functions at the same location — keep both.
 
 **Subagent-created worktrees**: subagents may create their own worktrees at
-unexpected paths (e.g. `~/src/fiddler-pr33`). Find them with `git worktree list`
+unexpected paths (e.g. `~/src/example-project-pr33`). Find them with `git worktree list`
 and use those for follow-up operations rather than creating new ones.
 
 **`gh pr merge --squash` is silent on success** — always verify:

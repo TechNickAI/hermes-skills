@@ -6,7 +6,7 @@ description: >
   it", "do it", or "send that" likely points at a prior-session artifact. Designed to
   never dead-end — if one source has nothing, keep searching others until you have a
   useful picture.
-version: 0.3.0
+version: 0.3.1
 license: MIT
 metadata:
   hermes:

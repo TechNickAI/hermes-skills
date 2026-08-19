@@ -1,6 +1,6 @@
 # Applied MEMORY.md cleanup review rubric
 
-Use this reference when Nick asks for a data-safety review of a cleanup that has already been applied. Do not redo the cleanup; audit the artifacts and live state, then return a concise pass/edit/hold verdict.
+Use this reference when the operator asks for a data-safety review of a cleanup that has already been applied. Do not redo the cleanup; audit the artifacts and live state, then return a concise pass/edit/hold verdict.
 
 ## Inputs to inspect
 

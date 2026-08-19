@@ -3,7 +3,7 @@ name: google-docs
 description:
   "Use when creating, importing, formatting, editing, exporting, or quality-checking
   Google Docs from agent-generated markdown or local files."
-version: 1.0.0
+version: 1.0.1
 author: Hermes Agent
 license: MIT
 platforms: [macos, linux]
@@ -50,8 +50,8 @@ fenced code blocks more faithfully.
 > to `$PWD`, or use the full path `skills/google-docs/scripts/gworkspace.py` from the
 > repo root.
 
-> **$HOME shadowing:** some agent runtimes rewrite `$HOME` to a sandbox path where gog's
-> auth doesn't exist. If credential lookup fails in that environment, point `HOME` at
+> **$HOME shadowing:** some agent runtimes rewrite `$HOME`to a sandbox path where gog's
+> auth doesn't exist. If credential lookup fails in that environment, point`HOME` at
 > the real OS user home before invoking the helper.
 
 ## When to Use

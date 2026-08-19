@@ -6,7 +6,7 @@ description: >
   what is valid, push back on what is wrong, react and reply to every comment, and drive
   the PR to a clean, mergeable state. Trigger phrases: "address the PR comments",
   "handle the bot feedback", "get the review comments addressed".
-version: 1.0.0
+version: 1.0.1
 license: MIT
 metadata:
   hermes:

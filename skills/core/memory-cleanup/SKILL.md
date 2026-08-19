@@ -7,7 +7,7 @@ description: >
   SOUL.md/USER.md/AGENTS.md/context files, offload long-tail facts to the memory
   provider, convert reusable procedures into skills, then drop only stale or duplicate
   material. Includes dry-run, diff, and review gates before any write.
-version: 0.1.0
+version: 0.1.1
 license: MIT
 metadata:
   hermes:

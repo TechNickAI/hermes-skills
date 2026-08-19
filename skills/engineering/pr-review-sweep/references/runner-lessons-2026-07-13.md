@@ -1,6 +1,6 @@
 # Runner lessons — 2026-07-13
 
-Session context: nightly PR review sweep across `carmentacollective` and `TechNickAI`, lookback 7 days, max 10 PRs, excluding `TechNickAI/openclaw-config`. Scanned 91 merged PRs, found 22 flagged PRs, processed 10, opened three follow-up PRs, and verified every processed original PR at zero residual unhandled comments.
+Session context: nightly PR review sweep across `example-org` and `TechNickAI`, lookback 7 days, max 10 PRs, excluding `TechNickAI/openclaw-config`. Scanned 91 merged PRs, found 22 flagged PRs, processed 10, opened three follow-up PRs, and verified every processed original PR at zero residual unhandled comments.
 
 ## Durable lessons
 
@@ -48,8 +48,8 @@ This gave the user enough operational detail without dumping Claude transcripts.
 ## Session-specific artifacts created
 
 - `TechNickAI/hermes-config#63` — follow-up PR for `--recency-days 0` handling.
-- `carmentacollective/<agent-f>#47` — follow-up PR for MQS pending-backfill summary.
-- `carmentacollective/<agent-f>#48` — tracking issue for persistent 429 pagination stalls.
-- `carmentacollective/fiddler#60` — follow-up PR for preserving no-orders-after-fill invariant after state-write failure.
+- `example-org/<agent-f>#47` — follow-up PR for MQS pending-backfill summary.
+- `example-org/<agent-f>#48` — tracking issue for persistent 429 pagination stalls.
+- `example-org/example-project#60` — follow-up PR for preserving no-orders-after-fill invariant after state-write failure.
 
 Do not hard-code these artifact numbers into future sweeps; they are examples of the report content, not reusable targets.
