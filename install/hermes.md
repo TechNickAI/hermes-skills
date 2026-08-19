@@ -82,18 +82,21 @@ is the most common self-inflicted context problem.
 
 ## What works out of the box
 
-Ten of the skills in this repo need no setup:
+Some skills run with no setup at all; the rest need a credential, external CLI, service,
+or OS permission first.
 
-`deep-dive` · `keep-going` · `memory-cleanup` · `moa-solve` · `mob-check` ·
-`multi-review` · `recall` · `report` · `skill-librarian` · `trust-framework`
+Rather than trusting a list here that will drift, ask the manifest:
 
-(`report` is `scope: fleet` — it needs no credential but assumes a multi-agent fleet.)
+```bash
+# Skills that need nothing beyond the agent itself
+grep -A9 '^- name:' skills/MANIFEST.yaml \
+  | grep -B9 'works_out_of_the_box: true' \
+  | grep '^- name:'
+```
 
-The rest have prerequisites — credentials, external CLIs, services, or OS permissions.
-[`skills/MANIFEST.yaml`](../skills/MANIFEST.yaml) lists exactly what each one needs in
-its `requires` field.
-
----
+[`skills/MANIFEST.yaml`](../skills/MANIFEST.yaml) is generated from the skills
+themselves and is the only source of truth for `requires`, `scope`, and
+`works_out_of_the_box`.
 
 ## Scope
 
