@@ -1,6 +1,6 @@
 # hermes-skills
 
-A library of **23 skills** for [Hermes](https://github.com/NousResearch/hermes-agent)
+A library of skills for [Hermes](https://github.com/NousResearch/hermes-agent)
 agents, grouped into role packs so an agent installs what its job needs and
 nothing else. They follow the [Agent Skills](https://agentskills.io) open
 standard, so they also work in Claude.
@@ -11,8 +11,8 @@ standard, so they also work in Claude.
 
 1. Read [`skills/MANIFEST.yaml`](skills/MANIFEST.yaml) first. It is the
    generated, machine-readable index: `scope`, `requires`,
-   `works_out_of_the_box`, and `use_when` for every skill. Do not open 23
-   `SKILL.md` files to answer questions this one file already answers.
+   `works_out_of_the_box`, and `use_when` for every skill. Read it instead of
+   opening every `SKILL.md` to answer questions this one file already answers.
 2. Ask your human what they want you to be better at, and whether they run one
    machine or several. On one machine, install `scope: solo` only — `fleet`
    skills assume multiple hosts and a cron fleet.
