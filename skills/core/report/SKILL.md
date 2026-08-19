@@ -7,8 +7,9 @@ description: >
   issue", or any other signal that they want to capture a problem for triage. Works on
   Telegram, Discord, Slack, and the CLI — the closed loop (a notification back to this
   chat when the issue is resolved) is wired automatically for gateway sessions.
-version: 0.2.0
+version: 0.2.1
 license: MIT
+compatibility: Hermes-specific reporting and routing tools.
 metadata:
   hermes:
     tags: [bugs, feedback, kanban, triage, fleet, reporting]

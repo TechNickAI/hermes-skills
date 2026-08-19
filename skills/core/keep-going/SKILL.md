@@ -1,16 +1,18 @@
 ---
 name: keep-going
 description: >
-  Invoked as /keep_going (or /keep-going) when the agent has stopped short — asked
-  "which option?", narrated a plan instead of executing it, or claimed a blocker that is
-  not real — while the user has already given clear direction. Nudges the agent to
-  re-anchor on the ORIGINAL request, pick a decisive default, and chain actions until
-  the work is verifiably done, stopping only for a blocker it can prove. Use when the
-  user says "keep going", "continue", "you got stuck, unstuck yourself", "why did you
-  stop", or runs the /keep_going slash command.
-version: 1.0.0
+  Use when the user says "/keep_going", "keep going", or "continue" after the agent has
+  stopped short — asked "which option?", narrated a plan instead of executing it, or
+  claimed a blocker that is not real — while the user has already given clear direction.
+  Also use proactively when the agent notices it is about to hand a solvable problem back
+  instead of completing the work. Re-anchor on the ORIGINAL request, pick a decisive
+  default, and chain actions until the work is verifiably done, stopping only for a
+  blocker it can prove. Use when the user says "keep going", "continue", "you got stuck,
+  unstuck yourself", "why did you stop", or runs the /keep_going slash command.
+version: 1.1.0
 author: Hermes Agent
 license: MIT
+compatibility: Portable to Hermes, Claude Code, and similar coding agents.
 metadata:
   hermes:
     tags: [workflow, continuation, autonomy, anti-premature-stop, nudge]

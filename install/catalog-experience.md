@@ -26,7 +26,18 @@ tools allow it.
 ## Build a personal catalog
 
 Read [`../skills/CATALOG.md`](../skills/CATALOG.md). Choose a small set that genuinely
-matches the person's answer. Usually three to five is enough.
+matches the person's answer **and the current runtime**. Usually three to five is enough.
+
+Treat compatibility as a filter, not a footnote:
+
+- **Portable:** recommend normally.
+- **Portable method with runtime substitutions:** explain the adaptation in one sentence
+  before recommending it.
+- **Hermes-specific:** do not recommend in Claude.
+- **Claude-specific:** do not recommend in Hermes.
+
+When a required tool or service is unavailable, either offer the smallest honest setup
+step or leave the skill out. Never describe an incompatible skill as "ready now."
 
 Present each candidate as a small card, not a filename dump:
 
@@ -49,7 +60,10 @@ _Turns "go figure this out" into a researched recommendation, not a pile of link
 
 **Lovely for:** comparing options, investigating an unfamiliar topic, checking whether a
 product already exists, and making a build-versus-buy decision.
-**Setup:** Ready now.
+**Runtime note:** Portable to Hermes and Claude Code. In Claude, use Claude's native web
+search, `WebFetch`, file tools, and subagents rather than Hermes tool names; unavailable
+source classes are reported openly.
+**Setup:** Ready now when the runtime has web access.
 
 ### Keep Going
 
