@@ -22,7 +22,7 @@ skills:
   version: 1.1.0
   scope: solo
   summary: Use when told "do a deep dive", "go figure this out", or "don't reinvent the wheel" - researches a question across every relevant source and returns a decision.
-  use_when: told "do a deep dive", "go figure this out", or "don't reinvent the wheel" - researches a question across every relevant source and returns a decision. Also fires on "see what everyone else is doing", "use all the skills you have", "what's the best way to X", "should we build this or buy it", "is th…
+  use_when: told "do a deep dive", "go figure this out", or "don't reinvent the wheel" - researches a question across every relevant source and returns a decision.
   requires: []
   works_out_of_the_box: true
   compatibility: Portable to Hermes and Claude Code. In Claude, map the named research tools and delegation/panel mechanisms to available equivalents; unsupported source classes are reported, not silently omitted.
@@ -73,7 +73,7 @@ skills:
   version: 1.1.0
   scope: solo
   summary: Use when the user says "/keep_going", "keep going", or "continue" after the agent has stopped short — asked "which option?", narrated a plan instead of executing it, or claimed a blocker that is not real — while the user has already given clear direction.
-  use_when: the user says "/keep_going", "keep going", or "continue" after the agent has stopped short — asked "which option?", narrated a plan instead of executing it, or claimed a blocker that is not real — while the user has already given clear direction. Also use proactively when the agent notices it is abo…
+  use_when: the user says "/keep_going", "keep going", or "continue" after the agent has stopped short — asked "which option?", narrated a plan instead of executing it, or claimed a blocker that is not real — while the user has already given clear direction.
   requires: []
   works_out_of_the_box: true
   compatibility: Portable to Hermes, Claude Code, and similar coding agents.
@@ -97,7 +97,7 @@ skills:
   version: 0.1.1
   scope: solo
   summary: Use when a Hermes MEMORY.md or USER.md file is too large, bloated, stale, or over the recommended cap and you need to reduce prompt footprint without losing important facts.
-  use_when: 'a Hermes MEMORY.md or USER.md file is too large, bloated, stale, or over the recommended cap and you need to reduce prompt footprint without losing important facts. Applies a lossless memory diet: compress, relocate to SOUL.md/USER.md/AGENTS.md/context files, offload long-tail facts to the memory pr…'
+  use_when: a Hermes MEMORY.md or USER.md file is too large, bloated, stale, or over the recommended cap and you need to reduce prompt footprint without losing important facts.
   requires: []
   works_out_of_the_box: true
   compatibility: Hermes-specific memory-file layout and conventions.
@@ -121,7 +121,7 @@ skills:
   version: 2.0.1
   scope: solo
   summary: Use when you have a HARD, open-ended, high-stakes problem worth throwing multiple AI models at and pulling the best solution out — architecture decisions, strategy design, thorny debugging, research synthesis, "what am I missing", tool/system design.
-  use_when: you have a HARD, open-ended, high-stakes problem worth throwing multiple AI models at and pulling the best solution out — architecture decisions, strategy design, thorny debugging, research synthesis, "what am I missing", tool/system design. This is the SOLVE counterpart to multi-review (which criti…
+  use_when: you have a HARD, open-ended, high-stakes problem worth throwing multiple AI models at and pulling the best solution out — architecture decisions, strategy design, thorny debugging, research synthesis, "what am I missing", tool/system design.
   requires: []
   works_out_of_the_box: true
   compatibility: Hermes-specific; requires the native MoA runtime.
@@ -145,7 +145,7 @@ skills:
   version: 1.0.0
   scope: solo
   summary: Use when the user wants to know what real people are actually saying about a topic right now, not the SEO/editorial version.
-  use_when: the user wants to know what real people are actually saying about a topic right now, not the SEO/editorial version. Pulls recent posts and engagement from Reddit, X, YouTube, Hacker News, Polymarket, GitHub, and the web, ranks by engagement and recency with a deterministic scorer, and writes one syn…
+  use_when: the user wants to know what real people are actually saying about a topic right now, not the SEO/editorial version.
   requires: []
   works_out_of_the_box: true
   compatibility: Agent Skills standard
@@ -173,7 +173,7 @@ skills:
   version: 1.4.1
   scope: solo
   summary: Use when reviewing almost any meaningful artifact, decision, action, plan, code change, prompt, skill, research summary, outbound message, or public-facing content.
-  use_when: reviewing almost any meaningful artifact, decision, action, plan, code change, prompt, skill, research summary, outbound message, or public-facing content. Runs a small panel of diverse review lenses across model families when available, synthesizes findings into fix/ask/defer/wontfix decisions, and…
+  use_when: reviewing almost any meaningful artifact, decision, action, plan, code change, prompt, skill, research summary, outbound message, or public-facing content.
   requires: []
   works_out_of_the_box: true
   compatibility: Portable review method. Native multi-model orchestration examples are Hermes-specific; Claude can run the method with Claude subagents but loses model-family diversity.
@@ -197,7 +197,7 @@ skills:
   version: 1.1.0
   scope: solo
   summary: Run a portfolio of long-running projects as a chief of staff rather than a task runner.
-  use_when: you have several open-ended efforts that each need periodic attention, when scheduled agent runs are producing activity without progress, when a notification channel has become an unreadable wall of updates, or when you want an agent to direct specialist agents instead of doing their work. Covers th…
+  use_when: you have several open-ended efforts that each need periodic attention, when scheduled agent runs are producing activity without progress, when a notification channel has become an unreadable wall of updates, or when you want an agent to direct specialist agents instead of doing their work.
   requires:
   - 'env: TELEGRAM_BOT_TOKEN (for the living board)'
   works_out_of_the_box: false
@@ -273,7 +273,7 @@ skills:
   version: 0.1.1
   scope: solo
   summary: Use when you need to know whether a Hermes agent is actually healthy — during a scheduled health check, after an outage or reboot, when someone asks "is X working?", or when an agent has gone quiet.
-  use_when: you need to know whether a Hermes agent is actually healthy — during a scheduled health check, after an outage or reboot, when someone asks "is X working?", or when an agent has gone quiet. Runs a deterministic collector that gathers facts across twelve subsystems, then reads those facts as an LLM t…
+  use_when: you need to know whether a Hermes agent is actually healthy — during a scheduled health check, after an outage or reboot, when someone asks "is X working?", or when an agent has gone quiet.
   requires:
   - Python 3.9+ (stdlib only, no third-party packages)
   - Read access to the target agent's HERMES_HOME
@@ -300,7 +300,7 @@ skills:
   version: 1.0.0
   scope: solo
   summary: Use when an agent's skill library needs auditing, cleaning, or triage - "audit my skills", "are my skills healthy", "find duplicate skills", "why didn't it use that skill", "clean up my skills", "which skills should this agent have", or after an upgrade adds new skills.
-  use_when: an agent's skill library needs auditing, cleaning, or triage - "audit my skills", "are my skills healthy", "find duplicate skills", "why didn't it use that skill", "clean up my skills", "which skills should this agent have", or after an upgrade adds new skills. Finds broken skills that silently vani…
+  use_when: an agent's skill library needs auditing, cleaning, or triage - "audit my skills", "are my skills healthy", "find duplicate skills", "why didn't it use that skill", "clean up my skills", "which skills should this agent have", or after an upgrade adds new skills.
   requires: []
   works_out_of_the_box: true
   compatibility: Agent Skills standard
@@ -351,7 +351,7 @@ skills:
   version: 1.0.0
   scope: solo
   summary: Use when a pull request has feedback from code-review bots (Cursor Bugbot, Codex, Claude Code Review, Greptile, CodeRabbit) or humans and you need to triage it, fix what is valid, push back on what is wrong, react and reply to every comment, and drive the PR to a clean, mergeable state.
-  use_when: 'a pull request has feedback from code-review bots (Cursor Bugbot, Codex, Claude Code Review, Greptile, CodeRabbit) or humans and you need to triage it, fix what is valid, push back on what is wrong, react and reply to every comment, and drive the PR to a clean, mergeable state. Trigger phrases: "add…'
+  use_when: a pull request has feedback from code-review bots (Cursor Bugbot, Codex, Claude Code Review, Greptile, CodeRabbit) or humans and you need to triage it, fix what is valid, push back on what is wrong, react and reply to every comment, and drive the PR to a clean, mergeable state.
   requires:
   - gh CLI, authenticated
   works_out_of_the_box: false
@@ -377,7 +377,7 @@ skills:
   version: 1.1.0
   scope: solo
   summary: Use when a fast hosted-render path is needed to turn D2, Mermaid, Graphviz, or Chart.js text into an inline-ready PNG for chat (Telegram, Discord, Slack) or a saved image.
-  use_when: a fast hosted-render path is needed to turn D2, Mermaid, Graphviz, or Chart.js text into an inline-ready PNG for chat (Telegram, Discord, Slack) or a saved image. Handles the hosted-render + local-rasterize plumbing and platform gotchas (snap-chromium sandbox, D2-is-SVG-only, blank-render detection…
+  use_when: a fast hosted-render path is needed to turn D2, Mermaid, Graphviz, or Chart.js text into an inline-ready PNG for chat (Telegram, Discord, Slack) or a saved image.
   requires:
   - chromium binary on PATH (or CHROMIUM_BIN) for local rasterize
   - network access to a Kroki host (KROKI_BASE) and QuickChart (QUICKCHART_BASE)
@@ -406,7 +406,7 @@ skills:
   version: 0.5.0
   scope: fleet
   summary: Use when adding, removing, password-protecting, or troubleshooting a mini-app served by the hermes-config mini-app router (Caddy + PM2 + auth sidecar + Tailscale Serve/Funnel) on a fleet machine.
-  use_when: adding, removing, password-protecting, or troubleshooting a mini-app served by the hermes-config mini-app router (Caddy + PM2 + auth sidecar + Tailscale Serve/Funnel) on a fleet machine. Covers install, the Caddy route pattern, the auth sidecar conventions, exposing apps publicly via Funnel, Hermes…
+  use_when: adding, removing, password-protecting, or troubleshooting a mini-app served by the hermes-config mini-app router (Caddy + PM2 + auth sidecar + Tailscale Serve/Funnel) on a fleet machine.
   requires:
   - 'host services: Caddy + PM2'
   - Tailscale Serve/Funnel
@@ -461,7 +461,7 @@ skills:
   version: 1.0.0
   scope: solo
   summary: Use when triaging one or more email inboxes on a schedule, removing obvious debris, quarantining promotional mail, and surfacing only messages that need the user's attention.
-  use_when: triaging one or more email inboxes on a schedule, removing obvious debris, quarantining promotional mail, and surfacing only messages that need the user's attention. Provides a Hermes-native workflow using cron, per-message sub-agent isolation, deterministic header heuristics, account adapters, visi…
+  use_when: triaging one or more email inboxes on a schedule, removing obvious debris, quarantining promotional mail, and surfacing only messages that need the user's attention.
   requires:
   - 'email CLI: gog or himalaya'
   - Hermes cron + delegation toolsets enabled
@@ -573,7 +573,7 @@ skills:
   version: 1.0.0
   scope: solo
   summary: Use when sending, reading, or searching iMessages from an agent on macOS, or when setting up, hardening, or debugging the BlueBubbles iMessage bridge.
-  use_when: sending, reading, or searching iMessages from an agent on macOS, or when setting up, hardening, or debugging the BlueBubbles iMessage bridge. Also use when an existing chat.db/imsg approach breaks with permissionDenied, "authorization denied (code 23)", or hangs with no output after a macOS or Pytho…
+  use_when: sending, reading, or searching iMessages from an agent on macOS, or when setting up, hardening, or debugging the BlueBubbles iMessage bridge.
   requires:
   - macOS with Messages.app signed into iMessage
   - BlueBubbles server app (installed by scripts/setup-bluebubbles.sh)

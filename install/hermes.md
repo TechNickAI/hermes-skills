@@ -38,22 +38,30 @@ attention degrades faster than the token cost suggests.
 # 0. Know what you are about to change
 hermes profile list          # which profiles exist, and which is active?
 hermes skills list           # what's already installed (name collisions, stale versions)?
-hermes skills tap list       # what sources are already tapped?
 
-# 1. Tap the packs you want (discoverable, free)
-hermes skills tap add TechNickAI/hermes-skills --path skills/core/
-hermes skills tap add TechNickAI/hermes-skills --path skills/engineering/
-hermes skills tap add TechNickAI/hermes-skills --path skills/productivity/
+# 1. Preview any skill before installing it
+hermes skills inspect https://raw.githubusercontent.com/TechNickAI/hermes-skills/main/skills/core/keep-going/SKILL.md
 
-# 2. Search and preview (custom taps need --source github)
-hermes skills search review --source github
-hermes skills inspect multi-review
-
-# 3. Install into the agent's index.
-# -p <profile> is REQUIRED when targeting a named profile: the CLI otherwise
-# installs into the calling profile while reporting success for the named one.
-hermes skills install multi-review -p <profile>
+# 2. Install by direct URL. -p <profile> is REQUIRED for a named profile: the CLI
+# otherwise installs into the calling profile while reporting success for the named one.
+hermes skills install https://raw.githubusercontent.com/TechNickAI/hermes-skills/main/skills/core/keep-going/SKILL.md -p <profile>
 ```
+
+Every skill's URL follows one pattern, and
+[`skills/CATALOG.md`](https://raw.githubusercontent.com/TechNickAI/hermes-skills/main/skills/CATALOG.md)
+gives you the `path` for each:
+
+```text
+https://raw.githubusercontent.com/TechNickAI/hermes-skills/main/<path>/SKILL.md
+```
+
+> **`hermes skills search` will not find these skills, even after tapping.**
+> Verified on Hermes v0.20.1: `--source` selects a public index (`skills-sh`, `github`,
+> and friends), and there is no `--source tap`. A bare `hermes skills search keep-going`
+> returns zero results while the tap is configured correctly. Taps make a pack
+> discoverable to the runtime, not to `search`. Install by URL instead — it needs no tap
+> at all. Skills carrying `references/` or `scripts/` need the folder rather than the
+> single file; use the npx installer or copy the directory for those.
 
 Verify the file actually landed rather than trusting the exit code — an ambiguous
 `hermes skills install <name>` can print a disambiguation table and exit 0 without

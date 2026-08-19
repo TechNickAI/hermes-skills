@@ -89,7 +89,17 @@ def use_when(description: str) -> str:
     if not match:
         return ""
     clause = match.group(1).strip()
-    return clause[:300].rstrip(" ,;") + ("…" if len(clause) > 300 else "")
+    if len(clause) <= 300:
+        return clause
+    # Truncate on a sentence boundary, never mid-word. An agent reads this field to
+    # decide whether to install a skill; a clause cut off mid-sentence ("…is th…")
+    # is the worst possible input for that decision.
+    window = clause[:300]
+    cut = max(window.rfind(". "), window.rfind("? "), window.rfind("! "))
+    if cut > 80:
+        return window[: cut + 1]
+    cut = window.rfind(" ")
+    return window[:cut].rstrip(" ,;") + "…"
 
 
 def requirements_for(frontmatter: dict) -> list[str]:
@@ -253,6 +263,21 @@ def render_catalog(manifest: dict) -> str:
         "",
         "This file is generated from each skill's metadata. Do not edit it by hand.",
         "Use it to choose a small set of relevant skills without opening every skill file.",
+        "",
+        "## Start here",
+        "",
+        "Every installed skill's name and description sit in the system prompt on *every*",
+        "turn, so a long list costs attention on work that has nothing to do with it.",
+        "Unless the person asks for something specific, propose these three and stop:",
+        "",
+        "| Skill | What changes for them | Claude |",
+        "| --- | --- | --- |",
+        "| `deep-dive` | \"Go figure this out\" returns a recommendation instead of a reading list | degraded |",
+        "| `keep-going` | It finishes the work instead of stopping to ask which option you want | native |",
+        "| `multi-review` | Important drafts and decisions get reviewed from several angles first | degraded |",
+        "",
+        "Everything below is the full index, for when someone names a need these three do",
+        "not cover.",
         "",
         "`Claude` values: `native` (works fully), `degraded` (runs but loses its",
         "differentiator — say so out loud), `unsupported` (never recommend it in Claude).",
