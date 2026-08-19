@@ -84,7 +84,8 @@ Ten of the skills in this repo need no setup:
 (`report` is `scope: fleet` — it needs no credential but assumes a multi-agent fleet.)
 
 The rest have prerequisites — credentials, external CLIs, services, or OS permissions.
-`skills/MANIFEST.yaml` lists exactly what each one needs in its `requires` field.
+[`skills/MANIFEST.yaml`](../skills/MANIFEST.yaml) lists exactly what each one needs in
+its `requires` field.
 
 ---
 
@@ -101,9 +102,9 @@ fan-out. Those are the ones that will not port cleanly to another runtime.
 
 ## Rules for an installing agent
 
-- Read `skills/MANIFEST.yaml` first. It answers `scope`, `requires`,
-  `works_out_of_the_box`, and `use_when` for every skill without opening a single
-  `SKILL.md`.
+- Read [`skills/MANIFEST.yaml`](../skills/MANIFEST.yaml) first. It answers `scope`,
+  `requires`, `works_out_of_the_box`, and `use_when` for every skill without opening a
+  single `SKILL.md`.
 - Filter by `scope` before anything else.
 - `works_out_of_the_box: true` means **eligible, not authorized**. Show the human the
   exact proposed list, flag collisions with already-installed skills, and wait for a yes.
