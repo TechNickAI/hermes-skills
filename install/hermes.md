@@ -30,8 +30,8 @@ attention degrades faster than the token cost suggests.
 
 ```bash
 # 0. Know what you are about to change
-hermes profile show          # which profile will this modify?
-hermes skills list           # what is already installed (name collisions)?
+hermes profile list          # which profiles exist, and which is active?
+hermes skills list           # what's already installed (name collisions, stale versions)?
 hermes skills tap list       # what sources are already tapped?
 
 # 1. Tap the packs you want (discoverable, free)
