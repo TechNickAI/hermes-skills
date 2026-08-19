@@ -7,7 +7,7 @@ what you installed and what you skipped.
 Claude Code supports the [Agent Skills](https://agentskills.io) open standard, so the
 skill _format_ works unmodified. Individual skills may still need external tools or
 Hermes-specific runtime features — check `requires` in
-[`skills/MANIFEST.yaml`](../skills/MANIFEST.yaml) before installing.
+[`skills/CATALOG.md`](../skills/CATALOG.md) before installing.
 
 ---
 
@@ -107,7 +107,7 @@ Everything in the `productivity` pack needs an external CLI or API key first. Ch
 
 ## Rules for an installing agent
 
-- Read `skills/MANIFEST.yaml` first. It answers `scope`, `requires`,
+- Read `skills/CATALOG.md` first. It answers `scope`, `requires`,
   `works_out_of_the_box`, and `use_when` for every skill without opening a single
   `SKILL.md`.
 - `works_out_of_the_box: true` means **eligible, not approved**. Show the human the exact

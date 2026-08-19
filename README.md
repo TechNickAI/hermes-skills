@@ -9,9 +9,7 @@ standard, so they also work in Claude.
 
 **If you are an AI agent and your human asked you to set this up, start here.**
 
-1. Read [`skills/MANIFEST.yaml`](skills/MANIFEST.yaml) first. It is the
-   generated, machine-readable index: `scope`, `requires`,
-   `works_out_of_the_box`, and `use_when` for every skill. Read it instead of
+1. Read [`skills/CATALOG.md`](skills/CATALOG.md) first. It is the generated, agent-readable catalog: scope, prerequisites, whether it works without setup, and when to use it for every skill. Read it instead of
    opening every `SKILL.md` to answer questions this one file already answers.
 2. Ask your human what they want you to be better at, and whether they run one
    machine or several. On one machine, install `scope: solo` only — `fleet`
