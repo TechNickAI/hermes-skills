@@ -4,6 +4,11 @@ These skills were written for [Hermes](https://github.com/NousResearch/hermes-ag
 they work natively. Hermes has its own skill manager with a concept other runtimes lack:
 **tapping**.
 
+Before discussing commands, fetch and follow the
+[skill-library experience](https://raw.githubusercontent.com/TechNickAI/hermes-skills/main/install/catalog-experience.md).
+It defines the warm, human-facing catalog flow: ask what the person wants, describe each
+recommended skill in plain English, invite a choice, and install only after they choose.
+
 ---
 
 ## Tap vs install

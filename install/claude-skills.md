@@ -4,6 +4,11 @@ Covers Claude Code (terminal) and the Claude apps (desktop and web). If you are 
 reading this on someone's behalf, follow the section matching your surface, then report
 what you installed and what you skipped.
 
+Before discussing installation, fetch and follow the
+[skill-library experience](https://raw.githubusercontent.com/TechNickAI/hermes-skills/main/install/catalog-experience.md).
+It defines the warm, human-facing catalog flow: ask what the person wants, describe each
+recommended skill in plain English, invite a choice, and install only after they choose.
+
 Claude Code supports the [Agent Skills](https://agentskills.io) open standard, so the
 skill _format_ works unmodified. Individual skills may still need external tools or
 Hermes-specific runtime features — check `requires` in
@@ -87,21 +92,14 @@ Notes that matter:
 
 ---
 
-## Which to install first
+## Choosing skills
 
-| Skill            | What it does                                             | Setup |
-| ---------------- | -------------------------------------------------------- | ----- |
-| `deep-dive`      | Researches a question across sources, returns a decision | none  |
-| `multi-review`   | Reviews a draft, plan, or diff through several lenses    | none  |
-| `keep-going`     | Re-anchors an agent that stopped short of the work       | none  |
-| `memory-cleanup` | Trims a bloated memory file without losing facts         | none  |
+Build the person's catalog from [`skills/CATALOG.md`](../skills/CATALOG.md), using the
+presentation format in [`catalog-experience.md`](catalog-experience.md). Recommend what
+matches their desired outcome rather than relying on a fixed starter pack.
 
-`recall` is listed as setup-free in the manifest, but its procedure reads Hermes session
-state and calls a Hermes-only search tool, so it has nothing to restore from in Claude.
-Skip it here.
-
-Everything in the `productivity` pack needs an external CLI or API key first. Check
-`requires` in the manifest before installing any of it.
+`recall` reads Hermes session state and calls a Hermes-only search tool, so it has nothing
+to restore from in Claude. Do not recommend it here.
 
 ---
 
