@@ -126,11 +126,16 @@ def concentration(values, labels=None) -> str:
     lines.append(f"  {share:.1%} of total absolute magnitude")
     lines.append(f"  total without it: {without:,.6g}")
 
-    if total and without and (total > 0) != (without > 0):
+    # `without == 0` must count: if the rest of the population cancels exactly, then
+    # this single row IS the entire result. Guarding on truthiness skipped that case
+    # and reported "no single observation dominates" for a one-row finding.
+    if total and (without == 0 or (total > 0) != (without > 0)):
+        becomes = "exactly zero" if without == 0 else f"{without:,.6g}"
         lines.append(
-            f"  >> THE SIGN DEPENDS ON THIS ONE OBSERVATION. {total:,.6g} becomes "
-            f"{without:,.6g} without it. This is not a population effect. Report it "
-            f"as one observation."
+            f"  >> THE RESULT DEPENDS ENTIRELY ON THIS ONE OBSERVATION. {total:,.6g} "
+            f"becomes {becomes} without it, so the rest of the population contributes "
+            f"nothing or points the other way. This is not a population effect. "
+            f"Report it as one observation."
         )
     elif share >= 0.5:
         lines.append(
@@ -150,7 +155,9 @@ def concentration(values, labels=None) -> str:
                 f"No group holds 50% or less of the rows ({dict(counts)}), so removing "
                 f"one always moves the number. Regroup by a finer key."
             )
-            return "\n".join(lines)
+            # Do NOT return: tail dominance does not depend on the grouping, and
+            # skipping it here silently dropped a check the caller asked for.
+            eligible = []
 
         full = _mean(values)
         scored = []
@@ -159,6 +166,8 @@ def concentration(values, labels=None) -> str:
             if kept:
                 scored.append((abs(_mean(kept) - full), g, _mean(kept), counts[g]))
         scored.sort(reverse=True)
+
+    if labels and scored:
         shift, group, without_mean, group_n = scored[0]
         rel = shift / abs(full) if full else math.inf
 
@@ -280,10 +289,6 @@ def confound(values, label_a, label_b, name_a="A", name_b="B") -> str:
             "see whether either survives holding the other fixed:"
         )
         lines.append("")
-
-    cells = {}
-    for v, a, b in zip(values, label_a, label_b):
-        cells.setdefault((a, b), []).append(v)
 
     # Does label_b still separate INSIDE a single label_a group, and vice versa?
     def survives_within(outer, inner, outer_name, inner_name):
@@ -488,6 +493,13 @@ def selection(sharpe: float, tried: int, periods: int) -> str:
     (mean/stdev per period), never a raw P&L or return: the ceiling is in
     standard-deviation units, so feeding it dollars is a units error.
     """
+    if not math.isfinite(sharpe):
+        return (
+            f"error: sharpe={sharpe} is not a finite number, so an upstream "
+            f"computation already failed. Every comparison against a NaN is false, "
+            f"which would let this report that the result clears the noise ceiling. "
+            f"Fix the source."
+        )
     if tried < 1 or periods < 2:
         return "error: need tried >= 1 and periods >= 2."
     if abs(sharpe) > 20:
@@ -610,7 +622,7 @@ def describe(values) -> str:
     return "\n".join(lines)
 
 
-def ledger(opening, inflows, outflows, pnl, closing, tolerance=0.01, materiality=None) -> str:
+def ledger(opening, inflows, outflows, pnl, closing, materiality=None) -> str:
     """Does the accounting close? opening + inflows - outflows + pnl == closing.
 
     The single largest sign error in the corpus was a P&L reported as +$1,086.86
@@ -786,7 +798,7 @@ def selftest() -> int:
 
     # concentration: single observation carries the sign
     cases.append(
-        ("single row flip", "DEPENDS ON THIS ONE", concentration([-40, -35, -50, 1200]), True)
+        ("single row flip", "DEPENDS ENTIRELY ON THIS ONE", concentration([-40, -35, -50, 1200]), True)
     )
 
     # tail dominance both directions
@@ -962,6 +974,36 @@ def selftest() -> int:
     cases.append(
         ("rounded prices not bimodal", "LOOKS BIMODAL", describe([10.25] * 30 + [10.5] * 30 + [10.75] * 30), False)
     )
+    # A NaN statistic must not take the success branch: every comparison against NaN
+    # is false, so both the raw-magnitude guard and the ceiling test are bypassed and
+    # a failed upstream computation reports that it clears the bar.
+    cases.append(("NaN Sharpe refused", "not a finite number", selection(float("nan"), 5, 250), True))
+    cases.append(
+        ("NaN Sharpe does not clear ceiling", "Clears the ceiling", selection(float("nan"), 5, 250), False)
+    )
+
+    # One row IS the total and the rest cancel exactly. Guarding on truthiness made
+    # `without == 0` fall through to "no single observation dominates".
+    cases.append(
+        (
+            "exactly cancelling remainder is caught",
+            "becomes exactly zero",
+            concentration([300.0, 200.0, -200.0, 250.0, -250.0, 180.0, -180.0]),
+            True,
+        )
+    )
+
+    # Tail dominance does not depend on the grouping, so a single-value label column
+    # must not suppress it.
+    cases.append(
+        (
+            "dead-end grouping still runs the tail check",
+            "TAIL-DOMINATED",
+            concentration([12.54] * 194 + [-202.5] * 9, ["only_desk"] * 203),
+            True,
+        )
+    )
+
     cases.append(
         ("normal data quiet", "LOOKS BIMODAL", describe([rng.gauss(50, 10) for _ in range(200)]), False)
     )

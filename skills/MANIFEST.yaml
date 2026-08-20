@@ -31,9 +31,9 @@ skills:
   size:
     files: 2
     bytes_skill_md: 23473
-    bytes_total: 70259
+    bytes_total: 72285
     approx_tokens_skill_md: 5868
-    approx_tokens_total: 17565
+    approx_tokens_total: 18071
   tags:
   - data-quality
   - analysis

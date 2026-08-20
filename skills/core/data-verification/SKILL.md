@@ -322,7 +322,7 @@ wrapping a one-line comparison is ceremony that makes the check feel done.
 
 ```bash
 python3 scripts/decompose.py --demo       # worked examples, no data needed
-python3 scripts/decompose.py --selftest   # 25 assertions, verifies it still works
+python3 scripts/decompose.py --selftest   # 46 assertions, verifies it still works
 python3 scripts/decompose.py --help
 ```
 
