@@ -18,12 +18,14 @@ from __future__ import annotations
 
 import math
 import random
+import re
 import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
 
 from checks import (  # noqa: E402
+    Check,
     check_units,
     concentration,
     distribution_shape,
@@ -273,6 +275,93 @@ def _():
     return distribution_shape([rng.gauss(0, 0.4) for _ in range(59)] + [95.0], name="lone_outlier")
 
 
+@scenario(
+    "NaN must never receive a PASS",
+    "CATCH",
+    "adversarial review: corrupt input was silently certified",
+    expect="FAIL",
+    says="Non-finite input",
+)
+def _():
+    # Every comparison against NaN is False, so a check written as a chain of
+    # comparisons falls through to its success branch and certifies corrupt data.
+    # This was a real defect in this module: multiple_testing(nan, 200, 60) returned
+    # PASS. A verification tool that green-lights NaN is worse than none, because it
+    # converts silent corruption into stated confidence.
+    return multiple_testing(float("nan"), n_tried=200, n_obs=60)
+
+
+@scenario(
+    "NaN inside a series must never receive a PASS",
+    "CATCH",
+    "adversarial review: aggregate over NaN is not a number",
+    expect="FAIL",
+    says="non-finite value",
+)
+def _():
+    return concentration([1.0, float("nan"), 2.0], name="corrupt_series")
+
+
+@scenario(
+    "a control that cannot clear its own threshold",
+    "CATCH",
+    "instrument that can only return one answer",
+    expect="FAIL",
+    says="too few",
+)
+def _():
+    # With trials=5 the smallest attainable p-value is 1/6 = 0.167, so the check can
+    # never return PASS however real the signal. An instrument with one reachable
+    # verdict is not a test, and this module exists to catch exactly that.
+    return negative_control(lambda xs: sum(xs), [1.0, 2.0, 3.0, 4.0], trials=5)
+
+
+@scenario(
+    "an expected range no value can satisfy",
+    "CATCH",
+    "inverted bounds make the gate unfalsifiable",
+    expect="FAIL",
+    says="inverted",
+)
+def _():
+    return plausible_magnitude(5.0, expected_low=100.0, expected_high=1.0, what="rate")
+
+
+@scenario(
+    "values and labels of different lengths",
+    "CATCH",
+    "silent zip truncation would make attribution arbitrary",
+    expect="FAIL",
+    says="disagree in length",
+)
+def _():
+    # zip() truncates silently, so without this guard the check would attribute the
+    # effect using a pairing that is simply wrong.
+    return leave_one_out([1.0, 2.0, 3.0, 4.0], ["a", "b"], name="mispaired")
+
+
+@scenario(
+    "negative row counts are not meaningful",
+    "CATCH",
+    "argument validation: a nonsense population must not be computed on",
+    expect="FAIL",
+    says="Negative row counts",
+)
+def _():
+    return reconcile_population(analyzed_n=-5, source_n=10)
+
+
+@scenario(
+    "tail quantile outside (0,1)",
+    "CATCH",
+    "argument validation: quantile=0 selects no tail and would always pass",
+    expect="FAIL",
+    says="quantile must be in",
+)
+def _():
+    return tail_dominance([1.0] * 30, quantile=0.0, name="bad_quantile")
+
+
 @scenario("silent filter drops 40% of days", "CATCH", "real incident: undeclared vol filter")
 def _():
     return reconcile_population(analyzed_n=204, source_n=343, name="trading_days")
@@ -398,6 +487,55 @@ def _():
 
 
 # --------------------------------------------------------------------------------------
+
+
+def test_guard_returns_are_not_truthiness_checks() -> Check:
+    """Source-level check: a `Check | None` guard must be compared against None.
+
+    This is a STRUCTURAL test, not a behavioural one, and it is here deliberately.
+    A `Check` is falsy when it FAILs, so `if guard: return guard` never fires and
+    silently disables the guard. That shipped in this module and certified NaN as
+    PASS across nine checks at once.
+
+    A behavioural scenario (NaN must FAIL) proves the current call sites are fixed.
+    It does NOT stop the idiom reappearing at the next guard someone adds, and
+    mutation testing confirmed the gap: reverting the idiom left every scenario
+    green. Testing the mechanism is warranted precisely when the mechanism is the
+    root cause and the symptom is one of its many possible expressions.
+    """
+    src = (Path(__file__).parent / "checks.py").read_text()
+    offenders = [
+        (i, line.strip())
+        for i, line in enumerate(src.splitlines(), 1)
+        if re.match(r"\s*if (guard|obs_guard)\s*:\s*$", line)
+    ]
+    if offenders:
+        listed = "; ".join(f"line {i}: {t}" for i, t in offenders[:5])
+        return Check(
+            "guard_idiom",
+            "FAIL",
+            f"{len(offenders)} guard(s) use truthiness instead of `is not None`, so a "
+            f"FAIL guard is falsy and never returns: {listed}. Use `if guard is not None:`.",
+            {"offenders": offenders},
+        )
+    return Check(
+        "guard_idiom",
+        "PASS",
+        "All Check|None guards compare against None rather than truthiness.",
+        {},
+    )
+
+
+SCENARIOS.append(
+    {
+        "name": "guards compare against None, not truthiness",
+        "kind": "QUIET",
+        "origin": "structural: the root cause of the NaN-passes defect",
+        "fn": test_guard_returns_are_not_truthiness_checks,
+        "expect": "PASS",
+        "says": None,
+    }
+)
 
 
 def main() -> int:

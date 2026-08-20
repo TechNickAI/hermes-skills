@@ -41,6 +41,27 @@ class Check:
     evidence: dict[str, Any] = field(default_factory=dict)
 
     def __bool__(self) -> bool:
+        """A Check is truthy only when it PASSED.
+
+        This is convenient (`if check: ship()`) and it is a trap, so it is stated
+        here rather than discovered later. A FAIL is FALSY, which means the natural
+        early-return idiom is silently inverted:
+
+            guard = _finite(name, x=x)
+            if guard:            # WRONG: a FAIL guard is falsy, so this never fires
+                return guard
+
+        That exact line shipped in this module and disabled every non-finite guard
+        at once, so NaN inputs were certified PASS. Always compare against None when
+        a helper returns `Check | None`:
+
+            if guard is not None:   # correct
+                return guard
+
+        `test_guard_returns_are_not_truthiness_checks` in the eval harness enforces
+        this by scanning the source, because the behavioural symptom (NaN passing)
+        can be fixed while the idiom that caused it survives elsewhere.
+        """
         return self.verdict == "PASS"
 
     def __str__(self) -> str:
@@ -73,6 +94,54 @@ class Report(list):
 
 
 # --------------------------------------------------------------------------------------
+# input hygiene
+# --------------------------------------------------------------------------------------
+
+
+def _finite(name: str, **named: float) -> Check | None:
+    """Reject NaN and infinity before any check reasons about a number.
+
+    This guard exists because of a specific defect found in adversarial review of
+    this very module: `multiple_testing(nan, 200, 60)` returned PASS, because every
+    comparison against NaN is False and the code fell through to the success
+    branch. A verification tool that hands a green light to corrupt data is worse
+    than no verification tool, since it converts silent corruption into stated
+    confidence. NaN is never a valid input here; it is the residue of a division by
+    zero, an empty aggregate, or a failed parse upstream, all of which are exactly
+    the provenance failures this skill exists to catch.
+    """
+    bad = {k: v for k, v in named.items() if isinstance(v, float) and not math.isfinite(v)}
+    if not bad:
+        return None
+    return Check(
+        name,
+        "FAIL",
+        f"Non-finite input: {', '.join(f'{k}={v}' for k, v in bad.items())}. "
+        f"NaN or infinity means an upstream computation already failed (division by "
+        f"zero, empty aggregate, failed parse). Fix the source; do not verify around it.",
+        {"non_finite": {k: str(v) for k, v in bad.items()}},
+    )
+
+
+def _finite_series(name: str, values: Sequence[float]) -> Check | None:
+    """Same guard for a series. Reports position so the bad row can be found."""
+    bad = [i for i, v in enumerate(values) if isinstance(v, float) and not math.isfinite(v)]
+    if not bad:
+        return None
+    shown = bad[:5]
+    more = f" (and {len(bad) - 5} more)" if len(bad) > 5 else ""
+    return Check(
+        name,
+        "FAIL",
+        f"Series contains {len(bad)} non-finite value(s) at index {shown}{more}. "
+        f"An aggregate over NaN is not a number, and silently dropping those rows "
+        f"would be the undeclared filter this skill exists to catch. Resolve them "
+        f"explicitly, then re-run.",
+        {"non_finite_count": len(bad), "first_indices": shown},
+    )
+
+
+# --------------------------------------------------------------------------------------
 # LANE 1 -- RECONCILE. Does the number tie to something computed a different way?
 # --------------------------------------------------------------------------------------
 
@@ -89,6 +158,9 @@ def reconcile(
     `independent` must come from a different data path, not a refactor of the same
     code. Re-running your own pipeline is not reconciliation.
     """
+    guard = _finite(name, claimed=claimed, independent=independent)
+    if guard is not None:
+        return guard
     if independent == 0:
         drift = abs(claimed)
         rel = math.inf if claimed else 0.0
@@ -149,6 +221,8 @@ def reconcile_population(
     """
     if source_n == 0:
         return Check(name, "FAIL", "Source population is zero; nothing to reconcile.", {})
+    if analyzed_n < 0 or source_n < 0:
+        return Check(name, "FAIL", "Negative row counts are not meaningful.", {})
     dropped = source_n - analyzed_n
     rate = dropped / source_n
     if abs(rate) <= tolerance:
@@ -172,6 +246,9 @@ def check_units(*quantities: tuple[float, str], name: str = "units") -> Check:
     against a figure denominated in contract price and declaring an edge 55x too
     small -- arithmetic that was flawless and meaningless.
     """
+    guard = _finite(name, **{f"q{i}": v for i, (v, _) in enumerate(quantities)})
+    if guard is not None:
+        return guard
     units = {u for _, u in quantities}
     if len(units) <= 1:
         return Check(name, "PASS", f"All quantities in '{units.pop() if units else ''}'.", {})
@@ -204,6 +281,9 @@ def concentration(
     vals = list(values)
     if not vals:
         return Check(name, "FAIL", "Empty series; no aggregate is defensible.", {})
+    guard = _finite_series(name, vals)
+    if guard is not None:
+        return guard
 
     labels = list(labels) if labels is not None else list(range(len(vals)))
     total = sum(vals)
@@ -268,6 +348,17 @@ def leave_one_out(
     """
     statistic = statistic or (lambda xs: sum(xs) / len(xs) if xs else 0.0)
     vals, labs = list(values), list(labels)
+    guard = _finite_series(name, vals)
+    if guard is not None:
+        return guard
+    if len(vals) != len(labs):
+        return Check(
+            name,
+            "FAIL",
+            f"values and labels disagree in length ({len(vals)} vs {len(labs)}); the "
+            f"pairing is wrong and every attribution below it would be arbitrary.",
+            {},
+        )
     if len(vals) < 3:
         return Check(name, "FLAG", f"n={len(vals)} is too small to decompose.", {"n": len(vals)})
 
@@ -341,6 +432,9 @@ def distribution_shape(values: Sequence[float], name: str = "distribution_shape"
     Catches heavy skew and suspected bimodality, the two cases where a central
     tendency is a number that no observation resembles.
     """
+    guard = _finite_series(name, list(values))
+    if guard is not None:
+        return guard
     vals = sorted(values)
     n = len(vals)
     if n < 8:
@@ -414,6 +508,11 @@ def tail_dominance(
     handful of observations carry the entire loss. That distinction is the whole
     decision, and an average hides it.
     """
+    guard = _finite_series(name, list(pnl))
+    if guard is not None:
+        return guard
+    if not 0 < quantile < 1:
+        return Check(name, "FAIL", f"quantile must be in (0,1), got {quantile}.", {})
     vals = sorted(pnl)
     n = len(vals)
     if n < 20:
@@ -541,8 +640,26 @@ def negative_control(
     """
     import random
 
+    guard = _finite_series(name, list(values))
+    if guard is not None:
+        return guard
+    # Below 19 trials the smallest attainable p-value, 1/(trials+1), cannot reach
+    # 0.05, so the check could only ever return FAIL: an instrument that can return
+    # exactly one answer, which is the defect this module exists to detect.
+    if trials < 19:
+        return Check(
+            name,
+            "FAIL",
+            f"trials={trials} is too few: the smallest attainable p-value is "
+            f"{1 / (trials + 1):.3f}, which cannot clear 0.05. Use at least 19 "
+            f"(200+ recommended).",
+            {"trials": trials},
+        )
     rng = random.Random(seed)
     observed = fn(values)
+    obs_guard = _finite(name, observed=observed)
+    if obs_guard is not None:
+        return obs_guard
     pool = list(values)
     null = []
     for _ in range(trials):
@@ -592,6 +709,9 @@ def multiple_testing(
     clear the noise ceiling for the number of variants tested is not a finding, and
     the count of variants includes every one you tried and abandoned.
     """
+    guard = _finite(name, best_result=best_result)
+    if guard is not None:
+        return guard
     if n_tried < 1 or n_obs < 2:
         return Check(name, "FLAG", "Need n_tried >= 1 and n_obs >= 2.", {})
 
@@ -668,6 +788,20 @@ def plausible_magnitude(
     denomination. Writing the expected range down first is what makes it work; a
     range chosen after seeing the value always contains the value.
     """
+    guard = _finite(
+        name, value=value, expected_low=expected_low, expected_high=expected_high
+    )
+    if guard is not None:
+        return guard
+    if expected_low > expected_high:
+        return Check(
+            name,
+            "FAIL",
+            f"Expected range is inverted: low={expected_low:,.6g} > "
+            f"high={expected_high:,.6g}. No value can satisfy it, so the check could "
+            f"only ever fail.",
+            {},
+        )
     if expected_low <= value <= expected_high:
         return Check(
             name,

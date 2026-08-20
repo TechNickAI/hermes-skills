@@ -295,15 +295,15 @@ this evidence.
 
 The gates are only worth what their evidence is worth, so:
 
-- **31 scenarios**, 20 `CATCH` (must fire) and 11 `QUIET` (must not fire). Most
+- **39 scenarios**, 27 `CATCH` (must fire) and 12 `QUIET` (must not fire). Most
   CATCH scenarios are replays of specific incidents from the audit. The QUIET half
   matters just as much: a checker that fires on everything gets ignored, and then
   it protects nothing.
 - **Scenarios pin the diagnosis, not just the alarm.** Many assert the exact
   verdict and a substring of the message, because a check that fires for the wrong
   reason hands back the wrong fix.
-- **19/19 mutation kill rate.** Every branch of every check was deliberately
-  broken and the harness caught all 19. This is the only evidence that the
+- **27/27 mutation kill rate.** Every branch of every check was deliberately
+  broken and the harness caught all 27. This is the only evidence that the
   scenarios test the checks rather than merely running them.
 
 Mutation testing earned its keep during construction. It found:
@@ -317,7 +317,28 @@ Mutation testing earned its keep during construction. It found:
   so the check was weakest exactly when the defect was worst;
 - a redundant `interior` guard that no input could ever make binding.
 
-Four real defects in checks that had already passed the whole suite. If you extend
+Adversarial review then found the worst one. **Every non-finite guard was
+disabled**, so `multiple_testing(nan, 200, 60)` returned `PASS`. The cause was
+one idiom:
+
+```python
+guard = _finite(name, x=x)
+if guard:            # a FAIL Check is FALSY, so this never fires
+    return guard
+```
+
+`Check.__bool__` returns True only for `PASS`, which makes the natural early-return
+idiom silently inverted. A verification tool that green-lights NaN is worse than no
+tool, because it converts silent corruption into stated confidence.
+
+Fixing the symptom was not enough. Mutation testing showed that reverting the idiom
+left **every scenario green**, so the harness now carries
+`test_guard_returns_are_not_truthiness_checks`, which scans the source. Testing a
+mechanism rather than a behaviour is usually a proxy and usually wrong; it is
+warranted here because the mechanism **is** the root cause and NaN-passing was only
+one of its expressions.
+
+Six real defects in checks that had already passed the whole suite. If you extend
 `checks.py`, add the scenario **and** re-run the mutation sweep, or you have added
 untested code to a skill whose entire purpose is not doing that.
 
@@ -346,6 +367,11 @@ the four provenance checks have nothing to compare against and this skill degrad
 to a statistics library, which would have caught almost none of the incidents that
 motivated it.
 
+**Non-finite input is rejected, not analyzed.** Every check returns `FAIL` on NaN
+or infinity rather than reasoning about it. NaN in an analysis means an upstream
+computation already failed, and verifying around it would launder a provenance
+failure into a statistical result.
+
 Three more honest limits:
 
 - **Thresholds are conventions, not laws.** 50% mass for concentration, 10x
@@ -358,7 +384,13 @@ Three more honest limits:
 - **`negative_control` has a real false-positive rate.** At the 0.05 boundary,
   roughly 1 in 20 genuinely null series will read as signal. That is the
   definition of the threshold, not a defect, and it is why a single passing
-  control is not proof of an edge.
+  control is not proof of an edge. It also needs at least 19 trials, since below
+  that the smallest attainable p-value cannot reach 0.05 and the check could only
+  ever return one verdict; it refuses rather than pretending.
+- **`negative_control` shuffles.** A plain permutation destroys serial structure,
+  which is right for a cross-sectional claim and wrong for one about autocorrelated
+  time series, where a block or circular-shift null is the correct comparator. Pass
+  a statistic that is meaningful under the null you actually want.
 
 ## Pitfalls
 
