@@ -19,27 +19,26 @@ packs:
 skills:
 - name: data-verification
   pack: core
-  version: 1.0.0
+  version: 2.0.0
   scope: solo
-  summary: 'Use when an analysis is about to produce a number, a verdict, or a recommendation someone will act on: backtests, P&L, cost and fee models, yield and returns, screens, cohort comparisons, "is this strategy profitable", "why did we lose money on X".'
-  use_when: 'an analysis is about to produce a number, a verdict, or a recommendation someone will act on: backtests, P&L, cost and fee models, yield and returns, screens, cohort comparisons, "is this strategy profitable", "why did we lose money on X".'
+  summary: 'Use before reporting any number, verdict, or recommendation drawn from data: "is this profitable", "did X cause Y", "which cohort performs best", metrics reviews, backtests, cost models, funnel analysis, A/B results.'
+  use_when: ''
   requires: []
   works_out_of_the_box: true
   compatibility: Agent Skills standard
   claude_compat: native
   claude_note: Stdlib-only check library and eval harness; the protocol needs no Hermes runtime.
   size:
-    files: 4
-    bytes_skill_md: 23004
-    bytes_total: 86248
-    approx_tokens_skill_md: 5751
-    approx_tokens_total: 21562
+    files: 2
+    bytes_skill_md: 17078
+    bytes_total: 44356
+    approx_tokens_skill_md: 4270
+    approx_tokens_total: 11089
   tags:
   - data-quality
-  - verification
   - analysis
+  - verification
   - statistics
-  - backtesting
   - epistemics
   - decision
   path: skills/core/data-verification
