@@ -26,9 +26,11 @@ came out of data and that someone will act on. "The strategy makes money." "Chur
 is worse on the enterprise tier." "Fees are what killed it." "Cohort B converts
 better."
 
-**Cost:** questions 1 and 2 take about three minutes and catch ~79% of real
-failures. That is the whole routine minimum. Do not skip them because the analysis
-felt simple; every incident in the corpus below felt simple.
+**Cost:** questions 1 and 2 are the routine minimum and usually take a few
+minutes. They target the failure modes behind ~79% of the audited corpus below,
+which is a statement about where those errors came from, not a measured catch
+rate against them. Do not skip them because the analysis felt simple; every
+incident in that corpus felt simple.
 
 **Do it BEFORE you write the conclusion, not after.** Answering these after you
 have stated a finding turns into serial public correction, where each message walks
@@ -55,8 +57,8 @@ incidents. The taxonomy:
 
 **Arithmetic errors: zero.**
 
-Every one of those incidents reproduces perfectly when you re-run the
-calculation. That is why "let me double-check my work" never caught any of them,
+Re-running the calculation reproduces these incidents rather than catching them,
+because the arithmetic was not the error. That is why "let me double-check my work" never caught any of them,
 and it is why this skill does not ask you to re-check your work.
 
 What it asks instead: **is this number about what I think it is about?**
@@ -78,9 +80,23 @@ or a population is not recoverable from the numbers afterwards.
   different units. Never compare two quantities until they carry the same one.
 - **What is the population?** How many rows the source holds, how many reached
   your calculation, and the name of every filter between them. **An unexplained
-  gap is a hypothesis you never declared.** In one real case a `credit <= 0.05`
+  gap is a hypothesis you never declared.** Naming filters is not enough on its
+  own, because the honest ones are visible while pagination caps, retention
+  windows, and stale replicas are not. Make the counts reconcile:
+
+  ```text
+  source total = retrieved unique rows + rows you failed to retrieve
+  retrieved    = parse failures + duplicates + join losses + each named filter + analyzed
+  ```
+
+  If either line does not balance, the difference is a filter you have not found
+  yet. Also confirm the first and last row of the window you claim to cover:
+  a default sort is not a sample, and pagination that stops early looks exactly
+  like a population that ends early. If you cannot certify the totals, label the
+  conclusion **bounded**, not verified. In one real case a `credit <= 0.05`
   skip removed 40.5% of days and correlated -0.471 with volatility: an undeclared
   low-volatility filter nobody chose.
+
 - **Is this rate, cost, or constant measured on THIS population?** An imported
   number is guilty until re-derived here. This one line would have prevented the
   single most expensive error in the audit.
@@ -88,7 +104,16 @@ or a population is not recoverable from the numbers afterwards.
   Transfer counts are not dollars moved.
 - **Does the field hold the series I think it holds?** State the magnitude you
   expect **before** looking. A range chosen after seeing the value always contains
-  the value.
+  the value. A magnitude check alone cannot separate two plausible fields, and
+  `planned_price` and `fill_price` share a unit and a range, so also write down
+  the field's **definition and lifecycle stage** from the source's documentation:
+  is this planned, submitted, executed, settled, or marked? If the documentation
+  does not say, mark the field **unverified** rather than assuming.
+- **Trace one record end to end.** Take a single row you can verify independently,
+  a fill you can see in the venue UI, an invoice, a receipt, one known customer,
+  and follow it from the raw response through every transformation into the final
+  statistic. One traced record catches wrong-field and wrong-stage errors that no
+  aggregate check can see, because the aggregate looks reasonable either way.
 
 > **Empty is not zero.** An HTTP 200 with an empty array means "no rows returned",
 > which is indistinguishable from "no data exists", "your window is wrong", and
@@ -181,14 +206,19 @@ Cheapest first:
   opening + inflows - outflows + P&L = closing
   ```
 
-  Every dollar lands in exactly one bucket. This is the only check that catches
-  double-counting, which produced the largest sign error in the corpus: a P&L
+  Every dollar lands in exactly one bucket. This closes to the CENT; a percentage
+  tolerance scales the allowance with the account and will certify a $9,000
+  residual on a $1,009,000 balance as clean. This is the check that catches
+  double-counting, which produced the largest sign error in the corpus. Nothing
+  else in this skill catches it, because every individual number is right: a P&L
   reported as **+$1,086.86** that was really **-$120.84**, because sale proceeds
   and settlement were both booked as income while the cost basis was never
   allocated. Every individual number was correct; only the identity fails. The
-  residual usually names the mistake, and a residual equal to the P&L means the
-  gain is counted twice. `scripts/decompose.py ledger` does this and diagnoses
-  the residual.
+  residual is a lead, not a diagnosis: a residual equal to the P&L is CONSISTENT
+  WITH the gain being counted twice, and equally consistent with a missing
+  transfer, a stale closing snapshot, or an omitted fee. Confirm against
+  transaction-level records before naming a cause. `scripts/decompose.py ledger`
+  runs the identity and lists candidate explanations.
 
 - **A second data path.** A different endpoint, table, or grain. Do not compare a
   vendor's number to the same vendor's number. Two vendors' supply figures once

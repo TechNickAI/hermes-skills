@@ -229,9 +229,18 @@ def confound(values, label_a, label_b, name_a="A", name_b="B") -> str:
         return f"n={n} is too small to separate two explanations."
 
     def flips(labels):
+        """Groups whose removal flips the sign, excluding majority groups.
+
+        Removing a group that holds most of the rows always moves the number, so
+        counting it as a finding would make any 99/1 split look like a confound.
+        `concentration` applies the same 50% rule.
+        """
         full = _mean(values)
+        counts = Counter(labels)
         out = []
         for g in sorted(set(labels)):
+            if counts[g] / n > 0.5:
+                continue
             kept = [v for v, lab in zip(values, labels) if lab != g]
             if kept and full and (_mean(kept) > 0) != (full > 0):
                 out.append(g)
@@ -245,19 +254,32 @@ def confound(values, label_a, label_b, name_a="A", name_b="B") -> str:
         "",
     ]
 
-    if not (flip_a and flip_b):
+    if not flip_a and not flip_b:
+        # A sign flip is a dramatic symptom, not the definition of a confound. An
+        # all-profitable book can still have a real weekday effect, and one grouping
+        # can still be a proxy for the other. Fall through to the cross-tab rather
+        # than declaring them separable, which would be an untested claim.
         lines.append(
-            f">> Only one explanation flips the result, so they are separable here. "
-            f"Attribute to it, and still name the mechanism before calling it a cause."
+            ">> Neither explanation flips the sign, so neither dominates the result "
+            "outright. Cross-tabulating anyway, because one can still be a proxy for "
+            "the other at a smaller magnitude:"
+        )
+        lines.append("")
+    elif not (flip_a and flip_b):
+        which = name_a if flip_a else name_b
+        other = name_b if flip_a else name_a
+        lines.append(
+            f">> Only {which} flips the result; {other} does not. They are separable "
+            f"here. Attribute to {which}, and still name the mechanism before calling "
+            f"it a cause."
         )
         return "\n".join(lines)
-
-    # Both flip. Cross-tabulate to see whether either survives holding the other fixed.
-    lines.append(
-        ">> BOTH EXPLANATIONS FLIP THE SIGN on the same rows. Cross-tabulating to see "
-        "whether either survives holding the other fixed:"
-    )
-    lines.append("")
+    else:
+        lines.append(
+            ">> BOTH EXPLANATIONS FLIP THE SIGN on the same rows. Cross-tabulating to "
+            "see whether either survives holding the other fixed:"
+        )
+        lines.append("")
 
     cells = {}
     for v, a, b in zip(values, label_a, label_b):
@@ -350,9 +372,12 @@ def confound(values, label_a, label_b, name_a="A", name_b="B") -> str:
 
     lines.append("")
     lines.append(
-        "   Whatever the arithmetic says, the tie-break is MECHANISM: an instrument, "
-        "a customer, or a venue can cause a loss; a weekday cannot. A grouping "
-        "without a mechanism is a place where the cause sits, not the cause."
+        "   Whatever the arithmetic says, the tie-break is MECHANISM. Ask what would "
+        "have to be true for each to be causal, and go check it. A calendar variable "
+        "is usually a proxy, though not always: weekly settlement, scheduled "
+        "announcements, and thin holiday liquidity are real weekday mechanisms. The "
+        "test is evidence that the mechanism operated, not the variable's category. "
+        "A grouping without a mechanism is where the cause sits, not the cause."
     )
     return "\n".join(lines)
 
@@ -585,7 +610,7 @@ def describe(values) -> str:
     return "\n".join(lines)
 
 
-def ledger(opening, inflows, outflows, pnl, closing, tolerance=0.01) -> str:
+def ledger(opening, inflows, outflows, pnl, closing, tolerance=0.01, materiality=None) -> str:
     """Does the accounting close? opening + inflows - outflows + pnl == closing.
 
     The single largest sign error in the corpus was a P&L reported as +$1,086.86
@@ -605,8 +630,18 @@ def ledger(opening, inflows, outflows, pnl, closing, tolerance=0.01) -> str:
 
     expected = opening + inflows - outflows + pnl
     residual = closing - expected
-    scale = max(abs(closing), abs(expected), abs(inflows), 1e-9)
+    scale = max(
+        abs(closing), abs(expected), abs(opening), abs(inflows), abs(outflows), abs(pnl), 1e-9
+    )
     rel = abs(residual) / scale
+
+    # Currency reconciliation is an EXACT identity, so the default bar is one cent,
+    # not a percentage. A relative-only tolerance scales the allowance with the
+    # account: adversarial review showed 1% certifying a $9,000 residual on a
+    # $1,009,000 balance as "every dollar accounted for". Pass an explicit
+    # `materiality` to accept a larger absolute residual, and it is reported.
+    limit = 0.01 if materiality is None else abs(materiality)
+    closes = abs(residual) <= limit
 
     lines = [
         f"opening {opening:>15,.2f}",
@@ -618,32 +653,47 @@ def ledger(opening, inflows, outflows, pnl, closing, tolerance=0.01) -> str:
         f"  residual {residual:>13,.2f}   ({rel:.2%} of scale)",
         "",
     ]
-    if rel <= tolerance:
-        lines.append(">> The identity closes. Every dollar is accounted for exactly once.")
+    if closes:
+        basis = (
+            "to the cent" if materiality is None else f"within the stated materiality of {limit:,.2f}"
+        )
+        lines.append(f">> The identity closes {basis}. Every dollar lands in exactly one bucket.")
         return "\n".join(lines)
 
     lines.append(
-        f">> DOES NOT CLOSE. {residual:,.2f} is unexplained, which means a dollar is "
-        f"counted twice, zero times, or in the wrong bucket."
+        f">> DOES NOT CLOSE. {residual:,.2f} ({rel:.2%} of the largest term) is "
+        f"unexplained, which means a dollar is counted twice, zero times, or booked "
+        f"to the wrong bucket."
     )
-    if abs(residual - pnl) / scale <= tolerance:
+    lines.append("")
+    lines.append("   CANDIDATE EXPLANATIONS, to be confirmed against transaction-level")
+    lines.append("   records. Numerical coincidence is a lead, not a diagnosis: a missing")
+    lines.append("   transfer, a stale closing snapshot, an unrealized mark, or an omitted")
+    lines.append("   fee can produce the same residual.")
+    # Match a residual to a term only on a near-exact coincidence, scaled so that
+    # floating-point noise on large balances does not hide a real match.
+    near = max(limit, scale * 1e-9)
+    if abs(residual - pnl) <= near:
         lines.append(
-            "   The residual equals the P&L exactly. Classic double-count: the gain is "
-            "in the closing balance AND added again as P&L."
+            "   - Residual equals the P&L. CONSISTENT WITH double-counting: the gain "
+            "already sits in the closing balance and is added again as P&L."
         )
-    elif pnl and abs(residual - 2 * pnl) / scale <= tolerance:
-        lines.append("   The residual is twice the P&L. The gain is being counted three times.")
-    elif inflows and abs(residual - inflows) / scale <= tolerance:
+    elif pnl and abs(residual - 2 * pnl) <= near:
+        lines.append("   - Residual is twice the P&L. CONSISTENT WITH the gain counted three times.")
+    elif inflows and abs(residual - inflows) <= near:
         lines.append(
-            "   The residual equals inflows. Deposits are being treated as profit, or "
-            "counted in both the balance and the P&L."
+            "   - Residual equals inflows. CONSISTENT WITH deposits treated as profit, "
+            "or counted in both the balance and the P&L."
         )
-    elif abs(residual + outflows) / scale <= tolerance:
-        lines.append("   The residual is minus outflows. Withdrawals are being booked as losses.")
+    elif outflows and abs(residual + outflows) <= near:
+        lines.append(
+            "   - Residual is minus outflows. CONSISTENT WITH withdrawals booked as losses."
+        )
     else:
         lines.append(
-            "   Check basis allocation first: proceeds counted as profit without "
-            "subtracting what the position cost is the most common cause."
+            "   - No single term matches the residual. Check basis allocation first: "
+            "proceeds counted as profit without subtracting what the position cost is "
+            "the most common cause in this corpus."
         )
     return "\n".join(lines)
 
@@ -681,13 +731,10 @@ def demo() -> None:
     print(concentration(vals, by_label))
     print()
     print(
-        "BOTH flip the sign, on the SAME rows. The arithmetic cannot tell them\n"
-        "apart, because the bad contract only traded on Mondays. Banning Monday\n"
-        "keeps the loss (it trades again next Monday under another name) and gives\n"
-        "up every good Monday trade. Only a mechanism separates these: a contract\n"
-        "can cause losses, a weekday cannot. When two groupings both flip, you have\n"
-        "found a confound, not a cause. Report it as unresolved and go find which\n"
-        "one has a mechanism."
+        "BOTH flip the sign, on the SAME rows. Banning Monday keeps the loss (the\n"
+        "contract trades again next Monday under another name) and gives up every\n"
+        "good Monday trade. The cross-tab above separates them here. When it cannot,\n"
+        "the tie-break is which one has a MECHANISM you can point at."
     )
 
     print()
@@ -813,7 +860,10 @@ def selftest() -> int:
         cv.append(cf_rng.gauss(-900, 80)); ce.append("weekly_X"); cl.append("Mon")
     cf_out = confound(cv, ce, cl, "instrument", "day")
     cases.append(("Monday confound resolves to instrument", "day is the LABEL", cf_out, True))
-    cases.append(("confound names the mechanism rule", "a weekday cannot", cf_out, True))
+    cases.append(("confound names the mechanism rule", "the tie-break is MECHANISM", cf_out, True))
+    # The mechanism rule must not claim calendar variables are never causal: weekly
+    # settlement and scheduled announcements are real weekday mechanisms.
+    cases.append(("mechanism rule is not categorical", "not always", cf_out, True))
 
     rv, re_, rl = [], [], []
     for i in range(200):
@@ -821,8 +871,32 @@ def selftest() -> int:
         rv.append(cf_rng.gauss(-300 if mon else 60, 40))
         re_.append(f"inst_{i % 8}")
         rl.append("Mon" if mon else "Tue")
+    real_day = confound(rv, re_, rl, "instrument", "day")
+    cases.append(("real day effect is separable", "Only day flips the result", real_day, True))
+    cases.append(("separable case names the loser", "instrument does not", real_day, True))
+
+    # Neither grouping flipping is NOT evidence they are separable. An all-profitable
+    # book can still hide a real weekday effect, so the cross-tab must still run.
+    pos_v, pos_e, pos_l = [], [], []
+    pos_rng = random.Random(5)
+    for i in range(200):
+        mon = i % 5 == 0
+        pos_v.append(pos_rng.gauss(120 if mon else 300, 30))
+        pos_e.append(f"inst_{i % 6}")
+        pos_l.append("Mon" if mon else "Tue")
     cases.append(
-        ("real day effect is not a confound", "Only one explanation flips", confound(rv, re_, rl, "instrument", "day"), True)
+        ("no sign flip still gets tested", "Cross-tabulating anyway", confound(pos_v, pos_e, pos_l, "instrument", "day"), True)
+    )
+
+    # A group holding 199 of 200 rows must not count as a flip: removing the majority
+    # always moves the number, which would make every lopsided split a confound.
+    maj_v, maj_e, maj_l = [], [], []
+    maj_rng = random.Random(9)
+    for _ in range(199):
+        maj_v.append(maj_rng.gauss(50, 10)); maj_e.append("main"); maj_l.append("Tue")
+    maj_v.append(-9000.0); maj_e.append("rogue"); maj_l.append("Mon")
+    cases.append(
+        ("majority group is not a flip", "removing no group flips", confound(maj_v, maj_e, maj_l, "entity", "day"), True)
     )
 
     # ledger: the identity must close when it should and name the double-count when
@@ -855,13 +929,24 @@ def selftest() -> int:
 
     cases.append(("clean books close", "identity closes", ledger(1000, 500, 200, 130, 1430), True))
     cases.append(("broken books caught", "DOES NOT CLOSE", ledger(0, 5000, 0, 1086.86, 4879.16), True))
+    # A percentage tolerance would certify this $9,000 residual as clean because it
+    # is under 1% of a $1,009,000 balance. Currency identities close to the cent.
     cases.append(
-        ("classic double-count named", "Classic double-count", ledger(1000, 0, 0, 250, 1500), True)
+        ("large absolute residual not excused by scale", "DOES NOT CLOSE", ledger(1_000_000, 0, 0, 0, 1_009_000), True)
+    )
+    cases.append(
+        ("explicit materiality is reported", "within the stated materiality", ledger(1_000_000, 0, 0, 0, 1_009_000, materiality=10_000), True)
+    )
+    cases.append(
+        ("diagnoses are hypotheses not verdicts", "CANDIDATE EXPLANATIONS", ledger(1000, 0, 0, 250, 1500), True)
+    )
+    cases.append(
+        ("classic double-count named", "CONSISTENT WITH double-counting", ledger(1000, 0, 0, 250, 1500), True)
     )
     # Deposits booked as profit: 5000 in, no real gain, but 5000 also reported as
     # P&L, so the closing balance is 5000 higher than the identity allows.
     cases.append(
-        ("deposits as profit named", "Deposits are being treated as profit", ledger(0, 5000, 0, 300, 10300), True)
+        ("deposits as profit named", "CONSISTENT WITH deposits treated as profit", ledger(0, 5000, 0, 300, 10300), True)
     )
     cases.append(("non-finite ledger refused", "not a finite number", ledger(0, 0, 0, float("nan"), 100), True))
 
