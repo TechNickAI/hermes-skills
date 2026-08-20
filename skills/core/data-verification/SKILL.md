@@ -37,14 +37,14 @@ the audits are reproducible from the evidence files.
 
 Across 24 verified incidents in one corpus, the taxonomy came out:
 
-| root cause                                          | share |
-| --------------------------------------------------- | ----: |
-| population / coverage bias                          |   33% |
-| wrong metric, denominator, or units                 |   25% |
-| schema / provenance / parsing                       |   21% |
-| accounting, duplicate credit                        |    8% |
-| broken measurement instrument                       |    8% |
-| causal attribution without execution evidence       |    4% |
+| root cause                                    | share |
+| --------------------------------------------- | ----: |
+| population / coverage bias                    |   33% |
+| wrong metric, denominator, or units           |   25% |
+| schema / provenance / parsing                 |   21% |
+| accounting, duplicate credit                  |    8% |
+| broken measurement instrument                 |    8% |
+| causal attribution without execution evidence |    4% |
 
 **Arithmetic errors: zero.** A second corpus (17 incidents) and a third
 (8 incidents) landed in the same place. The conclusion is not subtle:
@@ -158,7 +158,7 @@ answer these in writing:
 
 You observe that losses cluster on Monday morning. The tempting conclusion is
 "stop trading Monday morning". The true cause was one contract that happened to
-trade every Monday. Monday was a *label on* the cause, not the cause. Act on the
+trade every Monday. Monday was a _label on_ the cause, not the cause. Act on the
 calendar and you keep the loss and lose the good Monday trades too.
 
 Never report an aggregate without decomposing it first:
@@ -181,7 +181,7 @@ Never report an aggregate without decomposing it first:
 > **Before blaming a grouping variable, name the mechanism.** "Losses cluster on
 > Mondays" is an observation. "Mondays cause losses" is a causal claim needing a
 > mechanism that survives removing the entities inside the group. If you cannot
-> name the mechanism, you have found *where* the cause sits, not *what* it is.
+> name the mechanism, you have found _where_ the cause sits, not _what_ it is.
 
 ---
 
@@ -212,7 +212,7 @@ path is not a finding.
 
 - `sensitivity()` runs the full grid of defensible specifications and checks they
   agree on the **decision**, not on a digit. A miniature specification curve
-  (Simonsohn, Simmons & Nelson, *Nature Human Behaviour* 4:1208-1214, 2020;
+  (Simonsohn, Simmons & Nelson, _Nature Human Behaviour_ 4:1208-1214, 2020;
   Steegen et al. 2016). If they disagree, report the conditional result or defend
   the chosen spec on grounds fixed **before** you saw the data.
 - `negative_control()` destroys the structure the claim depends on and re-runs. If
@@ -221,7 +221,7 @@ path is not a finding.
   because it was an algebraic identity. It tested arithmetic, not the strategy.
 - `multiple_testing()` discounts the winner by how many variants were searched.
   The expected best-of-N from pure noise grows with N (Bailey & López de Prado,
-  *Deflated Sharpe Ratio*, JPM 40(5):94-107, 2014). **Count every variant you
+  _Deflated Sharpe Ratio_, JPM 40(5):94-107, 2014). **Count every variant you
   tried and abandoned**, not just the ones you kept.
 
 ---
@@ -237,8 +237,8 @@ for the specific thing, because "review this" gets you prose:
 
 **Direction-of-error audit.** For every assumption, ask which way its error runs.
 In one incident a loss floor was called "generous to the strategy" when the
-breakeven identity `L/(W+L)` means a larger assumed loss *raises* the bar and
-makes a kill *easier*. The assumption ran against the strategy, and the verdict
+breakeven identity `L/(W+L)` means a larger assumed loss _raises_ the bar and
+makes a kill _easier_. The assumption ran against the strategy, and the verdict
 reversed once it was corrected. If all your assumptions happen to run the same
 direction, you are not being conservative, you are steering.
 
@@ -349,19 +349,18 @@ untested code to a skill whose entire purpose is not doing that.
 
 ## Sources
 
-- Huang et al., "Large Language Models Cannot Self-Correct Reasoning Yet", ICLR
-  2024. https://arxiv.org/abs/2310.01798
+- Huang et al., "Large Language Models Cannot Self-Correct Reasoning Yet", ICLR 2024. https://arxiv.org/abs/2310.01798
 - Gou et al., "CRITIC: LLMs Can Self-Correct with Tool-Interactive Critiquing",
   ICLR 2024.
 - Knight & Leveson, "An Experimental Evaluation of the Assumption of Independence
   in Multiversion Programming", IEEE TSE SE-12(1):96-109, 1986.
   https://dx.doi.org/10.1109/TSE.1986.6312924
-- Simonsohn, Simmons & Nelson, "Specification Curve Analysis", *Nature Human
-  Behaviour* 4:1208-1214, 2020. https://www.nature.com/articles/s41562-020-0912-z
+- Simonsohn, Simmons & Nelson, "Specification Curve Analysis", _Nature Human
+  Behaviour_ 4:1208-1214, 2020. https://www.nature.com/articles/s41562-020-0912-z
 - Steegen, Tuerlinckx, Gelman & Vanpaemel, "Increasing Transparency Through a
   Multiverse Analysis", 2016.
-- Bailey & López de Prado, "The Deflated Sharpe Ratio", *Journal of Portfolio
-  Management* 40(5):94-107, 2014. https://ssrn.com/abstract=2460551
+- Bailey & López de Prado, "The Deflated Sharpe Ratio", _Journal of Portfolio
+  Management_ 40(5):94-107, 2014. https://ssrn.com/abstract=2460551
 - dbt data tests (`unique`, `not_null`, `relationships`, `accepted_values`,
   source freshness). https://docs.getdbt.com/docs/build/data-tests
 - Great Expectations (Apache-2.0, Python API), Soda Core (Apache-2.0, YAML/SodaCL),

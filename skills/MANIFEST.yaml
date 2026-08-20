@@ -29,11 +29,11 @@ skills:
   claude_compat: native
   claude_note: Stdlib-only check library and eval harness; the protocol needs no Hermes runtime.
   size:
-    files: 0
-    bytes_skill_md: 18464
-    bytes_total: 0
-    approx_tokens_skill_md: 4616
-    approx_tokens_total: 0
+    files: 3
+    bytes_skill_md: 18414
+    bytes_total: 58457
+    approx_tokens_skill_md: 4604
+    approx_tokens_total: 14614
   tags:
   - data-quality
   - verification
