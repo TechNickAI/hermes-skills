@@ -118,7 +118,10 @@ def reconcile(
     ):
         for candidate in (factor, 1 / factor):
             if candidate and abs(ratio / candidate - 1) < 0.02:
-                hint = f" Ratio is ~{label}; suspect a unit or annualization error, not a data error."
+                hint = (
+                    f" Ratio is ~{label}; suspect a unit or annualization error, "
+                    f"not a data error."
+                )
                 break
         if hint:
             break
@@ -376,11 +379,17 @@ def distribution_shape(values: Sequence[float], name: str = "distribution_shape"
     ev["mass_left_of_gap"] = left_share
 
     if ratio > 10 and 0.15 <= left_share <= 0.85:
+        scale = (
+            "unbounded relative to the typical spacing (the two groups have no internal "
+            "spread)"
+            if ratio == math.inf
+            else f"{ratio:,.0f}x the typical spacing"
+        )
         return Check(
             name,
             "FAIL",
             f"Distribution appears bimodal: an interior gap of {biggest_gap:,.6g} is "
-            f"{ratio:,.0f}x the typical spacing, splitting the population "
+            f"{scale}, splitting the population "
             f"{left_share:.0%}/{1 - left_share:.0%}. A mean of {mean:,.6g} describes no "
             f"observation. Split the population and report each mode.",
             ev,
@@ -667,7 +676,10 @@ def plausible_magnitude(
             f"{expected_high:,.6g}].",
             {"value": value},
         )
-    off = value / expected_high if value > expected_high else value / expected_low if expected_low else math.inf
+    if value > expected_high:
+        off = value / expected_high if expected_high else math.inf
+    else:
+        off = value / expected_low if expected_low else math.inf
     return Check(
         name,
         "FAIL",

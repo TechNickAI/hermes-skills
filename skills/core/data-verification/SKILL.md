@@ -321,6 +321,45 @@ Four real defects in checks that had already passed the whole suite. If you exte
 `checks.py`, add the scenario **and** re-run the mutation sweep, or you have added
 untested code to a skill whose entire purpose is not doing that.
 
+## What this skill cannot do
+
+Stated plainly, because a verification skill that oversells itself is the exact
+failure it exists to prevent.
+
+**The coverage is deliberately lopsided, and not in the direction you would
+expect.** Provenance and population errors are ~79% of real incidents, but only 4
+of the 11 checks target them (`check_units`, `reconcile`,
+`reconcile_population`, `plausible_magnitude`). The other 7 are decomposition and
+perturbation checks covering a much smaller share of incidents.
+
+That is not an oversight, it is the shape of the problem. **A unit error is not
+detectable from the data.** Nothing in a column of floats reveals that they are
+users rather than contract prices; the number 0.108 is untyped in every dataset
+that has ever existed. Same for population: a query returning 204 rows cannot know
+that the source held 343. These errors are only catchable if the analyst **writes
+down** the unit, the population, and the expected magnitude, at which point the
+check becomes trivial.
+
+So Gate 1 is mostly prompts, and it is mostly prompts on purpose. The 79% class is
+prevented by declaration, not by computation. If you skip the writing-down step,
+the four provenance checks have nothing to compare against and this skill degrades
+to a statistics library, which would have caught almost none of the incidents that
+motivated it.
+
+Three more honest limits:
+
+- **Thresholds are conventions, not laws.** 50% mass for concentration, 10x
+  spacing for bimodality, `p > 0.05` for the null, `n_tried` counting for
+  deflation. They are defensible defaults, not discoveries. Every one is a
+  parameter, and by the skill's own Gate 4 an unchosen parameter deserves
+  suspicion. Override them with a reason.
+- **A `PASS` on all gates is not a correct answer.** It means the named failure
+  modes were ruled out. The universe of ways to be wrong is larger than eleven.
+- **`negative_control` has a real false-positive rate.** At the 0.05 boundary,
+  roughly 1 in 20 genuinely null series will read as signal. That is the
+  definition of the threshold, not a defect, and it is why a single passing
+  control is not proof of an edge.
+
 ## Pitfalls
 
 1. **Re-running the calculation.** Reproducing your own arithmetic proves the
