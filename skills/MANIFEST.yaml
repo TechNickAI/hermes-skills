@@ -30,10 +30,10 @@ skills:
   claude_note: Stdlib-only check library and eval harness; the protocol needs no Hermes runtime.
   size:
     files: 3
-    bytes_skill_md: 22286
-    bytes_total: 72844
-    approx_tokens_skill_md: 5572
-    approx_tokens_total: 18211
+    bytes_skill_md: 23004
+    bytes_total: 80596
+    approx_tokens_skill_md: 5751
+    approx_tokens_total: 20149
   tags:
   - data-quality
   - verification

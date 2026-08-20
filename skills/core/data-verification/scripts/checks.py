@@ -238,6 +238,53 @@ def reconcile_population(
     )
 
 
+# Canonical unit aliases. This is intentionally small and explicit rather than a
+# pretend general-purpose dimensional-analysis engine. Unknown units are normalized
+# lexically; known aliases collapse to the same canonical unit. A scale change
+# (cents vs dollars, bps vs percent) remains DIFFERENT so the caller must perform
+# and cite the conversion rather than letting this check do it invisibly.
+_UNIT_ALIASES = {
+    "$": "usd",
+    "dollar": "usd",
+    "dollars": "usd",
+    "us_dollar": "usd",
+    "usdollars": "usd",
+    "¢": "usd_cent",
+    "cent": "usd_cent",
+    "cents": "usd_cent",
+    "%": "percent",
+    "pct": "percent",
+    "percentage_point": "percent",
+    "percentage_points": "percent",
+    "bp": "basis_point",
+    "bps": "basis_point",
+    "basis_points": "basis_point",
+}
+
+
+def _canonical_unit(unit: str) -> str:
+    """Normalize spelling, never scale.
+
+    `$` and `usd` are aliases. `cents` and `usd` are not, because silently scaling
+    during a verification check conceals the conversion the analysis is supposed to
+    make explicit. Compound units retain their denominator: `usd` and
+    `usd_per_share` are incompatible even though both contain dollars.
+    """
+    import re
+
+    # Normalize visual ratio separators to the word `per` BEFORE collapsing the
+    # remaining punctuation. `USD / share`, `usd-per-share`, and `usd_per_share`
+    # should carry the same declared dimension.
+    text = unit.strip().lower()
+    text = re.sub(r"\s*/\s*", "_per_", text)
+    text = re.sub(r"\s+-\s+|\s+per\s+", "_per_", text)
+    text = re.sub(r"[\s-]+", "_", text)
+    normalized = re.sub(r"_+", "_", text).strip("_")
+    # Canonicalize each compound token, preserving per-unit dimensions.
+    parts = normalized.split("_per_")
+    return "_per_".join(_UNIT_ALIASES.get(p, p) for p in parts)
+
+
 def check_units(*quantities: tuple[float, str], name: str = "units") -> Check:
     """Refuse to compare quantities carrying different units.
 
@@ -245,19 +292,33 @@ def check_units(*quantities: tuple[float, str], name: str = "units") -> Check:
     this skill, the most expensive error was comparing a figure denominated in users
     against a figure denominated in contract price and declaring an edge 55x too
     small -- arithmetic that was flawless and meaningless.
+
+    This validates DECLARED units, not the truth of the declaration. If an analyst
+    labels dollars-per-share as plain dollars, no function inspecting the number can
+    recover the missing denominator. Gate 1 therefore requires the unit be written
+    down from source metadata before computation. This function catches incompatible
+    declarations and common alias noise; it cannot catch a lie in the label.
     """
     guard = _finite(name, **{f"q{i}": v for i, (v, _) in enumerate(quantities)})
     if guard is not None:
         return guard
-    units = {u for _, u in quantities}
+    raw = [u for _, u in quantities]
+    canonical = [_canonical_unit(u) for u in raw]
+    units = set(canonical)
     if len(units) <= 1:
-        return Check(name, "PASS", f"All quantities in '{units.pop() if units else ''}'.", {})
+        unit = canonical[0] if canonical else ""
+        aliases = sorted(set(raw))
+        detail = f"All quantities in '{unit}'."
+        if len(aliases) > 1:
+            detail += f" Normalized aliases: {aliases}."
+        return Check(name, "PASS", detail, {"canonical_unit": unit, "declared": raw})
     return Check(
         name,
         "FAIL",
-        f"Comparing incompatible units: {sorted(units)}. Convert to a common unit through "
-        f"an explicit, cited conversion before comparing.",
-        {"units": sorted(units)},
+        f"Comparing incompatible units: declared {raw}, canonical {canonical}. Convert "
+        f"to one common unit through an explicit, cited conversion before comparing. "
+        f"A denominator is part of the unit: usd and usd_per_share are not the same.",
+        {"declared": raw, "canonical_units": canonical},
     )
 
 
@@ -457,19 +518,46 @@ def distribution_shape(values: Sequence[float], name: str = "distribution_shape"
     # modes, so an IQR-relative test is largest exactly when the defect is worst and
     # silently passes. Median spacing is a within-mode scale and does not have that
     # blind spot.
-    gaps = [(vals[i + 1] - vals[i], i) for i in range(n - 1)]
-    spacings = sorted(g for g, _ in gaps)
-    median_spacing = spacings[len(spacings) // 2]
-    biggest_gap, gap_at = max(gaps)
-    ratio = biggest_gap / median_spacing if median_spacing > 0 else math.inf
-    ev["largest_interior_gap_over_median_spacing"] = ratio
+    # Gap statistic on UNIQUE support points. Using every sorted observation makes
+    # median_spacing zero on any repeated-value dataset, so ordinary Likert scores,
+    # rounded prices, and integer counts all become "infinitely bimodal". Adversarial
+    # review reproduced the false FAIL with `[1,2,3,4,5] * 20` and rounded prices.
+    unique = sorted(set(vals))
+    ev["unique_values"] = len(unique)
+    if len(unique) < 8:
+        # With fewer than eight support points there is not enough resolution for a
+        # gap heuristic to distinguish a true mixture from ordinary discreteness.
+        # Do not call it bimodal. The mean/median/skew diagnostics above are still
+        # reported so the caller can choose a categorical analysis when appropriate.
+        if abs(skew) > 2:
+            return Check(
+                name,
+                "FLAG",
+                f"Discrete support ({len(unique)} unique values) with heavy skew "
+                f"({skew:+.2f}); a continuous bimodality test is invalid here. Report "
+                f"the frequency table and median rather than the mean alone.",
+                ev,
+            )
+        return Check(
+            name,
+            "PASS",
+            f"Discrete support ({len(unique)} unique values); continuous bimodality "
+            f"test not applied. Skew {skew:+.2f}; inspect the frequency table for modes.",
+            ev,
+        )
 
-    # Fraction of the population on each side of the gap. A mode needs MASS: one point
-    # far from a tight cluster produces an enormous gap ratio but is skew, not
-    # bimodality, and the two call for opposite fixes ("report the median and the tail"
-    # vs "split the population"). This single guard also subsumes an interior-position
-    # check, which mutation testing showed to be strictly weaker and therefore dead.
-    left_share = (gap_at + 1) / n
+    gaps = [(unique[i + 1] - unique[i], i) for i in range(len(unique) - 1)]
+    positive_spacings = sorted(g for g, _ in gaps if g > 0)
+    median_spacing = positive_spacings[len(positive_spacings) // 2]
+    biggest_gap, gap_at = max(gaps)
+    ratio = biggest_gap / median_spacing
+    ev["largest_gap_over_median_unique_spacing"] = ratio
+
+    # Fraction of OBSERVATIONS on each side of the unique-support gap. A mode needs
+    # mass: one point far from a tight cluster produces an enormous gap ratio but is
+    # skew, not bimodality, and the two call for opposite fixes.
+    split_value = unique[gap_at]
+    left_share = sum(v <= split_value for v in vals) / n
     ev["mass_left_of_gap"] = left_share
 
     if ratio > 10 and 0.15 <= left_share <= 0.85:
@@ -697,7 +785,7 @@ def negative_control(
 
 
 def multiple_testing(
-    best_result: float,
+    best_sharpe: float,
     n_tried: int,
     n_obs: int,
     name: str = "multiple_testing",
@@ -708,12 +796,39 @@ def multiple_testing(
     (Bailey & Lopez de Prado 2014, deflated Sharpe ratio). A result that does not
     clear the noise ceiling for the number of variants tested is not a finding, and
     the count of variants includes every one you tried and abandoned.
+
+    **`best_sharpe` must be a STANDARDIZED statistic** (mean / standard deviation,
+    per period), not a raw P&L, return, or cost difference. The noise ceiling is
+    derived in standard-deviation units, so feeding it a dollar amount or a raw
+    return compares two different things and reproduces the exact units error this
+    module exists to catch. Adversarial review found this: a mean return of 0.003
+    was compared against a ceiling of 0.36 and killed as "noise", which is
+    meaningless, while a $609.60 P&L sailed past the same ceiling.
+
+    Convert first::
+
+        sharpe = mean(returns) / stdev(returns)      # per period, then annualize
+        multiple_testing(sharpe, n_tried=200, n_obs=len(returns))
+
+    The guard below rejects the obvious raw-magnitude inputs, but it cannot catch a
+    raw return that happens to look Sharpe-sized. Standardize deliberately.
     """
-    guard = _finite(name, best_result=best_result)
+    guard = _finite(name, best_sharpe=best_sharpe)
     if guard is not None:
         return guard
     if n_tried < 1 or n_obs < 2:
         return Check(name, "FLAG", "Need n_tried >= 1 and n_obs >= 2.", {})
+    if abs(best_sharpe) > 20:
+        return Check(
+            name,
+            "FAIL",
+            f"best_sharpe={best_sharpe:,.6g} is far outside the plausible range for a "
+            f"Sharpe ratio, so this is almost certainly a raw P&L, return, or cost "
+            f"difference. The noise ceiling is in standard-deviation units; comparing a "
+            f"raw magnitude against it is a units error. Pass "
+            f"mean(returns)/stdev(returns) instead.",
+            {"best_sharpe": best_sharpe},
+        )
 
     euler = 0.5772156649015329
     if n_tried == 1:
@@ -730,16 +845,16 @@ def multiple_testing(
     se = 1 / math.sqrt(n_obs - 1)
     threshold = expected_max * se
     ev = {
-        "best_result": best_result,
+        "best_sharpe": best_sharpe,
         "n_tried": n_tried,
         "n_obs": n_obs,
         "noise_ceiling": threshold,
     }
-    if best_result <= threshold:
+    if best_sharpe <= threshold:
         return Check(
             name,
             "FAIL",
-            f"Best result {best_result:,.4g} is at or below the {threshold:,.4g} expected "
+            f"Best Sharpe {best_sharpe:,.4g} is at or below the {threshold:,.4g} expected "
             f"from the best of {n_tried} variants on pure noise with n={n_obs}. "
             f"This is a selection artifact, not an edge.",
             ev,
@@ -747,7 +862,7 @@ def multiple_testing(
     return Check(
         name,
         "PASS",
-        f"Best result {best_result:,.4g} clears the {threshold:,.4g} noise ceiling "
+        f"Best Sharpe {best_sharpe:,.4g} clears the {threshold:,.4g} noise ceiling "
         f"for {n_tried} variants at n={n_obs}.",
         ev,
     )

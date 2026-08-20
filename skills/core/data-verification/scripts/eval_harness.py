@@ -197,8 +197,12 @@ def _():
     says="appears bimodal",
 )
 def _():
-    lo = [random.Random(3).gauss(-500, 25) for _ in range(30)]
-    hi = [random.Random(4).gauss(500, 25) for _ in range(30)]
+    # Create the RNGs once. Constructing Random(seed) inside the comprehension
+    # emits the same value 30 times, which made the old scenario a rigged two-point
+    # dataset and let the broken tie detector look correct.
+    lo_rng, hi_rng = random.Random(3), random.Random(4)
+    lo = [lo_rng.gauss(-500, 25) for _ in range(30)]
+    hi = [hi_rng.gauss(500, 25) for _ in range(30)]
     return distribution_shape(lo + hi, name="fill_quality")
 
 
@@ -394,7 +398,7 @@ def _():
 
 @scenario("best of 200 variants is noise", "CATCH", "selection bias, deflated Sharpe")
 def _():
-    return multiple_testing(best_result=0.28, n_tried=200, n_obs=60)
+    return multiple_testing(best_sharpe=0.28, n_tried=200, n_obs=60)
 
 
 @scenario("annualization error caught by ratio hint", "CATCH", "252x daily-vs-annual")
@@ -405,6 +409,61 @@ def _():
 # --------------------------------------------------------------------------------------
 # QUIET -- sound analyses that must not trip
 # --------------------------------------------------------------------------------------
+
+
+@scenario(
+    "ordinary discrete data is not bimodality",
+    "QUIET",
+    "adversarial review: ties made median spacing zero and falsely failed",
+    expect="PASS",
+    says="Discrete support",
+)
+def _():
+    return distribution_shape([1, 2, 3, 4, 5] * 20, name="likert")
+
+
+@scenario(
+    "rounded market prices are not automatically bimodal",
+    "QUIET",
+    "adversarial review: ordinary price ticks falsely failed",
+    expect="PASS",
+    says="Discrete support",
+)
+def _():
+    return distribution_shape([10.25] * 30 + [10.50] * 30 + [10.75] * 30, name="ticks")
+
+
+@scenario(
+    "unit aliases normalize without hiding scale",
+    "QUIET",
+    "usd and dollar-sign are the same declared dimension",
+    expect="PASS",
+    says="Normalized aliases",
+)
+def _():
+    return check_units((1.0, "usd"), (2.0, "$"), name="currency_alias")
+
+
+@scenario(
+    "same numerator but different denominator is incompatible",
+    "CATCH",
+    "usd and usd-per-share are not the same dimension",
+    expect="FAIL",
+    says="denominator is part of the unit",
+)
+def _():
+    return check_units((1.0, "usd"), (2.0, "usd_per_share"), name="unit_dimension")
+
+
+@scenario(
+    "raw PnL cannot enter a Sharpe noise ceiling",
+    "CATCH",
+    "adversarial review: raw dollars compared to standardized noise",
+    expect="FAIL",
+    says="almost certainly a raw P&L",
+)
+def _():
+    return multiple_testing(best_sharpe=609.60, n_tried=200, n_obs=203)
 
 
 @scenario("clean reconciliation", "QUIET", "two paths agree")
@@ -478,7 +537,7 @@ def _():
 
 @scenario("single hypothesis clears the bar", "QUIET", "no multiple-testing penalty when n_tried=1")
 def _():
-    return multiple_testing(best_result=0.30, n_tried=1, n_obs=200)
+    return multiple_testing(best_sharpe=0.30, n_tried=1, n_obs=200)
 
 
 @scenario("magnitude inside a pre-stated range", "QUIET", "sanity gate does not nag")

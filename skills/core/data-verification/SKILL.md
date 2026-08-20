@@ -295,15 +295,17 @@ this evidence.
 
 The gates are only worth what their evidence is worth, so:
 
-- **39 scenarios**, 27 `CATCH` (must fire) and 12 `QUIET` (must not fire). Most
+- **44 scenarios**, 29 `CATCH` (must fire) and 15 `QUIET` (must not fire). Most
   CATCH scenarios are replays of specific incidents from the audit. The QUIET half
   matters just as much: a checker that fires on everything gets ignored, and then
   it protects nothing.
 - **Scenarios pin the diagnosis, not just the alarm.** Many assert the exact
   verdict and a substring of the message, because a check that fires for the wrong
   reason hands back the wrong fix.
-- **27/27 mutation kill rate.** Every branch of every check was deliberately
-  broken and the harness caught all 27. This is the only evidence that the
+- **30/30 mutation kill rate.** Every branch of every check was deliberately
+  broken and the harness caught all 30. The mutation runner ships at
+  `scripts/mutation_sweep.py`, so this claim is reproducible from the PR rather
+  than resting on a report. This is the only evidence that the
   scenarios test the checks rather than merely running them.
 
 Mutation testing earned its keep during construction. It found:
@@ -315,7 +317,11 @@ Mutation testing earned its keep during construction. It found:
   Monday-morning replay it exists to catch;
 - a bimodality test scaled against the IQR, which a clean bimodal split inflates,
   so the check was weakest exactly when the defect was worst;
-- a redundant `interior` guard that no input could ever make binding.
+- a redundant `interior` guard that no input could ever make binding;
+- a repeated-value gap statistic that called ordinary Likert scores and rounded
+  market prices "bimodal" because median adjacent spacing was zero;
+- a multiple-testing function whose parameter was named `best_result`, inviting
+  raw dollars and raw returns into a Sharpe-ratio noise ceiling.
 
 Adversarial review then found the worst one. **Every non-finite guard was
 disabled**, so `multiple_testing(nan, 200, 60)` returned `PASS`. The cause was
@@ -338,7 +344,7 @@ mechanism rather than a behaviour is usually a proxy and usually wrong; it is
 warranted here because the mechanism **is** the root cause and NaN-passing was only
 one of its expressions.
 
-Six real defects in checks that had already passed the whole suite. If you extend
+Eight real defects in checks that had already passed the whole suite. If you extend
 `checks.py`, add the scenario **and** re-run the mutation sweep, or you have added
 untested code to a skill whose entire purpose is not doing that.
 
@@ -356,7 +362,10 @@ perturbation checks covering a much smaller share of incidents.
 That is not an oversight, it is the shape of the problem. **A unit error is not
 detectable from the data.** Nothing in a column of floats reveals that they are
 users rather than contract prices; the number 0.108 is untyped in every dataset
-that has ever existed. Same for population: a query returning 204 rows cannot know
+that has ever existed. `check_units()` canonicalizes common aliases (`$` = `usd`)
+and preserves dimensions (`usd` != `usd_per_share`; `cents` != `usd` until an
+explicit conversion), but it validates the unit the analyst DECLARED. If the label
+itself is false or incomplete, only source metadata can catch it. Same for population: a query returning 204 rows cannot know
 that the source held 343. These errors are only catchable if the analyst **writes
 down** the unit, the population, and the expected magnitude, at which point the
 check becomes trivial.
