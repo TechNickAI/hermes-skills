@@ -154,6 +154,10 @@ CLAUDE_COMPAT = {
         "in Claude it becomes Claude reviewing Claude.",
     ),
     "grok-search": ("native", "Works in Claude once XAI_API_KEY is available."),
+    "data-verification": (
+        "native",
+        "Stdlib-only check library and eval harness; the protocol needs no Hermes runtime.",
+    ),
     "keep-going": ("native", "Works in Claude with no additional setup."),
     "mob-check": ("native", "Works in Claude with no additional setup."),
     "trust-framework": ("native", "Portable governance rules; no runtime dependency."),

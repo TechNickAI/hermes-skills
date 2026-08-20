@@ -126,6 +126,7 @@ against reality before reporting. That discipline is baked into the skill.
 | Skill              | What it does                                                                               | Needs                                                        |
 | ------------------ | ------------------------------------------------------------------------------------------ | ------------------------------------------------------------ |
 | `deep-dive`        | Research a question across every relevant source and come back with a decision, not links  | —                                                            |
+| `data-verification`| Gate an analysis before its number ships: units, population, decomposition, controls       | —                                                            |
 | `multi-review`     | Review any artifact through a panel of diverse lenses across model families, then converge | Hermes-native (subagent delegation)                          |
 | `moa-solve`        | Throw several models at one hard problem and synthesize the best answer out of the spread  | Hermes-native (`/moa` fan-out)                               |
 | `mob-check`        | What real people are actually saying right now — Reddit, X, HN, YouTube — ranked, not SEO  | —                                                            |

@@ -23,6 +23,19 @@ not cover.
 `Claude` values: `native` (works fully), `degraded` (runs but loses its
 differentiator — say so out loud), `unsupported` (never recommend it in Claude).
 
+## data-verification
+
+- **Pack:** core
+- **Scope:** solo
+- **What it does:** Use when an analysis is about to produce a number, a verdict, or a recommendation someone will act on: backtests, P&L, cost and fee models, yield and returns, screens, cohort comparisons, "is this strategy profitable", "why did we lose money on X".
+- **Use when:** an analysis is about to produce a number, a verdict, or a recommendation someone will act on: backtests, P&L, cost and fee models, yield and returns, screens, cohort comparisons, "is this strategy profitable", "why did we lose money on X".
+- **Prerequisites:** None
+- **Works without setup:** Yes
+- **Compatibility:** Agent Skills standard
+- **Claude:** native — Stdlib-only check library and eval harness; the protocol needs no Hermes runtime.
+- **Size:** 18,464 B body, loaded when the skill triggers (~4,616 tokens); 0 B across 0 file(s) total
+- **Path:** `skills/core/data-verification`
+
 ## deep-dive
 
 - **Pack:** core

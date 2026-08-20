@@ -11,12 +11,38 @@
 #   use_when              the trigger conditions, for selective installation
 _generated_by: scripts/generate_manifest.py
 _do_not_edit: Regenerate with `python scripts/generate_manifest.py`; CI checks it.
-count: 23
+count: 24
 packs:
 - core
 - engineering
 - productivity
 skills:
+- name: data-verification
+  pack: core
+  version: 1.0.0
+  scope: solo
+  summary: 'Use when an analysis is about to produce a number, a verdict, or a recommendation someone will act on: backtests, P&L, cost and fee models, yield and returns, screens, cohort comparisons, "is this strategy profitable", "why did we lose money on X".'
+  use_when: 'an analysis is about to produce a number, a verdict, or a recommendation someone will act on: backtests, P&L, cost and fee models, yield and returns, screens, cohort comparisons, "is this strategy profitable", "why did we lose money on X".'
+  requires: []
+  works_out_of_the_box: true
+  compatibility: Agent Skills standard
+  claude_compat: native
+  claude_note: Stdlib-only check library and eval harness; the protocol needs no Hermes runtime.
+  size:
+    files: 0
+    bytes_skill_md: 18464
+    bytes_total: 0
+    approx_tokens_skill_md: 4616
+    approx_tokens_total: 0
+  tags:
+  - data-quality
+  - verification
+  - analysis
+  - statistics
+  - backtesting
+  - epistemics
+  - decision
+  path: skills/core/data-verification
 - name: deep-dive
   pack: core
   version: 1.1.0
