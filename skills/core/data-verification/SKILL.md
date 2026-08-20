@@ -2,11 +2,11 @@
 name: data-verification
 version: 2.0.0
 description: >
-  Use before reporting any number, verdict, or recommendation drawn from data:
-  "is this profitable", "did X cause Y", "which cohort performs best", metrics
-  reviews, backtests, cost models, funnel analysis, A/B results. Five questions
-  that catch the errors re-checking arithmetic never catches, because the
-  calculation is usually right and the input or the question is wrong.
+  Use when data will drive a decision: is it profitable, did X cause Y, which
+  cohort wins. Load BEFORE reporting any number, rate, P&L, backtest result,
+  metrics review, cost model, funnel, or A/B outcome. Five questions that catch
+  the errors re-checking arithmetic never catches, because the calculation is
+  usually right and the input or the question is wrong.
 license: MIT
 metadata:
   hermes:
@@ -18,6 +18,25 @@ metadata:
 # Data Verification
 
 Your arithmetic is probably fine. That is not where analyses go wrong.
+
+## How to use this
+
+**Trigger:** you are about to state a number, a comparison, or a causal claim that
+came out of data and that someone will act on. "The strategy makes money." "Churn
+is worse on the enterprise tier." "Fees are what killed it." "Cohort B converts
+better."
+
+**Cost:** questions 1 and 2 take about three minutes and catch ~79% of real
+failures. That is the whole routine minimum. Do not skip them because the analysis
+felt simple; every incident in the corpus below felt simple.
+
+**Do it BEFORE you write the conclusion, not after.** Answering these after you
+have stated a finding turns into serial public correction, where each message walks
+back the last, which costs more trust than one wrong answer because it makes the
+reader into your QA process.
+
+**Output:** finish by reporting the number in the four-part form under "Reporting a
+verified number", including which questions you skipped.
 
 ## The finding this is built on
 
@@ -113,6 +132,20 @@ Before reporting any aggregate:
 > mechanism surviving removal of the entities inside the group. Without one you
 > have found _where_ the cause sits, not _what_ it is.
 
+**Do not stop at one grouping.** Decompose by the blamed label AND by the entity
+that repeats inside it, then cross-tabulate:
+
+- If only one flips the result, that one is your candidate.
+- If **both** flip, hold each fixed and re-test the other. The one whose effect
+  collapses is the label; the one that survives is where the effect lives.
+- If holding one fixed leaves too few rows to compare, they are **collinear** and
+  this dataset cannot separate them at any sample size. Say so and go get data
+  where they vary independently, rather than picking the one you already
+  suspected.
+
+The tie-break is always mechanism. `scripts/decompose.py confound` does this
+arithmetic.
+
 `scripts/decompose.py` does this arithmetic when the dataset is too large to
 eyeball. See "When to reach for the script".
 
@@ -123,12 +156,40 @@ eyeball. See "When to reach for the script".
 Recompute it a different way. Not a refactor of the same query: **a different
 mechanism**, or you have one check wearing two hats.
 
+**Write the three mechanisms down before computing**, the same way Gate 1 makes
+you write the unit down first. If two of them share a source, a parser, a
+denominator, or a population construction, they are one mechanism and you need
+another.
+
+| Claim type       | Path 1                       | Path 2                    | Path 3                                   |
+| ---------------- | ---------------------------- | ------------------------- | ---------------------------------------- |
+| A P&L or balance | sum the individual fills     | the ledger identity below | the venue or bank statement              |
+| A rate or cost   | re-derive on this population | schedule times size       | one known transaction, by hand           |
+| A count          | paginate to a short page     | the source's own total    | a different endpoint or table            |
+| A cause          | decompose by entity          | decompose by blamed label | does it survive removing the other       |
+| A metric or KPI  | recompute from raw events    | the dashboard or report   | order of magnitude from first principles |
+
 Cheapest first:
 
-- **An identity that must hold.** Break-even is `basis / (1 - cost%)`. Parts sum
-  to the whole. A share lands in [0, 1]. Free, and it catches sign and direction
-  errors. One audit incident shipped a break-even _below_ the cost basis, in a
-  document that contradicted itself two paragraphs apart.
+- **An identity that must hold.** Break-even is `basis / (1 - cost%)`. A share
+  lands in [0, 1]. Free, and it catches sign and direction errors. One audit
+  incident shipped a break-even _below_ the cost basis, in a document that
+  contradicted itself two paragraphs apart.
+- **For anything involving money, close the books:**
+
+  ```text
+  opening + inflows - outflows + P&L = closing
+  ```
+
+  Every dollar lands in exactly one bucket. This is the only check that catches
+  double-counting, which produced the largest sign error in the corpus: a P&L
+  reported as **+$1,086.86** that was really **-$120.84**, because sale proceeds
+  and settlement were both booked as income while the cost basis was never
+  allocated. Every individual number was correct; only the identity fails. The
+  residual usually names the mistake, and a residual equal to the P&L means the
+  gain is counted twice. `scripts/decompose.py ledger` does this and diagnoses
+  the residual.
+
 - **A second data path.** A different endpoint, table, or grain. Do not compare a
   vendor's number to the same vendor's number. Two vendors' supply figures once
   differed by definition ($90.3B vs $74.1B), so any ratio had to take numerator
@@ -169,7 +230,9 @@ and one path is not a finding.
   arithmetic, not the strategy.
 - **Discount by how many variants you searched.** The best of N tries on pure noise
   looks better as N grows (Bailey & López de Prado 2014). Count every variant you
-  tried and abandoned, not just the one you kept.
+  tried and abandoned, not just the one you kept. `decompose.py selection` prices
+  this for a standardized statistic; the same logic applies to any "best of N"
+  claim, including the best-performing cohort, channel, or variant in a dashboard.
 
 ---
 
@@ -235,26 +298,45 @@ python3 scripts/decompose.py --help
 
 Reads CSV or JSON, or import the functions. Standard library only, no install.
 
+Both a CLI and importable functions. Agents usually already hold the data in a
+list, so import when you have it and use the CLI when the data is in a file:
+
+```python
+import sys; sys.path.insert(0, "scripts")
+from decompose import concentration, confound, ledger
+
+print(concentration(values, labels))
+print(ledger(opening=1000, inflows=0, outflows=0, pnl=250, closing=1500))
+```
+
 ```bash
-# Does one row carry the result? Which group drives it?
-python3 scripts/decompose.py concentration trades.csv --value pnl --label instrument
+# Does one row or group carry the result?
+python3 scripts/decompose.py concentration data.csv --value amount --label entity
 
-# Is the effect real, or does it survive destroying its own premise?
-python3 scripts/decompose.py shuffle returns.csv --value daily_return
+# Two competing explanations: can the data separate them?
+python3 scripts/decompose.py confound data.csv --value amount \
+    --group-a entity --group-b day_of_week
 
-# Best of 40 variants, or noise?
-python3 scripts/decompose.py selection --sharpe 0.9 --tried 40 --periods 250
+# Does the accounting close, or is a dollar counted twice?
+python3 scripts/decompose.py ledger --opening 0 --inflows 5000 --pnl 1086.86 \
+    --closing 4879.16
+
+# Does the finding survive destroying its own premise?
+python3 scripts/decompose.py shuffle data.csv --value daily_return
 ```
 
 It prints an interpretation with each number, and says plainly when a result is
 too small or too degenerate to interpret. One file, standard library only, no
 install.
 
-**It cannot tell you which grouping is the cause.** Run the demo and you will see
-grouping by `instrument` and grouping by `day` both flip the sign on the same
-data, because the bad instrument only traded on Mondays. The arithmetic is
-identical; only you know which one is a mechanism. That is the division of labour
-in this skill: the script computes, you decide.
+**It computes; you decide what the grouping means.** `--demo` runs the
+Monday-morning case: the same rows grouped by `instrument` and by `day` BOTH flip
+the sign, because the bad contract only traded on Mondays. `confound` then
+cross-tabulates and shows `day` collapsing to 0% of its apparent effect once
+`instrument` is held fixed, while `instrument` keeps 100% of its own. That
+resolves this case. When the cross-tab CANNOT separate them it says COLLINEAR and
+stops, and the tie-break is mechanism, not arithmetic: an instrument can cause a
+loss, a weekday cannot.
 
 ## Adapting this to your domain
 

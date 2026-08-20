@@ -27,13 +27,13 @@ differentiator — say so out loud), `unsupported` (never recommend it in Claude
 
 - **Pack:** core
 - **Scope:** solo
-- **What it does:** Use before reporting any number, verdict, or recommendation drawn from data: "is this profitable", "did X cause Y", "which cohort performs best", metrics reviews, backtests, cost models, funnel analysis, A/B results.
-- **Use when:** Use before reporting any number, verdict, or recommendation drawn from data: "is this profitable", "did X cause Y", "which cohort performs best", metrics reviews, backtests, cost models, funnel analysis, A/B results.
+- **What it does:** Use when data will drive a decision: is it profitable, did X cause Y, which cohort wins.
+- **Use when:** data will drive a decision: is it profitable, did X cause Y, which cohort wins. Load BEFORE reporting any number, rate, P&L, backtest result, metrics review, cost model, funnel, or A/B outcome.
 - **Prerequisites:** None
 - **Works without setup:** Yes
 - **Compatibility:** Agent Skills standard
 - **Claude:** native — Stdlib-only check library and eval harness; the protocol needs no Hermes runtime.
-- **Size:** 17,078 B body, loaded when the skill triggers (~4,270 tokens); 44,356 B across 2 file(s) total
+- **Size:** 21,383 B body, loaded when the skill triggers (~5,346 tokens); 63,532 B across 2 file(s) total
 - **Path:** `skills/core/data-verification`
 
 ## deep-dive

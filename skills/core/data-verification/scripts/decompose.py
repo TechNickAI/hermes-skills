@@ -210,6 +210,153 @@ def concentration(values, labels=None) -> str:
     return "\n".join(lines)
 
 
+def confound(values, label_a, label_b, name_a="A", name_b="B") -> str:
+    """Two competing explanations for the same rows. Can the data separate them?
+
+    This is the Monday-morning test made executable. If the losses blamed on Monday
+    were really one contract that trades every Monday, then grouping by day and
+    grouping by instrument BOTH flip the sign, and no amount of arithmetic on this
+    dataset can tell you which one is the cause.
+
+    The check that separates them is a cross-tabulation: does the blamed label still
+    matter INSIDE the entity, and does the entity still matter INSIDE the label? A
+    real weekday effect shows up across many instruments. A confound does not.
+    """
+    n = len(values)
+    if not (n == len(label_a) == len(label_b)):
+        return "error: values and both label lists must be the same length."
+    if n < 12:
+        return f"n={n} is too small to separate two explanations."
+
+    def flips(labels):
+        full = _mean(values)
+        out = []
+        for g in sorted(set(labels)):
+            kept = [v for v, lab in zip(values, labels) if lab != g]
+            if kept and full and (_mean(kept) > 0) != (full > 0):
+                out.append(g)
+        return out
+
+    flip_a, flip_b = flips(label_a), flips(label_b)
+    lines = [
+        f"n = {n}   overall mean = {_mean(values):,.6g}",
+        f"{name_a}: removing {flip_a or 'no group'} flips the sign",
+        f"{name_b}: removing {flip_b or 'no group'} flips the sign",
+        "",
+    ]
+
+    if not (flip_a and flip_b):
+        lines.append(
+            f">> Only one explanation flips the result, so they are separable here. "
+            f"Attribute to it, and still name the mechanism before calling it a cause."
+        )
+        return "\n".join(lines)
+
+    # Both flip. Cross-tabulate to see whether either survives holding the other fixed.
+    lines.append(
+        ">> BOTH EXPLANATIONS FLIP THE SIGN on the same rows. Cross-tabulating to see "
+        "whether either survives holding the other fixed:"
+    )
+    lines.append("")
+
+    cells = {}
+    for v, a, b in zip(values, label_a, label_b):
+        cells.setdefault((a, b), []).append(v)
+
+    # Does label_b still separate INSIDE a single label_a group, and vice versa?
+    def survives_within(outer, inner, outer_name, inner_name):
+        verdicts = []
+        for o in sorted(set(outer)):
+            sub = [(v, i) for v, out_, i in zip(values, outer, inner) if out_ == o]
+            groups = {}
+            for v, i in sub:
+                groups.setdefault(i, []).append(v)
+            usable = {g: vs for g, vs in groups.items() if len(vs) >= 3}
+            if len(usable) < 2:
+                continue
+            means = {g: _mean(vs) for g, vs in usable.items()}
+            spread = max(means.values()) - min(means.values())
+            verdicts.append((o, spread, means))
+        if not verdicts:
+            return (
+                f"   {inner_name} within {outer_name}: not enough overlap to test. "
+                f"The two explanations are collinear in this data."
+            )
+        worst = max(v[1] for v in verdicts)
+        # Compare the within-cell spread against the BETWEEN-group spread that made
+        # this explanation look causal in the first place. Dividing by the overall
+        # mean would be a different question, and near a mean of zero it explodes.
+        between = {}
+        for v, i in zip(values, inner):
+            between.setdefault(i, []).append(v)
+        b_means = [_mean(vs) for vs in between.values() if len(vs) >= 3]
+        baseline = (max(b_means) - min(b_means)) if len(b_means) >= 2 else 0.0
+        rel = worst / baseline if baseline else math.inf
+        if rel < 0.5:
+            return (
+                f"   {inner_name} within {outer_name}: spread collapses to "
+                f"{worst:,.6g}, versus {baseline:,.6g} between groups "
+                f"({rel:.0%}). {inner_name} does NOT survive holding "
+                f"{outer_name} fixed, so it is the label, not the cause."
+            )
+        return (
+            f"   {inner_name} within {outer_name}: spread {worst:,.6g} versus "
+            f"{baseline:,.6g} between groups ({rel:.0%}). {inner_name} survives "
+            f"holding {outer_name} fixed, so it may carry real signal."
+        )
+
+    verdict_a = survives_within(label_b, label_a, name_b, name_a)
+    verdict_b = survives_within(label_a, label_b, name_a, name_b)
+    lines.append(verdict_b)
+    lines.append(verdict_a)
+    lines.append("")
+
+    a_survives = "survives" in verdict_a
+    b_survives = "survives" in verdict_b
+    collinear = "not enough overlap" in verdict_a or "not enough overlap" in verdict_b
+
+    if collinear:
+        lines.append(
+            "   COLLINEAR. Every row of one explanation sits inside a single value of "
+            "the other, so this dataset cannot separate them at any sample size. "
+            "Report the attribution as UNRESOLVED and get data where they vary "
+            "independently."
+        )
+    elif a_survives and not b_survives:
+        lines.append(
+            f"   RESOLVED: {name_a} survives holding {name_b} fixed, and {name_b} "
+            f"does not survive the reverse. {name_b} is the LABEL; {name_a} is where "
+            f"the effect lives. Acting on {name_b} would keep the real cause and "
+            f"discard the innocent rows that share the label."
+        )
+    elif b_survives and not a_survives:
+        lines.append(
+            f"   RESOLVED: {name_b} survives holding {name_a} fixed, and {name_a} "
+            f"does not survive the reverse. {name_a} is the LABEL; {name_b} is where "
+            f"the effect lives."
+        )
+    elif a_survives and b_survives:
+        lines.append(
+            "   BOTH survive holding the other fixed, so each carries some independent "
+            "signal. Report them jointly, and do not attribute the whole effect to "
+            "either alone."
+        )
+    else:
+        lines.append(
+            "   NEITHER survives holding the other fixed. The apparent effect is "
+            "carried by their combination, not by either explanation. Report as "
+            "UNRESOLVED."
+        )
+
+    lines.append("")
+    lines.append(
+        "   Whatever the arithmetic says, the tie-break is MECHANISM: an instrument, "
+        "a customer, or a venue can cause a loss; a weekday cannot. A grouping "
+        "without a mechanism is a place where the cause sits, not the cause."
+    )
+    return "\n".join(lines)
+
+
 # --------------------------------------------------------------------------------------
 # 2. shuffle (permutation control)
 # --------------------------------------------------------------------------------------
@@ -438,6 +585,69 @@ def describe(values) -> str:
     return "\n".join(lines)
 
 
+def ledger(opening, inflows, outflows, pnl, closing, tolerance=0.01) -> str:
+    """Does the accounting close? opening + inflows - outflows + pnl == closing.
+
+    The single largest sign error in the corpus was a P&L reported as +$1,086.86
+    that was really -$120.84: sale proceeds and settlement were both counted as
+    income while the cost basis was never allocated. No statistical check catches
+    that, because the arithmetic on each piece was correct. Only the identity does.
+
+    Every dollar must land in exactly one bucket. If the identity does not close,
+    the residual IS the double-count, and its size usually names the mistake.
+    """
+    for label, value in [
+        ("opening", opening), ("inflows", inflows), ("outflows", outflows),
+        ("pnl", pnl), ("closing", closing),
+    ]:
+        if not math.isfinite(value):
+            return f"error: {label}={value} is not a finite number."
+
+    expected = opening + inflows - outflows + pnl
+    residual = closing - expected
+    scale = max(abs(closing), abs(expected), abs(inflows), 1e-9)
+    rel = abs(residual) / scale
+
+    lines = [
+        f"opening {opening:>15,.2f}",
+        f"+ inflows {inflows:>13,.2f}",
+        f"- outflows {outflows:>12,.2f}",
+        f"+ P&L {pnl:>17,.2f}",
+        f"= expected {expected:>12,.2f}",
+        f"  reported {closing:>13,.2f}",
+        f"  residual {residual:>13,.2f}   ({rel:.2%} of scale)",
+        "",
+    ]
+    if rel <= tolerance:
+        lines.append(">> The identity closes. Every dollar is accounted for exactly once.")
+        return "\n".join(lines)
+
+    lines.append(
+        f">> DOES NOT CLOSE. {residual:,.2f} is unexplained, which means a dollar is "
+        f"counted twice, zero times, or in the wrong bucket."
+    )
+    if abs(residual - pnl) / scale <= tolerance:
+        lines.append(
+            "   The residual equals the P&L exactly. Classic double-count: the gain is "
+            "in the closing balance AND added again as P&L."
+        )
+    elif pnl and abs(residual - 2 * pnl) / scale <= tolerance:
+        lines.append("   The residual is twice the P&L. The gain is being counted three times.")
+    elif inflows and abs(residual - inflows) / scale <= tolerance:
+        lines.append(
+            "   The residual equals inflows. Deposits are being treated as profit, or "
+            "counted in both the balance and the P&L."
+        )
+    elif abs(residual + outflows) / scale <= tolerance:
+        lines.append("   The residual is minus outflows. Withdrawals are being booked as losses.")
+    else:
+        lines.append(
+            "   Check basis allocation first: proceeds counted as profit without "
+            "subtracting what the position cost is the most common cause."
+        )
+    return "\n".join(lines)
+
+
 # --------------------------------------------------------------------------------------
 # demo + cli
 # --------------------------------------------------------------------------------------
@@ -452,14 +662,33 @@ def demo() -> None:
         "(the instrument) instead of the calendar shows what is really happening.\n"
     )
     rng = random.Random(11)
-    vals, labels = [], []
-    for _ in range(180):
+    vals, by_entity, by_label = [], [], []
+    for i in range(180):
         vals.append(rng.gauss(40, 60))
-        labels.append("ordinary_trades")
+        by_entity.append("ordinary_trades")
+        by_label.append("Mon" if i % 5 == 0 else "Tue-Fri")
     for _ in range(20):
+        # The problem contract happens to trade every Monday. That is a fact about
+        # the CONTRACT, not about the day.
         vals.append(rng.gauss(-900, 80))
-        labels.append("weekly_contract_X")
-    print(concentration(vals, labels))
+        by_entity.append("weekly_contract_X")
+        by_label.append("Mon")
+
+    print("--- grouped by INSTRUMENT (the entity that repeats) ---")
+    print(concentration(vals, by_entity))
+    print()
+    print("--- grouped by DAY (the label you were about to blame) ---")
+    print(concentration(vals, by_label))
+    print()
+    print(
+        "BOTH flip the sign, on the SAME rows. The arithmetic cannot tell them\n"
+        "apart, because the bad contract only traded on Mondays. Banning Monday\n"
+        "keeps the loss (it trades again next Monday under another name) and gives\n"
+        "up every good Monday trade. Only a mechanism separates these: a contract\n"
+        "can cause losses, a weekday cannot. When two groupings both flip, you have\n"
+        "found a confound, not a cause. Report it as unresolved and go find which\n"
+        "one has a mechanism."
+    )
 
     print()
     print("=" * 74)
@@ -574,6 +803,68 @@ def selftest() -> int:
         ("one group dominates without flipping", "Report the conditional finding", concentration(hot_vals, hot_labels), True)
     )
 
+    # confound: the Monday-morning problem must RESOLVE, and a real day effect
+    # across many instruments must not be called a confound.
+    cf_rng = random.Random(11)
+    cv, ce, cl = [], [], []
+    for i in range(180):
+        cv.append(cf_rng.gauss(40, 60)); ce.append("ordinary"); cl.append("Mon" if i % 5 == 0 else "Tue")
+    for _ in range(20):
+        cv.append(cf_rng.gauss(-900, 80)); ce.append("weekly_X"); cl.append("Mon")
+    cf_out = confound(cv, ce, cl, "instrument", "day")
+    cases.append(("Monday confound resolves to instrument", "day is the LABEL", cf_out, True))
+    cases.append(("confound names the mechanism rule", "a weekday cannot", cf_out, True))
+
+    rv, re_, rl = [], [], []
+    for i in range(200):
+        mon = i % 5 == 0
+        rv.append(cf_rng.gauss(-300 if mon else 60, 40))
+        re_.append(f"inst_{i % 8}")
+        rl.append("Mon" if mon else "Tue")
+    cases.append(
+        ("real day effect is not a confound", "Only one explanation flips", confound(rv, re_, rl, "instrument", "day"), True)
+    )
+
+    # ledger: the identity must close when it should and name the double-count when
+    # it should not. This is the ONLY check covering the accounting bucket.
+    # Perfectly collinear: the entity NEVER appears outside its label, so no dataset
+    # of any size can separate them. This must be named, not silently resolved.
+    col_v, col_e, col_l = [], [], []
+    col_rng = random.Random(7)
+    for _ in range(60):
+        col_v.append(col_rng.gauss(50, 20)); col_e.append("normal_desk"); col_l.append("weekday")
+    for _ in range(60):
+        col_v.append(col_rng.gauss(-600, 20)); col_e.append("bad_desk"); col_l.append("weekend")
+    cases.append(
+        ("perfect collinearity named", "COLLINEAR", confound(col_v, col_e, col_l, "desk", "daytype"), True)
+    )
+
+    # A single row in its own cell must not be allowed to manufacture a within-group
+    # spread. Without the minimum-cell guard this returns a confident verdict built
+    # on one observation.
+    thin_v, thin_e, thin_l = [], [], []
+    thin_rng = random.Random(3)
+    for i in range(100):
+        thin_v.append(thin_rng.gauss(60, 15)); thin_e.append(f"e{i % 4}"); thin_l.append("Tue")
+    for _ in range(12):
+        thin_v.append(thin_rng.gauss(-800, 30)); thin_e.append("bad"); thin_l.append("Mon")
+    thin_v.append(-40.0); thin_e.append("e0"); thin_l.append("Mon")
+    cases.append(
+        ("singleton cell cannot decide", "not enough overlap", confound(thin_v, thin_e, thin_l, "entity", "day"), True)
+    )
+
+    cases.append(("clean books close", "identity closes", ledger(1000, 500, 200, 130, 1430), True))
+    cases.append(("broken books caught", "DOES NOT CLOSE", ledger(0, 5000, 0, 1086.86, 4879.16), True))
+    cases.append(
+        ("classic double-count named", "Classic double-count", ledger(1000, 0, 0, 250, 1500), True)
+    )
+    # Deposits booked as profit: 5000 in, no real gain, but 5000 also reported as
+    # P&L, so the closing balance is 5000 higher than the identity allows.
+    cases.append(
+        ("deposits as profit named", "Deposits are being treated as profit", ledger(0, 5000, 0, 300, 10300), True)
+    )
+    cases.append(("non-finite ledger refused", "not a finite number", ledger(0, 0, 0, float("nan"), 100), True))
+
     skewed_rng = random.Random(41)
     cases.append(
         (
@@ -656,6 +947,19 @@ def main() -> int:
     m.add_argument("--tried", type=int, required=True, help="every variant, including abandoned")
     m.add_argument("--periods", type=int, required=True)
 
+    cf = sub.add_parser("confound", help="two competing explanations: can data separate them?")
+    cf.add_argument("file")
+    cf.add_argument("--value", required=True)
+    cf.add_argument("--group-a", required=True, help="e.g. the entity: instrument, customer")
+    cf.add_argument("--group-b", required=True, help="e.g. the label: day_of_week, month")
+
+    lg = sub.add_parser("ledger", help="does opening + in - out + pnl = closing?")
+    lg.add_argument("--opening", type=float, required=True)
+    lg.add_argument("--inflows", type=float, default=0.0)
+    lg.add_argument("--outflows", type=float, default=0.0)
+    lg.add_argument("--pnl", type=float, required=True)
+    lg.add_argument("--closing", type=float, required=True)
+
     d = sub.add_parser("describe", help="is the mean a description of anything?")
     d.add_argument("file")
     d.add_argument("--value", required=True)
@@ -674,6 +978,9 @@ def main() -> int:
     if args.cmd == "selection":
         print(selection(args.sharpe, args.tried, args.periods))
         return 0
+    if args.cmd == "ledger":
+        print(ledger(args.opening, args.inflows, args.outflows, args.pnl, args.closing))
+        return 0
 
     rows = load_rows(args.file)
     values = numeric_column(rows, args.value)
@@ -687,6 +994,19 @@ def main() -> int:
         print(concentration(values, labels))
     elif args.cmd == "shuffle":
         print(shuffle_test(values, args.statistic, args.trials, args.seed))
+    elif args.cmd == "confound":
+        for col in (args.group_a, args.group_b):
+            if col not in rows[0]:
+                sys.exit(f"error: no column {col!r}. Available: {sorted(rows[0])}")
+        print(
+            confound(
+                values,
+                [str(r[args.group_a]) for r in rows],
+                [str(r[args.group_b]) for r in rows],
+                args.group_a,
+                args.group_b,
+            )
+        )
     elif args.cmd == "describe":
         print(describe(values))
     return 0

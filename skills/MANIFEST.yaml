@@ -21,8 +21,8 @@ skills:
   pack: core
   version: 2.0.0
   scope: solo
-  summary: 'Use before reporting any number, verdict, or recommendation drawn from data: "is this profitable", "did X cause Y", "which cohort performs best", metrics reviews, backtests, cost models, funnel analysis, A/B results.'
-  use_when: ''
+  summary: 'Use when data will drive a decision: is it profitable, did X cause Y, which cohort wins.'
+  use_when: 'data will drive a decision: is it profitable, did X cause Y, which cohort wins. Load BEFORE reporting any number, rate, P&L, backtest result, metrics review, cost model, funnel, or A/B outcome.'
   requires: []
   works_out_of_the_box: true
   compatibility: Agent Skills standard
@@ -30,10 +30,10 @@ skills:
   claude_note: Stdlib-only check library and eval harness; the protocol needs no Hermes runtime.
   size:
     files: 2
-    bytes_skill_md: 17078
-    bytes_total: 44356
-    approx_tokens_skill_md: 4270
-    approx_tokens_total: 11089
+    bytes_skill_md: 21383
+    bytes_total: 63532
+    approx_tokens_skill_md: 5346
+    approx_tokens_total: 15883
   tags:
   - data-quality
   - analysis
