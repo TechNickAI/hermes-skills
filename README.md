@@ -123,20 +123,21 @@ against reality before reporting. That discipline is baked into the skill.
 
 ### `core` — every agent, whatever its job
 
-| Skill              | What it does                                                                               | Needs                                                        |
-| ------------------ | ------------------------------------------------------------------------------------------ | ------------------------------------------------------------ |
-| `deep-dive`        | Research a question across every relevant source and come back with a decision, not links  | —                                                            |
-| `multi-review`     | Review any artifact through a panel of diverse lenses across model families, then converge | Hermes-native (subagent delegation)                          |
-| `moa-solve`        | Throw several models at one hard problem and synthesize the best answer out of the spread  | Hermes-native (`/moa` fan-out)                               |
-| `mob-check`        | What real people are actually saying right now — Reddit, X, HN, YouTube — ranked, not SEO  | —                                                            |
-| `grok-search`      | Real-time web and X search via xAI's Grok, for when general web search misses              | `XAI_API_KEY`                                                |
-| `recall`           | Rebuild context from prior sessions, memories, and transcripts after `/new`                | —                                                            |
-| `memory-cleanup`   | Shrink a bloated `MEMORY.md` without losing facts — compress, relocate, offload            | —                                                            |
-| `project-steward`  | Run a portfolio of long-running projects like a chief of staff instead of a task runner    | `TELEGRAM_BOT_TOKEN`                                         |
-| `trust-framework`  | Govern your own autonomy: act vs. ask, one-way vs. two-way doors, earn freedom over time   | —                                                            |
-| `robustify-doctor` | Is this agent actually healthy? Collects facts across twelve subsystems, then reads them   | Python 3.9+, read access to the target agent's `HERMES_HOME` |
-| `keep-going`       | `/keep_going` — re-anchor an agent that asked a question instead of doing the work         | —                                                            |
-| `report`           | File a bug or piece of feedback from any session, routed for triage                        | —                                                            |
+| Skill               | What it does                                                                               | Needs                                                        |
+| ------------------- | ------------------------------------------------------------------------------------------ | ------------------------------------------------------------ |
+| `deep-dive`         | Research a question across every relevant source and come back with a decision, not links  | —                                                            |
+| `data-verification` | Gate an analysis before its number ships: units, population, decomposition, controls       | —                                                            |
+| `multi-review`      | Review any artifact through a panel of diverse lenses across model families, then converge | Hermes-native (subagent delegation)                          |
+| `moa-solve`         | Throw several models at one hard problem and synthesize the best answer out of the spread  | Hermes-native (`/moa` fan-out)                               |
+| `mob-check`         | What real people are actually saying right now — Reddit, X, HN, YouTube — ranked, not SEO  | —                                                            |
+| `grok-search`       | Real-time web and X search via xAI's Grok, for when general web search misses              | `XAI_API_KEY`                                                |
+| `recall`            | Rebuild context from prior sessions, memories, and transcripts after `/new`                | —                                                            |
+| `memory-cleanup`    | Shrink a bloated `MEMORY.md` without losing facts — compress, relocate, offload            | —                                                            |
+| `project-steward`   | Run a portfolio of long-running projects like a chief of staff instead of a task runner    | `TELEGRAM_BOT_TOKEN`                                         |
+| `trust-framework`   | Govern your own autonomy: act vs. ask, one-way vs. two-way doors, earn freedom over time   | —                                                            |
+| `robustify-doctor`  | Is this agent actually healthy? Collects facts across twelve subsystems, then reads them   | Python 3.9+, read access to the target agent's `HERMES_HOME` |
+| `keep-going`        | `/keep_going` — re-anchor an agent that asked a question instead of doing the work         | —                                                            |
+| `report`            | File a bug or piece of feedback from any session, routed for triage                        | —                                                            |
 
 ### `engineering` — agents that write and ship code
 
