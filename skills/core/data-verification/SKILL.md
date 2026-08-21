@@ -65,8 +65,10 @@ What it asks instead: **is this number about what I think it is about?**
 
 ## The five questions
 
-Answer 1 and 2 for every analysis. They take about three minutes and catch ~79%
-of real failures. Reach for 3, 4, and 5 when their trigger fires.
+Answer 1 and 2 for every analysis; they are the routine minimum. They target the
+failure modes behind ~79% of the audited corpus, which is a claim about where
+those errors came from, not a measured catch rate. Reach for 3, 4, and 5 when
+their trigger fires.
 
 ---
 
@@ -365,8 +367,11 @@ the sign, because the bad contract only traded on Mondays. `confound` then
 cross-tabulates and shows `day` collapsing to 0% of its apparent effect once
 `instrument` is held fixed, while `instrument` keeps 100% of its own. That
 resolves this case. When the cross-tab CANNOT separate them it says COLLINEAR and
-stops, and the tie-break is mechanism, not arithmetic: an instrument can cause a
-loss, a weekday cannot.
+stops, and the tie-break is mechanism, not arithmetic. Ask what would have to be
+true for each to be causal and go check it. A calendar variable is usually a
+proxy, though not always: weekly settlement, scheduled announcements, and thin
+holiday liquidity are real weekday mechanisms. The test is evidence that the
+mechanism operated, not the variable's category.
 
 ## Adapting this to your domain
 
@@ -387,8 +392,8 @@ writeup. Skipping is fine; skipping silently is not.
 
 ## Pitfalls
 
-1. **Re-running the calculation.** It proves the arithmetic. All 49 incidents
-   reproduce perfectly.
+1. **Re-running the calculation.** It proves the arithmetic, which was never the
+   error. Re-running reproduces all 49 incidents rather than catching any of them.
 2. **Three correlated checks.** Knight-Leveson. Vary the mechanism.
 3. **Averaging a disagreement.** Find the driver instead.
 4. **A range chosen after seeing the number.** It always contains the number.
