@@ -33,7 +33,7 @@ differentiator — say so out loud), `unsupported` (never recommend it in Claude
 - **Works without setup:** Yes
 - **Compatibility:** Agent Skills standard
 - **Claude:** native — Stdlib-only check library and eval harness; the protocol needs no Hermes runtime.
-- **Size:** 23,473 B body, loaded when the skill triggers (~5,868 tokens); 72,285 B across 2 file(s) total
+- **Size:** 23,905 B body, loaded when the skill triggers (~5,976 tokens); 72,717 B across 2 file(s) total
 - **Path:** `skills/core/data-verification`
 
 ## deep-dive
