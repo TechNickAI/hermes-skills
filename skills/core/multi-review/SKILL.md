@@ -400,7 +400,9 @@ simultaneously. That 3GB database took structural B-tree damage — `invalid pag
 number`, `2nd reference to page`, rowids out of order — and had to be rebuilt
 offline from readable rows.
 
-**Give each reviewer its own scratch home.** Use the helper:
+**Give each reviewer its own scratch home.** Use the bundled helper
+`scripts/reviewer_home.sh` (the larger panel runner is
+`templates/parallel_reviewer_runner.sh`):
 
 ```bash
 source "$SKILL_DIR/scripts/reviewer_home.sh"
