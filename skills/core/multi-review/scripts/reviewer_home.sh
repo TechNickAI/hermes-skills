@@ -158,8 +158,27 @@ _reviewer_on_signal() {
   kill -s "$sig" "$$" 2>/dev/null
 }
 
+# Kill every live reviewer, including ones started as `reviewer_run ... &`.
+#
+# WHY NOT A TRACKED PID LIST: with the documented concurrent form, reviewer_run
+# runs in a BACKGROUND SUBSHELL, so any `_REVIEWER_LIVE_PIDS=...` assignment
+# inside it mutates that subshell's copy only. Measured: the parent's list was
+# [] while two reviewers ran. A parent handler relying on that list kills
+# nothing. (Reviewers often still die because SIGTERM reaches the shared
+# process group -- but that is incidental, not a guarantee, and it does not
+# hold if a reviewer is setsid'd or briefly ignores TERM.)
+#
+# `jobs -p` IS evaluated in the parent and lists the background subshells, so
+# we signal each job and its descendants -- the actual `hermes` child.
 _reviewer_kill_live() {
-  local p
+  local j p
+  for j in $(jobs -p 2>/dev/null); do
+    # children first, so hermes dies even if the subshell exits immediately
+    for p in $(pgrep -P "$j" 2>/dev/null); do
+      kill -TERM "$p" 2>/dev/null
+    done
+    kill -TERM "$j" 2>/dev/null
+  done
   for p in $_REVIEWER_LIVE_PIDS; do
     kill -TERM "$p" 2>/dev/null
   done
