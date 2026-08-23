@@ -71,7 +71,7 @@ Distinguish real issues from tradeoffs and false positives."
     timeout 1800 hermes -z "$prompt" --provider "$provider" -m "$model" \
     --ignore-rules -t '' > "$OUT/${name}.txt" 2>"$OUT/${name}.err"
   local rc=$?
-  rm -rf "$home"
+  _reviewer_rmtree "$home"
   # rc IS the diagnosis. rc=124 means TIMEOUT KILLED A WORKING REVIEWER --
   # not a broken model, not a routing problem. Never write a seat off without it.
   local note=""

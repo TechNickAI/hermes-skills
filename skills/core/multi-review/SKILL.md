@@ -6,7 +6,7 @@ description: >
   Runs a small panel of diverse review lenses across model families when available,
   synthesizes findings into fix/ask/defer/wontfix decisions, and iterates until the
   result is ready.
-version: 1.5.1
+version: 1.6.0
 license: MIT
 compatibility: >
   Portable review method. Native multi-model orchestration examples are Hermes-specific;

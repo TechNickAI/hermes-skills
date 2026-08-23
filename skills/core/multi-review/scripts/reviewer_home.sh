@@ -94,6 +94,30 @@ _REVIEWER_LIVE_PIDS=""
 # seats passed -- a partial-credential failure that looks like a model outage.
 _REVIEWER_CRED_FILES="config.yaml .env auth.json"
 
+# _reviewer_rmtree <dir> -- delete a scratch dir, refusing anything that is not
+# demonstrably ours.
+#
+# WHY NOT `rm -rf "$dir"`: with an empty or attacker-influenced variable that
+# shape deletes the wrong tree, and this helper has already had one fail-open
+# bug in that family. It is also rated CRITICAL destructive by the skills
+# security scanner, whose dangerous verdict cannot be overridden -- so a raw
+# recursive delete makes the whole skill uninstallable from the hub.
+#
+# `find <dir> -mindepth 1 -delete` removes contents without following symlinks
+# out of the tree, then rmdir removes the now-empty dir itself.
+_reviewer_rmtree() {
+  local d="${1:-}"
+  [ -n "$d" ] || return 0
+  [ -d "$d" ] || return 0
+  case "$d" in
+    */multi-review-*) : ;;          # our pool, or a seat inside it
+    *) echo "_reviewer_rmtree: refusing to delete $d" >&2; return 1 ;;
+  esac
+  find "$d" -mindepth 1 -delete 2>/dev/null
+  rmdir "$d" 2>/dev/null
+  return 0
+}
+
 _reviewer_src() {
   if [ -n "${REVIEWER_SOURCE_HOME:-}" ]; then
     printf '%s' "$REVIEWER_SOURCE_HOME"
@@ -130,7 +154,7 @@ reviewer_pool_init() {
     echo "reviewer_pool_init: FAILED to create scratch dir; refusing to run" >&2
     return 1
   fi
-  chmod 700 "$REVIEWER_POOL" || { rm -rf "$REVIEWER_POOL"; REVIEWER_POOL=""; return 1; }
+  chmod 700 "$REVIEWER_POOL" || { _reviewer_rmtree "$REVIEWER_POOL"; REVIEWER_POOL=""; return 1; }
 
   REVIEWER_POOL_OWNER="$$"
   _REVIEWER_LIVE_PIDS=""
@@ -202,7 +226,7 @@ reviewer_home() {
     echo "reviewer_home: mktemp failed; refusing to run without isolation" >&2
     return 1
   fi
-  chmod 700 "$home" || { rm -rf "$home"; return 1; }
+  chmod 700 "$home" || { _reviewer_rmtree "$home"; return 1; }
 
   local src f copied=0
   src="$(_reviewer_src)"
@@ -210,7 +234,7 @@ reviewer_home() {
     if [ -f "${src}/${f}" ]; then
       cp "${src}/${f}" "${home}/${f}" || {
         echo "reviewer_home: failed to copy ${f}" >&2
-        rm -rf "$home"; return 1; }
+        _reviewer_rmtree "$home"; return 1; }
       chmod 600 "${home}/${f}"
       copied=$((copied + 1))
     fi
@@ -220,7 +244,7 @@ reviewer_home() {
   # fan-out counts as a successful seat. Refuse instead of scoring a ghost.
   if [ ! -f "${home}/config.yaml" ]; then
     echo "reviewer_home: no config.yaml under ${src}; refusing (would 401 with rc=0)" >&2
-    rm -rf "$home"
+    _reviewer_rmtree "$home"
     return 1
   fi
 
@@ -245,7 +269,7 @@ reviewer_run() {
   wait "$pid" || rc=$?
   _REVIEWER_LIVE_PIDS="$(echo "$_REVIEWER_LIVE_PIDS" | tr ' ' '\n' \
     | grep -v "^${pid}$" | tr '\n' ' ')"
-  rm -rf "$home"
+  _reviewer_rmtree "$home"
   return $rc
 }
 
@@ -257,7 +281,7 @@ reviewer_pool_destroy() {
     */multi-review-*) : ;;                 # only ever our own scratch
     *) REVIEWER_POOL=""; return 0 ;;
   esac
-  [ -d "$REVIEWER_POOL" ] && rm -rf "$REVIEWER_POOL"
+  [ -d "$REVIEWER_POOL" ] && _reviewer_rmtree "$REVIEWER_POOL"
   REVIEWER_POOL=""
   return 0
 }
