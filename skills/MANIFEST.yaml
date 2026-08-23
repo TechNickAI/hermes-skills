@@ -195,7 +195,7 @@ skills:
   path: skills/core/mob-check
 - name: multi-review
   pack: core
-  version: 1.5.0
+  version: 1.5.1
   scope: solo
   summary: Use when reviewing almost any meaningful artifact, decision, action, plan, code change, prompt, skill, research summary, outbound message, or public-facing content.
   use_when: reviewing almost any meaningful artifact, decision, action, plan, code change, prompt, skill, research summary, outbound message, or public-facing content.
