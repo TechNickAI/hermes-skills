@@ -205,11 +205,11 @@ skills:
   claude_compat: degraded
   claude_note: The review method transfers, but cross-model-family diversity needs Hermes; in Claude it becomes Claude reviewing Claude.
   size:
-    files: 17
-    bytes_skill_md: 53904
-    bytes_total: 136994
-    approx_tokens_skill_md: 13476
-    approx_tokens_total: 34248
+    files: 18
+    bytes_skill_md: 54339
+    bytes_total: 147860
+    approx_tokens_skill_md: 13585
+    approx_tokens_total: 36965
   tags:
   - review
   - quality
