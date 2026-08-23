@@ -31,6 +31,9 @@
 #                      this way. Always print rc per seat: rc=124 IS the
 #                      diagnosis, and retrying a timeout with the SAME budget
 #                      just reproduces it.
+#  - isolation   : every reviewer runs in its own throwaway HERMES_HOME
+#                  via scripts/reviewer_home.sh, so no reviewer can open
+#                  the caller's live state.db. Never remove this.
 #  - `export HOME`  : set HOME explicitly. Headless `hermes -z` launched from a
 #                      script/subprocess can fail with "Could not determine home
 #                      directory" when HOME isn't inherited. Cheap, defensive.
@@ -42,6 +45,12 @@ BRIEF="$(cat /tmp/review_brief.md)"      # <-- the bounded, self-contained artif
 OUT=/tmp/review_panel
 mkdir -p "$OUT"
 
+# Per-reviewer isolation helper (ships beside this template).
+_MR_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+# shellcheck source=/dev/null
+source "${_MR_DIR}/scripts/reviewer_home.sh"
+reviewer_pool_init || { echo "cannot create reviewer scratch; refusing"; exit 1; }
+
 run() {
   local name="$1" provider="$2" model="$3" lens="$4"
   local prompt="${BRIEF}
@@ -52,9 +61,17 @@ ${lens}
 Respond in under 600 words. Be numeric and ruthless. For each finding give:
 severity, evidence/location, why it matters in practice, smallest useful fix.
 Distinguish real issues from tradeoffs and false positives."
-  timeout 1800 hermes -z "$prompt" --provider "$provider" -m "$model" \
+  # ISOLATION IS MANDATORY. A bare `hermes -z` opens the CALLING profile's
+  # state.db read-write; with the gateway also live that is two OS processes on
+  # one WAL database, which has produced real B-tree corruption. Each reviewer
+  # gets its own throwaway HERMES_HOME, removed as soon as the seat finishes.
+  local home
+  home="$(reviewer_home)" || { echo "[$name] no isolated home; seat skipped"; return 1; }
+  HERMES_HOME="$home" \
+    timeout 1800 hermes -z "$prompt" --provider "$provider" -m "$model" \
     --ignore-rules -t '' > "$OUT/${name}.txt" 2>"$OUT/${name}.err"
   local rc=$?
+  rm -rf "$home"
   # rc IS the diagnosis. rc=124 means TIMEOUT KILLED A WORKING REVIEWER --
   # not a broken model, not a routing problem. Never write a seat off without it.
   local note=""
