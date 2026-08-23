@@ -1,0 +1,251 @@
+#!/usr/bin/env bash
+# Ephemeral, self-destroying scratch homes for headless multi-review reviewers.
+#
+# WHY THIS EXISTS
+# `hermes -z` boots a full agent, and the CLI path opens the CALLING profile's
+# state.db read-write (cli.py:4642 SessionDB(), cli.py:8566 create_session(),
+# hermes_state.py:2798 _default_db_path()). Run that from an agent whose
+# gateway is live and two OS processes write one WAL database -- each with its
+# own lock state and its own view of the WAL index. No pragma prevents it.
+#
+# Measured on a production host: gateway (fd mode 'u') and a
+# `hermes -z` reviewer (fd mode 'u') held one state.db simultaneously. That
+# 3GB database took structural B-tree damage -- "invalid page number", "2nd
+# reference to page", rowids out of order -- and had to be rebuilt offline.
+#
+# THE MECHANISM
+# HERMES_HOME roots config.yaml, .env, auth.json, skills, memories AND
+# state.db. A scratch dir seeded with the caller's credentials gives a working
+# agent with a PRIVATE database. Nothing is registered under profiles/, so
+# there is no namespace to garbage-collect and no name to collide with.
+#
+# ONE HOME PER REVIEWER, ALWAYS. Measured: 6 concurrent reviewers sharing one
+# home produced 6 simultaneous holders of one database -- the original bug,
+# relocated. Per-reviewer homes measure a peak of exactly 1.
+#
+# NO ROLE VOCABULARY. Reviewers are anonymous slots; the caller's PROMPT makes
+# one critical and another empathetic. Never enumerate personas here.
+#
+# USAGE
+#   source reviewer_home.sh
+#   reviewer_pool_init            # REQUIRED, and never in $( ) -- see below
+#   reviewer_run "$PROMPT_A" -m grok   &
+#   reviewer_run "$PROMPT_B" -m gemini &
+#   wait
+#   reviewer_pool_destroy         # or let the EXIT trap do it
+#
+# HARD-WON CONSTRAINTS (each cost a real bug; do not "simplify" them away)
+#
+# 1. FAIL CLOSED ON SCRATCH FAILURE. If mktemp fails (TMPDIR unset, full, or
+#    read-only) an unchecked $home is EMPTY, and Hermes treats an empty
+#    HERMES_HOME as unset -- falling straight back to the caller's real
+#    ~/.hermes/state.db. The isolation helper would then silently cause the
+#    exact corruption it exists to prevent. Every scratch path is validated and
+#    the reviewer REFUSES to run without one.
+#
+# 2. NEVER CALL reviewer_pool_init IN COMMAND SUBSTITUTION. `P=$(...)` runs it
+#    in a subshell whose EXIT trap fires the moment the substitution closes,
+#    deleting the pool before use. `$$` cannot detect this (bash keeps the
+#    parent's pid in a subshell) and BASHPID is empty on bash 3.2 (macOS). So
+#    init EXPORTS nothing and RETURNS nothing -- it sets a global. Lazy
+#    auto-init is a hard error for the same reason: it used to run inside
+#    reviewer_run's own $(reviewer_home) substitution and self-destruct.
+#
+# 3. TRAPS DO NOT FIRE WHILE BASH BLOCKS IN A FOREGROUND CHILD. Measured: a
+#    script SIGTERMed during a foreground `sleep` never ran its EXIT trap and
+#    leaked its scratch; `sleep 60 & wait $!` cleaned up correctly. reviewer_run
+#    therefore backgrounds and waits.
+#
+# 4. A SIGNAL HANDLER THAT DOES NOT EXIT LETS THE SCRIPT RESUME. Bash returns
+#    control to the next statement after the handler, so a Ctrl-C'd fan-out
+#    would destroy the pool and then happily seed a NEW one and keep spending
+#    model calls. The INT/TERM handler kills live reviewers, restores the
+#    default disposition, and re-raises.
+#
+# 5. CHAIN THE CALLER'S TRAPS, DO NOT CLOBBER THEM. This file is sourced into
+#    the caller's shell; a bare `trap ... EXIT` silently replaces whatever
+#    cleanup the caller already installed.
+#
+# 6. DO NOT EXPORT REVIEWER_POOL. An exported pool is inherited by child
+#    shells, which then skip init, adopt the parent's pool, and delete it on
+#    their own exit while the parent's reviewers are still running.
+#
+# WHAT WAS REJECTED
+#   bare mktemp, unseeded   No credentials: "HTTP 401: Missing Authentication
+#                           header" WITH EXIT CODE 0, so a fan-out silently
+#                           scores dead reviewers as successful seats.
+#   profiles/<name> + -p    Litters the profile namespace, needs sweep-on-crash,
+#                           forces invented names; nested names fail rc=2.
+#   MoA presets             Broadcasts ONE prompt to N models. A panel needs N
+#                           DIFFERENT prompts. Different feature.
+#   delegate_task per-task  Upstream refuses it (PRs #17718/#23266/#25026/
+#   model override          #34773/#36790; maintainer: "We do not want this").
+
+set -uo pipefail
+
+REVIEWER_POOL=""            # deliberately NOT exported -- see constraint 6
+REVIEWER_POOL_OWNER=""
+_REVIEWER_PRIOR_EXIT_TRAP=""
+_REVIEWER_LIVE_PIDS=""
+
+# Credential artifacts a reviewer needs. auth.json carries OAuth tokens for
+# providers that do not use a plain API key (xAI/Grok, Codex): omitting it made
+# a real grok seat fail with "No xAI OAuth credentials stored" while the other
+# seats passed -- a partial-credential failure that looks like a model outage.
+_REVIEWER_CRED_FILES="config.yaml .env auth.json"
+
+_reviewer_src() {
+  if [ -n "${REVIEWER_SOURCE_HOME:-}" ]; then
+    printf '%s' "$REVIEWER_SOURCE_HOME"
+  elif [ -n "${HERMES_HOME:-}" ]; then
+    printf '%s' "$HERMES_HOME"
+  else
+    printf '%s' "$HOME/.hermes"
+  fi
+}
+
+# reviewer_pool_init [dir]
+# Sets $REVIEWER_POOL in the CALLER's shell and arms cleanup. Call it plain:
+#     reviewer_pool_init          # correct
+#     P=$(reviewer_pool_init)     # WRONG -- subshell, see constraint 2
+reviewer_pool_init() {
+  local requested="${1:-}"
+  if [ -n "$requested" ]; then
+    # A caller-supplied dir is NOT rm -rf'd blindly: we only ever delete a
+    # subdirectory we created inside it, so passing $HOME or a project dir
+    # cannot destroy it.
+    mkdir -p "$requested" 2>/dev/null || {
+      echo "reviewer_pool_init: cannot create $requested" >&2; return 1; }
+    REVIEWER_POOL="$(mktemp -d "${requested%/}/multi-review-XXXXXX" 2>/dev/null)" || REVIEWER_POOL=""
+  else
+    local tmp="${TMPDIR:-/tmp}"
+    [ -d "$tmp" ] && [ -w "$tmp" ] || tmp=/tmp
+    REVIEWER_POOL="$(mktemp -d "${tmp%/}/multi-review-XXXXXX" 2>/dev/null)" || REVIEWER_POOL=""
+  fi
+
+  # Constraint 1: fail closed. An empty pool would make every reviewer fall
+  # back to the caller's live database.
+  if [ -z "$REVIEWER_POOL" ] || [ ! -d "$REVIEWER_POOL" ]; then
+    REVIEWER_POOL=""
+    echo "reviewer_pool_init: FAILED to create scratch dir; refusing to run" >&2
+    return 1
+  fi
+  chmod 700 "$REVIEWER_POOL" || { rm -rf "$REVIEWER_POOL"; REVIEWER_POOL=""; return 1; }
+
+  REVIEWER_POOL_OWNER="$$"
+  _REVIEWER_LIVE_PIDS=""
+
+  # Constraint 5: chain, do not clobber, the caller's EXIT trap.
+  _REVIEWER_PRIOR_EXIT_TRAP="$(trap -p EXIT 2>/dev/null \
+    | sed "s/^trap -- '//; s/' EXIT$//")"
+  if [ -n "$_REVIEWER_PRIOR_EXIT_TRAP" ]; then
+    trap "reviewer_pool_destroy; ${_REVIEWER_PRIOR_EXIT_TRAP}" EXIT
+  else
+    trap 'reviewer_pool_destroy' EXIT
+  fi
+  # Constraint 4: kill reviewers, restore default, re-raise so the shell
+  # actually dies instead of resuming into the next fan-out.
+  trap '_reviewer_on_signal INT' INT
+  trap '_reviewer_on_signal TERM' TERM
+  return 0
+}
+
+_reviewer_on_signal() {
+  local sig="$1"
+  _reviewer_kill_live
+  reviewer_pool_destroy
+  trap - INT TERM EXIT
+  kill -s "$sig" "$$" 2>/dev/null
+}
+
+_reviewer_kill_live() {
+  local p
+  for p in $_REVIEWER_LIVE_PIDS; do
+    kill -TERM "$p" 2>/dev/null
+  done
+  _REVIEWER_LIVE_PIDS=""
+}
+
+# reviewer_home -> prints a fresh isolated HERMES_HOME, or fails.
+# Anonymous and unlimited: one call per reviewer.
+reviewer_home() {
+  # Constraint 2: no lazy init. Auto-initialising here would run inside
+  # reviewer_run's $(reviewer_home) subshell and self-destruct, handing the
+  # reviewer an unseeded home -- the silent 401 path.
+  if [ -z "$REVIEWER_POOL" ] || [ ! -d "$REVIEWER_POOL" ]; then
+    echo "reviewer_home: call reviewer_pool_init first (plain, not in \$( ))" >&2
+    return 1
+  fi
+
+  local home
+  home="$(mktemp -d "${REVIEWER_POOL%/}/r-XXXXXX" 2>/dev/null)" || home=""
+  if [ -z "$home" ] || [ ! -d "$home" ]; then
+    echo "reviewer_home: mktemp failed; refusing to run without isolation" >&2
+    return 1
+  fi
+  chmod 700 "$home" || { rm -rf "$home"; return 1; }
+
+  local src f copied=0
+  src="$(_reviewer_src)"
+  for f in $_REVIEWER_CRED_FILES; do
+    if [ -f "${src}/${f}" ]; then
+      cp "${src}/${f}" "${home}/${f}" || {
+        echo "reviewer_home: failed to copy ${f}" >&2
+        rm -rf "$home"; return 1; }
+      chmod 600 "${home}/${f}"
+      copied=$((copied + 1))
+    fi
+  done
+
+  # A reviewer with no config.yaml returns HTTP 401 and EXIT CODE 0, which a
+  # fan-out counts as a successful seat. Refuse instead of scoring a ghost.
+  if [ ! -f "${home}/config.yaml" ]; then
+    echo "reviewer_home: no config.yaml under ${src}; refusing (would 401 with rc=0)" >&2
+    rm -rf "$home"
+    return 1
+  fi
+
+  printf '%s' "$home"
+}
+
+# reviewer_run <prompt> [extra hermes args...]
+# One reviewer, one private home, torn down immediately after.
+# -t '' keeps it text-in/text-out: a headless reviewer that tries to call a
+# tool hangs forever waiting for an approval nobody can give.
+reviewer_run() {
+  local prompt="$1"; shift
+  local home rc=0
+  home="$(reviewer_home)" || return 1
+  [ -n "$home" ] && [ -d "$home" ] || {
+    echo "reviewer_run: no isolated home; refusing" >&2; return 1; }
+
+  # Constraint 3: background + wait so traps can fire.
+  HERMES_HOME="$home" hermes -z "$prompt" -t '' "$@" &
+  local pid=$!
+  _REVIEWER_LIVE_PIDS="$_REVIEWER_LIVE_PIDS $pid"
+  wait "$pid" || rc=$?
+  _REVIEWER_LIVE_PIDS="$(echo "$_REVIEWER_LIVE_PIDS" | tr ' ' '\n' \
+    | grep -v "^${pid}$" | tr '\n' ' ')"
+  rm -rf "$home"
+  return $rc
+}
+
+# reviewer_pool_destroy -- idempotent, safe from a trap and again by hand.
+reviewer_pool_destroy() {
+  [ -n "${REVIEWER_POOL:-}" ] || return 0
+  [ "${REVIEWER_POOL_OWNER:-}" = "$$" ] || return 0
+  case "$REVIEWER_POOL" in
+    */multi-review-*) : ;;                 # only ever our own scratch
+    *) REVIEWER_POOL=""; return 0 ;;
+  esac
+  [ -d "$REVIEWER_POOL" ] && rm -rf "$REVIEWER_POOL"
+  REVIEWER_POOL=""
+  return 0
+}
+
+# reviewer_assert_isolation <caller-state-db>
+# Prove no reviewer opened the caller's database. Run this whenever the fan-out
+# changes: good reviews say nothing about whether isolation held.
+reviewer_assert_isolation() {
+  echo "holders of caller db: $(lsof -t "$1" 2>/dev/null | wc -l | tr -d ' ')"
+}

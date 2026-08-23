@@ -195,7 +195,7 @@ skills:
   path: skills/core/mob-check
 - name: multi-review
   pack: core
-  version: 1.4.1
+  version: 1.5.0
   scope: solo
   summary: Use when reviewing almost any meaningful artifact, decision, action, plan, code change, prompt, skill, research summary, outbound message, or public-facing content.
   use_when: reviewing almost any meaningful artifact, decision, action, plan, code change, prompt, skill, research summary, outbound message, or public-facing content.
@@ -206,10 +206,10 @@ skills:
   claude_note: The review method transfers, but cross-model-family diversity needs Hermes; in Claude it becomes Claude reviewing Claude.
   size:
     files: 17
-    bytes_skill_md: 48649
-    bytes_total: 131739
-    approx_tokens_skill_md: 12162
-    approx_tokens_total: 32935
+    bytes_skill_md: 53904
+    bytes_total: 136994
+    approx_tokens_skill_md: 13476
+    approx_tokens_total: 34248
   tags:
   - review
   - quality

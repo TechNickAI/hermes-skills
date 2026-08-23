@@ -6,7 +6,7 @@ description: >
   Runs a small panel of diverse review lenses across model families when available,
   synthesizes findings into fix/ask/defer/wontfix decisions, and iterates until the
   result is ready.
-version: 1.4.1
+version: 1.5.0
 license: MIT
 compatibility: >
   Portable review method. Native multi-model orchestration examples are Hermes-specific;
@@ -113,22 +113,27 @@ are missing, and lower confidence to match what actually survived.
 Use the strongest practical isolation mechanism available, but match it to the task's
 shape:
 
-1. **Native subagents with per-task model override** when the runtime supports selecting
-   provider/model per child agent **and the reviewer task is bounded reasoning**: a
-   self-contained artifact, a clear lens, and no exploratory I/O. This is best because
-   prompts, context, and failures are naturally isolated. **Know the tradeoff before
-   choosing this path: a subagent's runtime almost certainly gives you no per-call
-   timeout control.** The delegation tool schema exposes goal, context, role, and output
-   schema — not a deadline. Any wall-clock cap is process-wide configuration read at call
-   time, so a skill cannot scale it to the size of the artifact. If this review needs a
-   deadline proportional to its scope, use path 2 or 3, where the launching tool call
-   does take a timeout.
-2. **Headless Hermes one-shots** (`hermes -z ... --provider ... -m ... -t ''`) for pure
-   text-in/text-out reviewer calls, especially when subagents cannot select model
-   families. This is the most portable Hermes pattern, and **the only path where you can
-   size the timeout to the job.** Use a higher timeout than the default for real reviews;
-   300-600 seconds is usually reasonable, and deep/slow model panels may need the upper
-   end. See execution rule 3 — the default is very likely lower than you want.
+1. **Headless Hermes one-shots in isolated scratch homes**
+   (`hermes -z ... -t ''`, each with its own `HERMES_HOME`) — the default. This
+   is the only path that delivers a **different prompt AND a different model per
+   seat** ("Grok, be critical"; "Claude, be empathetic"), and **the only path
+   where you can size the timeout to the job.** Isolation is mandatory, not
+   optional — see "Isolate every headless reviewer" below. Use a higher timeout
+   than the default for real reviews; 300-600 seconds is usually reasonable, and
+   deep/slow model panels may need the upper end. See execution rule 3 — the
+   default is very likely lower than you want.
+2. **Native subagents** when every seat can run on the *same* model and you only
+   need lens diversity: prompts, context, and failures are naturally isolated.
+   **Two tradeoffs before choosing this path.** First, the delegation tool has
+   **no per-task model parameter**, and upstream has repeatedly declined to add
+   one (PRs #17718, #23266, #25026, #34773, #36790; maintainer on #34773: *"We do
+   not want this"*). Every child in a batch runs on the single configured
+   delegation model, so this path cannot staff a multi-model panel — do not plan
+   one around it. Second, a subagent's runtime almost certainly gives you no
+   per-call timeout control: the schema exposes goal, context, role, and output
+   schema — not a deadline. Any wall-clock cap is process-wide configuration read
+   at call time, so a skill cannot scale it to the artifact. If this review needs
+   a deadline proportional to its scope, use path 1 or 3.
 3. **Parent-gathered I/O + reviewer one-shots** for open-ended or I/O-heavy review work
    (large filesystem searches, email/search crawls, binary downloads, multi-step data
    collection). Do the I/O in the parent with normal tools, reduce it to a bounded
@@ -379,6 +384,92 @@ Do **not** default to Grok for final wording, empathetic messaging, or careful p
 synthesis; its variance is a feature for finding problems and a liability for phrasing
 them. Pair it with a lower-variance synthesizer from a different configured family, and
 verify its claims rather than rubber-stamping them.
+
+### Isolate every headless reviewer in its own scratch home (REQUIRED)
+
+`hermes -z` boots a full agent, and the CLI path opens the **calling profile's**
+`state.db` read-write (`cli.py:4642` → `SessionDB()`, `cli.py:8566` →
+`create_session(...)`, resolved by `hermes_state.py:2798`). Run that from an
+agent whose gateway is live and you have **two OS processes writing one WAL
+database** — each with its own lock state and its own view of the WAL index. No
+pragma prevents the damage.
+
+This is not hypothetical. On a production host the gateway (fd mode `u`) and a
+`hermes -z` reviewer (fd mode `u`) were caught holding one `state.db`
+simultaneously. That 3GB database took structural B-tree damage — `invalid page
+number`, `2nd reference to page`, rowids out of order — and had to be rebuilt
+offline from readable rows.
+
+**Give each reviewer its own scratch home.** Use the helper:
+
+```bash
+source "$SKILL_DIR/scripts/reviewer_home.sh"
+reviewer_pool_init                    # REQUIRED; never inside $( )
+
+reviewer_run "$CRITICAL_PROMPT"   -m grok         &
+reviewer_run "$EMPATHETIC_PROMPT" -m claude-think &
+reviewer_run "$SECURITY_PROMPT"   -m gpt-5.6-sol  &
+wait
+reviewer_pool_destroy                 # or let the EXIT trap do it
+```
+
+`HERMES_HOME` roots config.yaml, `.env`, `auth.json`, skills, memories **and**
+state.db, so a seeded scratch home gives working credentials plus a private
+database. Nothing is registered under `profiles/`, so there is no namespace to
+garbage-collect and no name to collide with — the scratch dies with the run.
+
+**Reviewers are anonymous.** Run 2 or 10; the helper never names or enumerates
+personas. The PROMPT decides what each seat is, so a panel can be whatever that
+day's artifact needs. Never hardcode a role vocabulary into the tooling.
+
+**One home per reviewer, never one shared home.** Measured: 6 concurrent
+reviewers sharing a single home produced **6 simultaneous holders of one
+database** — the original bug, relocated. Per-reviewer homes measure a peak of
+exactly **1**. Integrity surviving one shared run proves nothing.
+
+**Measured cost:** seeding a home ~1.2 ms / ~26 KB; state.db created on demand
+~232 KB; 10 concurrent reviewers finished in 12.1 s using 2.7 MB of scratch,
+fully removed. Creating a home is far cheaper than the model call it wraps —
+never batch reviewers into one home to "save" it.
+
+#### Five ways this helper can betray you (all measured, all guarded)
+
+A reviewer panel found each of these in the first version of this helper. If you
+write your own, handle all five — every one fails *silently*.
+
+1. **Unchecked `mktemp` → empty `HERMES_HOME` → the caller's live database.**
+   Hermes treats an empty `HERMES_HOME` as unset and falls back to
+   `~/.hermes/state.db`. The isolation helper then causes exactly the corruption
+   it exists to prevent. Validate every scratch path and **refuse to run**
+   without one.
+2. **Lazy auto-init inside `$(reviewer_home)` self-destructs.** Command
+   substitution runs in a subshell whose EXIT trap fires when the substitution
+   closes, deleting the pool and handing the reviewer an *unseeded* home — the
+   401-with-rc=0 path. `$$` cannot detect a subshell (bash keeps the parent's
+   pid) and `BASHPID` is empty on bash 3.2 (macOS). Require explicit init.
+3. **A signal handler that does not exit lets the script resume.** Bash returns
+   control to the next statement, so a Ctrl-C'd fan-out destroys the pool and
+   then seeds a fresh one and keeps spending model calls. Kill live reviewers,
+   restore the default disposition, re-raise.
+4. **A sourced `trap ... EXIT` clobbers the caller's own cleanup.** Chain it.
+5. **An exported pool variable is inherited by child shells,** which skip init,
+   adopt the parent's pool, and delete it on their own exit while the parent's
+   reviewers are still running. Do not export it.
+
+Two more that cost real seats: a trap **cannot fire while bash blocks in a
+foreground child** (background each reviewer and `wait`), and `auth.json` must be
+copied alongside `config.yaml`/`.env` or OAuth-based providers fail with
+"No … OAuth credentials stored" while API-key providers succeed — a partial
+credential failure that reads like a model outage.
+
+**Rejected alternatives — do not reach for these:**
+
+| Approach | Why it fails |
+|---|---|
+| bare `mktemp -d`, unseeded | No credentials: `HTTP 401: Missing Authentication header` **with exit code 0**, so a fan-out silently scores dead reviewers as successful seats. |
+| a dedicated named profile + `-p` | Works, but litters the profile namespace with entries needing sweep-on-crash and forces invented names. Nested names fail `rc=2` with empty output. |
+| MoA presets | MoA broadcasts **one** prompt to N models. A panel needs N **different** prompts. Different feature. |
+| `delegate_task` per-task model | Upstream has declined it repeatedly (PRs #17718, #23266, #25026, #34773, #36790). It will not arrive — do not design around it. |
 
 ### Running reviewers as Hermes one-shots
 
