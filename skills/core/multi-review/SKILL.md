@@ -122,12 +122,12 @@ shape:
    than the default for real reviews; 300-600 seconds is usually reasonable, and
    deep/slow model panels may need the upper end. See execution rule 3 — the
    default is very likely lower than you want.
-2. **Native subagents** when every seat can run on the *same* model and you only
+2. **Native subagents** when every seat can run on the _same_ model and you only
    need lens diversity: prompts, context, and failures are naturally isolated.
    **Two tradeoffs before choosing this path.** First, the delegation tool has
    **no per-task model parameter**, and upstream has repeatedly declined to add
-   one (PRs #17718, #23266, #25026, #34773, #36790; maintainer on #34773: *"We do
-   not want this"*). Every child in a batch runs on the single configured
+   one (PRs #17718, #23266, #25026, #34773, #36790; maintainer on #34773: _"We do
+   not want this"_). Every child in a batch runs on the single configured
    delegation model, so this path cannot staff a multi-model panel — do not plan
    one around it. Second, a subagent's runtime almost certainly gives you no
    per-call timeout control: the schema exposes goal, context, role, and output
@@ -435,7 +435,7 @@ never batch reviewers into one home to "save" it.
 #### Five ways this helper can betray you (all measured, all guarded)
 
 A reviewer panel found each of these in the first version of this helper. If you
-write your own, handle all five — every one fails *silently*.
+write your own, handle all five — every one fails _silently_.
 
 1. **Unchecked `mktemp` → empty `HERMES_HOME` → the caller's live database.**
    Hermes treats an empty `HERMES_HOME` as unset and falls back to
@@ -444,7 +444,7 @@ write your own, handle all five — every one fails *silently*.
    without one.
 2. **Lazy auto-init inside `$(reviewer_home)` self-destructs.** Command
    substitution runs in a subshell whose EXIT trap fires when the substitution
-   closes, deleting the pool and handing the reviewer an *unseeded* home — the
+   closes, deleting the pool and handing the reviewer an _unseeded_ home — the
    401-with-rc=0 path. `$$` cannot detect a subshell (bash keeps the parent's
    pid) and `BASHPID` is empty on bash 3.2 (macOS). Require explicit init.
 3. **A signal handler that does not exit lets the script resume.** Bash returns
@@ -464,12 +464,12 @@ credential failure that reads like a model outage.
 
 **Rejected alternatives — do not reach for these:**
 
-| Approach | Why it fails |
-|---|---|
-| bare `mktemp -d`, unseeded | No credentials: `HTTP 401: Missing Authentication header` **with exit code 0**, so a fan-out silently scores dead reviewers as successful seats. |
+| Approach                         | Why it fails                                                                                                                                        |
+| -------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| bare `mktemp -d`, unseeded       | No credentials: `HTTP 401: Missing Authentication header` **with exit code 0**, so a fan-out silently scores dead reviewers as successful seats.    |
 | a dedicated named profile + `-p` | Works, but litters the profile namespace with entries needing sweep-on-crash and forces invented names. Nested names fail `rc=2` with empty output. |
-| MoA presets | MoA broadcasts **one** prompt to N models. A panel needs N **different** prompts. Different feature. |
-| `delegate_task` per-task model | Upstream has declined it repeatedly (PRs #17718, #23266, #25026, #34773, #36790). It will not arrive — do not design around it. |
+| MoA presets                      | MoA broadcasts **one** prompt to N models. A panel needs N **different** prompts. Different feature.                                                |
+| `delegate_task` per-task model   | Upstream has declined it repeatedly (PRs #17718, #23266, #25026, #34773, #36790). It will not arrive — do not design around it.                     |
 
 ### Running reviewers as Hermes one-shots
 
