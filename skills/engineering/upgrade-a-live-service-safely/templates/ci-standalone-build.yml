@@ -1,0 +1,121 @@
+# Template: build a Next.js/Node standalone bundle in CI instead of on the live host.
+#
+# Copy to .github/workflows/ and adapt the MARKED lines. Proven on the
+# router (2026-07-26) after an in-place build caused a ~30 min fleet outage.
+#
+# Why: the service's runtime RSS was ~1.2 GB but the build peaked at ~15 GB. The
+# host had been upsized to 16 GB purely to survive the build. Moving the build
+# here let the instance be downsized.
+#
+# PREREQ: pushing this file needs a token with `workflow` scope (`gh auth status`
+# shows scopes). If the server's token lacks it, fetch the branch to a machine
+# that has it and push from there.
+
+name: Build Standalone Artifact
+
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: "Branch/tag/SHA to build"
+        required: true
+        default: main
+  push:
+    branches:
+      - "release-*" # ADAPT: a push trigger fires the run without gh workflow run
+
+permissions:
+  contents: read
+
+concurrency:
+  group: standalone-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    # ADAPT: MUST match the target host's arch/OS. Native modules are compiled
+    # per-platform — a macOS build emits sharp-darwin-* and will NOT load on
+    # Linux. arm64 runners are free on PUBLIC repos
+    # (gh repo view OWNER/REPO --json visibility).
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 60
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.ref || github.ref }}
+          persist-credentials: false
+
+      - name: Report runner resources
+        run: |
+          echo "arch: $(uname -m)  cores: $(nproc)"
+          free -h
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24" # ADAPT: match the host's node major
+          cache: npm
+
+      # ADAPT: mirror the host runbook's documented install flags exactly.
+      # --ignore-scripts skips native builds, so rebuild them explicitly next.
+      - name: Install dependencies
+        run: npm ci --no-audit --no-fund --legacy-peer-deps --ignore-scripts
+
+      - name: Rebuild native modules
+        run: npm rebuild better-sqlite3 # ADAPT: your native deps
+
+      # ADAPT: call the build directly with the safe bundler. Do NOT assume a
+      # project's own release script honours env guards — assert it below.
+      - name: Build
+        env:
+          APP_USE_TURBOPACK: "0"
+          NODE_OPTIONS: --max-old-space-size=8192
+        run: |
+          set -o pipefail
+          npm run build 2>&1 | tee /tmp/build.log
+
+      # Load-bearing: an env guard did NOT hold through the project's own build
+      # script — the log still showed Turbopack. Fail loudly rather than ship a
+      # bundle built by a tool that OOMs the target host.
+      - name: Assert the safe bundler was used
+        run: |
+          if grep -qi "turbopack" /tmp/build.log; then
+            echo "::error::Turbopack used — it OOMs the target host. Rejected."
+            grep -i turbopack /tmp/build.log | head -5
+            exit 1
+          fi
+          echo "OK: correct bundler"
+
+      # Catch platform/patch problems HERE, not on the production box.
+      - name: Verify artifact shape
+        run: |
+          fail=0
+          [ -s .build/next/standalone/server.js ] || { echo "::error::missing server.js"; fail=1; }
+          if find .build -path "*sharp-darwin*" | grep -q .; then
+            echo "::error::darwin native modules present — wrong build platform"; fail=1
+          fi
+          # ADAPT: assert your fork's marker string survived into the bundle
+          if grep -rq "MY_FORK_MARKER" .build/next/standalone 2>/dev/null; then
+            echo "OK: fork patch present"
+          else
+            echo "::error::fork patch missing from bundle"; fail=1
+          fi
+          exit $fail
+
+      - name: Package
+        id: pack
+        run: |
+          SHORT=$(git rev-parse --short HEAD)
+          NAME="standalone-${SHORT}"
+          tar --zstd -cf "${NAME}.tar.zst" .build dist
+          sha256sum "${NAME}.tar.zst" > "${NAME}.tar.zst.sha256"
+          echo "name=${NAME}" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.pack.outputs.name }}
+          path: |
+            ${{ steps.pack.outputs.name }}.tar.zst
+            ${{ steps.pack.outputs.name }}.tar.zst.sha256
+          retention-days: 14
+          compression-level: 0 # already zstd-compressed
