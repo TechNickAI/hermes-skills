@@ -145,12 +145,15 @@ against reality before reporting. That discipline is baked into the skill.
 
 ### `engineering` — agents that write and ship code
 
-| Skill                 | What it does                                                                              | Needs                                                      |
-| --------------------- | ----------------------------------------------------------------------------------------- | ---------------------------------------------------------- |
-| `address-pr-comments` | Triage bot and human PR feedback, fix what's valid, push back on what isn't, reply to all | `gh` CLI, authenticated                                    |
-| `pr-review-sweep`     | Nightly sweep of merged PRs for review comments nobody handled                            | `gh` CLI authenticated; Hermes-native (delegation toolset) |
-| `diagram-rendering`   | D2, Mermaid, Graphviz, and Chart.js text into a chat-ready PNG, with the render gotchas   | chromium on `PATH`; network to Kroki + QuickChart          |
-| `mini-app`            | Operate the Caddy + PM2 + Tailscale app-router that serves small apps at clean URLs       | Caddy, PM2, Tailscale Serve/Funnel                         |
+| Skill                           | What it does                                                                                  | Needs                                                      |
+| ------------------------------- | --------------------------------------------------------------------------------------------- | ---------------------------------------------------------- |
+| `address-pr-comments`           | Triage bot and human PR feedback, fix what's valid, push back on what isn't, reply to all     | `gh` CLI, authenticated                                    |
+| `pr-review-sweep`               | Nightly sweep of merged PRs for review comments nobody handled                                | `gh` CLI authenticated; Hermes-native (delegation toolset) |
+| `diagram-rendering`             | D2, Mermaid, Graphviz, and Chart.js text into a chat-ready PNG, with the render gotchas       | chromium on `PATH`; network to Kroki + QuickChart          |
+| `mini-app`                      | Operate the Caddy + PM2 + Tailscale app-router that serves small apps at clean URLs           | Caddy, PM2, Tailscale Serve/Funnel                         |
+| `live-database-maintenance`     | Clean up, compact, or rescue a SQLite database a running service still holds open             | —                                                          |
+| `upgrade-a-live-service-safely` | Stage, verify, cut over, and roll back an upgrade on something already serving traffic        | —                                                          |
+| `find-the-real-bottleneck`      | Prove WHERE the cost comes from before you optimize — measure each hop, not the plausible one | —                                                          |
 
 ### `productivity` — documents, comms, scheduling
 

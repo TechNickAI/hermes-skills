@@ -279,7 +279,7 @@ differentiator — say so out loud), `unsupported` (never recommend it in Claude
 - **Works without setup:** No
 - **Compatibility:** Agent Skills standard
 - **Claude:** native — Works in Claude Code with an authenticated gh CLI.
-- **Size:** 19,751 B body, loaded when the skill triggers (~4,938 tokens); 63,432 B across 10 file(s) total
+- **Size:** 19,751 B body, loaded when the skill triggers (~4,938 tokens); 63,422 B across 10 file(s) total
 - **Path:** `skills/engineering/address-pr-comments`
 
 ## diagram-rendering
@@ -294,6 +294,32 @@ differentiator — say so out loud), `unsupported` (never recommend it in Claude
 - **Claude:** native — Works in Claude once its render prerequisites exist.
 - **Size:** 10,197 B body, loaded when the skill triggers (~2,549 tokens); 37,552 B across 4 file(s) total
 - **Path:** `skills/engineering/diagram-rendering`
+
+## find-the-real-bottleneck
+
+- **Pack:** engineering
+- **Scope:** solo
+- **What it does:** Use when something in a multi-layer stack is slow, memory-hungry, or expensive and you need to prove WHERE the cost actually originates before recommending a fix — a slow dashboard fronting a busy proxy, a request path spanning client → gateway → router → upstream API, a process whose RSS keeps climbing, a spend spike whose obvious explanation doesn't survive arithmetic.
+- **Use when:** something in a multi-layer stack is slow, memory-hungry, or expensive and you need to prove WHERE the cost actually originates before recommending a fix — a slow dashboard fronting a busy proxy, a request path spanning client → gateway → router → upstream API, a process whose RSS keeps climbing, a…
+- **Prerequisites:** None
+- **Works without setup:** Yes
+- **Compatibility:** Agent Skills standard
+- **Claude:** native — Measuring each hop in a causal chain needs only a shell and the system under test.
+- **Size:** 40,027 B body, loaded when the skill triggers (~10,007 tokens); 141,679 B across 16 file(s) total
+- **Path:** `skills/engineering/find-the-real-bottleneck`
+
+## live-database-maintenance
+
+- **Pack:** engineering
+- **Scope:** solo
+- **What it does:** Use when cleaning up, compacting, backing up, or restoring a SQLite database that a running service still holds open, or when one reports "database disk image is malformed".
+- **Use when:** cleaning up, compacting, backing up, or restoring a SQLite database that a running service still holds open, or when one reports "database disk image is malformed".
+- **Prerequisites:** None
+- **Works without setup:** Yes
+- **Compatibility:** Agent Skills standard
+- **Claude:** native — SQLite maintenance and corruption triage are runtime-agnostic; the bundled scripts are stdlib Python.
+- **Size:** 41,909 B body, loaded when the skill triggers (~10,477 tokens); 322,402 B across 36 file(s) total
+- **Path:** `skills/engineering/live-database-maintenance`
 
 ## mini-app
 
@@ -324,6 +350,19 @@ differentiator — say so out loud), `unsupported` (never recommend it in Claude
 - **Claude:** unsupported — Depends on the Hermes delegation toolset.
 - **Size:** 8,107 B body, loaded when the skill triggers (~2,027 tokens); 52,992 B across 11 file(s) total
 - **Path:** `skills/engineering/pr-review-sweep`
+
+## upgrade-a-live-service-safely
+
+- **Pack:** engineering
+- **Scope:** solo
+- **What it does:** Use when upgrading, rebuilding, or redeploying a service that is CURRENTLY SERVING production traffic — an LLM router, API gateway, web app, or any long-running daemon on a host you reach over SSH.
+- **Use when:** upgrading, rebuilding, or redeploying a service that is CURRENTLY SERVING production traffic — an LLM router, API gateway, web app, or any long-running daemon on a host you reach over SSH.
+- **Prerequisites:** None
+- **Works without setup:** Yes
+- **Compatibility:** Agent Skills standard
+- **Claude:** native — Stage-verify-cut-rollback sequencing applies to any supervised service.
+- **Size:** 70,156 B body, loaded when the skill triggers (~17,539 tokens); 381,004 B across 42 file(s) total
+- **Path:** `skills/engineering/upgrade-a-live-service-safely`
 
 ## email-steward
 
