@@ -351,6 +351,32 @@ differentiator — say so out loud), `unsupported` (never recommend it in Claude
 - **Size:** 8,107 B body, loaded when the skill triggers (~2,027 tokens); 52,992 B across 11 file(s) total
 - **Path:** `skills/engineering/pr-review-sweep`
 
+## scheduled-job-runner
+
+- **Pack:** engineering
+- **Scope:** solo
+- **What it does:** Use when a scheduled job silently does nothing, reports success after failing, or needs to move onto a common runner.
+- **Use when:** a scheduled job silently does nothing, reports success after failing, or needs to move onto a common runner. Ships a tested execution adapter that pins the interpreter, enforces timeouts, records every run with a real exit code, and locks its ledger.
+- **Prerequisites:** None
+- **Works without setup:** Yes, but read the Claude note before recommending it
+- **Compatibility:** Agent Skills standard
+- **Claude:** degraded — The runner and its exit-code contract are portable Python; the cron wiring examples assume a scheduler that dispatches by file extension.
+- **Size:** 13,573 B body, loaded when the skill triggers (~3,393 tokens); 69,590 B across 2 file(s) total
+- **Path:** `skills/engineering/scheduled-job-runner`
+
+## stop-the-noise
+
+- **Pack:** engineering
+- **Scope:** solo
+- **What it does:** Use when something is sending repeated, unwanted, or unread messages — a scheduled job that reports every run, a webhook firing once per event, progress commentary nobody asked for.
+- **Use when:** something is sending repeated, unwanted, or unread messages — a scheduled job that reports every run, a webhook firing once per event, progress commentary nobody asked for. Finds which source is actually producing the messages and silences it without muting real alerts.
+- **Prerequisites:** None
+- **Works without setup:** Yes, but read the Claude note before recommending it
+- **Compatibility:** Agent Skills standard
+- **Claude:** degraded — Diagnosing and silencing a noisy source transfers; the scheduled-job and gateway examples assume a long-running agent runtime.
+- **Size:** 27,642 B body, loaded when the skill triggers (~6,910 tokens); 157,348 B across 14 file(s) total
+- **Path:** `skills/engineering/stop-the-noise`
+
 ## upgrade-a-live-service-safely
 
 - **Pack:** engineering
@@ -363,6 +389,32 @@ differentiator — say so out loud), `unsupported` (never recommend it in Claude
 - **Claude:** native — Stage-verify-cut-rollback sequencing applies to any supervised service.
 - **Size:** 70,156 B body, loaded when the skill triggers (~17,539 tokens); 381,004 B across 42 file(s) total
 - **Path:** `skills/engineering/upgrade-a-live-service-safely`
+
+## vendor-switch-check
+
+- **Pack:** engineering
+- **Scope:** solo
+- **What it does:** Use when evaluating a new vendor, tool, or platform, or when someone proposes replacing one you already run.
+- **Use when:** evaluating a new vendor, tool, or platform, or when someone proposes replacing one you already run. Tries to falsify the claimed advantage first — verify the capability exists on your actual plan, measure it on the real path, and price the switching cost — before designing any migration.
+- **Prerequisites:** None
+- **Works without setup:** Yes
+- **Compatibility:** Agent Skills standard
+- **Claude:** native — Falsify-the-claim-first evaluation needs only the vendor's own API and a shell.
+- **Size:** 13,369 B body, loaded when the skill triggers (~3,342 tokens); 26,234 B across 4 file(s) total
+- **Path:** `skills/engineering/vendor-switch-check`
+
+## writing-for-non-engineers
+
+- **Pack:** engineering
+- **Scope:** solo
+- **What it does:** Use when writing a plan, status report, incident summary, or recommendation for someone who does not work in the system being described.
+- **Use when:** writing a plan, status report, incident summary, or recommendation for someone who does not work in the system being described. Leads with what changed for them, keeps the technical detail underneath, and gives them at most one real decision to make.
+- **Prerequisites:** None
+- **Works without setup:** Yes
+- **Compatibility:** Agent Skills standard
+- **Claude:** native — Writing guidance with no runtime dependency at all.
+- **Size:** 19,640 B body, loaded when the skill triggers (~4,910 tokens); 33,502 B across 4 file(s) total
+- **Path:** `skills/engineering/writing-for-non-engineers`
 
 ## email-steward
 
