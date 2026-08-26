@@ -6,7 +6,7 @@ bundling defect and its four downstream symptoms) and
 POST-DEPLOY half: what to measure once the fix is live, what NOT to undo yet, and
 what the fix will not improve.
 
-Worked case: the router v3.8.50 cutover, 2026-08-14.
+Worked case: the router v3.8.50 cutover, one occasion.
 
 ## The before/after table is the deliverable
 

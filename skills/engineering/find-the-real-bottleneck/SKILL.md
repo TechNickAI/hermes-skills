@@ -112,7 +112,7 @@ Exercise a path that does the same work WITHOUT X.
 If that path fails too, X is a symptom.
 ```
 
-Worked example (2026-08-07). A machine's agent could not reach Telegram; the
+Worked example. A machine's agent could not reach Telegram; the
 logs were saturated with hostname-resolution failures, and the natural read was
 "the home network's DNS is broken." The client, however, also retries against
 **hardcoded fallback IPs** — a path needing no DNS at all. Those failed **659
@@ -286,9 +286,9 @@ codecs, and compression libs count rows and buffers in C. Measured directly:
 When spend spikes, resist "the errors caused it." Divide.
 
 ```
-ignition events (distinct root causes) : 6
-resulting expensive calls              : 452
-amplification                          : 75x per ignition
+ignition events (distinct root causes): 6
+resulting expensive calls: 452
+amplification: 75x per ignition
 ```
 
 If a handful of events produced hundreds of expensive calls, the story is **not**
@@ -472,7 +472,7 @@ covers versus what the real one does (here: 3 tables hand-written vs 12 in
   is to package and prove the native SQLite module in the actual deployed
   runtime, then compare write counters under an identical workload.
 
-  **CONFIRMED on the 2026-08-14** — the mechanism above is no
+  **CONFIRMED later** — the mechanism above is no
   longer a hypothesis. Three independent signals on the live process:
   1. `grep better_sqlite3.node /proc/<pid>/maps` → **0 matches** (only unrelated
      native modules mapped), so the native driver was never `dlopen`ed.
@@ -502,7 +502,7 @@ covers versus what the real one does (here: 3 tables hand-written vs 12 in
 
 - **Citing an INHERITED diagnosis as if you had proven it.** A root cause you
   read in a PR description, an issue thread, a colleague's writeup, or your own
-  earlier session note is a _hypothesis you did not test_. On 2026-08-14 I
+  earlier session note is a _hypothesis you did not test_. On one occasion I
   asserted "the bug has already been identified" three times across a session,
   sourced entirely from a PR body. the operator challenged it — _"what do you mean the
   bug has already been identified?"_ — and the verification pass proved the

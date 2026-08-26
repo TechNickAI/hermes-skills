@@ -6,7 +6,7 @@ failure modes, and (worst) its assumptions get baked into monitors that then
 misreport reality.
 
 This is the method for deciding whether a hack is still needed, proven end to
-end on 2026-08-14 removing a tmpfs/ramdisk SQLite hack from the
+end on one occasion removing a tmpfs/ramdisk SQLite hack from the
 production router.
 
 ## The trap: "it's faster, so keep it"
@@ -14,18 +14,18 @@ production router.
 The ramdisk _was_ genuinely faster. Measured, not assumed:
 
 ```
-tmpfs : 32,434 SQLite ops/sec
-EBS   :  8,382 SQLite ops/sec     -> tmpfs is 3.9x faster
+tmpfs: 32,434 SQLite ops/sec
+EBS: 8,382 SQLite ops/sec -> tmpfs is 3.9x faster
 ```
 
 If you stop there you keep the hack forever. **Raw capability is the wrong
 question. The question is capability against measured demand.**
 
 ```
-production demand : 0.247 writes/sec typical
+production demand: 0.247 writes/sec typical
                     0.83  writes/sec  (busiest MINUTE in 24h)
-EBS headroom      : 10,099x the worst minute ever recorded
-per-insert cost   : +0.033 ms at p95
+EBS headroom: 10,099x the worst minute ever recorded
+per-insert cost: +0.033 ms at p95
 as a share of a 5,643 ms p50 request: 0.0005%
 ```
 
@@ -76,8 +76,8 @@ would attribute any load drift to the storage backend.
 Not all latency reaches the user.
 
 ```
-insert p95     : tmpfs 0.024 ms  vs EBS 0.057 ms   -> +0.033 ms, in the request path
-WAL checkpoint : tmpfs 0.20  ms  vs EBS 8.90 ms    -> +8.7 ms, BACKGROUND
+insert p95: tmpfs 0.024 ms vs EBS 0.057 ms -> +0.033 ms, in the request path
+WAL checkpoint: tmpfs 0.20 ms vs EBS 8.90 ms -> +8.7 ms, BACKGROUND
 ```
 
 The checkpoint delta is 260x worse and irrelevant, because checkpoints are

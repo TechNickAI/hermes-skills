@@ -86,7 +86,7 @@ grep -l "OLDNAME" \
 
 ## Restart
 
-**Caddy** — must run as background process, NOT via `nohup ... &` (Hermes harness
+**Caddy** — must run as background process, NOT via `nohup... &` (Hermes harness
 rejects shell-level backgrounding):
 
 ```python
@@ -106,7 +106,7 @@ PM2_HOME=/Users/<user>/.pm2 pm2 save
 ## Verify
 
 ```bash
-# Caddy health endpoint (defined in Caddyfile :8080 block, no auth)
+# Caddy health endpoint (defined in Caddyfile:8080 block, no auth)
 python3 -c "import urllib.request; print(urllib.request.urlopen('http://127.0.0.1:8080/health', timeout=3).read().decode())"
 # Expected: "ok"
 
@@ -127,8 +127,8 @@ usually a missed path patch.
   `ls -d /Users/<user>/NEWNAME /Users/<user>/OLDNAME` after the `mv` to prove the old
   one was gone — that `ls` exited 1 (correctly) and `set -e` killed the whole script
   before the patches ran. Either drop `set -e` for verifications or use
-  `ls ... || true`.
-- **Don't try `nohup ... &` in foreground mode.** Hermes harness intercepts and refuses.
+  `ls... || true`.
+- **Don't try `nohup... &` in foreground mode.** Hermes harness intercepts and refuses.
   Use `terminal(background=true, watch_patterns=[...])` for Caddy.
 - **Don't recursive-grep all of `/Users/<user>`.** Times out on node_modules. Target
   known config files instead.

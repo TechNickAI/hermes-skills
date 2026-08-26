@@ -84,7 +84,7 @@ deliveries, and verify with fail → success → fail alternation, not repetitio
 
 **Wrong #1 — deleting the evidence.** Collapsing repeated messages is the obvious design,
 and it destroys evidence: a message repeated 54 times is usually an **unacknowledged
-alarm**, not redundancy. Measured 2026-08-21 — a SEV-1 halt reprinted 54 times over 95
+alarm**, not redundancy. Measured on one run — a SEV-1 halt reprinted 54 times over 95
 hours with zero owner response, and a a guard-failure line reporting an unmonitored condition
 reprinted 29 times over 5 days while still broken. A dedupe janitor would have deleted the
 only standing evidence of both. Never delete the newest copy of a repeating fault; attach
@@ -247,7 +247,7 @@ classify into; naming the consequence; declaring silence the default.
   _discovery_ (rare, exploratory — "find new things worth adopting") with _incumbent
   tracking_ (frequent, bounded — "did something we already run change?") gets scheduled
   at the faster cadence and then manufactures discovery findings daily to justify the
-  tick. the operator's 2026-08-15 correction: split them into two jobs on two schedules —
+  tick. the operator's correction: split them into two jobs on two schedules —
   daily for "new versions of what we already use", weekly for "new things worth
   evaluating". Two rules when splitting:
   - **Give each job its own ledger file.** A shared dedupe ledger lets one job's entry
@@ -277,7 +277,7 @@ classify into; naming the consequence; declaring silence the default.
 - **Encode a classification RULE, never a hardcoded roster.** When a recurring prompt must
   sort items into classes (self-updating vs pinned, monitored vs ignored, owned vs
   third-party), the tempting fix after a misclassification is to enumerate the current
-  members. the operator rejected exactly this on 2026-08-15: _"We're going to be adding more 'latest'
+  members. the operator rejected exactly this: _"We're going to be adding more 'latest'
   prompts. I think it's a terrible idea for you to hard code the specific models around that,
   and instead, you should describe the pattern."_ A roster is stale the day after it is
   written, and its staleness is **silent** — new members fall through unlabeled and
@@ -289,7 +289,7 @@ classify into; naming the consequence; declaring silence the default.
 
 - **A job that BREAKS will narrate its own tool failure to the user.** The `[SILENT]`
   contract and the actionability gate both cover "nothing to report"; neither covers
-  "I broke". Observed 2026-08-15: a discovery cron looped on `web_search`, hit the
+  "I broke". Observed in one case: a discovery cron looped on `web_search`, hit the
   per-turn guardrail (`loop_web_search_cap`), produced no analysis, and delivered
   _"I stopped retrying web_search because it hit the tool-call guardrail…"_ as its
   user-facing message. That is a third noise class — self-referential tool chatter —

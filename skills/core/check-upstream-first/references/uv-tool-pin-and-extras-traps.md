@@ -1,7 +1,7 @@
 # uv tool install traps: exact-version pins + dropped extras
 
 Two independent traps that BOTH bit while upgrading an assistant agent (Ali's Mac mini)
-0.18.2 → 0.19.0 on 2026-07-30. Either one alone produces an upgrade that looks
+0.18.2 → 0.19.0 on one occasion. Either one alone produces an upgrade that looks
 successful but is a silent no-op — or that takes the member offline on restart.
 
 ---
@@ -149,11 +149,11 @@ cp ~/.hermes/.env        ~/.hermes/.env.bak.preupgrade-$TS 2>/dev/null || true
   hermes gateway status                            # expect: ✓ Service definition matches
   ```
 
-  Verified on an assistant agent 2026-07-30: went from ⚠ stale → ✓ matches, new PID.
+  Verified on an assistant agent One case: went from ⚠ stale → ✓ matches, new PID.
   **Sweep this across the fleet after any rollout** — it drifts silently and only
   ever surfaces in `gateway status`. Observed stale on a personal-assistant agent (thomas) and Bob
   Steel (gil) while a personal-assistant agent/Dos (an owner) were fine, so it is per-box, not uniform.
   Note it restarts that member's gateway → owner-facing boxes need the operator's go.
 
 - **The file-edit tool refuses to write Hermes config files.** Use
-  `hermes config set ...`, or patch via a python heredoc on the remote host.
+  `hermes config set...`, or patch via a python heredoc on the remote host.

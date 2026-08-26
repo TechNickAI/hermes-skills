@@ -72,7 +72,7 @@ yourself.
 **Second corollary — verify load-bearing NEGATIVES, not just positives.** "X does not exist",
 "zero records found", "it never worked" are the claims most likely to be artifacts of the
 child's query rather than facts about the world, and they are the ones that send the user off
-to fix a non-problem or issue a credential they do not need. Measured 2026-08-15: a child
+to fix a non-problem or issue a credential they do not need. Measured on one run: a child
 reported a model route did not exist and required an operator config change; two follow-up
 queries found 24 successful calls on that exact route within the retained window. The child had
 searched one namespace (`combos`) for something that lived in another (a direct provider model).
@@ -104,7 +104,7 @@ killed takes the finding with it.
 **Fanning work out to parallel seats/workers yourself? Capture each one's exit code.** A
 harness that backgrounds each `timeout`, never `wait`s a PID, and judges results by
 `wc -c` cannot tell a silently-killed worker from one that returned an empty answer — both
-are 0 bytes on both streams, and the script exits 0 either way. Measured 2026-08-15: a
+are 0 bytes on both streams, and the script exits 0 either way. Measured on one run: a
 review panel declared two seats "dead" while router logs showed both models answering
 correctly for the full run, killed by the panel's own budget. `wait` each PID individually,
 write `$?` to a file, and treat `rc=124` as "timed out at Ns", never as a verdict on the
@@ -196,7 +196,7 @@ and reference it, rather than a giant inline string.
 
 A child burning its budget on work that is _correct but unbounded_ will not fail loudly —
 it will exhaust its iteration cap during the shipping steps and hand back a partial
-result. Watch the live transcript for the shape: repeated `process(wait ...)` on one
+result. Watch the live transcript for the shape: repeated `process(wait...)` on one
 long-running command is the tell.
 
 Before intervening, distinguish **stuck** from **slow**, because they need opposite
@@ -247,7 +247,7 @@ A background dispatch returns immediately and its completion notice re-enters th
 whenever it finishes. If you kept working — polling the output file, inspecting artifacts —
 you will often have **already read and reported the result before the notice shows up**.
 
-Observed repeatedly on 2026-08-15: three separate completion notices landed for runs whose
+Observed repeatedly: three separate completion notices landed for runs whose
 output had already been read off disk and summarized. Re-summarizing each one would have told
 the user the same thing twice and made a completed task look unfinished.
 

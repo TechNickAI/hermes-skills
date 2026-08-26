@@ -10,7 +10,7 @@ Companion to the main skill's "Config shapes that look right and silently
 no-op." This is the _nesting-level_ variant: the key name is correct, the value
 is correct, and it is parked at a level nothing reads.
 
-## The failure, verified live (2026-08-19)
+## The failure, verified live (one occasion)
 
 Goal: stop a gateway from replying to unknown iMessage senders with pairing
 codes. Correct key, three attempts, all "successful", none effective:
@@ -18,7 +18,7 @@ codes. Correct key, three attempts, all "successful", none effective:
 ```bash
 # attempt 1 — top level
 hermes config set -- bluebubbles.unauthorized_dm_behavior ignore
-# ✓ Set bluebubbles.unauthorized_dm_behavior = ignore in .../config.yaml
+# ✓ Set bluebubbles.unauthorized_dm_behavior = ignore in.../config.yaml
 
 # attempt 2 — under gateway:
 hermes config set -- gateway.bluebubbles.unauthorized_dm_behavior ignore
@@ -26,7 +26,7 @@ hermes config set -- gateway.bluebubbles.unauthorized_dm_behavior ignore
 
 # attempt 3 — under gateway: with extra:
 hermes config set --force -- gateway.bluebubbles.extra.unauthorized_dm_behavior ignore
-# ✓ Set ... in .../config.yaml
+# ✓ Set... in.../config.yaml
 ```
 
 After each, the resolver still returned `pair`:
@@ -57,7 +57,7 @@ gc  = __import__("gateway.config", fromlist=["GatewayConfig"])
 from gateway.session import Platform
 
 raw = getattr(mod, "_load_" + "gateway" + "_config")()   # returns a dict
-cfg = gc.GatewayConfig.from_dict(raw)                    # NOT .from_env()
+cfg = gc.GatewayConfig.from_dict(raw) # NOT.from_env()
 print(cfg.platforms.get(Platform.BLUEBUBBLES))           # None => nothing read it
 ```
 
@@ -112,7 +112,7 @@ change.
 Then confirm the platform count in the startup log:
 
 ```bash
-grep -E "Gateway running with|✓ .* connected" gateway.log | tail -3
+grep -E "Gateway running with|✓.* connected" gateway.log | tail -3
 ```
 
 ## Prefer a lever whose default does the work
@@ -123,7 +123,7 @@ flips the default in the direction you want. Here,
 to `"ignore"` whenever **any** allowlist is configured for the platform:
 
 ```bash
-# one .env line replaced three failed config attempts
+# one.env line replaced three failed config attempts
 BLUEBUBBLES_ALLOWED_USERS=+15551234567
 ```
 
@@ -146,7 +146,7 @@ a direct `.enabled = True` assignment rather than assuming config governs it.
 
 - Grepping `config.yaml` to confirm a setting took effect. It confirms text,
   not consumption.
-- Trusting `✓ Set ...` output. The writer succeeded; the reader was never
+- Trusting `✓ Set...` output. The writer succeeded; the reader was never
   consulted.
 - Forgetting `.env` overrides. Load dotenv in the probe or the resolved value
   will not match the live process.

@@ -2,7 +2,7 @@
 
 The template is deliberately generic. These are the facts you must gather from
 the **live host** before filling it in, and the traps found while adapting it to
-the router (2026-08-01).
+the router (one occasion).
 
 ## Gather the target facts first — from the running unit, not from docs
 
@@ -24,7 +24,7 @@ Each of these changes the workflow or the stage script:
 | ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `WorkingDirectory`            | If it already ends in `current/...`, cutover is a symlink flip and the unit needs no edit. If it points at a real dir, that's a one-time unit change.              |
 | `PORT` from `.env`            | The live port. Your smoke port must differ (e.g. live 20128 → test 20129). Do **not** assume 3000 — probing the wrong port returns `000` and looks like an outage. |
-| `DATA_DIR`                    | The DB location to `sqlite3 .backup` from.                                                                                                                         |
+| `DATA_DIR`                    | The DB location to `sqlite3.backup` from.                                                                                                                          |
 | `node --version` + `uname -m` | Pin `node-version:` and pick `ubuntu-24.04-arm` vs `ubuntu-24.04`.                                                                                                 |
 | `gh` present on host          | The stage script downloads the artifact host-side.                                                                                                                 |
 | free disk                     | Releases are large; keep 2–3 and prune with the running-release guard.                                                                                             |
@@ -38,7 +38,7 @@ Each of these changes the workflow or the stage script:
 ## Never call the project's release script in CI either
 
 Use `npm run build`, not `npm run build:release`. The release script typically
-begins `rm -rf .build dist`. In CI that's merely wasteful, but keeping the same
+begins `rm -rf.build dist`. In CI that's merely wasteful, but keeping the same
 command in both places prevents the muscle memory that causes the on-host
 outage. Pass `APP_BUILD_SHA=$(git rev-parse --short HEAD)` explicitly since
 you skipped the wrapper that normally sets it.
@@ -51,7 +51,7 @@ you skipped the wrapper that normally sets it.
 2. **Fork-fix-present assert** — grep the emitted standalone bundle for a symbol
    unique to your patch:
    ```yaml
-   if grep -rqs "<OLD_FIX_SYMBOL>" .build/next/standalone 2>/dev/null; then
+   if grep -rqs "<OLD_FIX_SYMBOL>".build/next/standalone 2>/dev/null; then
      echo "OK: fix present in bundle"
    else
      echo "::error::fork fix missing from bundle"; fail=1
@@ -67,7 +67,7 @@ native-module set means the rebuild step silently no-opped.
 ## Lint before pushing; the workflow file has its own gate
 
 ```bash
-actionlint .github/workflows/standalone-build.yml
+actionlint.github/workflows/standalone-build.yml
 shellcheck -S style stage_and_smoke.sh
 bash -n stage_and_smoke.sh
 python3 -c "import yaml;yaml.safe_load(open('.github/workflows/standalone-build.yml'))"

@@ -105,7 +105,7 @@ before you wait on feedback that will never arrive:
 
 ```bash
 gh pr view <N> --repo $R --json mergeable,mergeStateStatus,statusCheckRollup \
-  --jq '{mergeable, state: .mergeStateStatus,
+  --jq '{mergeable, state:.mergeStateStatus,
          checks: [(.statusCheckRollup // [])[] | {name, status, conclusion}]}'
 ```
 
@@ -129,12 +129,12 @@ comment sits unread.
 
 # PR-level / issue comments from bots (Claude Code Review, some Greptile/CodeRabbit)
 gh api repos/$R/issues/<N>/comments --paginate \
-  --jq '.[] | select(.user.login | endswith("[bot]")) | {id, user: .user.login, created_at, body}'
+  --jq '.[] | select(.user.login | endswith("[bot]")) | {id, user:.user.login, created_at, body}'
 
 # Line-level / inline review comments from bots (Cursor, Codex, Greptile inline)
 gh api repos/$R/pulls/<N>/comments --paginate \
   --jq '.[] | select(.user.login | endswith("[bot]"))
-            | "\n=== \(.path):\(.line // .original_line) — \(.user.login) [id \(.id)] ===\n\(.body)"'
+            | "\n=== \(.path):\(.line //.original_line) — \(.user.login) [id \(.id)] ===\n\(.body)"'
 
 # Bot review summaries (Cursor/Codex headers, verdict bodies). Use real jq with
 # --slurp (`-s`) so pagination is sorted globally, not page-by-page. Include review IDs
@@ -144,7 +144,7 @@ gh api repos/$R/pulls/<N>/reviews --paginate \
   | jq -sr 'add
             | map(select(.user.login | endswith("[bot]")))
             | sort_by(.submitted_at) | reverse
-            | .[] | "--- review_id \(.id) \(.user.login) [\(.state)] \(.submitted_at) ---\n\(.body[0:600])"'
+            |.[] | "--- review_id \(.id) \(.user.login) [\(.state)] \(.submitted_at) ---\n\(.body[0:600])"'
 
 # --- HUMAN feedback (surface separately; do NOT auto-react or auto-decline — step 10) ---
 
@@ -154,7 +154,7 @@ gh api repos/$R/issues/<N>/comments --paginate \
 
 # Human inline + review-body feedback
 gh api repos/$R/pulls/<N>/comments --paginate \
-  --jq '.[] | select((.user.login | endswith("[bot]")) | not) | "\(.path):\(.line // .original_line) \(.user.login): \(.body[0:300])"'
+  --jq '.[] | select((.user.login | endswith("[bot]")) | not) | "\(.path):\(.line //.original_line) \(.user.login): \(.body[0:300])"'
 gh api repos/$R/pulls/<N>/reviews --paginate \
   --jq '.[] | select((.user.login | endswith("[bot]")) | not) | select(.body != "") | "\(.user.login) [\(.state)]: \(.body[0:300])"'
 ```
@@ -192,8 +192,8 @@ current code. To isolate findings actually tied to the current head:
 HEAD=$(gh pr view <N> --repo $R --json headRefOid --jq '.headRefOid')
 # gh's --jq does NOT forward jq's --arg; pipe to a real jq with --arg instead.
 gh api repos/$R/pulls/<N>/comments --paginate \
-  | jq -r --arg h "$HEAD" 'map(select(.commit_id == $h or .original_commit_id == $h))
-                           | .[] | "\(.path):\(.line // .original_line) — \(.body[0:140])"'
+  | jq -r --arg h "$HEAD" 'map(select(.commit_id == $h or.original_commit_id == $h))
+                           |.[] | "\(.path):\(.line //.original_line) — \(.body[0:140])"'
 ```
 
 Read each finding's _description_ against the current file state. If your fix already

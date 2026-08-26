@@ -221,8 +221,8 @@ would guess.** There is no top-level `transcript`.
 curl -sS -H "Authorization: Bearer $VAPI_API_KEY" \
   "https://api.vapi.ai/call/$CALL_ID" \
   | jq '{status, endedReason, cost,
-         summary: .analysis.summary,
-         transcript: .artifact.transcript}'
+         summary:.analysis.summary,
+         transcript:.artifact.transcript}'
 ```
 
 Fall back to `.artifact.messages` or `.messages` if the transcript is empty. **Report

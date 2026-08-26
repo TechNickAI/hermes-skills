@@ -8,7 +8,7 @@ skill exists to catch: the directive is **accepted, parsed, echoed back by
 
 ---
 
-## Case: `RequiresMountsFor=` in a USER unit (verified 2026-08-11)
+## Case: `RequiresMountsFor=` in a USER unit (verified one occasion)
 
 ### What happened
 

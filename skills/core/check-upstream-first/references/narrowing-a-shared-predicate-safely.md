@@ -14,7 +14,7 @@ reads that flag first.**
 In the real case, the boolean this predicate produced fed **three** behaviors:
 
 1. the whole-provider circuit-breaker gate (the buggy one)
-2. a transient-retry decision (`isTransient = !isStreamReadinessFailure && ...`)
+2. a transient-retry decision (`isTransient = !isStreamReadinessFailure &&...`)
 3. a round-robin semaphore cooldown
 
 Deleting the `||` clause would have fixed (1) and **silently changed (2) and (3)** —
@@ -50,10 +50,10 @@ argument consumed only by the site that needs the distinction:
 
 ```typescript
 // unchanged — the retry and cooldown paths still want both codes treated alike
-export function isStreamReadinessFailureErrorBody(errorBody: unknown): boolean { ... }
+export function isStreamReadinessFailureErrorBody(errorBody: unknown): boolean {... }
 
 // new, strictly narrower
-export function isStreamEarlyEofErrorBody(errorBody: unknown): boolean { ... }
+export function isStreamEarlyEofErrorBody(errorBody: unknown): boolean {... }
 
 export function shouldRecordProviderBreakerFailure(args: {
   isStreamReadinessFailure: boolean;
@@ -103,7 +103,7 @@ A test that only passes after your fix proves the fix works. A test that demonst
 the bug on untouched upstream code proves the bug **exists** — that's the one that
 belongs in the issue/PR description.
 
-Note: a RED run that fails with `SyntaxError: does not provide an export named ...` is
+Note: a RED run that fails with `SyntaxError: does not provide an export named...` is
 **not** proof of a behavioral bug — it's proof your test imports something that doesn't
 exist yet. Import the upstream copy directly to get a real behavioral RED.
 

@@ -1,7 +1,7 @@
 # Reading CURRENT main, and the OPEN-but-rotting PR
 
 Two traps that sit _before_ the CLOSED≠FIXED check in the main skill, plus the
-tooling recipes that actually worked. Source session: 2026-08-14, H‍ermes gateway
+tooling recipes that actually worked. Source session: one occasion, H‍ermes gateway
 progress-message cleanup (the "wall of text" UX complaint).
 
 ## Trap 1 — diagnosing "unfixed upstream" from a STALE local checkout
@@ -11,7 +11,7 @@ twin: **reading** a tree that is behind, and concluding from it that a bug is
 still present on `main`.
 
 Live example. `~/.h‍ermes/h‍ermes-agent` HEAD was `<sha>`, dated
-**2026-08-07**. Actual upstream `main` was `<sha>`, dated **2026-08-14** —
+**one occasion**. Actual upstream `main` was `<sha>`, dated **one occasion** —
 seven days and ~90 new lines in the one file under investigation
 (`gateway/stream_consumer.py`: 2347 lines local vs 2437 on main).
 
@@ -24,7 +24,7 @@ the delta first, in two cheap commands:
 
 ```bash
 cd ~/.h‍ermes/h‍ermes-agent && git log -1 --format='%h %ci'
-gh api repos/NousResearch/h‍ermes-agent/commits/main --jq '.sha[0:10] + "  " + .commit.committer.date'
+gh api repos/NousResearch/h‍ermes-agent/commits/main --jq '.sha[0:10] + " " +.commit.committer.date'
 ```
 
 If they differ, fetch the real file before forming any conclusion.
@@ -41,8 +41,8 @@ Live example — PR #22613, `feat(gateway): cleanup_progress polish`:
 | state           | `open` (not draft)                  |
 | mergeable       | `false` / `dirty`                   |
 | size            | +550/−20 across 6 files, 12 commits |
-| created         | 2026-05-09                          |
-| last touched    | 2026-07-19                          |
+| created         | one occasion                        |
+| last touched    | one occasion                        |
 | review comments | **0**                               |
 
 Commit 2 was literally _"expose commentary_message_ids + redirect hook — captures
@@ -117,7 +117,7 @@ cd hm-main && git sparse-checkout set gateway     # NO -q flag
 ⚠️ `git sparse-checkout set <dir> -q` **exits 129** — `-q` is not a valid switch
 for that subcommand, unlike most git commands. Drop it.
 
-**`gh api .../files --paginate` breaks `json.loads`.** Pagination concatenates
+**`gh api.../files --paginate` breaks `json.loads`.** Pagination concatenates
 multiple JSON arrays, giving `JSONDecodeError: Extra data: line 1 column 277`.
 Use an explicit page size instead:
 
@@ -125,16 +125,16 @@ Use an explicit page size instead:
 gh api "repos/NousResearch/h‍ermes-agent/pulls/<n>/files?per_page=100"
 ```
 
-**The Projects-classic GraphQL error is still live** (confirmed 2026-08-14, on
+**The Projects-classic GraphQL error is still live** (confirmed one occasion, on
 both `gh issue view --comments` and `gh pr view`):
 
 ```
-GraphQL: Projects (classic) is being deprecated ... (repository.issue.projectCards)
+GraphQL: Projects (classic) is being deprecated... (repository.issue.projectCards)
 ```
 
 Fall back to `gh api repos/.../issues/<n>` and
 `gh api repos/.../issues/<n>/comments`. The main skill calls this intermittent —
-it was 100% reproducible this session. Never read a `gh ... view` failure as
+it was 100% reproducible this session. Never read a `gh... view` failure as
 "the issue doesn't exist."
 
 ## Verification checklist for this reference

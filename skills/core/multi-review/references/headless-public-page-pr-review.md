@@ -16,7 +16,7 @@ Use this when a public-facing static page or PR needs a real multi-model panel a
    - Only call it multi-model if distinct families actually responded.
 3. Write prompt files programmatically, not with fragile shell heredocs, when the artifact contains HTML entities, ampersands, math, or long markup.
    - A terminal wrapper may mistake literal `&` in heredocs or command text for shell backgrounding.
-   - Use Python or a file-writing tool to compose `/tmp/prompt_<lens>.txt` files, then call `hermes -z "$(cat /tmp/prompt_<lens>.txt)" ...` only if the prompt is comfortably under argv limits.
+   - Use Python or a file-writing tool to compose `/tmp/prompt_<lens>.txt` files, then call `hermes -z "$(cat /tmp/prompt_<lens>.txt)"...` only if the prompt is comfortably under argv limits.
 4. Use one independent prompt per lens.
    - Example lenses: contrarian/license/reputation, content/math accuracy/voice, structure/SEO/accessibility.
    - Ask for severity, confidence, evidence/location, why it matters, smallest fix, and verdict.

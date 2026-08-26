@@ -158,7 +158,7 @@ pid=2795631  cmd=hermes  fd=6   mode=u   *** NON-GATEWAY WRITER ***
 The parent chain is what indicts the mechanism:
 
 ```
-2795602  ppid 2788769  bash -lic ... for M in gemini grok ...
+2795602 ppid 2788769 bash -lic... for M in gemini grok...
 2795628  ppid 2795602  hermes -z "Review PRODUCTION CODE..."
 ```
 

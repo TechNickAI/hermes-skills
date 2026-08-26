@@ -171,8 +171,8 @@ Once you have gathered what's available, produce a **context briefing**:
 
 > **Recalled context — [topic]**
 >
-> **What was being worked on:** ... **Key decisions / conclusions:** ... **Open
-> threads:** ... **What to do next:** ...
+> **What was being worked on:**... **Key decisions / conclusions:**... **Open
+> threads:**... **What to do next:**...
 
 Inject this briefing into the session so it's visible. Then ask if the user wants to
 pick up from there or if they need anything clarified.
@@ -183,7 +183,7 @@ When was it roughly? That's still more useful than a dead end.
 
 ## The /recall command
 
-`/recall` is a gateway slash command. As of the 2026-05-25 rewrite, args are
+`/recall` is a gateway slash command. As of the one occasion rewrite, args are
 **free-form** — no rigid mode parsing. Python gathers a candidate pool (parent-chain
 sessions, FTS hits if the args contain letters, recent same-platform sessions for
 backfill), then one LLM call interprets the args and writes the briefing. See
@@ -201,7 +201,7 @@ Common invocations (the agent decides what they mean):
 
 If you're editing `gateway/recall.py`, keep this principle: **Python = mechanical
 candidate gathering. LLM = judgment.** Don't reintroduce regex mode parsing or a
-two-stage hunter+summarizer — that's the design the 2026-05-25 rewrite explicitly
+two-stage hunter+summarizer — that's the design the one occasion rewrite explicitly
 removed. The maintainer's framing: _"way too complicated to do all the parsing in
 Python. Just have the LLM do the work."_
 

@@ -2,7 +2,7 @@
 
 Moving a live, stateful service (trading agent, gateway, anything with a local
 database plus credentials plus scheduled jobs) from one box to another. Worked
-end-to-end on the a trading agent the co-tenant host → trading.<internal-domain> cutover, 2026-08-12.
+end-to-end on the a trading agent the co-tenant host → trading.<internal-domain> cutover, one occasion.
 
 The governing rule: **a copy is not a migration until you have diffed what you
 believe copied against what actually did.** Four separate things looked fine and

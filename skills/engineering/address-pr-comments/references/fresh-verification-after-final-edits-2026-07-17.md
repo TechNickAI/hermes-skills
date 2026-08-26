@@ -1,4 +1,4 @@
-# Fresh verification after final PR-comment edits (2026-07-17)
+# Fresh verification after final PR-comment edits (one occasion)
 
 Use this when a PR-comment remediation session has already run tests/CI but the final system status still says the workspace is `unverified` for changed paths.
 

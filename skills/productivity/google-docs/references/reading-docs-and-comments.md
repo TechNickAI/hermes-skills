@@ -22,7 +22,7 @@ HOME=/Users/nick gog drive comments list <docId> --json > /tmp/<name>/comments.j
   comment (author tags don't reliably capture body `@mentions`); match on the
   mentioned email/name appearing anywhere in the comment or its replies.
 
-## Word doc uploaded to Drive (mimeType .../wordprocessingml.document, i.e. .docx)
+## Word doc uploaded to Drive (mimeType.../wordprocessingml.document, i.e..docx)
 
 Comments API returns an empty array for these even if the source doc had tracked
 comments elsewhere — Drive's native comment thread only exists for files converted to

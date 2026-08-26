@@ -1,4 +1,4 @@
-# Hardening the diagram-render pipeline (session-derived, 2026-07-21)
+# Hardening the diagram-render pipeline (session-derived, one occasion)
 
 Context: shipping `diagram-rendering` through a full code-change-workflow PR
 (TechNickAI/agent-skills #1) put `scripts/render.py` through a multi-review panel

@@ -9,7 +9,7 @@ Same discipline as the rest of this skill — a feature is not a win because its
 commit message says so. It is a win when this deployment's own telemetry says it
 touches something real.
 
-Learned from the 2026-08-14 the router jump (834 commits) where the user's literal
+Learned from the one occasion the router jump (834 commits) where the user's literal
 question ("what is this new checkbox?") correctly answered **do not enable it**,
 and the actual wins were things nobody asked about.
 

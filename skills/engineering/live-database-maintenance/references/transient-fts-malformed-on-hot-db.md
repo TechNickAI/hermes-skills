@@ -1,7 +1,7 @@
 # Transient "malformed inverted index" on a hot FTS5 database
 
 Applies when `PRAGMA integrity_check` on a **live, heavily-written** database
-reports `malformed inverted index for FTS5 table ...` — and especially when a
+reports `malformed inverted index for FTS5 table...` — and especially when a
 human forwards it as "is it corrupted again?"
 
 Distinct from `transient-torn-reads-on-live-db.md`, which covers whole-database
@@ -56,7 +56,7 @@ damage), so do not use the two agreeing/disagreeing as your signal here.
 
    ```python
    cur = con.execute("SELECT id, session_id, role, content FROM messages")
-   while (rows := cur.fetchmany(5000)):
+   while (rows:= cur.fetchmany(5000)):
        got += len(rows)
    ```
 

@@ -23,14 +23,14 @@ query. Do not report a finding.
 
 ## Trap: SQLite type affinity makes date filters match nothing
 
-Measured 2026-08-24 while searching a 176,837-row `chat.db`. This filter returned
+Measured on one run while searching a 176,837-row `chat.db`. This filter returned
 **zero rows** with no error:
 
 ```sql
 WHERE m.date/1000000000 + 978307200 > strftime('%s','now','-14 days')
 ```
 
-`strftime('%s', ...)` returns a **TEXT** value. The left side is an INTEGER
+`strftime('%s',...)` returns a **TEXT** value. The left side is an INTEGER
 expression. SQLite compares INTEGER against TEXT using storage-class ordering, in
 which every integer sorts _before_ every string, so the predicate is false for
 every row in the table. Forever. Silently.

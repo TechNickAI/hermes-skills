@@ -1,6 +1,6 @@
 # Verifying a rebuilt database before you swap it in
 
-**Six real bugs, one session (2026-08-22).** Every one passed
+**Six real bugs, one session (one occasion).** Every one passed
 `PRAGMA integrity_check` and would have shipped silently. The lesson is that
 **`integrity: ok` on the new file proves nothing about whether the rebuild
 preserved your data** — you must diff the rebuilt copy against the source.
@@ -89,7 +89,7 @@ refuse anything larger:
 
 ```
 sessions  live readable=3638  new=3635  missing=3 (tolerance 20) OK
-  unrecoverable ids: ['20260822_173623_b6fe1e', ...]
+  unrecoverable ids: ['20260822_173623_b6fe1e',...]
 messages  live readable=455487 new=455483 missing=4 (tolerance 22) OK
   unrecoverable ids: [976098, 976116, 976117, 976118]
 ```
@@ -102,7 +102,7 @@ the corruption window.
 ## 5. Holding down a `Restart=always` service
 
 `systemctl stop` is undone 5s later. `systemctl mask` **fails** when the unit is
-a real file (`Failed to mask unit: File ... already exists`) — it only works on
+a real file (`Failed to mask unit: File... already exists`) — it only works on
 symlinks. The lever that works is a drop-in, removed in an `EXIT` trap:
 
 ```bash

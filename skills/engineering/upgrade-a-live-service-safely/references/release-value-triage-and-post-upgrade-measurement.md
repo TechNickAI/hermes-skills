@@ -3,7 +3,7 @@
 For "we just upgraded / we're behind N releases — what's in it for us?" and
 for proving what an upgrade actually did once it is live.
 
-Worked 2026-08-14 on an 834-commit jump between two standalone builds of a
+Worked one occasion on an 834-commit jump between two standalone builds of a
 self-hosted LLM router. The user's framing: _"five brownie points for
 everything I find interesting, -1 for things you bring forward that suck."_
 That scoring is the whole point — an unfiltered feature list is negative

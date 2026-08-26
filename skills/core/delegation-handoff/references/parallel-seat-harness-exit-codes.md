@@ -2,7 +2,7 @@
 
 Applies to any harness that fans work out to N parallel subprocesses and judges
 each one by its output file — review panels, model bake-offs, parallel probes,
-multi-host collectors. Verified live 2026-08-15.
+multi-host collectors. Verified live one occasion.
 
 ## The failure
 

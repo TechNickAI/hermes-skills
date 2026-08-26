@@ -1,6 +1,6 @@
 # Sizing and speccing infrastructure: measure, and check the platform first
 
-Three failure modes hit in one session (2026-08-15) while sizing and speccing a
+Three failure modes hit in one session (one occasion) while sizing and speccing a
 cloud host. All three produced confident, wrong recommendations the operator had
 to push back on. All three are attribution failures: asserting a plausible
 mechanism instead of measuring the real one.

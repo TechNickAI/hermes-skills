@@ -5,7 +5,7 @@ Why this exists
 ---------------
 A version bump is an unverified config lever. The config parses, the call
 returns 200, and the output can still be corrupted or 4x slower. Verified
-2026-08-13: grok-4.6 leaked raw control tokens into user-facing prose on 2 of 4
+One case: grok-4.6 leaked raw control tokens into user-facing prose on 2 of 4
 trials while grok-4.5 was clean 4 of 4 -- every call HTTP 200. A single probe
 would have passed it half the time.
 

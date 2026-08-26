@@ -20,7 +20,7 @@
 #                      RE-INJECT any privacy/PII constraints into the brief if the
 #                      artifact may contain private data — --ignore-rules drops them.
 #  - `timeout`      : 1800s. DO NOT LOWER THIS FOR ANALYTICAL PANELS.
-#                      Root-caused 2026-08-15: `timeout 900` was KILLING working
+#                      Root-caused: `timeout 900` was KILLING working
 #                      reviewers on a 15KB code-review brief. Measured, same
 #                      model + same prompt: killed at 20s -> rc=124 with a
 #                      0-byte .txt AND a 0-byte .err; given 900s -> 18,486 bytes,
@@ -81,7 +81,7 @@ Distinguish real issues from tradeoffs and false positives."
 
 # --- Edit these lines: one per lens. Use DIFFERENT model families for diversity. ---
 # RESOLVE PROVIDER/MODEL FROM THE LIVE CONFIG, NEVER FROM MEMORY OR THIS TEMPLATE.
-# Verified 2026-08-15 on trading.example.com: `custom:grok`, `custom:gemini` and
+# Verified on an example host: `custom:grok`, `custom:gemini` and
 # `custom:openrouter` DO NOT EXIST on that profile -- each fails instantly with
 # "Unknown provider" and a 0-byte .txt. That profile defines only `omniroute` and
 # `openrouter-direct`, and routes model aliases server-side. Check first:

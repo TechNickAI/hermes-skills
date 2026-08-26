@@ -28,8 +28,8 @@ created-by: the reporting user's name or platform handle
    - Real bug → `hermes kanban specify <id>` to flesh out the spec, then assign to the
      right debugger profile
    - Feedback → add a comment with disposition, close as
-     `done --result "feedback noted: ..."`
-   - WAI → `hermes kanban complete <id> --result "working-as-intended: ..."`
+     `done --result "feedback noted:..."`
+   - WAI → `hermes kanban complete <id> --result "working-as-intended:..."`
 4. **When fixed** — `hermes kanban complete <id> --result "fixed in <ref>"`. The
    reporter is automatically notified via the gateway's kanban notifier if they
    subscribed (Telegram/Discord/Slack sessions).

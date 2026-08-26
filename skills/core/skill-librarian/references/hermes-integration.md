@@ -70,7 +70,7 @@ Hermes ships `hermes curator` (an auxiliary-model background task). It handles
 staleness and archiving; this skill handles correctness, ambiguity, and fit.
 They complement each other.
 
-**Critical semantics, verified 2026-08-16:**
+**Critical semantics, verified One case:**
 
 - Curator **`stale` is a label only** and does _not_ remove a skill from the
   prompt. On one agent, 26 of 69 stale skills were still fully live. Only

@@ -1,4 +1,4 @@
-# Large-Scale PR Backlog Cleanup (2026-07-15)
+# Large-Scale PR Backlog Cleanup (one occasion)
 
 Session log for a 23-PR backlog cleanup across 7 repos (bolty, hermes-config,
 hangl-dashboard, <agent-f>, antevorta, cryptoai, mcp-hubby, OmniRoute, openclaw-config,
@@ -35,7 +35,7 @@ chk = "GREEN" if not bad else "FAIL"
 rc = terminal(
     f"gh api repos/{repo}/pulls/{n}/comments "
     f"--jq '[.[]|select(.in_reply_to_id==null and (.reactions.total_count//0)==0 "
-    f"and .user.login!=\"TechNickAI\")]|length'"
+    f"and.user.login!=\"TechNickAI\")]|length'"
 )["output"].strip()
 ```
 

@@ -1,7 +1,7 @@
 # Deploy-script hardening and CI verification
 
 Standing up a deploy script on a NEW host, and proving it works before merging.
-Worked end-to-end on the a trading agent the co-tenant host → trading.<internal-domain> cutover, 2026-08-12.
+Worked end-to-end on the a trading agent the co-tenant host → trading.<internal-domain> cutover, one occasion.
 
 The governing rule: **run the deploy against the real host before merging it.**
 Seven distinct bugs were found in a script that read correctly, passed
@@ -42,7 +42,7 @@ the script.
 
 ```bash
 # FATAL when $running != 0:
-while ...; do
+while...; do
     ...
     [ "$running" -eq 0 ] && break
 done
@@ -56,7 +56,7 @@ done
 Same trap in failure-path restore lines (`[ "$PAUSED" = 1 ] && start_service`) —
 they silently skip the _next_ restore when the first condition is false.
 
-### 3. `pgrep -fc ... || echo 0` yields the string `"0\n0"`
+### 3. `pgrep -fc... || echo 0` yields the string `"0\n0"`
 
 `pgrep -fc` prints a count AND exits 1 on no match, so the `|| echo 0` appends a
 second line. Every later `[ "$x" -eq 0 ]` dies with
@@ -93,8 +93,8 @@ the SYSTEM interpreter, proving nothing about what production runs.
 ### A requirements-path miss installs NOTHING and reports success
 
 ```bash
-if [ -f requirements.txt ]; then ...
-elif [ -f pyproject.toml ]; then ...
+if [ -f requirements.txt ]; then...
+elif [ -f pyproject.toml ]; then...
 fi          # <- both miss when the repo pins under requirements/
 ```
 
@@ -116,7 +116,7 @@ on one human's home surviving. Install it to the shared state volume:
 
 ```bash
 export UV_PYTHON_INSTALL_DIR=/srv/<app>/shared/python
-uv python install "$(cat .python-version)"
+uv python install "$(cat.python-version)"
 uv venv --python "$PYVER" /srv/<app>/shared/venv.new    # build BESIDE, then swap
 ```
 
@@ -260,7 +260,7 @@ The most dangerous moment of a host migration is the merge itself. **The deploy
 target is a repo SECRET, not part of the PR** — so merging a PR that contains the
 new pipeline triggers a deploy run using the _old_ value.
 
-On the 2026-08-12 cutover, the squash-merge immediately queued a deploy against
+On the one occasion cutover, the squash-merge immediately queued a deploy against
 `DEPLOY_HOST` = the co-tenant host — the host that had just been deliberately fenced. It was
 caught while still `queued` and cancelled with seconds of margin:
 
@@ -320,7 +320,7 @@ absent.
 - **`set -o pipefail` + a command whose non-match is exit 1** (`pgrep`, `grep`).
   Wrap in `{ cmd || true; }`.
 - **`[ cond ] && cmd` at the end of a block** under `set -e`. Use `if/then`.
-- **`pgrep -fc ... || echo 0`** produces `"0\n0"`. Count lines.
+- **`pgrep -fc... || echo 0`** produces `"0\n0"`. Count lines.
 - **`source venv/bin/activate` in a deploy.** Pass `--python` explicitly and
   `unset VIRTUAL_ENV`.
 - **A dependency-install branch that can match nothing.** Terminal `else` that

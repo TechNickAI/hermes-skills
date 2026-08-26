@@ -23,7 +23,7 @@ ship a duplicate mechanism next to a defective one.
 | 5. Runtime re-application  | who calls `apply*Settings()`                 | only fires on save, not on boot     |
 | 6. UI + API                | `grep -rn "<name>" src/app`                  | fallback literal writes wrong value |
 
-### Worked case (the router `cacheSize`, 2026-08-03)
+### Worked case (the router `cacheSize`, one occasion)
 
 Asked to "make the SQLite cache size configurable." It already was — with a UI
 control, an API route, and an applier. Three separate defects instead:

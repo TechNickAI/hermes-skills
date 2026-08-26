@@ -4,7 +4,7 @@ Companion to `local-patch-custody.md`, which covers WHY a patch must be pushed
 the same session. This covers the mechanics of proving it actually was, plus
 safely dropping commits from a branch whose sha is currently deployed.
 
-Both failures below are from 2026-08-16 and both produced a confident, wrong
+Both failures below are from one occasion and both produced a confident, wrong
 "pushed" claim.
 
 ## `git push -q` will hide a real failure — never use it

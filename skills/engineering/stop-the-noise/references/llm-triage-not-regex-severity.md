@@ -4,7 +4,7 @@ Governs: **anything that decides what a human SEES**. Severity, priority, "does 
 matter", "is this the same issue", "should I interrupt them". If the answer depends on
 what the text _means_, a pattern cannot produce it.
 
-Derived from the 2026-08-23 session, after three escalating corrections ending in:
+Derived from a session, after three escalating corrections ending in:
 
 > "You are doing too much with python, and not THINKING enough."
 > "I don't want you in these channels just making more work for me."

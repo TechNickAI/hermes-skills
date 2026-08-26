@@ -10,7 +10,7 @@ healthy retention job with nothing to do.** Nobody investigates a green run.
 
 ## 1. The CLI rejects your invocation and exits 0
 
-Measured with Hermes: `hermes -p _root sessions prune ...` prints an argparse
+Measured with Hermes: `hermes -p _root sessions prune...` prints an argparse
 usage banner and **exits 0**. A wrapper checking only `returncode` reports
 success forever.
 
@@ -38,7 +38,7 @@ Pin it explicitly:
 ```python
 env = dict(os.environ)
 env["HERMES_HOME"] = str(profile_home(profile))
-subprocess.run(cmd, env=env, ...)
+subprocess.run(cmd, env=env,...)
 ```
 
 Do **not** rely on `HERMES_PROFILE` — the Hermes CLI silently ignores it.
@@ -61,7 +61,7 @@ Fix: **reconcile against the database**, not stdout.
 
 ```python
 before = _source_count(db, src)
-subprocess.run(cmd, ...)
+subprocess.run(cmd,...)
 deleted = before - _source_count(db, src)   # ground truth
 ```
 
@@ -148,7 +148,7 @@ an explicit override for manual runs and tests:
 
 ```python
 def _detect_profile() -> str:
-    if override := os.environ.get("DBMAINT_PROFILE"):
+    if override:= os.environ.get("DBMAINT_PROFILE"):
         return override
     home = Path(os.environ.get("HERMES_HOME") or (Path.home() / ".hermes"))
     return home.name if home.parent.name == "profiles" else "_root"

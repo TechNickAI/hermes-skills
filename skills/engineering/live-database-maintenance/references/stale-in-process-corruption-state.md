@@ -17,7 +17,7 @@ Every write from the running service fails with `database disk image is
 malformed`, continuously, for tens of minutes. Meanwhile every check you run
 from a _separate_ process says the database is healthy.
 
-Measured 2026-08-16, Hermes `a research agent` profile, 1.5 GB `state.db`:
+Measured on one run, Hermes `a research agent` profile, 1.5 GB `state.db`:
 
 - `pragma integrity_check` → `ok`
 - both FTS5 indexes → `integrity-check` passes clean
@@ -95,7 +95,7 @@ than letting them keep chasing it.
 
 Once diagnosis lands on "restart the process," an agent running _inside_ a
 Hermes gateway is fenced from executing it. Four paths were tried on
-2026-08-16, all correctly refused:
+one occasion, all correctly refused:
 
 | attempt                                                      | result                                                                       |
 | ------------------------------------------------------------ | ---------------------------------------------------------------------------- |

@@ -1,6 +1,6 @@
 # When your "easy win" is already in place (or was never the problem)
 
-Measured 2026-08-22 on a 2.8 GB Hermes `state.db` (a trading agent) after a real
+Measured on a 2.8 GB Hermes `state.db` (a trading agent) after a real
 corruption. Two fixes were proposed to the user with confidence. **Both were
 wrong**, and each failed in a different, generalizable way. Verifying them took
 about two minutes; proposing them cost credibility.

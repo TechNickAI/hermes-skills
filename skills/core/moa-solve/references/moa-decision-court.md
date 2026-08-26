@@ -1,6 +1,6 @@
 # MoA as a recurring DECISION court (not one-shot solving)
 
-Derived from the Rumor Desk build (<agent-d>, 2026-07-21). The base skill frames MoA as
+Derived from the Rumor Desk build (<agent-d>, one occasion). The base skill frames MoA as
 "solve one hard problem once." This reference covers the OTHER shape: a standing **evaluation
 court** that runs a panel of conflicting seats on a STREAM of candidates and emits a decision,
 with a persistent watchlist and a learning loop. Use it whenever you're building an automated

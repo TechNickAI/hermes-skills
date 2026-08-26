@@ -2,7 +2,7 @@
 
 Hardcoded model slugs in a panel rot fast. Vendors ship new flagships roughly quarterly
 (`gemini-2.5-pro` → `gemini-3.1-pro-preview`, `gpt-chat-latest` → `gpt-5.5`,
-`grok-4.x` ...). A stale panel keeps "working" but silently runs a weaker, older model —
+`grok-4.x`...). A stale panel keeps "working" but silently runs a weaker, older model —
 the worst kind of failure because nothing errors. The durable fix is to resolve the
 current flagship per family **live** from the provider's model list at runtime, validate
 the pick, cache it, and fall back to a known-good pin only if resolution fails.

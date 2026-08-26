@@ -14,7 +14,7 @@ Hermes surfaces session-write failure to the user as:
 > permissions), then send your message again."
 
 **That message names the wrong cause more often than the right one.** Observed
-2026-08-10 on host `the co-tenant host`: 40 GB free, inodes at 8%, permissions fine — the real
+one occasion on host `the co-tenant host`: 40 GB free, inodes at 8%, permissions fine — the real
 failure was b-tree corruption. Always run the disk check AND the log grep before
 believing either:
 
@@ -82,7 +82,7 @@ decide on the restart window.
 
 Two dead ends, both worth knowing so you skip them:
 
-- **`sqlite3 .recover` is unavailable on stock Ubuntu builds.** It fails with
+- **`sqlite3.recover` is unavailable on stock Ubuntu builds.** It fails with
   `sql error: no such table: sqlite_dbpage (1)` because the distro CLI is built
   without the dbpage vtab. It exits non-zero having written a 0-byte output
   file, so check the output size, not just rc.
@@ -130,7 +130,7 @@ Correct sequence:
 
 ```python
 m.execute("ATTACH ? AS live", (live_path,))
-staged, aux = ..., {}
+staged, aux =..., {}
 for t in aux_tables:                      # per-table tolerance
     try:    aux[t] = m.execute(f"select * from live.{t}").fetchall()
     except Exception as e: print("SKIP", t, e)

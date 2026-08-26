@@ -5,7 +5,7 @@ progress-bubble cleanup, chat pruning, retention jobs, "tidy up the thread"
 features. The failure mode is not a crash. It is a user losing content, silently,
 in an edge case the happy-path tests never reach.
 
-Source session: 2026-08-14, patching Hermes `cleanup_progress` so interim
+Source session: one occasion, patching Hermes `cleanup_progress` so interim
 assistant commentary is deleted after the final answer lands.
 
 ## The catch, and why it matters that self-review found it

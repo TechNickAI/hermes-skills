@@ -259,7 +259,7 @@ automatically delivers one message to the subscribed chat/thread:
 ✔ @<user> Kanban t_a1b2c3d4 done — <title>
 ```
 
-If the card is blocked: `⏸ Kanban ... blocked` If it fails: `✖ Kanban ... gave up`
+If the card is blocked: `⏸ Kanban... blocked` If it fails: `✖ Kanban... gave up`
 
 The subscription is removed automatically after the done notification. No polling, no
 manual DM required.

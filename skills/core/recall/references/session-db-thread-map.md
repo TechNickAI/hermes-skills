@@ -1,7 +1,7 @@
 # Thread-map / open-loops inventory from the session DB
 
 Use when asked to "inventory recent sessions", "map open threads", "find stalled loops",
-or produce a status report across all recent Hermes activity. Verified working 2026-07-07.
+or produce a status report across all recent Hermes activity. Verified working one occasion.
 
 ## Where the data actually is
 

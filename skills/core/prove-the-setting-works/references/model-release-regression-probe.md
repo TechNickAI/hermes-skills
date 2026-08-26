@@ -1,4 +1,4 @@
-# Model-release regression probe — grok-4.6, 2026-08-13
+# Model-release regression probe — grok-4.6, one occasion
 
 Worked case behind "a version bump is a config lever too." A one-day-old release
 was ordered pinned everywhere; probing first found a reproducible output defect

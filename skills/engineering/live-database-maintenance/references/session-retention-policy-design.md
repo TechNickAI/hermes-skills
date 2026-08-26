@@ -44,8 +44,8 @@ search hits BEFORE archive: 1
 search hits AFTER  archive: 1     <- archive does NOT hide from search
 archived flag in DB: 1
 list include_archived=False: 0    <- but it IS hidden from /resume + sidebar
-list include_archived=True : 1
-search hits AFTER  prune  : 0     <- prune is unrecoverable
+list include_archived=True: 1
+search hits AFTER prune: 0 <- prune is unrecoverable
 ```
 
 Mechanism: `search_messages()` in `hermes_state_search.py` filters only on the

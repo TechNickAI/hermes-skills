@@ -7,7 +7,7 @@ Both directions of error are expensive:
 - **False "already upstream"** → you talk the operator OUT of a real contribution.
 - **False "not upstream"** → you write a duplicate PR and look careless.
 
-Both happened in a single session on 2026-08-16.
+Both happened in a single session on one occasion.
 
 ## Trap 1: `origin` in a fork clone is the FORK, not upstream
 

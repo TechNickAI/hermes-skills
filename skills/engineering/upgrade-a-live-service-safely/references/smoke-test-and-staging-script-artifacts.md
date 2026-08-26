@@ -1,7 +1,7 @@
 # Smoke tests and staging scripts that fail themselves
 
 Three ways a staging run reports a broken release when the release is fine. All
-three cost real time on the (2026-08-04). The SQLite torn-read
+three cost real time on the (one occasion). The SQLite torn-read
 class is its own document — see `sqlite-live-wal-false-corruption.md`.
 
 The unifying rule: **before believing a staging failure, check whether the test
@@ -35,14 +35,14 @@ distinguished from "progressed".
 
 ## 2. `EXIT=28` is curl, not the release
 
-A staging run ended `EXIT=28` with `live :20128 health http=000`, which reads as
+A staging run ended `EXIT=28` with `live:20128 health http=000`, which reads as
 "the live service is down". It was not — 28 is curl's timeout code, and the
 final liveness probe used `-m 10` while a second full instance was competing for
 a 2-vCPU box. Direct checks immediately after:
 
 ```
-loopback :20128                 http=200  8.271s   <- the slow one
-loopback :20128                 http=200  0.086s
+loopback:20128 http=200 8.271s <- the slow one
+loopback:20128 http=200 0.086s
 https://<router-host>   http=200  0.035s
 ```
 
@@ -55,7 +55,7 @@ alarming.
 ## 3. A result variable that is computed and never read
 
 `SMOKE_FAIL` was assigned in four places and never tested. Every inference check
-could fail and the script still exited 0, printing `=== staged at ... ===` —
+could fail and the script still exited 0, printing `=== staged at... ===` —
 a staging gate that could not fail. Found by `shellcheck -S style` (SC2034,
 "appears unused"), which is worth running on any deploy script; it also caught
 real SC2015 `A && B || C` bugs on rollback paths in the same file.

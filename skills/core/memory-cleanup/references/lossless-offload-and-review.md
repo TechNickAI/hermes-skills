@@ -39,7 +39,7 @@ A pointer is valid only when the named destination exists **and contains the cla
 
 ## 3. Cortex FTS5 recovery
 
-Cortex uses an external-content FTS5 index. A desynchronized index may produce empty searches or errors such as `fts5: missing row ... from content table 'pages'`, even when the Markdown page and `pages` row exist.
+Cortex uses an external-content FTS5 index. A desynchronized index may produce empty searches or errors such as `fts5: missing row... from content table 'pages'`, even when the Markdown page and `pages` row exist.
 
 Recovery pattern:
 

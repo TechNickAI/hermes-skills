@@ -4,7 +4,7 @@ Governs: **owner says "I don't want to see all 95 of these"**. Read this BEFORE
 `post-hoc-channel-cleanup.md` — that one is about removing messages, and removal is
 almost never what the owner is asking for.
 
-Derived from the 2026-08-21/22 session where two successive builds were rejected before
+Derived from a/22 session where two successive builds were rejected before
 the third was accepted.
 
 ---

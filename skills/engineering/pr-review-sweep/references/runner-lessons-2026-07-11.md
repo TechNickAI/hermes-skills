@@ -1,4 +1,4 @@
-# PR review sweep runner lessons — 2026-07-11
+# PR review sweep runner lessons — one occasion
 
 Condensed operational lessons from a successful 10-PR sweep across `carmentacollective` and `TechNickAI`.
 

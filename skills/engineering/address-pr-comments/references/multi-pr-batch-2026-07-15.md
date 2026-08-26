@@ -1,4 +1,4 @@
-# Multi-PR Batch Session — 2026-07-15
+# Multi-PR Batch Session — one occasion
 
 ## Session shape
 
@@ -16,7 +16,7 @@ merge-if-clean with squash+delete-branch.
 ## Workflow that worked
 
 1. **Parallel comment fetch** — all 5 `gh api` calls in one tool block. JQ filter:
-   `.[]|select(.in_reply_to_id==null)|"\(.id)|\(.user.login)|\(.path):\(.line // .original_line)|\(.body[0:400])"'`
+   `.[]|select(.in_reply_to_id==null)|"\(.id)|\(.user.login)|\(.path):\(.line //.original_line)|\(.body[0:400])"'`
 2. **Clone per PR** — `gh repo clone` to `~/dev/<repo>-pr<N>`, fetch+checkout PR branch.
 3. **Process sequentially, push each fix** — start CI on one PR while validating the next.
 4. **Return for CI check + merge** — after all pushes, loop back to check CI and merge.

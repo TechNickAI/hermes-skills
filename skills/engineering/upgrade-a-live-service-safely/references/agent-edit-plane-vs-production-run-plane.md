@@ -4,7 +4,7 @@ Use this when autonomous agents can modify the same product that is currently ru
 
 > ## ⚠️ the operator rejects releases+symlink — offer single-directory + deploy lock
 >
-> **2026-08-11, a trading agent rebuild.** the operator, unprompted: _"I don't agree with the
+> **one occasion, a trading agent rebuild.** the operator, unprompted: _"I don't agree with the
 > releases directory and assembly link. I've always just run a Git pull to
 > update the working directory or use Docker, but I think the releases thing is
 > overkill and just winds up piling up shit. I don't need an atomic rollback,
@@ -74,7 +74,7 @@ components does not answer "how does an edit become production".
 The load-bearing move is **two machines**: agent work does not happen on the
 production box at all.
 
-> ⚠️ **the operator overrode the two-machine split on 2026-08-11.** _"I don't want a
+> ⚠️ **the operator overrode the two-machine split on one occasion.** _"I don't want a
 > whole nother machine for editing. the owner will edit with a trading agent, and it needs to
 > be in a local directory. the owner is interacting with prod. The separation I'm
 > looking for is not permissioning, its just giving the owner a place to edit that
@@ -188,7 +188,7 @@ Make release code root/deploy-owned and read-only after staging. Keep SQLite bac
 
 ## Concurrent coding tasks: independent clones are a valid baseline
 
-When shared Git metadata is unacceptable, allocate one full clone per task. Accelerate without coupling writable state by cloning from a read-only local bare mirror (`git clone --reference-if-able ...`), while retaining an independent `.git`, index, refs, branch, dependency cache namespace, ports, volumes, and test database.
+When shared Git metadata is unacceptable, allocate one full clone per task. Accelerate without coupling writable state by cloning from a read-only local bare mirror (`git clone --reference-if-able...`), while retaining an independent `.git`, index, refs, branch, dependency cache namespace, ports, volumes, and test database.
 
 Workspace manager requirements:
 
@@ -236,7 +236,7 @@ Teach agents to answer "is this live?" by querying this truth chain, never by in
 
 Hermes file-tool write guards/denylists reduce accidental writes by file tools, but shell/terminal authority remains the OS user's authority. Dangerous-command classifiers are also footgun guards, not an RCE or filesystem containment boundary. Prefer a Docker/remote terminal backend or OS-level separation, and verify exact installed-version support before relying on a named config feature.
 
-**Correction (2026-08-11):** an earlier version of this file, following a research
+**Correction (one occasion):** an earlier version of this file, following a research
 lane, said not to infer that `lifecycle_guard` exists. That was wrong in the
 literal direction — **`cron/lifecycle_guard.py` DOES exist in Hermes source**
 (it has blocked terminal commands on this fleet many times, and has its own

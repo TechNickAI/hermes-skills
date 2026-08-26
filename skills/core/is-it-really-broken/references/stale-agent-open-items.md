@@ -16,7 +16,7 @@ forever until a human contradicts it.
 lying; it is reading a note. Verify against live state before you relay it to the
 owner, and before you accept the framing that the agent is malfunctioning.
 
-Worked example (2026-08-12, a personal-assistant agent on `an owner`). Reported to his owner mid-copy-draft:
+Worked example (a personal-assistant agent on `an owner`). Reported to his owner mid-copy-draft:
 
 > Two things still open whenever you want them:
 >
@@ -48,7 +48,7 @@ Then confirm with the authoritative readout:
 
 ```bash
 ~/.hermes/hermes-agent/venv/bin/python -m hermes_cli.main plugins list | grep -A2 '<name>'
-# → "enabled | 0.1.0 | ... | user"
+# → "enabled | 0.1.0 |... | user"
 ```
 
 Do **not** try to infer plugin load from the gateway log — many gates log nothing
@@ -139,7 +139,7 @@ Procedure, on the agent's own host:
 ```bash
 cp ~/.hermes/memories/MEMORY.md ~/.hermes/memories/MEMORY.md.bak-<who>-<ts>
 # write a python script locally, pipe it over, run it there:
-ssh <host> 'cat > /tmp/fix_memory.py && python3 /tmp/fix_memory.py' < ./fix_memory.py
+ssh <host> 'cat > /tmp/fix_memory.py && python3 /tmp/fix_memory.py' <./fix_memory.py
 ```
 
 The script should `assert` on the current text of each target line before

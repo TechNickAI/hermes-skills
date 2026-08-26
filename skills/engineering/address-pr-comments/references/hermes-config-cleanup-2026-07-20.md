@@ -1,4 +1,4 @@
-# hermes-config PR cleanup — 2026-07-20
+# hermes-config PR cleanup — one occasion
 
 5 open PRs across TechNickAI/hermes-config, all CI-green. Addressed bot comments
 and merged in dependency order.
@@ -17,7 +17,7 @@ and merged in dependency order.
 
 ### #59: Incident-specific dates in public skill (codex P1)
 
-Codex flagged exact dates ("Confirmed 2026-06-12; parallel default reaffirmed 2026-06-22")
+Codex flagged exact dates ("Confirmed one occasion; parallel default reaffirmed one occasion")
 in `skills/multi-review/SKILL.md`, citing the repo's AGENTS.md guidance to generalize
 incident dates. Fix: replaced with "Confirmed in practice; parallel default reaffirmed
 after a later recurrence."

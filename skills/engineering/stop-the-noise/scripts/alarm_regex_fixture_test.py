@@ -7,7 +7,7 @@ Get that regex wrong in the permissive direction and you delete evidence of a
 real fault; get it wrong in the greedy direction and every ordinary sentence
 becomes "critical" and the escalation surface is useless.
 
-Measured 2026-08-21: a first-pass regex matching any message CONTAINING
+Measured on one run: a first-pass regex matching any message CONTAINING
 halt|escalat|broken|margin flagged 385 ordinary conversational messages on one
 agent as critical. Anchoring to machine-emitted shapes brought it to 135 real
 ones. The bug was only visible because both directions were tested.
@@ -53,7 +53,7 @@ MUST_MATCH = [
     "  reason : SEV-1: intent target 25ct but exchange executed two",
     "⚠️ Cron 'Convexity Desk acting guard' failed: Script exited with code 2 "
     "stdout: GUARD CHECK FAILED (exit 2), the watched condition is unmonitored",
-    "FAVORITE GRINDER MONITOR — 2026-08-20 07:31 UTC\n"
+    "FAVORITE GRINDER MONITOR — 2026-01-15 07:31 UTC\n"
     "MONITOR BLIND   could not read the exchange: KalshiApiError: HTTP 500",
     "MEMECOIN BOOK HALTED\n  HALT (forward-looking): $-41.19 realized leaves $18.81",
     "CRITICAL: disk full on /dev/sda1",

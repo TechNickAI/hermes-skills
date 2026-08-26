@@ -43,13 +43,13 @@ One file, two clearly separated sections, **owner section first**:
 **<Owner>: this one is for you. <Operator>'s version is below it.**
 
 ## <Owner>'s version
-   ... 300-500 words, zero jargon, what they will notice ...
+... 300-500 words, zero jargon, what they will notice...
 
 ---
 ---
 
 ## <Operator>'s version
-   ... full technical detail, architecture, open questions ...
+... full technical detail, architecture, open questions...
 ```
 
 They should never scroll past architecture to find their part.
@@ -176,7 +176,7 @@ A capability check turns a speculative project into a small, upstreamable change
 
 This applies to live support replies, not just formal documents. It is the
 highest-frequency version of the "don't hand them your homework" rule, and it
-cost a full turn on 2026-08-12.
+cost a full turn.
 
 an owner's reaction: a "PATH fix" meant nothing to them, and the update read as machine
 goop. Stop handing me decisions that have no meaning to me and stop gating your
@@ -237,7 +237,7 @@ you", or "Your call" feels like respecting the owner's authority. It reads as ho
 Volume makes it worse: three questions is not three times as deferential as one, it is a
 to-do list.
 
-Measured 2026-08-21. A research-and-propose task closed with three open questions —
+Measured on one run. A research-and-propose task closed with three open questions —
 scope, backlog depth, and which rooms to touch. The operator's reply:
 
 > "come on. be helpful. don't just come back to questions. Think empathetically about
@@ -265,7 +265,7 @@ the actual message text, the actual counts. A proposal they can picture is one t
 approve; a framework is one more thing on their plate.
 
 **The relapse pattern: the questions come back as soon as the work gets risky.** In the
-same 2026-08-21 session, _after_ the correction above had already landed and been
+same one occasion session, _after_ the correction above had already landed and been
 acknowledged, the very next substantial deliverable closed with three more open
 questions. The trigger was irreversibility — deletion, someone else's rooms, driving the
 owner's personal account — and the questions felt like conscientiousness rather than
@@ -287,7 +287,7 @@ Audit the draft for this specifically when the work is irreversible. That is exa
 the pattern returns.
 
 **Solve the verb they used, not the adjacent problem you know how to solve.** The same
-2026-08-21 session produced this correction one turn before the questions one. The owner
+one occasion session produced this correction one turn before the questions one. The owner
 asked for _cleanup_: "summarization, cleanup, deleting of things that I don't need to
 see, roll up." The plan that came back was a _prevention_ design — config keys and
 silence contracts so agents would post less in future. Both are legitimate work; only

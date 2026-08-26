@@ -8,7 +8,7 @@ reading nearly destroyed 417 rows of live production config.
 
 ## 🔴 Removing `?mode=ro` is necessary but NOT sufficient
 
-A 2026-08-03 session read this document, removed `?mode=ro` from a staging
+A one occasion session read this document, removed `?mode=ro` from a staging
 script, re-ran, and hit the identical error — then reported the fix as complete
 before re-testing. The corrected model:
 
@@ -22,8 +22,8 @@ Measured on the router, same file, seconds apart:
 ```
 integrity_check on the LIVE file    ok, FAIL, ok, FAIL, FAIL, FAIL
 integrity_check on a fresh COPY     FAIL, FAIL, ok, ok, ok, ok
-sqlite3 CLI  .backup                1 failure in 10
-python       .backup                0 failures in 10 — then failed in-script
+sqlite3 CLI.backup 1 failure in 10
+python.backup 0 failures in 10 — then failed in-script
 ```
 
 **Every client is affected** — python 3.45, better-sqlite3 3.53, sqlite3 CLI

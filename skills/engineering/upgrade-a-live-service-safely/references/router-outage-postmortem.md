@@ -1,11 +1,11 @@
-# Case study: the router fleet-router outage, 2026-07-26
+# Case study: the router fleet-router outage, one occasion
 
 > **Resolution (same session): builds moved off the router entirely.**
 > `.github/workflows/build-standalone-artifact.yml` on the fork builds on a free
 > GitHub `ubuntu-24.04-arm` runner (the repo is PUBLIC, so arm64 minutes are
 > free). Verified end-to-end: build 10m38s, artifact 586 MB (4.7 GB unpacked),
 > downloaded to the router, unpacked to `releases/<name>/`, smoke-tested on port
-> 20129 against a `sqlite3 .backup` copy of the DB — healthy in 8s, `/v1/models`
+> 20129 against a `sqlite3.backup` copy of the DB — healthy in 8s, `/v1/models`
 > 200, live `MainPID=3060` unchanged across three consecutive runs, script exit 0.
 > Nothing was swapped; cutover remained a human decision.
 >
@@ -65,7 +65,7 @@ Worth separating from the deploy failure: the upgrade itself was fine.
 
 ## The deploy failure
 
-`npm run build:release` begins with **`rm -rf .build dist`** — deleting the
+`npm run build:release` begins with **`rm -rf.build dist`** — deleting the
 systemd unit's `WorkingDirectory` while the service ran from it. The live process
 survived on memory-mapped code, so health checks stayed green (0.5s responses)
 and the rollback window closed silently.
@@ -88,7 +88,7 @@ pattern-matched onto it. Check `InstanceType` before invoking credits.
 
 ## Recovery that worked
 
-1. TCP-probe :443 and :22 from outside → both OPEN but HTTP hanging ⇒ starved
+1. TCP-probe:443 and:22 from outside → both OPEN but HTTP hanging ⇒ starved
    process, not dead host.
 2. `aws ec2 reboot-instances --instance-ids <instance-id> --region ca-central-1`
    (**plural**; `reboot-instance` is invalid and dumps the whole subcommand list).
@@ -97,7 +97,7 @@ pattern-matched onto it. Check `InstanceType` before invoking credits.
 4. Restore:
    ```bash
    cd ~/src/the router
-   rm -rf .build && tar xzf ~/rollback-build-20260726T220501Z.tar.gz   # 808M back
+   rm -rf.build && tar xzf ~/rollback-build-20260726T220501Z.tar.gz # 808M back
    git checkout main
    systemctl --user restart the router.service
    ```

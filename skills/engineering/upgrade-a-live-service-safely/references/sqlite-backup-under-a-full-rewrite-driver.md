@@ -1,6 +1,6 @@
 # Backing up SQLite when the app is on a full-rewrite driver (sql.js)
 
-Worked case 2026-08-14, the router, before a v3.8.50 deploy. the operator asked
+Worked case one occasion, the router, before a v3.8.50 deploy. the operator asked
 for "triple backups — I don't want to have to rebuild my configuration."
 Two reasonable-looking backup methods produced **corrupt files** before the
 third worked. Both failures looked like data corruption and were not.

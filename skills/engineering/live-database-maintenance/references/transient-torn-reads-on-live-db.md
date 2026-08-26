@@ -27,7 +27,7 @@ d = sqlite3.connect("/tmp/snap.sqlite")
 print(d.execute("pragma quick_check").fetchone()[0])
 ```
 
-Measured on the router 2026-08-13: `quick_check = ok`, 7,009 quota rows intact.
+Measured on the router One case: `quick_check = ok`, 7,009 quota rows intact.
 Then loop a small read 12 times against the LIVE file:
 
 ```

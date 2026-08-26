@@ -61,7 +61,7 @@ the auth sidecar's source (that's an upstream PR in hermes-config).
 
 ```
 Internet (optional)
-   │ Tailscale Funnel on :443  (only if you've opted in per-host)
+   │ Tailscale Funnel on:443 (only if you've opted in per-host)
    ▼
 Tailnet host: <machine>.<your-tailnet>.ts.net
    │
@@ -411,7 +411,7 @@ Build it ONCE (takes ~1-2 min), then restart the PM2 process:
 
 ```bash
 cd ~/.hermes/hermes-agent/web && npm install --no-audit --no-fund && npm run build
-# build writes to ../hermes_cli/web_dist/ ; then:
+# build writes to../hermes_cli/web_dist/; then:
 PM2_HOME=/Users/<user>/.pm2 pm2 restart <name>-dashboard
 PM2_HOME=/Users/<user>/.pm2 pm2 reset <name>-dashboard   # clear the crash-loop counter
 ```
@@ -440,7 +440,7 @@ exist yet, and PM2 will show the process `errored` with restart count climbing. 
 `pm2 logs <name>` for:
 
 ```
-✗ --skip-build was passed but no web dist found at: .../hermes_cli/web_dist
+✗ --skip-build was passed but no web dist found at:.../hermes_cli/web_dist
 ```
 
 Fix — build it once (takes ~1-2 min), then restart:
@@ -454,7 +454,7 @@ pm2 restart <name> && pm2 reset <name>   # reset clears the inflated restart cou
 After that `--skip-build` is correct (fast start, no rebuild per boot).
 
 **5. Pin `HERMES_HOME` in env and pass the profile as a CLI arg, not env.** The reliable
-combo is `args: "--profile <name> dashboard ..."` (omit `--profile` for the root DB)
+combo is `args: "--profile <name> dashboard..."` (omit `--profile` for the root DB)
 plus
 `env: { HERMES_HOME: "/Users/<user>/.hermes", PATH: "<venv-bin>:/opt/homebrew/bin:..." }`.
 Set `HERMES_HOME` to an ABSOLUTE path — under PM2 the rewritten `$HOME` otherwise points
@@ -510,7 +510,7 @@ reverse-proxy to the tailnet-IP backend, then funnel that loopback listener. Exa
 an LLM proxy bound to a tailnet IP:
 
 ```caddy
-# In ~/mini-apps/_registry/Caddyfile, ABOVE the main :8080 block:
+# In ~/mini-apps/_registry/Caddyfile, ABOVE the main:8080 block:
 :8090 {
     bind 127.0.0.1
     reverse_proxy 100.x.y.z:20128 {
@@ -795,7 +795,7 @@ for db in ~/.hermes/state.db ~/.hermes/profiles/*/state.db; do
   [ -f "$db" ] && echo "$(sqlite3 "$db" 'SELECT COUNT(*) FROM sessions') $db"; done
 ls ~/.hermes/hermes-agent/hermes_cli/web_dist/index.html 2>/dev/null  # build needed?
 ls -d ~/mini-apps ~/openclaw-apps 2>/dev/null                          # existing router?
-# who owns :443 / what serve routes exist already?
+# who owns:443 / what serve routes exist already?
 /opt/homebrew/bin/tailscale serve status
 ```
 
@@ -921,7 +921,7 @@ across reboots natively, so only PM2 needs this.
     `tailscale serve --bg` config both persist across reboot on their own; only the
     launchd entry needs the one-time sudo.
 
-13. **Streaming a tarball over `ssh ... 'bash -s' <<heredoc` to transfer files.** The
+13. **Streaming a tarball over `ssh... 'bash -s' <<heredoc` to transfer files.** The
     heredoc consumes stdin, so piped binary data never arrives ("Unrecognized archive
     format" / "error decoding base64"). Use `scp` for file transfer, and reserve the
     heredoc-over-ssh pattern for running commands that don't also need piped stdin.
@@ -929,7 +929,7 @@ across reboots natively, so only PM2 needs this.
 14. **Running Caddy unsupervised (bare process, not under PM2).** If Caddy dies, nothing
     restarts it and every route 502s while backend apps stay healthy — looks like a
     total outage but it's just the front door. Always start Caddy under PM2
-    (`pm2 start <caddy> --name caddy --interpreter none -- run --config ...`).
+    (`pm2 start <caddy> --name caddy --interpreter none -- run --config...`).
     Diagnosis: backends `online` in `pm2 list` but `curl http://127.0.0.1:8080/health`
     is refused/000 ⇒ Caddy itself is down.
 

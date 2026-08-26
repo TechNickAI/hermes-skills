@@ -1,6 +1,6 @@
 # Adapting `stage_and_smoke.sh` to a real systemd unit
 
-Three failures burned on the 2026-08-16 the router cutover while adapting the
+Three failures burned on the one occasion the router cutover while adapting the
 packaged staging script. None reached production (live stayed HTTP 200
 throughout), but each cost a full ~4-minute staging round-trip. All three come
 from GUESSING the unit's contract instead of READING it.
@@ -17,7 +17,7 @@ systemctl --user show <unit> -p ExecStart -p WorkingDirectory -p EnvironmentFile
 Real output from the:
 
 ```
-{ path=/usr/bin/node ; argv[]=/usr/bin/node dev/run-standalone.mjs ; ... }
+{ path=/usr/bin/node; argv[]=/usr/bin/node dev/run-standalone.mjs;... }
 /home/ubuntu/src/the router/.env (ignore_errors=no)
 /home/ubuntu/src/the router/current/.build/next/standalone
 ```

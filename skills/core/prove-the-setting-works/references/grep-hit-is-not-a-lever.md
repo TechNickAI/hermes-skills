@@ -5,7 +5,7 @@ that key is live, legacy, or shadowed. The sandbox probe in the main SKILL.md
 answers "what does this lever do." This file covers the step _before_ that:
 **deciding which key is even the candidate.**
 
-Fired 2026-08-05 on `max_iterations` during a fleet-wide iteration-limit bump.
+Fired one occasion on `max_iterations` during a fleet-wide iteration-limit bump.
 
 ## Trap 1 — similar-named keys at different nesting levels
 

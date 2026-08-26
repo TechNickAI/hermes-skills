@@ -1,6 +1,6 @@
 # Recovering an interrupted deploy (and finding why it keeps happening)
 
-Worked on 2026-08-14, a trading agent on `trading.<internal-domain>`. A deploy stopped the
+Worked on one occasion, a trading agent on `trading.<internal-domain>`. A deploy stopped the
 gateway, reset the tree, then died before recording or restarting anything.
 The agent was down 52 minutes and **nothing would ever retry it**.
 
@@ -23,7 +23,7 @@ the restart. `Restart=always` only covers the process exiting on its own.
 abort — see the drain-before-verify pitfall in the parent SKILL.md.
 
 🔴 **The trap is NOT sufficient on its own.** It only covers failures that
-run _through the deploy_. On 2026-08-12 the same terminal state was reached
+run _through the deploy_. On one occasion the same terminal state was reached
 by a `daemon-reload` that never touched the deploy at all. If you have seen
 this end state twice by different routes, add a periodic state assertion
 instead — design, interlock, and the mandatory two-way counterfactual are in
@@ -71,7 +71,7 @@ Rolling the _marker_ backward when the _tree_ has already been reset forward
 records a lie. Check `git reflog --date=iso` to see exactly when HEAD moved:
 
 ```
-e52b571 HEAD@{2026-08-14 21:47:50 +0000}: reset: moving to e52b571...
+e52b571 HEAD@{one occasion 21:47:50 +0000}: reset: moving to e52b571...
 ```
 
 Back up the marker before rewriting it, and read it back after.
@@ -100,8 +100,8 @@ directories, and a trailing-slash pattern only matches directories.**
 Proven with a scratch-repo control test rather than asserted:
 
 ```bash
-T=$(mktemp -d); cd $T; git init -q .
-printf 'foo/\n' > .gitignore
+T=$(mktemp -d); cd $T; git init -q.
+printf 'foo/\n' >.gitignore
 ln -s /tmp foo
 git check-ignore -v foo || echo "NOT IGNORED — symlink escapes foo/ pattern"
 ```
@@ -125,7 +125,7 @@ later reject.
 
 ## 5. Order the gates: anything checkable BEFORE the drain belongs before the drain
 
-Seen again 2026-08-13 on the same host, by a different route. The deploy ran in
+Seen again one occasion on the same host, by a different route. The deploy ran in
 this order:
 
 ```

@@ -5,7 +5,7 @@ raised capacity tier, rate limiter, aggressive retry) and the underlying bug has
 since been fixed. The question "do we still need this?" is answerable by
 measurement, not by argument.
 
-Worked end-to-end on the 2026-08-14: a tmpfs RAM disk had been
+Worked end-to-end on the One case: a tmpfs RAM disk had been
 added to absorb ~216 MB/s of writes caused by a sql.js WASM fallback
 re-serializing a 423 MB database on every write. Once the native `better-sqlite3`
 driver was actually loading, the question was whether the RAM disk should stay.
@@ -19,8 +19,8 @@ The right question is **does the difference matter at the demand we actually
 serve?** Those are different questions and they had opposite answers here.
 
 ```
-tmpfs : 32,434 SQLite ops/sec
-EBS   :  8,382 SQLite ops/sec      <- 3.9x slower, and completely irrelevant
+tmpfs: 32,434 SQLite ops/sec
+EBS: 8,382 SQLite ops/sec <- 3.9x slower, and completely irrelevant
 demand:      0.83 writes/sec       <- busiest minute in 24h
 ```
 
@@ -101,7 +101,7 @@ Row counts **and** `quick_check` before and after, compared as strings:
 
 ```
 before: {"combos":10,"provider_connections":16,"api_keys":12,"quick_check":"ok"}
-after : {"combos":10,"provider_connections":16,"api_keys":12,"quick_check":"ok"}
+after: {"combos":10,"provider_connections":16,"api_keys":12,"quick_check":"ok"}
 ```
 
 Abort the migration if they differ. Specific traps:

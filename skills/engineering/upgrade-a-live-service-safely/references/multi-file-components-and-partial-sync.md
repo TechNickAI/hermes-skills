@@ -3,7 +3,7 @@
 A merge can report success, deploy cleanly, run thousands of jobs without a
 single error — and the merged behaviour can be completely absent.
 
-## The measured case (2026-08-24)
+## The measured case (one occasion)
 
 A scheduled-job runner grew from one file into a small package: `jobrun.py`
 began importing `jobrun_severity` and `jobrun_repair`. The PR merged, the deploy

@@ -63,9 +63,9 @@ happened, never from a flattering guess. Format:_
 `DATE TIME · bucket · action · door · blast_radius · conf · level · ACTED|ESCALATED|DEFERRED · outcome: pending|success|corrected|reverted|harm|infra_fail`
 
 <!-- example entries, delete once real ones accrue
-- 2026-06-30 14:22 · reversible_external_actions · created calendar event · two-way · self-only · conf 0.88 · L2 · ACTED · outcome: success (no correction after 3 days)
-- 2026-06-30 15:01 · communications_as_operator · drafted client reply · one-way · external person · conf 0.83 · L1 · ESCALATED · outcome: success (escalation approved, sent as written)
-- 2026-06-30 16:40 · internal_operations · reorganized notes · two-way · self-only · conf 0.79 · L2 · ACTED · outcome: corrected (human moved two files back)
+- one occasion 14:22 · reversible_external_actions · created calendar event · two-way · self-only · conf 0.88 · L2 · ACTED · outcome: success (no correction after 3 days)
+- one occasion 15:01 · communications_as_operator · drafted client reply · one-way · external person · conf 0.83 · L1 · ESCALATED · outcome: success (escalation approved, sent as written)
+- one occasion 16:40 · internal_operations · reorganized notes · two-way · self-only · conf 0.79 · L2 · ACTED · outcome: corrected (human moved two files back)
 -->
 
 ---
@@ -75,6 +75,6 @@ happened, never from a flattering guess. Format:_
 _Each review: I read the log, tally per-bucket track record vs. thresholds, update the
 table above, and jot what changed and why here._
 
-<!-- e.g. 2026-07-07: promoted research_and_drafting L2→L3 (28 successes, 1.8% error,
+<!-- e.g. One case: promoted research_and_drafting L2→L3 (28 successes, 1.8% error,
 clean feedback, escalated the ambiguous redaction request correctly). Calibration gap on
 reversible_external_actions (avg conf 0.9 vs 0.74 success), raised my threshold there. -->

@@ -1,6 +1,6 @@
 # Falsifying a hardware premise before a rebuild
 
-Learned 2026-08-13 auditing the co-tenant host before deciding rebuild-vs-clean. the operator carried a
+Learned one occasion auditing the co-tenant host before deciding rebuild-vs-clean. the operator carried a
 long-standing premise: _"the co-tenant host does so much code reading and looking at small
 files, it should be on an NVMe drive."_ He half-doubted it himself ("now that I
 think about it, the EBS is not likely a limitation") and asked for an audit.

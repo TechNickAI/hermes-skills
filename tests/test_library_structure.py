@@ -204,6 +204,41 @@ PII_CASES = [
     ("see releases/standalone-<sha>", False),
 ]
 
+# Exact incident dates are a WARNING, not a blocker, so the blocker-only table
+# above cannot see them. CONTRIBUTING has banned these all along; nothing
+# enforced it until 299 shipped.
+#
+# The False cases matter most. A date inside a command, regex, or SQL value is a
+# TYPED LITERAL, not prose: rewriting it to "on one occasion" makes an awk filter
+# match nothing (a failure check that always reports success) and makes a SQL
+# cutoff sort after every real row (DELETE selects the whole table).
+INCIDENT_DATE_CASES = [
+    ("Measured 2026-08-12: the job died", True),
+    ("Verified 2026-08-22 on the host", True),
+    ("# learned the hard way, 2026-08-14", True),
+    ("ISO column holds 2026-07-27T13:51:00.000Z", False),
+    ("cutoff is 2026-01-15 13:51:00", False),
+    ("Measured on one run: the job died", False),
+]
+
+
+@pytest.mark.parametrize("text,flagged", INCIDENT_DATE_CASES, ids=lambda v: str(v)[:40])
+def test_incident_dates_are_flagged(text, flagged, tmp_path):
+    """Bundled code ships with the skill and leaks identically to prose, so the
+    probe is a .py file rather than a .md."""
+    sys.path.insert(0, str(ROOT / "scripts"))
+    try:
+        import importlib
+
+        pii = importlib.import_module("pii_scan")
+        importlib.reload(pii)
+    finally:
+        sys.path.pop(0)
+    probe = tmp_path / "probe.py"
+    probe.write_text(text)
+    hits = [h for h in pii.scan(probe) if h[1] == "incident-date"]
+    assert bool(hits) == flagged, f"{text!r}: expected flagged={flagged}, got {hits}"
+
 
 @pytest.mark.parametrize("text,flagged", PII_CASES, ids=lambda v: str(v)[:40])
 def test_pii_scanner_boundaries(text, flagged, tmp_path):

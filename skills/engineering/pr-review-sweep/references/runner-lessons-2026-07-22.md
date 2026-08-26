@@ -1,4 +1,4 @@
-# Runner lessons — 2026-07-22
+# Runner lessons — one occasion
 
 Session-specific evidence from a 20-PR scan that triaged 28 zero-reaction candidates on two merged PRs and produced two follow-ups.
 

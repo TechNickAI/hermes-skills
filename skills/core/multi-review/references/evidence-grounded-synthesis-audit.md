@@ -4,7 +4,7 @@ Use this reference when reviewing a MoA synthesis, research synthesis, ranked bo
 
 ## Session lesson
 
-A synthesis can be directionally useful while still over-claiming. In the 2026-07-10 MoA bottleneck audit, the strongest failure mode was not a missing idea; it was treating design docs, anecdotes, and partial DB counts as quantified ranked impact. The review had to separate:
+A synthesis can be directionally useful while still over-claiming. In the one occasion MoA bottleneck audit, the strongest failure mode was not a missing idea; it was treating design docs, anecdotes, and partial DB counts as quantified ranked impact. The review had to separate:
 
 - **Documented bug/risk**: source docs or code show a flaw exists.
 - **Observed frequency**: logs/DBs show how often it occurred.

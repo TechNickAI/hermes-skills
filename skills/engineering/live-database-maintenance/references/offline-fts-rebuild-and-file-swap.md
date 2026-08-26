@@ -1,6 +1,6 @@
 # Offline FTS rebuild and whole-file swap on an auto-restarting service
 
-Measured 2026-08-22 on the fleet's busiest Hermes profile (455k messages,
+Measured on the fleet's busiest Hermes profile (455k messages,
 3.0 GB `state.db`), which had corrupted repeatedly over three days. Every
 section below is a place where the obvious move fails silently or destructively.
 
@@ -169,7 +169,7 @@ at these row counts.
 script aborts with "database is held", or worse, races a live writer.
 
 - `systemctl mask` is **refused** when the unit is a real file rather than a
-  symlink: `Failed to mask unit: File ... already exists`.
+  symlink: `Failed to mask unit: File... already exists`.
 - The lever that works is a drop-in, removed on the way out:
 
 ```bash

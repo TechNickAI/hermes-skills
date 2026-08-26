@@ -5,7 +5,7 @@ this answers _what should it say once I can?_
 
 Applies whenever interface text — menu labels, button names, command options,
 model/combo aliases — is read by someone who does not know the architecture.
-Derived from the 2026-07-31 `/models` picker curation session.
+Derived from a `/models` picker curation session.
 
 The same audience discipline applies to _messages_. This is that discipline
 applied to _nouns in a UI_,
@@ -95,7 +95,7 @@ before proposing names — use `scripts/probe_config_lever.py`.
 
 Measured in the Hermes picker (v0.19.0): **provider rows are relabelable,
 individual model buttons are not.** A plausible-looking shape
-(`models: [{id: ..., name: ...}]`) silently does nothing, because `name` is
+(`models: [{id:..., name:...}]`) silently does nothing, because `name` is
 parsed as an _ID fallback_ consulted only when `id` is absent. Nothing errors;
 the button still renders the raw identifier.
 

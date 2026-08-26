@@ -4,7 +4,7 @@ A backup job that exits 0 every night proves it ran. It does not prove that
 restoring from it produces a **working service**. Those are different claims,
 and the gap between them is only visible if you deliberately go looking.
 
-Worked case, 2026-08-14, the router production router. The restic→S3 job had been
+Worked case, one occasion, the router production router. The restic→S3 job had been
 green for months. Its backup root was `~/.the router`, which contained the SQLite
 database holding all routing configuration — combos, provider connections, API
 keys. Looked complete. It was not.
@@ -83,7 +83,7 @@ failed:
 ```
 repo already locked, waiting up to 0s for the lock
 unable to create lock in backend: repository is already locked by PID 614122
-lock was created at 2026-08-14 19:28:48 (20m56s ago)
+lock was created at one occasion 19:28:48 (20m56s ago)
 ```
 
 `forget --prune` had been silently skipped — visible only as snapshot count

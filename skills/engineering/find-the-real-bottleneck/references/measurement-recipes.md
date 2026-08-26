@@ -1,7 +1,7 @@
 # Measurement recipes
 
 Copy-paste probes. Each isolates ONE arrow in a causal chain. All verified
-2026-08-03 against a live Node/Next.js LLM router on `m8g.large` (2 vCPU, 7.6GB).
+one occasion against a live Node/Next.js LLM router on `m8g.large` (2 vCPU, 7.6GB).
 
 ---
 

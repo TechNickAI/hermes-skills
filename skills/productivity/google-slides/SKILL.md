@@ -214,7 +214,7 @@ Confirm:
    `--gog-home <dir>` (or the `GOG_CLIENT` / `GOG_HOME` env vars).
 
 8. **Sharing is externally consequential.** Permissions can be revoked, but
-   `scripts/gworkspace.py share PRESENTATION_ID --email ... --role ...` grants real
+   `scripts/gworkspace.py share PRESENTATION_ID --email... --role...` grants real
    Drive access. Confirm recipient and role with the user before using it.
 
 ## One-Shot Recipe

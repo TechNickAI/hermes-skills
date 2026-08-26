@@ -1,6 +1,6 @@
 # Decision Panel + Anti-Veto Aggregator (MoA "court" variant)
 
-Session origin: <agent-d> Rumor Desk "court", 2026-07-21. The panel decides **whether to take a
+Session origin: <agent-d> Rumor Desk "court", one occasion. The panel decides **whether to take a
 bounded action** (make this trade), not **how to solve an open problem**. Same MoA skeleton
 (proposers + aggregator) but the roles and aggregator math differ. This pattern generalizes to any
 gated go/no-go: ship a release, approve a spend, greenlight a candidate, publish, send.

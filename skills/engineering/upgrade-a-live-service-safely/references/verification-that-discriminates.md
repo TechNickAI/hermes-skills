@@ -1,6 +1,6 @@
 # Verification that discriminates (or: why my fixtures agreed with my bug)
 
-Worked case: the router v3.8.50 deploy, 2026-08-14. Four CI builds (~15 min each)
+Worked case: the router v3.8.50 deploy, one occasion. Four CI builds (~15 min each)
 burned iterating a release gate that kept **failing a correct artifact**.
 
 ## What happened
@@ -115,10 +115,10 @@ The verdict that finally settled it needed no bundler analysis at all — just t
 same measurement on both processes, side by side:
 
 ```
-live v3.8.49  : wreq-js.linux-arm64-gnu.node            ← no SQLite driver
+live v3.8.49: wreq-js.linux-arm64-gnu.node ← no SQLite driver
 staged v3.8.50: better-sqlite3/prebuilds/linux-arm64.node ← real dlopen
 
-arrayBuffers  : 1,326 MB live  →  17 MB staged           (76x)
+arrayBuffers: 1,326 MB live → 17 MB staged (76x)
 DB file rewrites in 10s: ~5-9 live  →  0 staged
 ```
 

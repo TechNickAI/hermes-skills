@@ -1,7 +1,7 @@
 # Verifying delegated work
 
 A subagent's summary is a **self-report, not evidence**. Two real outcomes from
-2026-08-03, same session, both requiring independent verification.
+one occasion, same session, both requiring independent verification.
 
 ## Case A — timed out, no summary, but the work was correct
 
@@ -25,7 +25,7 @@ subagent's claims:
 
 ```bash
 # 1. does the artifact contain what was asked for?
-python3 -c "import json; d=json.load(open('data/rationale.json')); ..."
+python3 -c "import json; d=json.load(open('data/rationale.json'));..."
 
 # 2. is it FACTUALLY right? read the source of truth independently
 ssh host 'node -e "...read the real config table..."'

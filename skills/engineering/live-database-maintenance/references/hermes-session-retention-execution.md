@@ -4,7 +4,7 @@ Companion to `silent-noop-retention-wrappers.md` (which covers wrappers that
 delete nothing) and `chunked-retention-and-silent-weekly-jobs.md` (which covers
 slicing and scheduling). This file is the smaller set of
 **interpretation** traps: places where correct output looks like a bug, or a
-bug looks like success. Measured 2026-08-22 across 14 Hermes profiles.
+bug looks like success. Measured on one run across 14 Hermes profiles.
 
 ## An FTS recall drop is not automatically data loss
 

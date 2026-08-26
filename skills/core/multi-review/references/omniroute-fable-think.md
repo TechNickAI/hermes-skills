@@ -11,7 +11,7 @@ Use when Nick asks for a multi-review that specifically includes the "think" mod
 - Key env var: `OMNIROUTE_KEY`.
 - API shape: Anthropic messages, not OpenAI chat completions.
 
-## The `/v1/chat/completions` route DOES work — it just streams by default (corrected 2026-06-22)
+## The `/v1/chat/completions` route DOES work — it just streams by default (corrected one occasion)
 
 Earlier guidance said "do not send `think` to the OpenAI-compatible `/v1/chat/completions`
 route, it returns non-JSON or fails." That was a **misdiagnosis**. The route works fine. The
@@ -20,7 +20,7 @@ default**, returning Server-Sent-Event chunks (`data: {...}\n\n` lines), so a na
 `json.loads(response_body)` throws `Expecting value: line 1 column 1`.
 
 Fix: send `"stream": false` in the body and you get a single clean JSON object back.
-Verified 2026-06-22 from a <agent-d> script hitting
+Verified in one case from a <agent-d> script hitting
 `https://omniroute.example.com/v1/chat/completions` with model `think`:
 
 ```python
@@ -46,7 +46,7 @@ So there are TWO valid surfaces for `think`:
 - Anthropic `/v1/messages` (below), if you prefer the Anthropic body shape.
 
 `think` is a **floating alias to the latest thinking model** — it resolved to
-`claude-fable-5` earlier and to `claude-opus-4-8` on 2026-06-22. That is the point of using
+`claude-fable-5` earlier and to `claude-opus-4-8` on one occasion. That is the point of using
 `think` instead of a pinned slug: it always rides the current best thinking model. Do not
 hard-code the resolved model name.
 
@@ -75,7 +75,7 @@ For high-stakes <agent-d> financial strategy reviews, a useful four-panel setup 
 
 Use one shared, self-contained brief and fixed headings so the outputs are comparable. Synthesize, do not average.
 
-## Verified working one-shot commands (<agent-d> profile, re-verified 2026-06-17)
+## Verified working one-shot commands (<agent-d> profile, re-verified one occasion)
 
 ```bash
 # Fable (think)  -- provider is custom:omniroute, NOT custom:omniroute-anthropic
@@ -94,9 +94,9 @@ hermes -z "$PROMPT" --provider openrouter -m openai/gpt-chat-latest --ignore-rul
 hermes -z "$PROMPT" --provider custom:omniroute -m simple --ignore-rules -t ''
 ```
 
-**Config file that governs these:** `/Users/nick/.hermes/profiles/<agent-d>/config.yaml`
+**Config file that governs these:** `$HERMES_HOME/config.yaml`
 
-### Provider/slug corrections (verified 2026-06-17 by direct run)
+### Provider/slug corrections (verified one occasion by direct run)
 
 - **Fable provider alias is `custom:omniroute`** (with `-m think`). `custom:omniroute-anthropic`
   is NOT a valid `hermes -z` provider and fails with `AuthError: Unknown provider
@@ -163,7 +163,7 @@ discovery work without a tight scope and bounded output.
 
 ## Fable `think` timeout on long prompts
 
-Fable via `hermes -z ... -m think` with a very long brief (~3,700 char) can timeout at
+Fable via `hermes -z... -m think` with a very long brief (~3,700 char) can timeout at
 120 seconds (observed once in production). If this happens:
 
 1. Shorten the brief significantly -- cut to core facts + the specific questions.
@@ -181,7 +181,7 @@ Use `terminal()` directly from the parent agent for hermes one-shot calls.
 ## "Could not determine home directory" can also hit parent terminal() calls
 
 The same error can surface intermittently even on plain parent `terminal()` runs of
-`hermes -z` / OpenRouter one-shots (observed 2026-06-17: two consecutive failures, then
+`hermes -z` / OpenRouter one-shots (observed One case: two consecutive failures, then
 success). Fix: prefix the command with `export HOME=/Users/nick` (literal path, the
 sandbox rewrites `$HOME`). It cleared immediately on the next run. Treat it as a flaky
 env-resolution issue, not a broken provider -- do not abandon the reviewer over it.

@@ -4,7 +4,7 @@ Companion to the maintenance procedure. Covers reading live pragmas, benchmarkin
 them honestly on network storage, and the recurring defect where an application
 exposes a tunable that silently reverts.
 
-Measured on a 334 MB SQLite DB behind a Node service on AWS gp3 EBS, 2026-08-03.
+Measured on a 334 MB SQLite DB behind a Node service on AWS gp3 EBS, one occasion.
 
 ---
 
@@ -155,7 +155,7 @@ the case that prompted this).
 Management APIs often need a **dashboard session cookie**, not a bearer/API key:
 
 ```bash
-PW=$(grep -m1 '^INITIAL_PASSWORD=' .env | cut -d= -f2-)
+PW=$(grep -m1 '^INITIAL_PASSWORD='.env | cut -d= -f2-)
 curl -s -c /tmp/ck -X POST $BASE/api/auth/login \
   -H "Content-Type: application/json" -d "{\"password\":\"$PW\"}"
 curl -s -b /tmp/ck -X PATCH $BASE/api/settings/database \

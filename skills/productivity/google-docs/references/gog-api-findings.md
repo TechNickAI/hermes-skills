@@ -1,4 +1,4 @@
-# gog CLI Empirical Findings (tested 2026-06-23)
+# gog CLI Empirical Findings (tested one occasion)
 
 ## Local version: v0.9.0
 

@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
   }
   try {
     return NextResponse.json(getDatabaseSettings());   // <- the fixed code path
-  } catch (error) { ... 500 ... }
+  } catch (error) {... 500... }
 }
 ```
 
@@ -105,7 +105,7 @@ Four independent facts, each catching something the others miss:
 readlink -f ~/src/App/current                              # symlink → new release
 systemctl --user show app -p MainPID --value               # PID changed
 systemctl --user show app -p NRestarts --value             # 0 = clean, not crash-looped
-curl -s .../health | python3 -c "import json,sys;d=json.load(sys.stdin);print(d['system']['uptime'])"
+curl -s.../health | python3 -c "import json,sys;d=json.load(sys.stdin);print(d['system']['uptime'])"
 ```
 
 A **small uptime** confirms a fresh process — a stale one would still be serving

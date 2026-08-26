@@ -1,4 +1,4 @@
-# Runner lessons — 2026-07-20
+# Runner lessons — one occasion
 
 ## Search limits must be configurable end to end
 
@@ -19,7 +19,7 @@ Review-bot comments can contain very large markdown bodies, embedded image data,
 
 ```bash
 gh api repos/{owner}/{repo}/pulls/{pr}/comments \
-  --jq '.[] | [(.id|tostring), .user.login, .path, (.line // .original_line // 0), (.body | gsub("[\\r\\n\\t]+"; " "))] | @tsv'
+  --jq '.[] | [(.id|tostring),.user.login,.path, (.line //.original_line // 0), (.body | gsub("[\\r\\n\\t]+"; " "))] | @tsv'
 ```
 
 Use the analogous issues endpoint for general PR comments. For counting, keep using server-side `--jq '[.[] | select(...)] | length'`; do not transport full bodies at all. If prose is needed, truncate it after TSV projection.

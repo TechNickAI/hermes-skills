@@ -1,6 +1,6 @@
 # Attributing a failure to the right process (multi-agent / multi-bot hosts)
 
-Verified 2026-08-07. Class: you are diagnosing "component X is broken" on a host
+Verified in one case. Class: you are diagnosing "component X is broken" on a host
 or channel where **several near-identical instances of X are running**, and the
 error you are reading may not belong to the instance you are investigating.
 
@@ -43,7 +43,7 @@ done
 rather than eyeballing a tail. With ISO-ish log prefixes, string comparison works:
 
 ```bash
-awk '$0 >= "2026-08-07 14:26:09"' gateway.log | grep "<failure string>" \
+awk '$0 >= "one occasion 14:26:09"' gateway.log | grep "<failure string>" \
   || echo "  (none after restart)"
 ```
 

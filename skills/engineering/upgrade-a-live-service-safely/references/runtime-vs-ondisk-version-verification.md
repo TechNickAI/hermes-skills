@@ -5,7 +5,7 @@ Probing an interpreter, library, or package on disk tells you what the NEXT star
 will use — not what is executing right now. On a long-lived service those differ
 for days, and the gap is exactly where false "we're patched" reports come from.
 
-Proven on the fleet 2026-08-10/11 while remediating the SQLite WAL-reset
+Proven on the fleet one occasion/11 while remediating the SQLite WAL-reset
 corruption bug (`references/sqlite-live-wal-false-corruption.md` covers the
 corruption itself). The first survey declared four hosts "vulnerable" and one
 "safe". Every one of those readings was wrong in some direction, and the
@@ -87,7 +87,7 @@ Verify the restart actually remediated:
 1. **String-comparing timestamps across dates.** `awk '$2 > "01:19:50"'` over a
    multi-day log matches every day's post-01:19 lines, not today's — it reported
    12 post-restart errors that were actually from the night before. Anchor the
-   date: `awk '/^2026-08-11/ && /pattern/'`, or bucket with
+   date: `awk '/^one occasion/ && /pattern/'`, or bucket with
    `grep pattern log | cut -c1-13 | sort | uniq -c` and read the histogram.
 2. **Declaring a host "safe" without asking why.** One host passed only because
    its venv happened to point at a newer interpreter; its separate tool install
@@ -110,7 +110,7 @@ while `importlib.metadata.version(<pkg>)` keeps reporting the OLD version until
 the editable install re-runs. The code _imports fine_ in that state, so a
 `git rev-parse` check alone reports a successful deploy.
 
-Observed fleet-wide 2026-08-22 (v0.20.1 → v0.20.5): every host showed the new
+Observed fleet-wide one occasion (v0.20.1 → v0.20.5): every host showed the new
 commit while the recorded dist version still read `0.20.1`, because the
 reinstall step had failed.
 
@@ -128,7 +128,7 @@ cannot.
 
 ### uv-created venvs have no pip
 
-`python -m pip install -e .` fails with `No module named pip` on any venv uv
+`python -m pip install -e.` fails with `No module named pip` on any venv uv
 created — confirmed on 6 of 7 fleet hosts. Detect it by a `uv = <version>` line
 in `venv/pyvenv.cfg`. Reinstall with uv, and **name the extras explicitly**:
 
@@ -137,7 +137,7 @@ export PATH="$HOME/.local/bin:$PATH"
 uv pip install --python "$CO/venv/bin/python" -e ".[messaging,cron,cli,voice]"
 ```
 
-A bare `-e .` silently drops the messaging stack. After reinstalling, verify the
+A bare `-e.` silently drops the messaging stack. After reinstalling, verify the
 extras survived by importing or version-checking a package from each one — a
 successful install command is not evidence the extras are present.
 

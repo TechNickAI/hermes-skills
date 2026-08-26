@@ -2,7 +2,7 @@
 
 Read this before diagnosing "the subagent timed out" or before promising a caller that a
 long-running delegated task can be given more time. Verified by code read of
-`~/.h‍ermes/h‍ermes-agent/tools/delegate_tool.py` on 2026-08-15.
+`~/.h‍ermes/h‍ermes-agent/tools/delegate_tool.py` on one occasion.
 
 ## There is no per-call timeout parameter
 
@@ -55,7 +55,7 @@ On a timeout with **zero API calls**, the tool writes
 the config'd timeout, tracker snapshot, and every thread's stack. Zero-API-call timeouts mean
 the child never reached its first LLM request — a startup problem, not a slow model.
 
-## Removing a local cap (measured 2026-08-15)
+## Removing a local cap (measured one occasion)
 
 Restoring the upstream default is a one-line edit per profile, but do it with the
 fleet-uniformity discipline: the key can appear in the root config AND every named
@@ -98,7 +98,7 @@ protection, but if a wedged child ever hangs a panel, the lever is
    foreground max 600s; use background + poll beyond that).
 2. **Make partial work survivable.** A hard kill discards the child's summary. Instruct
    children to append findings to a workspace file incrementally, so a killed run still
-   leaves evidence. Real cost of not doing this, 2026-08-15: a review child found a genuine
+   leaves evidence. Real cost of not doing this, One case: a review child found a genuine
    bug in the user's code and was killed before writing a summary — the finding was only
    recoverable because the user happened to see it mid-stream.
 3. **Do not "fix" a slow reviewer by bypassing the configured router.** Slow is not broken;

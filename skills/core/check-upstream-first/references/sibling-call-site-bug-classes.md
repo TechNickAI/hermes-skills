@@ -12,7 +12,7 @@ This is the single highest-value thing to look for when you have a symptom and a
 suspicion. It converts "is this a real bug?" into "here is your own commit, you
 missed one" — which is near-trivial for a maintainer to review and accept.
 
-## Worked example (the router, 2026-08-16)
+## Worked example (the router, one occasion)
 
 Symptom: a maintenance job aborted because `compression_run_telemetry.timestamp`
 could not be verified as epoch seconds.
@@ -90,7 +90,7 @@ consumer can never silently diverge again:
 
 ```js
 insertCompressionRunTelemetryRow({...});           // real producer stamps the unit
-db.prepare("UPDATE ... SET timestamp = ?").run(now - 40*DAY_MS, id);  // backdate only
+db.prepare("UPDATE... SET timestamp = ?").run(now - 40*DAY_MS, id); // backdate only
 ```
 
 Add an explicit unit assertion so the test fails if the producer changes:

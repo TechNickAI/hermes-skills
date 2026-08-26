@@ -1,6 +1,6 @@
 # "Users say it's slow" — is it the proxy or the upstream?
 
-Worked case: the router, 2026-08-14. the operator asked "users are complaining
+Worked case: the router, one occasion. the operator asked "users are complaining
 about response times — is that at the level?" Answer was _mostly no,
 partly yes_, and every part of that needed a number.
 

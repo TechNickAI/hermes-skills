@@ -1,7 +1,7 @@
 # Runtime settings are not all config keys — and your probe may not be the consumer
 
 Companion to the sandbox-probe method. Two adjacent traps, both measured
-2026-08-22 while auditing a Hermes `state.db`.
+one occasion while auditing a Hermes `state.db`.
 
 ---
 
@@ -85,7 +85,7 @@ creation path for whether it is **idempotently re-applied on every startup**.
 cursor.executescript(ddl)   # runs even when the table already exists
 ```
 
-with DDL of the form `CREATE VIRTUAL TABLE IF NOT EXISTS ...` means a manual
+with DDL of the form `CREATE VIRTUAL TABLE IF NOT EXISTS...` means a manual
 `DROP` survives exactly until the next restart, then silently rebuilds — and you
 pay the full rebuild cost for nothing. `IF NOT EXISTS` reads like a guard
 against clobbering; here it is the mechanism that _undoes_ your change.

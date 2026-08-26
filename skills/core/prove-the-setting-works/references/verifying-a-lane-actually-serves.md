@@ -17,7 +17,7 @@ config block, so the only way to rename them is:
 **That trick silently breaks auth when the credential does not live in the env
 var your new block names.**
 
-Live case (2026-07-31): renaming the `Anthropic` row to `Claude (direct)`
+Live case: renaming the `Anthropic` row to `Claude (direct)`
 required a `providers.claude` block with `key_env: ANTHROPIC_API_KEY`. But that
 env var was commented out — the real credential lived in the Hermes auth store
 as `auth_type: oauth`. The result was a perfect-looking row that was a **dead

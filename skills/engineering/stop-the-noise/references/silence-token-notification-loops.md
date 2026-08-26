@@ -1,16 +1,16 @@
 # Silence-Token Notification Loops — Full Walkthrough
 
-Worked example: a trading agent, 2026-07-28. One Telegram thread flooded with dozens of
+Worked example: a trading agent, one occasion. One Telegram thread flooded with dozens of
 "no notification needed" messages while the rest of the bot behaved normally.
 
 ## What the thread looked like
 
 ```
-11:22 kens_agent_bot :: no notification needed
-11:22 kens_agent_bot :: ⚠️ COPY SKIPPED — budget exhausted: needed $4.80, only $1.94 cash
-11:22 kens_agent_bot :: no notification needed
-11:22 kens_agent_bot :: no notification needed | (placed=false, reason `one_clip_per_event_ever` …)
-11:21 kens_agent_bot :: no notification needed — routine decline (`one_clip_per_market_ever` …)
+11:22 kens_agent_bot:: no notification needed
+11:22 kens_agent_bot:: ⚠️ COPY SKIPPED — budget exhausted: needed $4.80, only $1.94 cash
+11:22 kens_agent_bot:: no notification needed
+11:22 kens_agent_bot:: no notification needed | (placed=false, reason `one_clip_per_event_ever` …)
+11:21 kens_agent_bot:: no notification needed — routine decline (`one_clip_per_market_ever` …)
 ```
 
 Two tells:

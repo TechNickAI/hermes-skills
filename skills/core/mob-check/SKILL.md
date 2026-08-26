@@ -194,7 +194,7 @@ only, so `uv run` and plain `python3` both work:
 ```bash
 SKILL_DIR="<directory this SKILL.md was loaded from>"
 python3 "$SKILL_DIR/scripts/rank.py" --freshness-mode balanced_recent --top 25 < items.json > ranked.json
-# or: uv run "$SKILL_DIR/scripts/rank.py" ...
+# or: uv run "$SKILL_DIR/scripts/rank.py"...
 ```
 
 Input JSON shape:
@@ -259,7 +259,7 @@ is a brief that reads like a sharp human analyst, not an SEO blog or an evidence
    brief ends at the closing line. Nothing below it.
 6. **Transform, do not dump.** The ranker's `ranked[]` and `why` fields are evidence for
    you to read, not output to paste. Turn them into prose. If your draft contains the
-   literal ranker JSON, a `(score N ...)` tuple, or a raw cluster list, you dumped
+   literal ranker JSON, a `(score N...)` tuple, or a raw cluster list, you dumped
    instead of synthesizing. Regenerate.
 7. **Lead with engagement and corroboration.** A claim corroborated across three
    sources, or carried by a clearly high-traffic thread, leads. Quote the actual

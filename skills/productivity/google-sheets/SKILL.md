@@ -193,11 +193,11 @@ workaround: `"'" + formula` renders as broken-looking literal formula text.
 ### Mandatory verification before handing over
 
 1. **Literal-formula and error scan** — read every tab with
-   `gog sheets get ... --render FORMATTED_VALUE` and assert no displayed cell starts
+   `gog sheets get... --render FORMATTED_VALUE` and assert no displayed cell starts
    with `=` or `'=`, and none unexpectedly contain `#REF!`, `#ERROR!`, `#NAME?`,
    `#DIV/0!`, `#VALUE!`, `#NUM!`, or `#N/A`.
 2. **Formula policy** — for a live-formula workbook, read the same range with
-   `gog sheets get ... --render FORMULA` and confirm required formulas remain present.
+   `gog sheets get... --render FORMULA` and confirm required formulas remain present.
    For an intentionally static workbook, instead confirm formula count is zero and
    compare critical totals against independently computed expectations.
 3. **Visual QA** — export each tab to PDF and inspect **every page**. Use a multipage
@@ -278,7 +278,7 @@ artifact still exists after cleanup.
    `--gog-home <dir>` (or the `GOG_CLIENT` / `GOG_HOME` env vars).
 
 8. **Sharing is externally consequential.** Permissions can be revoked, but
-   `scripts/gworkspace.py share SHEET_ID --email ... --role ...` grants real Drive
+   `scripts/gworkspace.py share SHEET_ID --email... --role...` grants real Drive
    access. Confirm recipient and role with the user before using it.
 
 9. **Array index vs. A1 row number (off-by-one).** Returned values are a 0-indexed array

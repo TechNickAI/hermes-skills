@@ -408,7 +408,7 @@ the host-side evidence imply the reporting path works.
   non-existent problem: `references/false-corruption-from-readonly-wal.md`.
 - 🔴 **External mutation while the application is running — CONFIRMED to silently
   REVERT, and the read-back lies.** A process with cached rows can flush stale
-  state over external writes. Observed 2026-08-03 on the router: updated a combo row
+  state over external writes. Observed on the router: updated a combo row
   in `storage.sqlite` while the service ran, `SELECT`-verified the new value on
   disk (it was there), restarted, and the row came back with the ORIGINAL value.
   The service holds combos in memory and wrote its stale copy over the change on
@@ -426,7 +426,7 @@ the host-side evidence imply the reporting path works.
 - **Aborting on an empty table and stopping there.** The abort is correct, but it is
   only half the job. A 0-row table whose producer and cleanup disagree on units means
   **the retention sweep has never worked** — the cleanup is inert, not idle. Observed
-  2026-08-16 on the router: `compressionRunTelemetry` stamps `Date.now()`
+  one occasion on the router: `compressionRunTelemetry` stamps `Date.now()`
   (milliseconds) while `cleanupCompressionRunTelemetry` computed a **seconds** cutoff,
   so `timestamp < cutoff` could never match. That function exists specifically to bound
   storage and prevent OOM, so the guard had never fired. The table reading 0 rows is
@@ -501,7 +501,7 @@ REAL and confirmed (not the read-only artifact above — falsify with a second
 independent copy first). Covers: why the Hermes "session storage could not be
 written… often a full disk" error text misleads (host had 40 GB free while the
 actual fault was b-tree corruption), localizing damage per-table so the intact
-tables can be merged forward, why `sqlite3 .recover` and row-by-row index salvage
+tables can be merged forward, why `sqlite3.recover` and row-by-row index salvage
 both dead-end, and the restore-from-restic + merge-forward procedure that
 recovered 20 h of post-backup writes with ~90 s downtime — including the
 DETACH-before-write rule that stops one corrupt-table read error from poisoning

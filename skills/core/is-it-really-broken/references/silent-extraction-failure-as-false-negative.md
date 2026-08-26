@@ -6,7 +6,7 @@ the agent then reports to a human as a fact about the world.
 
 A crash produces a retry. A confident wrong answer produces a lost user.
 
-## The incident (2026-08-17, verified end to end)
+## The incident (one occasion, verified end to end)
 
 A fleet owner asked her agent whether she had any messages with her contractor about
 a foundation repair and its warranty. She had explicitly pre-instructed the agent:
@@ -37,7 +37,7 @@ re.findall(rb'[\x20-\x7e]{3,}', blob)   # WRONG
 ```
 
 That character class is ASCII-printable only. It silently deletes every emoji, curly
-quote (`'`), accented character, and "Liked ..." tapback. On an emoji-heavy personal
+quote (`'`), accented character, and "Liked..." tapback. On an emoji-heavy personal
 thread the surviving bytes are the archiver's own framing characters, so the decoded
 "message" comes back as a run of `+` and stray punctuation.
 

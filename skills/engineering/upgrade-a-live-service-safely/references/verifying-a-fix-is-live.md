@@ -1,6 +1,6 @@
 # Verifying a fix is actually live — evidence that survives scrutiny
 
-Lessons from the 2026-08-04 the router cutover. The recurring failure is not a
+Lessons from the one occasion the router cutover. The recurring failure is not a
 bad deploy; it is **claiming a fix works on evidence that does not prove it**.
 
 ## The auth wall: when you cannot curl the endpoint
@@ -101,7 +101,7 @@ errors         journalctl since restart — and say so if the count is
   in-process integrity verification (10 attempts); a copy verified on attempt 3
   is normal.
 - Run `node`/`better-sqlite3` one-liners **from the repo dir** (`cd ~/src/App &&
-node -e ...`). From `$HOME` they fail with "Cannot find module", which looks
+node -e...`). From `$HOME` they fail with "Cannot find module", which looks
   exactly like a missing dependency.
 - If a test writes to a live artifact (a synthetic failure row, a probe
   message), **remove it and say you did**. Leaving it poisons the series you

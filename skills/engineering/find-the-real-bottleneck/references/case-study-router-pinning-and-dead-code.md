@@ -1,6 +1,6 @@
 # Case study: pinning, dead-code schedulers, and live-DB mutation (the router)
 
-Concrete worked examples of the SKILL.md phases, from a 2026-08-03 investigation
+Concrete worked examples of the SKILL.md phases, from a one occasion investigation
 of a self-hosted LLM router. The _patterns_ generalize; the file/line references
 are specific to that codebase (`the router` skill covers the product itself).
 
@@ -10,10 +10,10 @@ A ~$213/day spend spike looked like "lots of upstream errors causing failover."
 Arithmetic said otherwise:
 
 ```
-sessions pinned to the PAID model      : 6
-paid calls those 6 produced            : 452  (105.4M tokens, ~$211/24h)
-amplification                          : 75x per ignition
-sessions pinned to the FREE rung-1     : 1,477
+sessions pinned to the PAID model: 6
+paid calls those 6 produced: 452 (105.4M tokens, ~$211/24h)
+amplification: 75x per ignition
+sessions pinned to the FREE rung-1: 1,477
 ```
 
 The routing ladder was working correctly on 1,477 sessions. The cost came from
@@ -49,9 +49,9 @@ just a bug? seems so basic"_, restating the mechanism louder does not land. What
 lands is **why a competent author would have built it this way**, which is
 usually recorded in the guard's own comment, often naming the incident:
 
-> "incident 2026-06-21: … pinned to a deepseek connection with no active
+> "incident One case: … pinned to a deepseek connection with no active
 > credentials → instant fail, never falling through"
-> "incident 2026-06-22: laila stuck on a throttled claude account …"
+> "incident One case: laila stuck on a throttled claude account …"
 
 Reading those revealed both guards asked _"is the pinned target reachable?"_ —
 neither asked _"has a better target recovered?"_ That reframes the finding from

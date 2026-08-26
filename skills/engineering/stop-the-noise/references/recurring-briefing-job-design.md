@@ -5,7 +5,7 @@ changed** — model releases, dependency updates, competitor moves, price change
 advisories. These jobs fail in characteristic ways that are not obvious until a human is
 already annoyed.
 
-Derived from the 2026-08-15 model-watch build (the operator/the operations agent), where every rule below was a
+Derived from a model-watch build (the operator/the operations agent), where every rule below was a
 correction the operator issued after seeing real output.
 
 ---
@@ -40,7 +40,7 @@ definitive allowlist of what the job may report on.
 
 ## 2. The actionability gate — the single highest-value rule
 
-> the operator, 2026-08-15: "I don't want to see a notification every day that it runs where I don't
+> the operator, One case: "I don't want to see a notification every day that it runs where I don't
 > have to do anything. That's noise."
 
 For every candidate finding the job asks: **does this change what the human would DO?**
@@ -81,7 +81,7 @@ This is the rule that lets the gate be aggressive without losing institutional m
 
 ## 3. Know which of your inputs are self-updating
 
-**The defect that got caught, 2026-08-15:** the job recommended "upgrade
+**The defect that got caught, One case:** the job recommended "upgrade
 `~google/gemini-flash-latest` to Gemini 3.7 Flash". That ID is a _floating alias_ — it already
 resolved to Gemini 3.7 Flash at the identical price. The job told the user to change a thing
 into itself.
@@ -104,7 +104,7 @@ reportable only when:
 
 ### Teach the PATTERN, never a hardcoded list
 
-**the operator's follow-up correction, 2026-08-15** (after the first fix enumerated the four floating
+**the operator's follow-up correction, one occasion** (after the first fix enumerated the four floating
 IDs then in the stack): _"We're going to be adding more 'latest' prompts. I think it's a
 terrible idea for you to hard code the specific models around that, and instead, you should
 describe the pattern."_
@@ -156,7 +156,7 @@ job re-flags it as a defect every single run.
 ## 3b. Budget the search, and never narrate a tool failure to the human
 
 Open-ended **discovery** jobs (the weekly half of the split) have no bounded input set, so
-they can loop on searching in a way the bounded daily job never will. Observed 2026-08-15: the
+they can loop on searching in a way the bounded daily job never will. Observed in one case: the
 weekly job made **50 repeated `web_search` calls**, tripped the Hermes per-turn guardrail
 (`loop_web_search_cap`, enforced in `agent/tool_guardrails.py` — a cap of 0 disables it), died
 with no analysis produced, and then delivered its own tool error as the user-facing response:

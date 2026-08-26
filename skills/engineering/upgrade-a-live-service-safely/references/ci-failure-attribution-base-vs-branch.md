@@ -160,7 +160,7 @@ name logs blank lines when the check does not yet exist, then exhausts its
 iterations having learned nothing. Distinguish explicitly:
 
 ```bash
-if [ -n "$out" ]; then echo "$out"; case "$out" in *pass*) ...;; *fail*) ...;; esac
+if [ -n "$out" ]; then echo "$out"; case "$out" in *pass*)...;; *fail*)...;; esac
 else [ $((i % 10)) -eq 0 ] && echo "still queued, gate not scheduled yet"
 fi
 ```

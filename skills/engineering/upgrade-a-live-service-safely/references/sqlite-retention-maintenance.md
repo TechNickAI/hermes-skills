@@ -1,6 +1,6 @@
 # the router SQLite retention-maintenance cron
 
-Created 2026-08-03: a scheduled cron job that prunes the `storage.sqlite`
+Created One case: a scheduled cron job that prunes the `storage.sqlite`
 DB on a weekly cadence, deleting rows past a 7-day retention window across 12
 telemetry/audit tables, then VACUUMing to reclaim space. Distinct from monitoring
 (read-only probes) and deployment (fresh install) — this is the **mutate-the-live-DB
@@ -61,11 +61,11 @@ Each table has a specific timestamp column and format. The cutoff instant is
 | Representation               | Example                    | Used by                     |
 | ---------------------------- | -------------------------- | --------------------------- |
 | ISO UTC text                 | `2026-07-27T13:51:00.000Z` | most tables                 |
-| SQL-style UTC text           | `2026-07-27 13:51:00`      | `xp_audit_log`              |
+| SQL-style UTC text           | `2026-01-15 13:51:00`      | `xp_audit_log`              |
 | epoch milliseconds (integer) | `1753624260000`            | `domain_cost_history`       |
 | epoch seconds (integer)      | `1753624260`               | `compression_run_telemetry` |
 
-Table/column/format mappings (verified 2026-08-03):
+Table/column/format mappings (verified one occasion):
 
 | Table                       | Column                         | Format                              |
 | --------------------------- | ------------------------------ | ----------------------------------- |
@@ -117,7 +117,7 @@ representation.
 
 ### 4. Delete expired rows (service stopped)
 
-- One `better-sqlite3` transaction, parameterized `DELETE ... WHERE <col> < ?`.
+- One `better-sqlite3` transaction, parameterized `DELETE... WHERE <col> < ?`.
 - Save `.changes` per table.
 - If any statement fails, transaction rollback → recovery.
 
@@ -174,7 +174,7 @@ tell the user to set it manually.
 ### 🔴 Create it RECURRING, then trigger the first run manually
 
 **Do NOT use the "one-shot ISO timestamp ~5 minutes out, reschedule later"
-pattern.** It was tried on 2026-08-03 and lost the job entirely:
+pattern.** It was tried on one occasion and lost the job entirely:
 
 - A subagent took **13.5 minutes** to register a job scheduled to fire in 5, so
   the window had already passed by the time it existed.
@@ -185,7 +185,7 @@ pattern.** It was tried on 2026-08-03 and lost the job entirely:
 A one-shot is spent by any trigger, whether or not the work ran. Instead:
 
 ```
-cronjob(action="create", schedule="0 9 * * 0", ...)   # real recurring cadence
+cronjob(action="create", schedule="0 9 * * 0",...) # real recurring cadence
 cronjob(action="run", job_id="<id>")                  # immediate validation run
 ```
 
@@ -270,13 +270,13 @@ recovery procedure, and the report format. The full prompt for the first job is
 
 - SSH alias `the router` → `ubuntu@<router-host>`.
 - Remote login shell is **zsh** — every remote bash payload must use:
-  `ssh the router 'bash -s' <<'EOF' ... EOF`
+  `ssh the router 'bash -s' <<'EOF'... EOF`
 - Filter harmless SSH/login noise: `grep -viE "gitstatus|setopt|exec zsh|GITSTATUS"`
   while preserving the real exit status.
 - For complex Python/JS probes, `scp` a file rather than inline heredocs —
   nested quotes break (same lesson as `router-outage-postmortem.md`).
 
-## Job registered (validated 2026-08-03)
+## Job registered (validated one occasion)
 
 - **job_id**: `dcd5beba61b6`
 - **Name**: `the router-weekly-db-maintenance`

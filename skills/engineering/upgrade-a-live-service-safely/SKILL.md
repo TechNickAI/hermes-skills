@@ -56,7 +56,7 @@ provisioned purely to survive a monthly build.
 🔴 **Adapt the packaged script by READING the unit, not guessing it.** One
 `systemctl --user show <unit> -p ExecStart -p WorkingDirectory -p EnvironmentFiles --value`
 answers entry point, env file, and working directory. Three failed staging runs
-on 2026-08-16 all came from skipping it: `source`-ing a file that systemd loads
+all came from skipping it: `source`-ing a file that systemd loads
 via `EnvironmentFile=` (that is NOT shell — unquoted parens in user-agent values
 are a bash syntax error but valid to systemd), running the entry relative to the
 release root instead of `WorkingDirectory`, and inferring artifact layout from a
@@ -86,7 +86,7 @@ sub-package-failure trap in `references/ci-offload-build-and-stage.md`.
 artifact.** Two failed rounds on the same check means stop and switch to a
 BEHAVIOURAL gate — make the program do the thing (open the DB, serve the
 request) rather than inspecting what its compiled output looks like. Four CI
-builds were burned on 2026-08-14 iterating a static bundler check against an
+builds were burned iterating a static bundler check against an
 artifact that was correct every time, while the substance signals stayed green
 in every failed run. Fixtures you write yourself cannot falsify your own mental
 model; only a known-bad and a known-good REAL artifact can. Full case, plus the
@@ -133,7 +133,7 @@ modifications lock for 6 hours) so you size once.
 same change.** This is the step that gets skipped and it is the dangerous one.
 Rules written during the incident describe the hack as permanent truth, and once
 the hack is gone they become blind spots pointed at exactly the failure you most
-need to see. Found live on 2026-08-14 after removing a tmpfs DB mount: a
+need to see. Found live after removing a tmpfs DB mount: a
 watchdog charter still said _"the DB is on tmpfs and gets fully rewritten, so
 NEVER trust `quick_check` on the live file"_ — true while the hack existed, but
 now it means **a real corruption signal gets dismissed as normal**. Alongside it,
@@ -146,7 +146,7 @@ written to silence.
 
 🔴 **Before a deploy, back up the state DB with the engine that WRITES it, and
 prove each copy by opening it.** Two plausible methods produced corrupt copies
-on 2026-08-14: the host `python3` stdlib sqlite (3.45.1) made a backup of a DB
+on one occasion: the host `python3` stdlib sqlite (3.45.1) made a backup of a DB
 written by better-sqlite3 3.53.3 that **both** engines then read as
 `SQLITE_CORRUPT`, and `VACUUM INTO` failed the same way. When the app is on a
 full-rewrite driver (sql.js), every reader also hits **torn reads** — the live
@@ -161,7 +161,7 @@ opening each copy). Always land one copy **off-host** and grab the service
 `.env` alongside it — config is what the user cannot rebuild.
 
 **A migration to a new deploy mechanism can delete the working one.** On
-2026-08-03 a commit titled `ci: move owner-specific builds to the ops repo`
+one occasion a commit titled `ci: move owner-specific builds to the ops repo`
 removed `standalone-build.yml` from the repo — but the new ops repo only held an
 unfinished _container_ build, while the router still ran an unpacked standalone
 bundle under `releases/`. Net effect: no way to produce a shippable artifact
@@ -173,7 +173,7 @@ new path is proven, and confirm with the user which mechanism is actually live
 before adopting the new one.
 
 🔴 **This recurs, and the second time it recurred as a RESTORE-THEN-DELETE-AGAIN
-pair.** On 2026-08-14, `<sha>` _restored_ `standalone-build.yml` and then
+pair.** On one occasion, `<sha>` _restored_ `standalone-build.yml` and then
 `<sha>` ("ci: keep fork deployment automation in the ops repo") deleted it
 again — so the branch HEAD had no tarball build while the ops repo still shipped
 only a container. Skimming the log for "was it restored?" gives a false yes.
@@ -199,7 +199,7 @@ also that workflows can exist but be `disabled_manually`, which `gh workflow
 list --all` reveals and a tree listing does not.
 
 **Verify that commits the live box has but the new branch "lacks" are real
-losses.** `git rev-list <newref>..<deployed-sha>` listed two on 2026-08-14. One
+losses.** `git rev-list <newref>..<deployed-sha>` listed two on one occasion. One
 was a feature **reapplied** during the rebase under different SHAs — confirm by
 grepping the _feature string_ in the new tree (`git show origin/<ref>:<path> |
 grep -c FEATURE_FLAG`), never by SHA ancestry, since a rebase rewrites them.
@@ -212,7 +212,7 @@ assert works by running it against the currently-deployed bundle — the new
 strings must be absent there and the pre-existing one present:
 
 ```
-FOUND    : <OLD_FIX_SYMBOL>          ← old fix, already shipped
+FOUND: <OLD_FIX_SYMBOL> ← old fix, already shipped
 not found: no such (module|table): dbstat   ← today's change, correctly absent
 not found: <NEW_FLAG>             ← today's change, correctly absent
 ```
@@ -224,7 +224,7 @@ block, and `bash -n` it.
 
 🔴 **An assert validated only against FIXTURES is not validated.** Fixtures you
 write encode the same mental model as the code you wrote, so they agree with
-each other and are wrong together. On 2026-08-14 three revisions of one release
+each other and are wrong together. On one occasion three revisions of one release
 gate each FAILED A CORRECT ARTIFACT while passing 18/18 of their own fixture
 tests — wrong chunk, then a generic webpack helper present in both bundles, then
 per-file lookup of module ids that are global to the chunk graph. Each round
@@ -264,7 +264,7 @@ a fallback ladder announces itself immediately above a cheerful "database
 ready". Full recipe, asserts, and per-PID verification:
 `references/native-module-completeness-in-bundles.md`.
 
-🔴 **REFINEMENT (2026-08-14): "missing native module" is often a BUNDLING defect,
+🔴 **REFINEMENT (one occasion): "missing native module" is often a BUNDLING defect,
 not an absent file.** Verified end-to-end on the live host: the addon was
 present at v13.0.1, `linux-arm64.node` loaded by hand, and `createRequire`
 resolved it from all five plausible anchors — yet the app logged `Cannot find
@@ -290,7 +290,7 @@ when it is still vulnerable — and makes "run the updater" a **false remedy**.
 The per-PID probes (`/proc/<pid>/exe` on Linux, `lsof` txt segment on macOS), the
 `(deleted)` tell, and the restart-not-upgrade conclusion are in
 `references/runtime-vs-ondisk-version-verification.md`. Read it before scoping
-any remediation as an upgrade — on 2026-08-11 it collapsed a four-host
+any remediation as an upgrade — on one occasion it collapsed a four-host
 coordinated upgrade into four restarts.
 
 **Restarting a busy service over SSH needs a detached script, and success means
@@ -307,7 +307,7 @@ systemd's `WorkingDirectory` points at the nested path. The assembly step can
 leave that nested copy STALE while the outer one rebuilds cleanly, so a current
 release serves weeks-old UI code while the release dir name, mtime, `BUILD_SHA`,
 and health-endpoint version all read correct. A feature merged before the stale
-cut renders fine, "proving" the deploy is healthy. On 2026-08-11 this hid a
+cut renders fine, "proving" the deploy is healthy. On one occasion this hid a
 missing dashboard provider for three weeks. **Compare `BUILD_ID` at BOTH levels
 as a standing post-cutover check** — mismatch means the served bundle is stale,
 and re-extracting the same (already-correct) CI artifact into a fresh release
@@ -365,7 +365,7 @@ replaces the previous good one: `references/durability-mechanism-verification.md
 Also size tmpfs against the engine's WRITE AMPLIFICATION, not the file size —
 outgrowing the mount makes SQLite return exactly a disk I/O error.
 
-⚠️ **CORRECTION (2026-08-13) to the earlier reading of this same incident.** A
+⚠️ **CORRECTION (one occasion) to the earlier reading of this same incident.** A
 prior pass concluded "the `cp` corrupted the persist twin, the RAM copy stayed
 clean." **Both files were fine.** Snapshots of each passed `integrity_check` 3/3
 — the malformed readings were torn reads of live files, in BOTH directions
@@ -452,7 +452,7 @@ _idle_ downstream client from a genuinely broken one.
 ## Read the host's own runbook before you build
 
 **And load this skill before you plan the deploy, not after the plan is
-written.** On 2026-08-03 a full cutover plan was drafted from first principles —
+written.** On one occasion a full cutover plan was drafted from first principles —
 backup, unpack, flip, verify — and only when the user asked "there is a skill
 for this, are you using it?" did the session load it. The skill already carried
 a proven `scripts/stage_and_smoke.sh` with a **test-port staging step against a
@@ -465,7 +465,7 @@ Before diagnosing or building anything on a host you did not configure, look for
 operator docs **on the box**: `/root/CLAUDE.md`, `~/CLAUDE.md`, `~/README`,
 `~/scripts/`, `~/*-runbook.md`, and any watchdog's journal.
 
-In the 2026-07-26 outage the host carried a `BUILD GOTCHAS` section naming the
+In the one occasion outage the host carried a `BUILD GOTCHAS` section naming the
 exact trap that caused the incident (Turbopack OOMs the box; use webpack), plus
 a ready-made `~/build-clean.sh`. It was never read. Three documented rules were
 violated and the fleet went down.
@@ -499,10 +499,10 @@ samples, so post-mortems are almost always possible:
 
 ```bash
 sar -r -f /var/log/sysstat/sa<DD> -s 22:00:00 -e 23:00:00   # memory
-sar -S -f /var/log/sysstat/sa<DD> ...                       # swap used
-sar -W -f /var/log/sysstat/sa<DD> ...                       # swap in/out rate
-sar -u -f /var/log/sysstat/sa<DD> ...                       # cpu (%nice = build)
-sar -q -f /var/log/sysstat/sa<DD> ...                       # load + blocked
+sar -S -f /var/log/sysstat/sa<DD>... # swap used
+sar -W -f /var/log/sysstat/sa<DD>... # swap in/out rate
+sar -u -f /var/log/sysstat/sa<DD>... # cpu (%nice = build)
+sar -q -f /var/log/sysstat/sa<DD>... # load + blocked
 journalctl -k -b -1 | grep -i "out of memory\|killed process"
 ```
 
@@ -568,9 +568,9 @@ Gather these first. Each one has burned a real deploy.
 ```bash
 TS=$(date +%Y%m%dT%H%M%SZ)
 git rev-parse HEAD > ~/rollback-HEAD-$TS.txt
-cp .env ~/rollback-env-$TS.bak
+cp.env ~/rollback-env-$TS.bak
 systemctl --user cat <svc> > ~/rollback-unit-$TS.service
-tar czf ~/rollback-build-$TS.tar.gz .build dist     # the artifact itself
+tar czf ~/rollback-build-$TS.tar.gz.build dist # the artifact itself
 # plus a DB/data backup if the upgrade runs migrations
 ```
 
@@ -612,7 +612,7 @@ artifact:
 ```bash
 # on a BUILD host — MUST match the target's OS and arch
 npm ci && npm run build:release
-tar czf app-build.tar.gz .build dist
+tar czf app-build.tar.gz.build dist
 
 # on the live host: unpack into a NEW release dir, then flip
 scp app-build.tar.gz user@prod:/tmp/
@@ -629,9 +629,9 @@ You cannot build a Linux artifact on macOS just because both are arm64. Native
 addons compile or vendor per-platform:
 
 ```bash
-find .build -name '*.node' | wc -l          # count native binaries
+find.build -name '*.node' | wc -l # count native binaries
 ls node_modules/@img                        # sharp ships per-platform variants
-find . -path '*better-sqlite3*' -name '*.node'
+find. -path '*better-sqlite3*' -name '*.node'
 ```
 
 `better-sqlite3` compiles against the build platform; `sharp` installs only the
@@ -786,7 +786,7 @@ behind a 15–25 min Next.js compile. The honest shape:
 ## Pitfalls
 
 - **Load this skill and its `scripts/` BEFORE hand-rolling a deploy step.** In
-  the 2026-08-03 session the agent hand-wrote staging and cutover logic, and the
+  the one occasion session the agent hand-wrote staging and cutover logic, and the
   user had to ask "there is a skill for this are you using it" — twice. The
   packaged `scripts/stage_and_smoke.sh` already encodes the DB-copy retry, the
   test-port smoke gate, and the live-untouched assertions that the hand-rolled
@@ -844,7 +844,7 @@ behind a 15–25 min Next.js compile. The honest shape:
   or `no matches found:`. Use `ssh host 'bash -s' <<'EOF'` for anything
   bash-specific. Related: **macOS bash is 3.2** and has no `mapfile`, so test
   bash-5 constructs on the Linux host, not locally.
-- **Sourcing an `EnvironmentFile` with `set -a; . .env`.** systemd's format
+- **Sourcing an `EnvironmentFile` with `set -a;..env`.** systemd's format
   permits unquoted values containing parens/spaces (e.g.
   `UA=claude-cli/2.1.207 (external, cli)`) that POSIX shell sourcing chokes on.
   Parse it line-by-line into an env array instead:
@@ -867,7 +867,7 @@ behind a 15–25 min Next.js compile. The honest shape:
   that aborts partway (a failed `assert`, an anchor already rewritten) leaves the
   file unmodified, and an un-gated `scp` on the next line ships the **unadapted
   template** — which then runs against `REPO="OWNER/REPO"`. Gate the upload on
-  the adaptation succeeding (`python3 patch.py && scp ...`) and verify the
+  the adaptation succeeding (`python3 patch.py && scp...`) and verify the
   _uploaded_ file, not the local one: `ssh host 'grep -E "^(REPO|MARKER)="
 /tmp/script.sh; bash -n /tmp/script.sh'`. Also **copy templates verbatim with
   `cp`, then patch** — round-tripping a script through a line-numbered reader and
@@ -889,7 +889,7 @@ behind a 15–25 min Next.js compile. The honest shape:
   failure. And when a check fails, suspect the check itself before the subject:
   reproduce with the harness removed (write to a file instead of a pipe) to
   separate a real defect from a measurement artifact.
-- **`find ... | head -N | while read` in a `set -e` script.** `head` closes the
+- **`find... | head -N | while read` in a `set -e` script.** `head` closes the
   pipe, `find` dies with SIGPIPE, and the script aborts with **exit 141** partway
   through — looking like the probe "found nothing" when it never finished. Write
   results to a temp file, then loop over the file. Related: `find <no matches> |
@@ -902,7 +902,7 @@ xargs file` invokes `file` with zero args, which dumps its full usage block
 - **Fallback chains whose first rung points at the same host that just died.**
   When auditing outage resilience, confirm at least one rung leaves the failing
   system entirely.
-- **Proposing releases+symlink to the operator.** He rejected it outright on 2026-08-11:
+- **Proposing releases+symlink to the operator.** He rejected it outright on one occasion:
   _"the releases thing is overkill and just winds up piling up shit. I don't
   need an atomic rollback, so let's just do one directory."_ Offer **one
   directory + `git reset --hard <sha>` + a deploy lock** (or Docker) instead —
@@ -965,7 +965,7 @@ xargs file` invokes `file` with zero args, which dumps its full usage block
   "read-only" checker may still need write access somewhere (`git fetch` writes
   `.git/FETCH_HEAD`); route just that call through the tree owner.
 - **Changing a function signature without updating its test double.** Adding a
-  `write=` kwarg broke `monkeypatch.setattr(mod, "_git", lambda *a: ...)`; every
+  `write=` kwarg broke `monkeypatch.setattr(mod, "_git", lambda *a:...)`; every
   call raised `TypeError`, `main()` swallowed it as a failed check and returned
   non-zero. Stubs need `*a, **k`.
 - **Citing "zero errors" from a job that never ran.** A forced cron run that
@@ -978,7 +978,7 @@ xargs file` invokes `file` with zero args, which dumps its full usage block
   exists, and the credential — not the service — is the layer that actually
   stops money. Playbook, including red-teaming your own fence, in
   `references/decommissioning-the-old-host.md`. That reference also covers three
-  traps found on the 2026-08-13 shutdown: a format-match credential sweep on a
+  traps found on the one occasion shutdown: a format-match credential sweep on a
   SHARED home scrubs the CO-TENANT's live keys (and the damage is invisible
   because the running gateway holds creds in memory while only its cron jobs
   401); the agent's own internal cron keeps taking EXTERNAL actions (a job was
@@ -1012,7 +1012,7 @@ xargs file` invokes `file` with zero args, which dumps its full usage block
   found first.
 - **Re-reporting the same blocker instead of escalating its COST.** When a
   deploy is gated on a user decision, the blocker does not stay static — the
-  unfixed defect keeps causing incidents. On 2026-08-14 I reported the identical
+  unfixed defect keeps causing incidents. On one occasion I reported the identical
   "no standalone artifact path" blocker three times across a session while, in
   parallel, the router was restarting on a ~12h cycle, a watchdog was paging the
   owner, and an automated escalation was burning Opus calls hunting a cause we
@@ -1056,7 +1056,7 @@ xargs file` invokes `file` with zero args, which dumps its full usage block
 - 🔴 **Sort deploy gates by what they READ, and run everything checkable before
   the drain.** A gate that only needs the new tree — module imports, env/config
   consistency, hardcoded path pins, dependency resolution — must run BEFORE the
-  service is stopped. Verified 2026-08-13: a money-path import check correctly
+  service is stopped. Verified in one case: a money-path import check correctly
   refused a deploy over a stale hardcoded path from the previous host, but it ran
   _after_ the drain, so a correct refusal left the agent down with nothing
   scheduled to restart it. "Refused to deploy" and "took the service down" must
@@ -1085,7 +1085,7 @@ xargs file` invokes `file` with zero args, which dumps its full usage block
   `references/release-value-triage-and-post-upgrade-measurement.md`.
 - 🔴 **A merge can land INERT.** When a component grows from one file into a
   package, the sync/mirror that deploys it still knows only the file it was
-  written for. Measured 2026-08-24: the entry point deployed as the new version
+  written for. Measured on one run: the entry point deployed as the new version
   while both modules it imports were MISSING from the host — 420 runs, all
   success, nothing in any alarm, and the just-merged feature was not running.
   Defensive imports (`try/except` around the new modules, so a partial install
@@ -1102,7 +1102,7 @@ xargs file` invokes `file` with zero args, which dumps its full usage block
 - 🔴 **Rolling ONE upgrade across N hosts is its own discipline.** Survey every
   host's `git status --porcelain` BEFORE touching any of them, and make the
   deploy script REFUSE a dirty tree so a batch loop fails closed on the one box
-  that needs a human. On 2026-08-22 exactly one host of eight carried 66 lines
+  that needs a human. On one occasion exactly one host of eight carried 66 lines
   of uncommitted owner fixes that existed nowhere else — including the fix
   stopping an agent from texting pairing codes to the owner's real contacts. A
   hard reset would have silently reverted them, and the tree looked like

@@ -1,4 +1,4 @@
-# <agent-a> MEMORY.md cleanup — 2026-06-05
+# <agent-a> MEMORY.md cleanup — one occasion
 
 ## Scope
 

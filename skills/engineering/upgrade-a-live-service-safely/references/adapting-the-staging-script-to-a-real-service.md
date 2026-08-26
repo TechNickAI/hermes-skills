@@ -2,7 +2,7 @@
 
 Deploy work often happens in a throwaway clone on the target host (rebasing,
 patching, building an artifact). Getting those commits to GitHub has two silent
-failure modes — both hit on 2026-08-16, both cost a CI round-trip.
+failure modes — both hit on one occasion, both cost a CI round-trip.
 
 For the staging-script adaptation traps (env file, entry path, artifact layout)
 see `references/adapting-stage-and-smoke-to-a-real-unit.md`.

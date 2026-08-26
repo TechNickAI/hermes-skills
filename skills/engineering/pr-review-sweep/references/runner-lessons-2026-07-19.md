@@ -1,4 +1,4 @@
-# Runner lessons — 2026-07-19
+# Runner lessons — one occasion
 
 Session context: nightly PR review sweep across `carmentacollective` and `TechNickAI`,
 lookback 7 days, max 10 PRs, excluding `TechNickAI/openclaw-config`. Scanned 34 merged
@@ -11,7 +11,7 @@ unhandled comments. Total wall-clock ~15 minutes including both dispatches.
 ### "Deliberate regression guard" is a distinct decline subtype
 
 The skill already names "declined as deliberate design choice" as a third outcome category
-(see 2026-07-16 reference). This session surfaced a stronger, more specific subtype:
+(see one occasion reference). This session surfaced a stronger, more specific subtype:
 **deliberate regression guards** — tight assertions, hardcoded-value checks, or
 string-substring guards that exist explicitly to prevent a specific past incident from
 recurring. The distinguishing signal is an **inline comment referencing the incident**,
@@ -29,7 +29,7 @@ But line 167 of the same file documents the incident:
 
 ```python
 # The subaccount must be read from env, NEVER hardcoded — hardcoding the wrong number
-# silently showed 21 stale fills and missed 1300+ real trades (2026-07-18 incident).
+# silently showed 21 stale fills and missed 1300+ real trades (one occasion incident).
 ```
 
 The sub-agent correctly declined both as WONTFIX with a thumbs-down, citing the incident
@@ -58,7 +58,7 @@ Combined with `--dangerously-skip-permissions`, both runs self-terminated cleanl
 - hangl-dashboard #16 (3 comments): ~3 min, 1 fix + 2 declines
 
 Zero manual kills, zero CI-polling tails, zero `process(action=kill)` interventions.
-This is now confirmed across 12+ PRs total (10 from 2026-07-11 + 2 here). The
+This is now confirmed across 12+ PRs total (10 from one occasion + 2 here). The
 exit-immediately line should be treated as a mandatory part of every dispatch prompt,
 not an optional optimization.
 

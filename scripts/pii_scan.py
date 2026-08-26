@@ -38,6 +38,21 @@ CHAT_IDS = r"-100(?!1234567890|0000000000)\d{10}\b"
 # Commit SHAs and build identifiers. These correlate a public artifact with a
 # private repository's history even when every name has been scrubbed.
 BUILD_IDS = r"\breleases/standalone-[0-9a-f]{7,}\b|\b[0-9a-f]{40}\b"
+# Exact incident dates. CONTRIBUTING's substitution table already bans these
+# ("an exact incident date tied to a real outage" -> "on one occasion", or drop
+# it), but nothing enforced it and 299 shipped. A date is a JOIN KEY: alone it
+# identifies nobody, but against a public commit timeline it narrows an anecdote
+# to one outage on one estate on one day.
+#
+# Applies to BUNDLED CODE too (.py/.sh/.cjs), not just prose -- those files are
+# published with the skill and leak identically.
+#
+# NOT flagged: an ISO timestamp with a time component, or a date followed by a
+# clock time. Those are format examples and typed literals; rewriting them
+# breaks the command (an awk filter matches nothing, a SQL cutoff sorts after
+# every real row and deletes the table). Use a neutral placeholder date there
+# instead of prose.
+INCIDENT_DATES = r"\b20(?:2[4-9]|3\d)-\d{2}-\d{2}\b(?!T\d|\d|\s\d{2}:\d{2})"
 DOMAINS = r"technick\.ai|carmenta\.ai|sullivanflock\.com"
 PATHS = r"/Users/(?!<user>|you\b)[a-z]+/|/home/(?!<user>|ubuntu/?$)[a-z]+/"
 # Real key shapes: require enough entropy-ish length and exclude hyphenated words.
@@ -46,6 +61,7 @@ SECRETS = r"\b(?:sk-[A-Za-z0-9]{20,}|gho_[A-Za-z0-9]{20,}|ghp_[A-Za-z0-9]{20,}|x
 RULES = [
     ("SECRET", SECRETS, "BLOCKER"),
     ("network", NETWORK, "BLOCKER"),
+    ("incident-date", INCIDENT_DATES, "warn"),
     ("chat-id", CHAT_IDS, "BLOCKER"),
     ("build-id", BUILD_IDS, "BLOCKER"),
     ("private-domain", DOMAINS, "BLOCKER"),
@@ -95,10 +111,17 @@ def main(argv):
         status = "BLOCKED " if nb else ("warn    " if nw else "clean   ")
         print(f"{status} {label:28} blockers={nb:4} warns={nw:4}")
         for f, v in sorted(hits.items()):
+            # Show warnings too, not just blockers. Printing only BLOCKERs is
+            # how 299 incident dates stayed invisible: the rule fired, the count
+            # appeared in the summary, and not one offending line was ever
+            # displayed -- so "0 blockers" read as clean and nobody looked.
+            # A warning nobody can see is not a warning.
             shown = [h for h in v if h[0] == "BLOCKER"][:4]
+            shown += [h for h in v if h[0] == "warn"][:4]
             for sev, name, ln, txt, match in shown:
                 rel = f.name if f == t else f.relative_to(t)
-                print(f"      {name:15} {rel}:{ln}  {match!r}")
+                tag = "      " if sev == "BLOCKER" else "  warn "
+                print(f"{tag}{name:15} {rel}:{ln}  {match!r}")
 
     print(f"\nTOTAL blockers={blockers} warns={warns}")
     return 1 if blockers else 0

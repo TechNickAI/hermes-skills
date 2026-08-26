@@ -1,4 +1,4 @@
-# Pre-PR Multi-Review Findings (2026-06-23)
+# Pre-PR Multi-Review Findings (one occasion)
 
 Panel: Grok (contrarian/security) + Gemini (coverage) + GPT (structure/trigger clarity)
 
@@ -14,7 +14,7 @@ Panel: Grok (contrarian/security) + Gemini (coverage) + GPT (structure/trigger c
   `gworkspace.py token --refresh-token-file F` failed silently. Fix: shared
   parent parser with `argparse.SUPPRESS` defaults.
 
-- **gog binary PATH injection risk** (Grok HIGH) — bare `["gog", ...]` in
+- **gog binary PATH injection risk** (Grok HIGH) — bare `["gog",...]` in
   subprocess allows PATH hijack. Fix: `shutil.which("gog")` before every call.
 
 - **Credential file ownership/mode not checked** (Grok HIGH/MED) — added

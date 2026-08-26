@@ -53,8 +53,8 @@ run_seat() {
   fi
 }
 
-run_seat grok timeout 900 hermes -z "$P" ... & p1=$!
-run_seat gemini timeout 900 hermes -z "$P" ... & p2=$!
+run_seat grok timeout 900 hermes -z "$P"... & p1=$!
+run_seat gemini timeout 900 hermes -z "$P"... & p2=$!
 wait "$p1"; s1=$?
 wait "$p2"; s2=$?
 ```

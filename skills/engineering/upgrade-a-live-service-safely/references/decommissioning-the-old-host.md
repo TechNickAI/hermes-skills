@@ -1,7 +1,7 @@
 # Decommissioning the old host after a migration
 
 Making a migrated service **stay** dead on the box it moved off. Worked on the
-a trading agent the co-tenant host → trading.<internal-domain> cutover, 2026-08-12, after the "fenced" old
+a trading agent the co-tenant host → trading.<internal-domain> cutover, one occasion, after the "fenced" old
 host answered a live user message.
 
 The governing rule: **a fence you built and only verified yourself is a
@@ -90,7 +90,7 @@ missing key — not on a config guard.
 `Refusing subaccount 3: configured home is 0`, which is the app declining, not
 the credential being gone. Re-run with the _correct_ configuration so the only
 remaining obstacle is the missing key. The honest result looks like
-`FileNotFoundError: .../kalshi.pem`.
+`FileNotFoundError:.../kalshi.pem`.
 
 ## Secrets live in far more places than the live config
 
@@ -199,7 +199,7 @@ Found live on the co-tenant host hours after it was supposed to be quiet:
 ```
 h‍ermes cron run <job>
   └─ python3 ~/.h‍ermes/skills/pr-review-sweep/scripts/run_pr_review_sweep.py
-      └─ claude --print --model sonnet --dangerously-skip-permissions ...
+      └─ claude --print --model sonnet --dangerously-skip-permissions...
           └─ gh api repos/<org>/<repo>/pulls/104/comments/<id>/replies -f body=...
 ```
 
@@ -256,7 +256,7 @@ co-tenant's credentials broken, I restored 7 keys, `git checkout`-ed 345 files,
 and **restarted the gateway to verify the fix** — on a machine the user had just
 said he was abandoning. His reply:
 
-> "I didn't fucking tell you to restore, nor turn him back on ... Nothing should
+> "I didn't fucking tell you to restore, nor turn him back on... Nothing should
 > be fucking running on that old machine. Stop working against me"
 
 Every individual instinct was one the fleet skills endorse: diagnose don't

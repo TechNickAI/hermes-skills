@@ -52,7 +52,7 @@ For a Hermes gateway that is:
 
 ```python
 import hermes_cli.config as hcfg
-for k, v in (hcfg.load_env() or {}).items():   # profile .env -> os.environ
+for k, v in (hcfg.load_env() or {}).items(): # profile.env -> os.environ
     os.environ.setdefault(k, v)
 cfg = gcfg.load_gateway_config()               # NOT GatewayConfig.from_dict
 ```
@@ -109,8 +109,8 @@ Anchor the edit on the platform block by regex and assert the replacement count,
 After restart, re-run the probe on the box and require both properties:
 
 ```text
-STRANGER GETS PAIRING CODE?    : False
-OUTBOUND SEND CONFIGURED?      : True
+STRANGER GETS PAIRING CODE?: False
+OUTBOUND SEND CONFIGURED?: True
 ```
 
 `OUTBOUND SEND CONFIGURED` is a configuration proof, not a delivery proof. Do not claim outbound works until a message has actually been delivered — and never send a test message to a real human without the owner naming the recipient.

@@ -7,7 +7,7 @@ Every external mutation attempt silently reverted. Everything below is measured.
 
 ```
 Jul-20 rows: 22515 -> 0  (deleted 22515)
-... 6 seconds later ...
+... 6 seconds later...
 after 6s, Jul-20 rows: 22515   <-- RESTORED
 ```
 
@@ -51,7 +51,7 @@ stop service → prove the process is gone → mutate → checkpoint → VACUUM 
 systemctl --user stop the router
 for i in 1 2 3 4 5 6; do pgrep -f "dev/run-standalone" >/dev/null || break; sleep 2; done
 pgrep -f "dev/run-standalone" >/dev/null && { echo "STILL RUNNING - abort"; exit 1; }
-# ... deletes via the app's own better-sqlite3 ...
+# ... deletes via the app's own better-sqlite3...
 # PRAGMA wal_checkpoint(TRUNCATE); VACUUM;
 systemctl --user start the router
 for i in $(seq 1 18); do
@@ -93,7 +93,7 @@ retry loop:
 ```js
 function go() {
   const D = require("better-sqlite3")(FILE, { readonly: true });
-  /* ... */ D.close();
+  /*... */ D.close();
   return r;
 }
 var r = null;

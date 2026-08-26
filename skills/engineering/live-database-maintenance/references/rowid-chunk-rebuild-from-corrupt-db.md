@@ -71,8 +71,8 @@ Timestamps tell you cause vs consequence. Sort the log and read forward:
 ```
 17:39  disk I/O error                      <- ENOSPC, the actual injury
 20:00  file is not a database              <- self-heal reconnect begins
-20:15  FTS-corruption error ... in-place FTS rebuild
-21:09  In-place FTS rebuild failed ... needs full offline repair
+20:15 FTS-corruption error... in-place FTS rebuild
+21:09 In-place FTS rebuild failed... needs full offline repair
 21:21  FTS indexes remain corrupt; disabled FTS sync, canonical writes retried
 ```
 
@@ -100,7 +100,7 @@ WARNING agent.conversation_compression: compression session recovery failed
 ```
 
 Count the literal error to measure the fix later:
-`journalctl ... | grep -c "not a database"` → want 0.
+`journalctl... | grep -c "not a database"` → want 0.
 
 ## Why `.recover` may not be an option
 
@@ -110,7 +110,7 @@ sql error: no such table: sqlite_dbpage (1)
 ```
 
 The distro sqlite3 build lacked `SQLITE_ENABLE_DBPAGE_VTAB`, and `.recover`
-depends on it. Check with `sqlite3 :memory: "pragma compile_options;"`. Do not
+depends on it. Check with `sqlite3:memory: "pragma compile_options;"`. Do not
 burn time here — the chunk-copy below is more surgical anyway because it
 reports loss **per table**.
 
@@ -164,7 +164,7 @@ bytes, and set it **after** reading the schema (the schema must stay `str` or
 `name.startswith(...)` raises `TypeError: a bytes-like object is required`):
 
 ```python
-schema = src.execute("select type, name, sql from sqlite_master ...").fetchall()
+schema = src.execute("select type, name, sql from sqlite_master...").fetchall()
 src.text_factory = lambda b: b.decode("utf-8", errors="replace")
 ```
 
@@ -503,9 +503,9 @@ find <profile>/cron/output -newermt "<restart time>" -name "*.md" | wc -l
 
 ## Operational gates around the swap
 
-- **Long-running work needs a real background launch.** `nohup ... &` inside a
+- **Long-running work needs a real background launch.** `nohup... &` inside a
   short-lived SSH command dies with the connection. Use
-  `setsid nohup ... < /dev/null > log 2>&1 &` and poll the log, and check for a
+  `setsid nohup... < /dev/null > log 2>&1 &` and poll the log, and check for a
   duplicate process before relaunching — two rebuilds writing one output file
   is its own corruption source.
 - **Sanity-check what the outage actually costs.** On a live-money host,
@@ -527,7 +527,7 @@ find <profile>/cron/output -newermt "<restart time>" -name "*.md" | wc -l
   `backup-to-s3.sh` to learn `$REPO` executed the entire nightly backup. It was
   additive and harmless, but parse the file (`grep`/`sed`) instead.
 - **The Hermes lifecycle guard reads referenced script CONTENTS.** Staging a
-  swap script that merely _mentioned_ `systemctl ... stop` in an echoed
+  swap script that merely _mentioned_ `systemctl... stop` in an echoed
   instruction was refused with "cannot restart or stop the gateway from inside
   the gateway process" — even though the script only _aborts_ when the gateway
   is up. It fires on a heredoc written through the terminal tool, and on the

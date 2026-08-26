@@ -1,6 +1,6 @@
 # Verifying your own verification
 
-Every entry below is a real false-PASS or false-FAIL from a single 2026-08-03/04
+Every entry below is a real false-PASS or false-FAIL from a single one occasion/04
 deploy session. In each case the _check itself_ was broken, and the agent
 reported its output as fact. The deploy was fine; the reporting was not.
 
@@ -39,7 +39,7 @@ Session example that worked: three bundle assertions were tested against the
 currently-deployed bundle, which contained one of the three markers:
 
 ```
-FOUND    : <OLD_FIX_SYMBOL>          <- the old fix, present
+FOUND: <OLD_FIX_SYMBOL> <- the old fix, present
 not found: no such (module|table): dbstat   <- the new fix, correctly absent
 not found: <NEW_FLAG>             <- the new fix, correctly absent
 ```
@@ -66,7 +66,7 @@ shellcheck -S warning script.sh       # SC2034 = computed and thrown away
 ## `head`, `read -n`, and early `break` manufacture false failures on streams
 
 ```bash
-curl -N ... | head -c 300 | grep -q "event:"   # FAILS on a healthy stream
+curl -N... | head -c 300 | grep -q "event:" # FAILS on a healthy stream
 ```
 
 `head` closes the pipe, curl dies on SIGPIPE, grep sees a truncated body. The
@@ -74,7 +74,7 @@ server logs `request_signal_aborted` — which reads like a server bug and is
 actually the test hanging up. Capture to a file, then assert:
 
 ```bash
-curl -N ... > /tmp/out.sse 2>&1
+curl -N... > /tmp/out.sse 2>&1
 [ "$(grep -c '^event:' /tmp/out.sse)" -ge 2 ]   # >=2 proves it progressed
 ```
 
@@ -90,7 +90,7 @@ bundle and diff old vs new:
 
 ```
 NEW: catch(a){if(a instanceof Error&&/no such (module|table): dbstat/i.test(a.message))return!1;throw a}
-OLD: unguarded  SELECT SUM(pgsize) ... FROM dbstat WHERE name = ?   (no guard string)
+OLD: unguarded SELECT SUM(pgsize)... FROM dbstat WHERE name = ? (no guard string)
 ```
 
 An endpoint returning the _same_ status before and after is not evidence either
@@ -105,7 +105,7 @@ code path actually ran in the window.
 
 ## 🔴 A forced job that produced no output NEVER RAN — check the artifact
 
-The sharpest version of the rule above (2026-08-13). After restoring damaged
+The sharpest version of the rule above (one occasion). After restoring damaged
 credentials I force-ran the agent's hourly cron job to prove auth worked, then
 counted auth errors in the window:
 
@@ -174,7 +174,7 @@ Check content on the remote side, never assume `scp` implies correctness.
 ## 🔴 A check that fails REPEATEDLY on good input is the defect — stop patching it
 
 The mirror image of a false PASS, and more expensive because each round looks
-like progress. 2026-08-14, deploying a router fix: a static check inspecting
+like progress. one occasion, deploying a router fix: a static check inspecting
 compiled webpack output produced **four consecutive false BROKEN verdicts**
 against an artifact that was correct the entire time. Each revision cost a full
 ~15 minute CI build to discover.
@@ -240,7 +240,7 @@ The authoritative evidence was `/proc/<pid>/maps` showing the native module
 actually `dlopen`'d, plus the absence of fallback lines in the boot log:
 
 ```
-live (broken) : wreq-js.linux-arm64-gnu.node          <- no SQLite driver
+live (broken): wreq-js.linux-arm64-gnu.node <- no SQLite driver
 staged (fixed): better-sqlite3/prebuilds/linux-arm64.node
 ```
 

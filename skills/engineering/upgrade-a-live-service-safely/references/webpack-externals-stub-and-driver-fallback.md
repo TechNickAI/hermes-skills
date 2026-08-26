@@ -1,6 +1,6 @@
 # The webpack "missing module" stub: a native driver that silently degrades
 
-Worked case 2026-08-14, the router. Symptom presented as **four unrelated
+Worked case one occasion, the router. Symptom presented as **four unrelated
 problems**; all four were one bundling defect.
 
 ## Fingerprint
@@ -31,7 +31,7 @@ as a **literal at the call site**. Given an injectable loader:
 ```ts
 const _require = createRequire(import.meta.url);
 createSyncDriverFactory(_require); // loader passed as a VARIABLE
-// ...later, inside the factory:
+//...later, inside the factory:
 load("better-sqlite3"); // unanalyzable
 ```
 
@@ -58,7 +58,7 @@ Do NOT stop at step 1 — a naive grep produces the OPPOSITE conclusion.
 **1. Count real externals vs. stub text — and do not confuse them.**
 
 ```bash
-grep -rhoF 'require("better-sqlite3")' --include=*.js .build | wc -l   # 726 (!)
+grep -rhoF 'require("better-sqlite3")' --include=*.js.build | wc -l # 726 (!)
 ```
 
 726 real requires looks like proof the bundle is fine. It is not. Most live in
@@ -71,14 +71,14 @@ Classify each hit; never count.
 marker string from the source (an error message, a comment):
 
 ```bash
-grep -rlF "Nenhum driver SQLite" --include=*.js .build
+grep -rlF "Nenhum driver SQLite" --include=*.js.build
 # .build/next/server/chunks/12718.js, 1716.js, middleware.js
 ```
 
 **3. Read the call site and identify the require function.**
 
 ```js
-let l = (d = c(570591), function(a,b){ ... new (d("better-sqlite3"))(a,b) ... })
+let l = (d = c(570591), function(a,b){... new (d("better-sqlite3"))(a,b)... })
 ```
 
 `d` is **webpack module 570591**, not `createRequire`. Confirm the chunk has no

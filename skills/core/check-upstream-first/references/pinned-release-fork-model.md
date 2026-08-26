@@ -5,7 +5,7 @@ fleet. Companion to `local-patch-custody.md`: that file covers the custody of an
 individual patch, this one covers the _deployment model_ that carries patches
 across hosts without becoming a fork you regret.
 
-Source session: 2026-08-14. the operator: _"I don't want to be running a fork of Hermes.
+Source session: one occasion. the operator: _"I don't want to be running a fork of Hermes.
 That's going to be a PITA."_ then, after seeing the release-pinned shape,
 _"I'd prefer to stick to releases."_
 
@@ -19,7 +19,7 @@ Quoting the distance-from-`main` figure as the upgrade cost is misleading and
 scares everyone off a routine upgrade. Always compute both:
 
 ```bash
-gh api repos/<org>/<repo>/releases/latest --jq '.tag_name + "  " + .published_at'
+gh api repos/<org>/<repo>/releases/latest --jq '.tag_name + " " +.published_at'
 gh api repos/<org>/<repo>/compare/<tag>...main --jq '{ahead:.ahead_by, behind:.behind_by}'
 ```
 
@@ -42,7 +42,7 @@ It printed nothing and left the fork's `main` three months stale. Use the API an
 
 ```bash
 gh api repos/<user>/<repo>/merge-upstream -f branch=main
-gh api repos/<user>/<repo>/commits/main --jq '.sha[0:10] + "  " + .commit.committer.date'
+gh api repos/<user>/<repo>/commits/main --jq '.sha[0:10] + " " +.commit.committer.date'
 ```
 
 ## Every patch carries a removal condition

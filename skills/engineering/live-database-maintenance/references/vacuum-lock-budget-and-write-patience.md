@@ -6,7 +6,7 @@ concurrency leases, incident skip conditions, canary promotion, alerting);
 this one gives the **measured numbers** to plug into them and the code shape
 for a prediction gate.
 
-## Measured VACUUM cost (Hermes state.db, macOS, APFS, local SSD, 2026-08-22)
+## Measured VACUUM cost (Hermes state.db, macOS, APFS, local SSD, one occasion)
 
 Full sequence timed: `wal_checkpoint(TRUNCATE)` -> `VACUUM` ->
 `wal_checkpoint(TRUNCATE)` -> `optimize`, on real copies of fleet databases.
@@ -187,7 +187,7 @@ for _ in range(WAL_SETTLE_ATTEMPTS):
     if not busy:
         break
 else:
-    report["wal_not_settled_mb"] = ...   # never report a silent 0
+    report["wal_not_settled_mb"] =... # never report a silent 0
 ```
 
 ### Evaluate the compaction gate BEFORE taking the backup

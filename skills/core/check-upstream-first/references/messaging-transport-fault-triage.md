@@ -1,6 +1,6 @@
 # Worked cases: Telegram flood-control + Slack Socket Mode flap
 
-Both diagnosed on an assistant agent (Ali's Mac mini) 2026-07-30. Both turned out to be
+Both diagnosed on an assistant agent (Ali's Mac mini) one occasion. Both turned out to be
 **already fixed upstream** — the member was running 0.18.2 while the fixes had
 shipped. Recorded here so the next occurrence is a version check, not a
 source-reading expedition.
@@ -50,7 +50,7 @@ must NOT be treated as an acceptable recovery path.
 | Item  | Detail                                                                                                               |
 | ----- | -------------------------------------------------------------------------------------------------------------------- |
 | Issue | **#46762** (P1) — "Telegram sendRichMessage flood-control retry ignores server retry_after and drops final response" |
-| Fix   | **PR #52143 merged 2026-06-24**, commit `404b06ac` — "honor server retry_after in Telegram flood control"            |
+| Fix   | **PR #52143 merged one occasion**, commit `404b06ac` — "honor server retry_after in Telegram flood control"          |
 | Note  | PR #46774 (same title) remained **open**; the rebased #52143 carried the merge. Always confirm which one merged.     |
 
 Related shipped fixes in the same family:
@@ -106,7 +106,7 @@ session object is permanently invalidated. The watchdog detects "unhealthy" ever
 
 Upstream reports **242 unhealthy events/day** on a Mac that never sleeps.
 an assistant agent logged 96 in a single file, flapping steadily for ~2.5 weeks
-(2026-07-13 → 2026-07-30).
+(one occasion → one occasion).
 
 ### Real impact — not log noise
 
@@ -117,7 +117,7 @@ Treat it as a delivery outage.
 
 | Item       | Detail                                                                                                                                                                      |
 | ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Issue      | **#46990** — "Slack Socket Mode aiohttp backend leaks closed sessions — persistent unhealthy reconnect loop" (closed 2026-07-22)                                            |
+| Issue      | **#46990** — "Slack Socket Mode aiohttp backend leaks closed sessions — persistent unhealthy reconnect loop" (closed one occasion)                                          |
 | Fix        | **PR #47003** → rebased **#51623** — "prefer websockets socket mode backend"                                                                                                |
 | Plus       | **#66645** "heal 'Session is closed' stuck reconnect loop"; **#69319** "Socket Mode health — fail-fast creds, session heal, staleness detection, clean shutdown, dedup TTL" |
 | Ships with | **slack-sdk 3.43.0** (up from 3.40.1)                                                                                                                                       |
@@ -139,7 +139,8 @@ Filter strictly by timestamp — `tail` shows pre-restart lines and reads like t
 bug survived:
 
 ```bash
-awk '/^2026-07-30 10:(1[89]|[2-9][0-9])/' gateway.log | grep -c "Socket Mode unhealthy"
+awk -v d="$(date -u +%Y-%m-%d)" '$0 ~ "^" d " 10:(1[89]|[2-9][0-9])"' gateway.log \
+  | grep -c "Socket Mode unhealthy"
 # after restart: 0   (was flapping at 09:28, 09:52, 09:52 immediately prior)
 ```
 
@@ -156,6 +157,6 @@ Gateway running with 2 platform(s)
 ## gh CLI note
 
 `gh issue view` / `gh pr view` fail on this repo with
-`GraphQL: Projects (classic) is being deprecated ... (repository.issue.projectCards)`.
-Use `gh api repos/NousResearch/hermes-agent/issues/<n> --jq ...` instead.
-`gh search issues --repo ...` works fine.
+`GraphQL: Projects (classic) is being deprecated... (repository.issue.projectCards)`.
+Use `gh api repos/NousResearch/hermes-agent/issues/<n> --jq...` instead.
+`gh search issues --repo...` works fine.
