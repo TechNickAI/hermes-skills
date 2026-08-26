@@ -111,10 +111,17 @@ def main(argv):
         status = "BLOCKED " if nb else ("warn    " if nw else "clean   ")
         print(f"{status} {label:28} blockers={nb:4} warns={nw:4}")
         for f, v in sorted(hits.items()):
+            # Show warnings too, not just blockers. Printing only BLOCKERs is
+            # how 299 incident dates stayed invisible: the rule fired, the count
+            # appeared in the summary, and not one offending line was ever
+            # displayed -- so "0 blockers" read as clean and nobody looked.
+            # A warning nobody can see is not a warning.
             shown = [h for h in v if h[0] == "BLOCKER"][:4]
+            shown += [h for h in v if h[0] == "warn"][:4]
             for sev, name, ln, txt, match in shown:
                 rel = f.name if f == t else f.relative_to(t)
-                print(f"      {name:15} {rel}:{ln}  {match!r}")
+                tag = "      " if sev == "BLOCKER" else "  warn "
+                print(f"{tag}{name:15} {rel}:{ln}  {match!r}")
 
     print(f"\nTOTAL blockers={blockers} warns={warns}")
     return 1 if blockers else 0

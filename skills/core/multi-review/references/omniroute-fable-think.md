@@ -94,7 +94,7 @@ hermes -z "$PROMPT" --provider openrouter -m openai/gpt-chat-latest --ignore-rul
 hermes -z "$PROMPT" --provider custom:omniroute -m simple --ignore-rules -t ''
 ```
 
-**Config file that governs these:** `/Users/nick/.hermes/profiles/<agent-d>/config.yaml`
+**Config file that governs these:** `$HERMES_HOME/config.yaml`
 
 ### Provider/slug corrections (verified one occasion by direct run)
 

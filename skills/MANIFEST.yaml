@@ -283,9 +283,9 @@ skills:
   size:
     files: 18
     bytes_skill_md: 54440
-    bytes_total: 150932
+    bytes_total: 150895
     approx_tokens_skill_md: 13610
-    approx_tokens_total: 37733
+    approx_tokens_total: 37724
   tags:
   - review
   - quality
@@ -333,7 +333,7 @@ skills:
   size:
     files: 16
     bytes_skill_md: 45256
-    bytes_total: 134977
+    bytes_total: 134975
     approx_tokens_skill_md: 11314
     approx_tokens_total: 33744
   tags:
@@ -594,9 +594,9 @@ skills:
   size:
     files: 12
     bytes_skill_md: 45642
-    bytes_total: 87270
+    bytes_total: 87298
     approx_tokens_skill_md: 11410
-    approx_tokens_total: 21818
+    approx_tokens_total: 21824
   tags:
   - devops
   - app-router

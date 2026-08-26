@@ -20,7 +20,7 @@
 #                      RE-INJECT any privacy/PII constraints into the brief if the
 #                      artifact may contain private data — --ignore-rules drops them.
 #  - `timeout`      : 1800s. DO NOT LOWER THIS FOR ANALYTICAL PANELS.
-#                      Root-caused 2026-08-15: `timeout 900` was KILLING working
+#                      Root-caused: `timeout 900` was KILLING working
 #                      reviewers on a 15KB code-review brief. Measured, same
 #                      model + same prompt: killed at 20s -> rc=124 with a
 #                      0-byte .txt AND a 0-byte .err; given 900s -> 18,486 bytes,

@@ -13,7 +13,7 @@ on the same port keeps answering requests.
 There can be **two (or more) PM2 God Daemons running on the same machine**, each with
 its own `PM2_HOME` and its own independent process list:
 
-- The **default** daemon at `~/.pm2` (e.g. `/Users/nick/.pm2`).
+- The **default** daemon at `~/.pm2` (e.g. `/Users/<user>/.pm2`).
 - A **Hermes-profile** daemon at `~/.hermes/profiles/<profile>/home/.pm2`
   (this is the one bare `pm2` commands hit when the profile env is active, because
   `$HOME`/`PM2_HOME` is rewritten for the profile).
@@ -35,7 +35,7 @@ daemon — keeps running stale code and holding the port.
    The path in `God Daemon (<path>)` is the `PM2_HOME` that owns the process.
 2. List each daemon's processes explicitly:
    ```bash
-   PM2_HOME=/Users/nick/.pm2 pm2 jlist        # default daemon
+   PM2_HOME=/Users/<user>/.pm2 pm2 jlist        # default daemon
    pm2 jlist                                  # whatever the current env points at
    ```
 
@@ -44,8 +44,8 @@ daemon — keeps running stale code and holding the port.
 Always manage the app through the daemon that owns it, by setting `PM2_HOME` explicitly:
 
 ```bash
-PM2_HOME=/Users/nick/.pm2 pm2 restart <app>
-PM2_HOME=/Users/nick/.pm2 pm2 save
+PM2_HOME=/Users/<user>/.pm2 pm2 restart <app>
+PM2_HOME=/Users/<user>/.pm2 pm2 save
 ```
 
 Editing source requires a restart **under the correct daemon** to take effect.

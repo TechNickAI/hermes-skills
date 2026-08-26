@@ -167,7 +167,7 @@ differentiator — say so out loud), `unsupported` (never recommend it in Claude
 - **Works without setup:** Yes, but read the Claude note before recommending it
 - **Compatibility:** Portable review method. Native multi-model orchestration examples are Hermes-specific; Claude can run the method with Claude subagents but loses model-family diversity.
 - **Claude:** degraded — The review method transfers, but cross-model-family diversity needs Hermes; in Claude it becomes Claude reviewing Claude.
-- **Size:** 54,440 B body, loaded when the skill triggers (~13,610 tokens); 150,932 B across 18 file(s) total
+- **Size:** 54,440 B body, loaded when the skill triggers (~13,610 tokens); 150,895 B across 18 file(s) total
 - **Path:** `skills/core/multi-review`
 
 ## project-steward
@@ -195,7 +195,7 @@ differentiator — say so out loud), `unsupported` (never recommend it in Claude
 - **Works without setup:** Yes
 - **Compatibility:** Agent Skills standard
 - **Claude:** native — Sandbox-probe method is runtime-agnostic; it needs only a copyable config and the ability to re-run the real code path.
-- **Size:** 45,256 B body, loaded when the skill triggers (~11,314 tokens); 134,977 B across 16 file(s) total
+- **Size:** 45,256 B body, loaded when the skill triggers (~11,314 tokens); 134,975 B across 16 file(s) total
 - **Path:** `skills/core/prove-the-setting-works`
 
 ## recall
@@ -333,7 +333,7 @@ differentiator — say so out loud), `unsupported` (never recommend it in Claude
 - **Works without setup:** No in Hermes (not available in Claude)
 - **Compatibility:** Agent Skills standard
 - **Claude:** unsupported — Operates Hermes-config mini-app host services.
-- **Size:** 45,642 B body, loaded when the skill triggers (~11,410 tokens); 87,270 B across 12 file(s) total
+- **Size:** 45,642 B body, loaded when the skill triggers (~11,410 tokens); 87,298 B across 12 file(s) total
 - **Path:** `skills/engineering/mini-app`
 
 ## pr-review-sweep

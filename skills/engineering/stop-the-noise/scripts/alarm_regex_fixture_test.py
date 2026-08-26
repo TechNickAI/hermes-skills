@@ -7,7 +7,7 @@ Get that regex wrong in the permissive direction and you delete evidence of a
 real fault; get it wrong in the greedy direction and every ordinary sentence
 becomes "critical" and the escalation surface is useless.
 
-Measured 2026-08-21: a first-pass regex matching any message CONTAINING
+Measured on one run: a first-pass regex matching any message CONTAINING
 halt|escalat|broken|margin flagged 385 ordinary conversational messages on one
 agent as critical. Anchoring to machine-emitted shapes brought it to 135 real
 ones. The bug was only visible because both directions were tested.
