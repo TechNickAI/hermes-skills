@@ -31,9 +31,9 @@ skills:
   size:
     files: 16
     bytes_skill_md: 50649
-    bytes_total: 156360
+    bytes_total: 156390
     approx_tokens_skill_md: 12662
-    approx_tokens_total: 39090
+    approx_tokens_total: 39098
   tags:
   - hermes
   - upstream
@@ -283,9 +283,9 @@ skills:
   size:
     files: 18
     bytes_skill_md: 54440
-    bytes_total: 150947
+    bytes_total: 150932
     approx_tokens_skill_md: 13610
-    approx_tokens_total: 37737
+    approx_tokens_total: 37733
   tags:
   - review
   - quality
@@ -647,9 +647,9 @@ skills:
   size:
     files: 2
     bytes_skill_md: 13573
-    bytes_total: 69590
+    bytes_total: 69580
     approx_tokens_skill_md: 3393
-    approx_tokens_total: 17398
+    approx_tokens_total: 17395
   tags:
   - cron
   - jobs
@@ -705,9 +705,9 @@ skills:
   size:
     files: 42
     bytes_skill_md: 70019
-    bytes_total: 380712
+    bytes_total: 380692
     approx_tokens_skill_md: 17505
-    approx_tokens_total: 95178
+    approx_tokens_total: 95173
   tags:
   - deploy
   - upgrade

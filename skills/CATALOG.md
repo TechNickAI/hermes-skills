@@ -33,7 +33,7 @@ differentiator — say so out loud), `unsupported` (never recommend it in Claude
 - **Works without setup:** Yes
 - **Compatibility:** Agent Skills standard
 - **Claude:** native — Version-then-issue-tracker method works anywhere with a shell and network.
-- **Size:** 50,649 B body, loaded when the skill triggers (~12,662 tokens); 156,360 B across 16 file(s) total
+- **Size:** 50,649 B body, loaded when the skill triggers (~12,662 tokens); 156,390 B across 16 file(s) total
 - **Path:** `skills/core/check-upstream-first`
 
 ## data-verification
@@ -167,7 +167,7 @@ differentiator — say so out loud), `unsupported` (never recommend it in Claude
 - **Works without setup:** Yes, but read the Claude note before recommending it
 - **Compatibility:** Portable review method. Native multi-model orchestration examples are Hermes-specific; Claude can run the method with Claude subagents but loses model-family diversity.
 - **Claude:** degraded — The review method transfers, but cross-model-family diversity needs Hermes; in Claude it becomes Claude reviewing Claude.
-- **Size:** 54,440 B body, loaded when the skill triggers (~13,610 tokens); 150,947 B across 18 file(s) total
+- **Size:** 54,440 B body, loaded when the skill triggers (~13,610 tokens); 150,932 B across 18 file(s) total
 - **Path:** `skills/core/multi-review`
 
 ## project-steward
@@ -361,7 +361,7 @@ differentiator — say so out loud), `unsupported` (never recommend it in Claude
 - **Works without setup:** Yes, but read the Claude note before recommending it
 - **Compatibility:** Agent Skills standard
 - **Claude:** degraded — The runner and its exit-code contract are portable Python; the cron wiring examples assume a scheduler that dispatches by file extension.
-- **Size:** 13,573 B body, loaded when the skill triggers (~3,393 tokens); 69,590 B across 2 file(s) total
+- **Size:** 13,573 B body, loaded when the skill triggers (~3,393 tokens); 69,580 B across 2 file(s) total
 - **Path:** `skills/engineering/scheduled-job-runner`
 
 ## stop-the-noise
@@ -387,7 +387,7 @@ differentiator — say so out loud), `unsupported` (never recommend it in Claude
 - **Works without setup:** Yes
 - **Compatibility:** Agent Skills standard
 - **Claude:** native — Stage-verify-cut-rollback sequencing applies to any supervised service.
-- **Size:** 70,019 B body, loaded when the skill triggers (~17,505 tokens); 380,712 B across 42 file(s) total
+- **Size:** 70,019 B body, loaded when the skill triggers (~17,505 tokens); 380,692 B across 42 file(s) total
 - **Path:** `skills/engineering/upgrade-a-live-service-safely`
 
 ## vendor-switch-check

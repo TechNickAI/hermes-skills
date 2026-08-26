@@ -214,7 +214,7 @@ echo "[8] health"
 curl -s -m 10 "http://127.0.0.1:$TEST_PORT$HEALTH_PATH" | head -c 400; echo
 
 # A health endpoint proves the process booted, NOT that it can serve. On the
-# 2026-08-01 the router cutover the staged instance passed [8] while /v1/models
+# On one router cutover the staged instance passed [8] while /v1/models
 # returned {"error":{"code":"AUTH_002"}} — the smoke had never exercised real
 # inference. Pull a real key from the TEST DB copy (never the live one) and make
 # actual requests across several backends before trusting the release.

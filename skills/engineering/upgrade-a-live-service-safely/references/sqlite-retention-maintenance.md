@@ -61,7 +61,7 @@ Each table has a specific timestamp column and format. The cutoff instant is
 | Representation               | Example                    | Used by                     |
 | ---------------------------- | -------------------------- | --------------------------- |
 | ISO UTC text                 | `2026-07-27T13:51:00.000Z` | most tables                 |
-| SQL-style UTC text           | `one occasion 13:51:00`    | `xp_audit_log`              |
+| SQL-style UTC text           | `2026-01-15 13:51:00`      | `xp_audit_log`              |
 | epoch milliseconds (integer) | `1753624260000`            | `domain_cost_history`       |
 | epoch seconds (integer)      | `1753624260`               | `compression_run_telemetry` |
 

@@ -139,7 +139,8 @@ Filter strictly by timestamp — `tail` shows pre-restart lines and reads like t
 bug survived:
 
 ```bash
-awk '/^one occasion 10:(1[89]|[2-9][0-9])/' gateway.log | grep -c "Socket Mode unhealthy"
+awk -v d="$(date -u +%Y-%m-%d)" '$0 ~ "^" d " 10:(1[89]|[2-9][0-9])"' gateway.log \
+  | grep -c "Socket Mode unhealthy"
 # after restart: 0   (was flapping at 09:28, 09:52, 09:52 immediately prior)
 ```
 

@@ -2,7 +2,7 @@
 /*
  * backup_sqlite_multi.cjs — pre-deploy N-way backup of a live SQLite state DB.
  *
- * WHY THIS EXISTS (all three learned the hard way, 2026-08-14):
+ * WHY THIS EXISTS (all three learned the hard way):
  *
  *  1. Back up with the engine that WRITES the db. A backup made by a different
  *     SQLite version can be unreadable by BOTH engines afterwards. Observed:

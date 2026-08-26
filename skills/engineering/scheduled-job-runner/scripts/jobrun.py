@@ -2,7 +2,7 @@
 """jobrun — the fleet's one scheduled-job execution adapter.
 
 Design basis: projects/job-runner-design.md (measured audit + ecosystem research,
-2026-08-21). This is an EXECUTION ADAPTER, not a scheduler. Hermes cron stays the
+). This is an EXECUTION ADAPTER, not a scheduler. Hermes cron stays the
 scheduler. jobrun owns the seven things every job re-implements badly today:
 
   1. interpreter/dependency resolution   (kills the .sh-wrapper hack)

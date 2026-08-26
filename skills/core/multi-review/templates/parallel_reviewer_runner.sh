@@ -81,7 +81,7 @@ Distinguish real issues from tradeoffs and false positives."
 
 # --- Edit these lines: one per lens. Use DIFFERENT model families for diversity. ---
 # RESOLVE PROVIDER/MODEL FROM THE LIVE CONFIG, NEVER FROM MEMORY OR THIS TEMPLATE.
-# Verified 2026-08-15 on trading.example.com: `custom:grok`, `custom:gemini` and
+# Verified on an example host: `custom:grok`, `custom:gemini` and
 # `custom:openrouter` DO NOT EXIST on that profile -- each fails instantly with
 # "Unknown provider" and a 0-byte .txt. That profile defines only `omniroute` and
 # `openrouter-direct`, and routes model aliases server-side. Check first:
