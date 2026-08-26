@@ -19,7 +19,7 @@ or produce a status report across all recent Hermes activity. Verified working 2
 `parent_session_id`, `handoff_error`.
 
 - `session_key` format for Telegram forum topics:
-  `agent:main:telegram:group:<chat_id>:<thread_id>` (e.g. `...:-1003705911078:6330`).
+  `agent:main:telegram:group:<chat_id>:<thread_id>` (e.g. `...:-1001234567890:6330`).
 - Many real telegram sessions have `session_key` **NULL** (DMs / non-topic) — query both
   keyed and unkeyed, filter by `source='telegram'`, don't rely on session_key alone.
 - `messages.content` is sometimes a **JSON list of `{type,text}` chunks**, sometimes a

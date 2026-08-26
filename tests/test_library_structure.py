@@ -193,6 +193,15 @@ PII_CASES = [
     ("com.apple.f'ace'timemessagestored", False),
     ("appapl'ace'holdersyncd", False),
     ("unanchored /hermes|ace/ matched", False),
+    # Chat/group identifiers name a specific private room but are not a name,
+    # a host, or an IP -- every other rule here missed one that shipped.
+    ("routed to -1003705911078 explicitly", True),
+    ("chat_id = -1000000000000  # placeholder", False),
+    ("use -1001234567890 in examples", False),
+    # Commit/build identifiers correlate a public artifact with private history.
+    ("running releases/standalone-2fc1229", True),
+    ("at 7a8589e782427398f6acfa62d5078a17a9b20286", True),
+    ("see releases/standalone-<sha>", False),
 ]
 
 
@@ -208,7 +217,9 @@ def test_pii_scanner_boundaries(text, flagged, tmp_path):
         sys.path.pop(0)
     probe = tmp_path / "probe.py"
     probe.write_text(text)
-    hits = [h for h in pii.scan(probe) if h[1] == "agent-name"]
+    # Any BLOCKER counts. Scoping this to one rule name let a whole class of
+    # leak (chat ids, commit SHAs) pass the suite because no rule owned it.
+    hits = [h for h in pii.scan(probe) if h[0] == "BLOCKER"]
     assert bool(hits) == flagged, f"{text!r}: expected flagged={flagged}, got {hits}"
 
 

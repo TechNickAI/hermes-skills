@@ -30,6 +30,14 @@ AGENTS = (r"(?<![a-z'\"|])bosun\b|(?<![a-z'\"|])argus\b|(?<![a-z'\"|])cora\b"
           r"|(?<![a-z'\"|])ace(?![a-z'\"])\b")
 # Private/LAN addressing only. Loopback and documentation ranges are not PII.
 NETWORK = r"\b100\.(?:6[4-9]|[7-9]\d|1[0-1]\d|12[0-7])\.\d{1,3}\.\d{1,3}\b"
+# Real chat/group identifiers. A Telegram supergroup id is -100 followed by 10
+# digits and names a specific private room, but it is not a name, a host, or an
+# IP -- so every other rule here misses it. The documentation range -100123456789x
+# is allowed so examples can still be concrete.
+CHAT_IDS = r"-100(?!1234567890|0000000000)\d{10}\b"
+# Commit SHAs and build identifiers. These correlate a public artifact with a
+# private repository's history even when every name has been scrubbed.
+BUILD_IDS = r"\breleases/standalone-[0-9a-f]{7,}\b|\b[0-9a-f]{40}\b"
 DOMAINS = r"technick\.ai|carmenta\.ai|sullivanflock\.com"
 PATHS = r"/Users/(?!<user>|you\b)[a-z]+/|/home/(?!<user>|ubuntu/?$)[a-z]+/"
 # Real key shapes: require enough entropy-ish length and exclude hyphenated words.
@@ -38,6 +46,8 @@ SECRETS = r"\b(?:sk-[A-Za-z0-9]{20,}|gho_[A-Za-z0-9]{20,}|ghp_[A-Za-z0-9]{20,}|x
 RULES = [
     ("SECRET", SECRETS, "BLOCKER"),
     ("network", NETWORK, "BLOCKER"),
+    ("chat-id", CHAT_IDS, "BLOCKER"),
+    ("build-id", BUILD_IDS, "BLOCKER"),
     ("private-domain", DOMAINS, "BLOCKER"),
     ("fleet-host", HOSTS, "BLOCKER"),
     ("agent-name", AGENTS, "BLOCKER"),
