@@ -11,12 +11,40 @@
 #   use_when              the trigger conditions, for selective installation
 _generated_by: scripts/generate_manifest.py
 _do_not_edit: Regenerate with `python scripts/generate_manifest.py`; CI checks it.
-count: 24
+count: 28
 packs:
 - core
 - engineering
 - productivity
 skills:
+- name: check-upstream-first
+  pack: core
+  version: 1.4.0
+  scope: solo
+  summary: Use before debugging a framework or dependency bug from its source, and before writing any local patch.
+  use_when: ''
+  requires: []
+  works_out_of_the_box: true
+  compatibility: Agent Skills standard
+  claude_compat: native
+  claude_note: Version-then-issue-tracker method works anywhere with a shell and network.
+  size:
+    files: 16
+    bytes_skill_md: 50684
+    bytes_total: 156412
+    approx_tokens_skill_md: 12671
+    approx_tokens_total: 39103
+  tags:
+  - hermes
+  - upstream
+  - github
+  - triage
+  - gateway
+  - telegram
+  - slack
+  - version
+  - patch
+  path: skills/core/check-upstream-first
 - name: data-verification
   pack: core
   version: 2.0.0
@@ -68,6 +96,30 @@ skills:
   - multi-source
   - orchestration
   path: skills/core/deep-dive
+- name: delegation-handoff
+  pack: core
+  version: 1.0.0
+  scope: solo
+  summary: Use when handing work to a background agent or subprocess, or when one comes back reporting success.
+  use_when: handing work to a background agent or subprocess, or when one comes back reporting success. Covers verifying the premise before dispatch, writing a brief the worker can finish inside its budget, and checking the artifact yourself afterward.
+  requires: []
+  works_out_of_the_box: true
+  compatibility: Agent Skills standard
+  claude_compat: degraded
+  claude_note: The briefing and artifact-verification discipline transfers; the background-dispatch examples assume a delegation toolset.
+  size:
+    files: 3
+    bytes_skill_md: 18448
+    bytes_total: 30637
+    approx_tokens_skill_md: 4612
+    approx_tokens_total: 7659
+  tags:
+  - delegation
+  - subagent
+  - orchestration
+  - verification
+  - background
+  path: skills/core/delegation-handoff
 - name: grok-search
   pack: core
   version: 0.1.0
@@ -93,6 +145,30 @@ skills:
   - twitter
   - x
   path: skills/core/grok-search
+- name: is-it-really-broken
+  pack: core
+  version: 1.0.0
+  scope: solo
+  summary: Use when a health check, audit, or monitor says something is BROKEN, before repeating that to anyone.
+  use_when: a health check, audit, or monitor says something is BROKEN, before repeating that to anyone.
+  requires: []
+  works_out_of_the_box: true
+  compatibility: Agent Skills standard
+  claude_compat: native
+  claude_note: Re-probing a failure verdict needs no host runtime beyond the failing check.
+  size:
+    files: 6
+    bytes_skill_md: 17979
+    bytes_total: 47596
+    approx_tokens_skill_md: 4495
+    approx_tokens_total: 11899
+  tags:
+  - monitoring
+  - diagnostics
+  - integrations
+  - reliability
+  - reporting
+  path: skills/core/is-it-really-broken
 - name: keep-going
   pack: core
   version: 1.1.0
@@ -243,6 +319,30 @@ skills:
   - cost-control
   - delegation
   path: skills/core/project-steward
+- name: prove-the-setting-works
+  pack: core
+  version: 1.1.0
+  scope: solo
+  summary: Use when about to tell someone a config change will (or will not) do what they want — hide a UI element, disable a provider, silence a channel, pin a new model version.
+  use_when: about to tell someone a config change will (or will not) do what they want — hide a UI element, disable a provider, silence a channel, pin a new model version. Copies the config to a throwaway profile, changes one setting, re-runs the real code path, and reads the actual output.
+  requires: []
+  works_out_of_the_box: true
+  compatibility: Agent Skills standard
+  claude_compat: native
+  claude_note: Sandbox-probe method is runtime-agnostic; it needs only a copyable config and the ability to re-run the real code path.
+  size:
+    files: 16
+    bytes_skill_md: 45322
+    bytes_total: 135104
+    approx_tokens_skill_md: 11330
+    approx_tokens_total: 33776
+  tags:
+  - config
+  - verification
+  - sandbox
+  - probe
+  - methodology
+  path: skills/core/prove-the-setting-works
 - name: recall
   pack: core
   version: 0.3.1

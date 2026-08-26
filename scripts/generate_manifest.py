@@ -173,6 +173,24 @@ CLAUDE_COMPAT = {
         "Full method in Claude Code using its own web, file, and subagent tools; "
         "prior-session search and cross-family synthesis are unavailable.",
     ),
+    "prove-the-setting-works": (
+        "native",
+        "Sandbox-probe method is runtime-agnostic; it needs only a copyable config "
+        "and the ability to re-run the real code path.",
+    ),
+    "check-upstream-first": (
+        "native",
+        "Version-then-issue-tracker method works anywhere with a shell and network.",
+    ),
+    "is-it-really-broken": (
+        "native",
+        "Re-probing a failure verdict needs no host runtime beyond the failing check.",
+    ),
+    "delegation-handoff": (
+        "degraded",
+        "The briefing and artifact-verification discipline transfers; the "
+        "background-dispatch examples assume a delegation toolset.",
+    ),
 }
 
 

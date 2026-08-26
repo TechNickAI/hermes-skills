@@ -23,6 +23,19 @@ not cover.
 `Claude` values: `native` (works fully), `degraded` (runs but loses its
 differentiator — say so out loud), `unsupported` (never recommend it in Claude).
 
+## check-upstream-first
+
+- **Pack:** core
+- **Scope:** solo
+- **What it does:** Use before debugging a framework or dependency bug from its source, and before writing any local patch.
+- **Use when:** Use before debugging a framework or dependency bug from its source, and before writing any local patch.
+- **Prerequisites:** None
+- **Works without setup:** Yes
+- **Compatibility:** Agent Skills standard
+- **Claude:** native — Version-then-issue-tracker method works anywhere with a shell and network.
+- **Size:** 50,684 B body, loaded when the skill triggers (~12,671 tokens); 156,412 B across 16 file(s) total
+- **Path:** `skills/core/check-upstream-first`
+
 ## data-verification
 
 - **Pack:** core
@@ -49,6 +62,19 @@ differentiator — say so out loud), `unsupported` (never recommend it in Claude
 - **Size:** 34,360 B body, loaded when the skill triggers (~8,590 tokens); 34,360 B across 1 file(s) total
 - **Path:** `skills/core/deep-dive`
 
+## delegation-handoff
+
+- **Pack:** core
+- **Scope:** solo
+- **What it does:** Use when handing work to a background agent or subprocess, or when one comes back reporting success.
+- **Use when:** handing work to a background agent or subprocess, or when one comes back reporting success. Covers verifying the premise before dispatch, writing a brief the worker can finish inside its budget, and checking the artifact yourself afterward.
+- **Prerequisites:** None
+- **Works without setup:** Yes, but read the Claude note before recommending it
+- **Compatibility:** Agent Skills standard
+- **Claude:** degraded — The briefing and artifact-verification discipline transfers; the background-dispatch examples assume a delegation toolset.
+- **Size:** 18,448 B body, loaded when the skill triggers (~4,612 tokens); 30,637 B across 3 file(s) total
+- **Path:** `skills/core/delegation-handoff`
+
 ## grok-search
 
 - **Pack:** core
@@ -61,6 +87,19 @@ differentiator — say so out loud), `unsupported` (never recommend it in Claude
 - **Claude:** native — Works in Claude once XAI_API_KEY is available.
 - **Size:** 5,499 B body, loaded when the skill triggers (~1,375 tokens); 23,112 B across 4 file(s) total
 - **Path:** `skills/core/grok-search`
+
+## is-it-really-broken
+
+- **Pack:** core
+- **Scope:** solo
+- **What it does:** Use when a health check, audit, or monitor says something is BROKEN, before repeating that to anyone.
+- **Use when:** a health check, audit, or monitor says something is BROKEN, before repeating that to anyone.
+- **Prerequisites:** None
+- **Works without setup:** Yes
+- **Compatibility:** Agent Skills standard
+- **Claude:** native — Re-probing a failure verdict needs no host runtime beyond the failing check.
+- **Size:** 17,979 B body, loaded when the skill triggers (~4,495 tokens); 47,596 B across 6 file(s) total
+- **Path:** `skills/core/is-it-really-broken`
 
 ## keep-going
 
@@ -145,6 +184,19 @@ differentiator — say so out loud), `unsupported` (never recommend it in Claude
 - **Claude:** unsupported — Drives a Hermes living board and cron cadence.
 - **Size:** 23,679 B body, loaded when the skill triggers (~5,920 tokens); 122,549 B across 9 file(s) total
 - **Path:** `skills/core/project-steward`
+
+## prove-the-setting-works
+
+- **Pack:** core
+- **Scope:** solo
+- **What it does:** Use when about to tell someone a config change will (or will not) do what they want — hide a UI element, disable a provider, silence a channel, pin a new model version.
+- **Use when:** about to tell someone a config change will (or will not) do what they want — hide a UI element, disable a provider, silence a channel, pin a new model version. Copies the config to a throwaway profile, changes one setting, re-runs the real code path, and reads the actual output.
+- **Prerequisites:** None
+- **Works without setup:** Yes
+- **Compatibility:** Agent Skills standard
+- **Claude:** native — Sandbox-probe method is runtime-agnostic; it needs only a copyable config and the ability to re-run the real code path.
+- **Size:** 45,322 B body, loaded when the skill triggers (~11,330 tokens); 135,104 B across 16 file(s) total
+- **Path:** `skills/core/prove-the-setting-works`
 
 ## recall
 
