@@ -1,7 +1,7 @@
 # Offloading the build to CI, then staging on a test port
 
 The strongest fix for "the build takes down the service" is **don't build on the
-box at all**. Proven end-to-end on the, 2026-07-26.
+box at all**. Proven end-to-end on the, one occasion.
 
 Sequence: CI builds → uploads artifact → host downloads → unpack to a NEW
 release dir → run on a TEST PORT against a COPY of the DB → verify → only then
@@ -59,7 +59,7 @@ this project — not a patchable one-off).
 **private** repo the identical label yields **2 vCPU / 7.7 GB**. Nothing in the
 workflow changes; the machine silently halves.
 
-Hit on 2026-08-14 moving this exact workflow from the public app repo into a
+Hit on one occasion moving this exact workflow from the public app repo into a
 private ops repo. The build died ten minutes into `Creating an optimized
 production build` with:
 
@@ -73,13 +73,13 @@ in an early step and reading them off the log:
 
 ```yaml
 - run: |
-    echo "arch: $(uname -m)  cores: $(nproc)"
+    echo "arch: $(uname -m) cores: $(nproc)"
     free -h
 ```
 
 ```
-arch: aarch64  cores: 2
-Mem: 7.7Gi   Swap: 3.0Gi          ← half of what the public runner gives
+arch: aarch64 cores: 2
+Mem: 7.7Gi Swap: 3.0Gi ← half of what the public runner gives
 ```
 
 Rule: **when moving a workflow between repos, re-check the runner's real specs
@@ -171,7 +171,7 @@ Non-negotiables that make this safe to run against production:
 
 1. Unpack into `releases/<name>/`, **never** the live working directory.
 2. Bind a **different port** (20129 vs live 20128).
-3. Point `DATA_DIR` at a **copy** of the DB — use `sqlite3 .backup` (safe
+3. Point `DATA_DIR` at a **copy** of the DB — use `sqlite3.backup` (safe
    against a live writer), not `cp`.
    **The `sqlite3` CLI is often NOT installed on minimal server images.**
    `command -v sqlite3` silently fails and a naive fallback to `cp` can tear a
@@ -192,7 +192,7 @@ Non-negotiables that make this safe to run against production:
 
 ### Trap: `.env` is systemd `EnvironmentFile` syntax, not shell
 
-`set -a; . .env; set +a` **fails** on values systemd accepts unquoted:
+`set -a;..env; set +a` **fails** on values systemd accepts unquoted:
 
 ```
 CLAUDE_USER_AGENT=claude-cli/2.1.207 (external, cli)

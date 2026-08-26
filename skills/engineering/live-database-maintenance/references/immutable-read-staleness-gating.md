@@ -47,7 +47,7 @@ con.execute("INSERT INTO t VALUES (1)")
 con.commit()
 con.close()
 
-for suffix in ("-wal", "-shm"):          # force the checkpointed state
+for suffix in ("-wal", "-shm"): # force the checkpointed state
     Path(str(db) + suffix).unlink(missing_ok=True)
 
 # now mode=ro raises OperationalError; immutable=1 succeeds AND is exact

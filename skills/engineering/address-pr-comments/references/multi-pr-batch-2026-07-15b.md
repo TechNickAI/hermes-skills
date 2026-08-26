@@ -1,4 +1,4 @@
-# Multi-PR Batch Session — 2026-07-15 (Trading Bots + Config)
+# Multi-PR Batch Session — one occasion (Trading Bots + Config)
 
 ## Session shape
 
@@ -107,10 +107,10 @@ is the fastest pattern for multi-PR batches.
 
 ```bash
 # Fetch all comments with metadata (parallel batch)
-gh api repos/$R/pulls/$N/comments --jq '.[] | {id, user: .user.login, body: .body[:500], path, line, original_line, in_reply_to_id, reactions: .reactions.total_count}'
+gh api repos/$R/pulls/$N/comments --jq '.[] | {id, user:.user.login, body:.body[:500], path, line, original_line, in_reply_to_id, reactions:.reactions.total_count}'
 
 # Fetch full comment body
-gh api repos/$R/pulls/$N/comments --jq '.[] | select(.id == <ID>) | .body'
+gh api repos/$R/pulls/$N/comments --jq '.[] | select(.id == <ID>) |.body'
 
 # Get PR diff
 gh pr diff $N --repo $R

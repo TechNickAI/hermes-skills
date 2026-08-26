@@ -282,8 +282,8 @@ should hold what is true right now.**
 `scripts/living_board.py` maintains ONE pinned message per board, edited in place:
 
 ```bash
-living_board.py show    --topic brief
-living_board.py set     --topic brief --title "Short human title" --file item.md
+living_board.py show --topic brief
+living_board.py set --topic brief --title "Short human title" --file item.md
 living_board.py resolve --topic needs-me --item "substring of title"
 ```
 

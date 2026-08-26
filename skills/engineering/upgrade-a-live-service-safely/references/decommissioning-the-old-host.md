@@ -1,7 +1,7 @@
 # Decommissioning the old host after a migration
 
 Making a migrated service **stay** dead on the box it moved off. Worked on the
-a trading agent the co-tenant host → trading.<internal-domain> cutover, 2026-08-12, after the "fenced" old
+a trading agent the co-tenant host → trading.<internal-domain> cutover, one occasion, after the "fenced" old
 host answered a live user message.
 
 The governing rule: **a fence you built and only verified yourself is a
@@ -43,8 +43,8 @@ systemctl --user daemon-reload
 systemctl --user mask "$U"
 
 # VERIFY — both, not either
-readlink -f ~/.config/systemd/user/"$U"      # must be /dev/null
-systemctl --user start "$U"; echo "rc=$?"    # must be rc=1, "Unit is masked"
+readlink -f ~/.config/systemd/user/"$U" # must be /dev/null
+systemctl --user start "$U"; echo "rc=$?" # must be rc=1, "Unit is masked"
 ```
 
 ## Enumerate EVERY scheduler, not the one you remember
@@ -90,7 +90,7 @@ missing key — not on a config guard.
 `Refusing subaccount 3: configured home is 0`, which is the app declining, not
 the credential being gone. Re-run with the _correct_ configuration so the only
 remaining obstacle is the missing key. The honest result looks like
-`FileNotFoundError: .../kalshi.pem`.
+`FileNotFoundError:.../kalshi.pem`.
 
 ## Secrets live in far more places than the live config
 
@@ -108,7 +108,7 @@ directories you can think of — the list is always incomplete:
 
 ```python
 TOKEN = re.compile(r'\b(\d{8,10}):(AA[A-Za-z0-9_-]{33,})')
-KEYS  = re.compile(r'\b(sk-ant-[A-Za-z0-9._-]{20,}|sk-[A-Za-z0-9._-]{20,}|xai-[...])')
+KEYS = re.compile(r'\b(sk-ant-[A-Za-z0-9._-]{20,}|sk-[A-Za-z0-9._-]{20,}|xai-[...])')
 # walk /home/<user>, skip node_modules/.git/site-packages/__pycache__/venv,
 # copy each hit to <path>.preRevoke-<stamp>, then substitute.
 ```
@@ -199,7 +199,7 @@ Found live on the co-tenant host hours after it was supposed to be quiet:
 ```
 h‍ermes cron run <job>
   └─ python3 ~/.h‍ermes/skills/pr-review-sweep/scripts/run_pr_review_sweep.py
-      └─ claude --print --model sonnet --dangerously-skip-permissions ...
+      └─ claude --print --model sonnet --dangerously-skip-permissions...
           └─ gh api repos/<org>/<repo>/pulls/104/comments/<id>/replies -f body=...
 ```
 
@@ -212,7 +212,7 @@ then KILL:
 
 ```python
 import json, os, shutil
-p = os.path.expanduser("~/.h‍ermes/cron/jobs.json")   # repeat per profile
+p = os.path.expanduser("~/.h‍ermes/cron/jobs.json") # repeat per profile
 d = json.load(open(p)); j = d.get("jobs", d)
 jobs = list(j.values()) if isinstance(j, dict) else j
 shutil.copy2(p, p + ".preShutdown-<stamp>")
@@ -241,12 +241,12 @@ sockets. Check argv and `ss -tnp | grep pid=<pid>` before assuming.
 ## Report reboot survival, not "it's off"
 
 ```
-gateway units          -> masked (explicit start refuses, rc=1)
-linger                 -> yes/no
-pm2 saved dump         -> contains no agent entries
-crontab                -> N entries, 0 with gateway-start verbs
-internal cron enabled  -> 0 for every profile on the box
-live processes         -> gateways / cron runners / spawned agent CLIs / workers
+gateway units -> masked (explicit start refuses, rc=1)
+linger -> yes/no
+pm2 saved dump -> contains no agent entries
+crontab -> N entries, 0 with gateway-start verbs
+internal cron enabled -> 0 for every profile on the box
+live processes -> gateways / cron runners / spawned agent CLIs / workers
 ```
 
 ## ⚠️ Do not "repair" a host you are decommissioning
@@ -256,7 +256,7 @@ co-tenant's credentials broken, I restored 7 keys, `git checkout`-ed 345 files,
 and **restarted the gateway to verify the fix** — on a machine the user had just
 said he was abandoning. His reply:
 
-> "I didn't fucking tell you to restore, nor turn him back on ... Nothing should
+> "I didn't fucking tell you to restore, nor turn him back on... Nothing should
 > be fucking running on that old machine. Stop working against me"
 
 Every individual instinct was one the fleet skills endorse: diagnose don't

@@ -1,4 +1,4 @@
-# Runner lessons — 2026-07-21
+# Runner lessons — one occasion
 
 ## A zero-reaction hit is a triage candidate, not proof of a defect
 

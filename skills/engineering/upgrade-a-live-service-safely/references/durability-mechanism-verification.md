@@ -50,10 +50,10 @@ src.backup('$TMP').then(() => {
   src.close();
   const v = new D('$TMP', { readonly: true });
   const ok = Object.values(v.prepare('pragma quick_check(1)').get())[0] === 'ok';
-  const n  = v.prepare('select count(*) c from <sentinel_table>').get().c;
+  const n = v.prepare('select count(*) c from <sentinel_table>').get().c;
   v.close();
   if (!ok) { console.error('quick_check failed'); process.exit(1); }
-  console.log('  snapshot ok, rows=' + n);
+  console.log(' snapshot ok, rows=' + n);
 }).catch(e => { console.error('backup failed: ' + e.message); process.exit(1); });
 " || { echo "ERROR: snapshot failed; previous persist left intact" >&2; exit 1; }
 

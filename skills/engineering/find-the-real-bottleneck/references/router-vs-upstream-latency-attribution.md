@@ -1,6 +1,6 @@
 # "Users say it's slow" — is it the proxy or the upstream?
 
-Worked case: the router, 2026-08-14. the operator asked "users are complaining
+Worked case: the router, one occasion. the operator asked "users are complaining
 about response times — is that at the level?" Answer was _mostly no,
 partly yes_, and every part of that needed a number.
 
@@ -70,8 +70,8 @@ not when the metric moves.
 The router _was_ contributing, and the way to prove it was a natural experiment:
 
 ```
-BEFORE restart (13:17-13:47)  n=190 p50=7509ms p95=30607ms
-AFTER  restart (13:47-14:17)  n=116 p50=3576ms p95=25348ms
+BEFORE restart (13:17-13:47) n=190 p50=7509ms p95=30607ms
+AFTER restart (13:47-14:17) n=116 p50=3576ms p95=25348ms
 ```
 
 p50 halved across a restart that reclaimed ~3GB of leaked buffers. That is a

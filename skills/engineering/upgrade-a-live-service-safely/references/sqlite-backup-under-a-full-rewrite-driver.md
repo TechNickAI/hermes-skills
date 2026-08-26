@@ -1,6 +1,6 @@
 # Backing up SQLite when the app is on a full-rewrite driver (sql.js)
 
-Worked case 2026-08-14, the router, before a v3.8.50 deploy. the operator asked
+Worked case one occasion, the router, before a v3.8.50 deploy. the operator asked
 for "triple backups — I don't want to have to rebuild my configuration."
 Two reasonable-looking backup methods produced **corrupt files** before the
 third worked. Both failures looked like data corruption and were not.
@@ -33,8 +33,8 @@ Consequences for anything that reads the file:
 ## Trap 1: the host python is a different SQLite than the writer
 
 ```
-host python3 -c "import sqlite3; print(sqlite3.sqlite_version)"   -> 3.45.1
-app better-sqlite3 "select sqlite_version()"                      -> 3.53.3
+host python3 -c "import sqlite3; print(sqlite3.sqlite_version)" -> 3.45.1
+app better-sqlite3 "select sqlite_version()" -> 3.53.3
 ```
 
 A backup taken with **python's** `sqlite3` `.backup()` API produced a file that
@@ -153,8 +153,8 @@ the compiled code path can never reach them.
 
 ```bash
 # 1. is the native module actually dlopen'd into the running process?
-sudo grep -c 'better_sqlite3\.node' /proc/<pid>/maps      # 0 == NOT loaded
-sudo grep -oE '/[^ ]*\.node' /proc/<pid>/maps | sort -u   # what IS loaded
+sudo grep -c 'better_sqlite3\.node' /proc/<pid>/maps # 0 == NOT loaded
+sudo grep -oE '/[^ ]*\.node' /proc/<pid>/maps | sort -u # what IS loaded
 
 # 2. behavioural: full-file rewrite rate
 a=$(stat -c%Y $DB); n=0

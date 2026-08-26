@@ -1,12 +1,12 @@
 # The supervisor above the supervisor
 
-Built and proven on 2026-08-14 for a trading agent's gateway on `trading.<internal-domain>`,
+Built and proven on one occasion for a trading agent's gateway on `trading.<internal-domain>`,
 after the SAME terminal state was reached twice by different routes:
 
-| date       | route                                                                                 | end state               |
-| ---------- | ------------------------------------------------------------------------------------- | ----------------------- |
-| 2026-08-12 | `daemon-reload` issued from inside the gateway's own cgroup SIGKILLed its supervisor  | `failed`, `NRestarts=0` |
-| 2026-08-14 | a deploy stopped the gateway, then died at its own verify gate before the resume step | `failed`, `NRestarts=0` |
+| date         | route                                                                                 | end state               |
+| ------------ | ------------------------------------------------------------------------------------- | ----------------------- |
+| one occasion | `daemon-reload` issued from inside the gateway's own cgroup SIGKILLed its supervisor  | `failed`, `NRestarts=0` |
+| one occasion | a deploy stopped the gateway, then died at its own verify gate before the resume step | `failed`, `NRestarts=0` |
 
 One hole, two incidents: **nothing asserts the service SHOULD be up,
 independent of how it went down.** `Restart=always` is load-bearing for
@@ -18,7 +18,7 @@ The obvious fix is an `EXIT` trap in the deploy that restarts the service on
 any exit path. **Prefer the state assertion instead.**
 
 A trap only covers failure modes that run _through the deploy_. The
-2026-08-12 outage did not go through the deploy at all, so a trap fixes one
+one occasion outage did not go through the deploy at all, so a trap fixes one
 of the two incidents. A periodic assertion fixes the class — it does not
 care what stopped the service or whether that caller is still alive to clean
 up after itself. (The trap is still worth adding as defence in depth; it is
@@ -33,7 +33,7 @@ A deploy legitimately holds the service down while it drains in-flight work
 and resets the tree. The watchdog must stand down during that, or it
 re-opens exactly the unsafe window the deploy exists to provide.
 
-**Do not gate on a flag/lock file.** The 2026-08-14 deploy died WITHOUT
+**Do not gate on a flag/lock file.** The one occasion deploy died WITHOUT
 cleanup — a stale flag would have suppressed the watchdog indefinitely,
 rebuilding the very outage it was written to prevent. A process check cannot
 go stale because the kernel reaps the evidence:
@@ -72,7 +72,7 @@ Fix — act ONLY on a settled down-state:
 
 ```bash
 case "$state" in
-    active|activating|reloading|deactivating) exit 0 ;;
+    active|activating|reloading|deactivating) exit 0;;
 esac
 ```
 
@@ -108,17 +108,17 @@ confirm recovery on the next tick. Use a fake process — never run the real
 deploy to test a watchdog, and keep money paths read-only.
 
 Budget real time: with a 210s stop timeout, each counterfactual runs for
-minutes. Run them detached (`nohup ... > /tmp/out.log 2>&1 &`) and poll the
+minutes. Run them detached (`nohup... > /tmp/out.log 2>&1 &`) and poll the
 log, because an SSH foreground call will time out mid-drain and tell you
 nothing.
 
-## Installing it without repeating the 2026-08-12 outage
+## Installing it without repeating the one occasion outage
 
 `daemon-reload` is what caused the earlier incident. Before running it,
 prove your shell is NOT in the target's cgroup:
 
 ```bash
-cat /proc/self/cgroup     # want: .../session-NNNN.scope
+cat /proc/self/cgroup # want:.../session-NNNN.scope
 systemctl --user show <unit> -p ControlGroup --value
 ```
 

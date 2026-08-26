@@ -88,7 +88,7 @@ or a population is not recoverable from the numbers afterwards.
 
   ```text
   source total = retrieved unique rows + rows you failed to retrieve
-  retrieved    = parse failures + duplicates + join losses + each named filter + analyzed
+  retrieved = parse failures + duplicates + join losses + each named filter + analyzed
   ```
 
   If either line does not balance, the difference is a filter you have not found
@@ -323,8 +323,8 @@ judgment or a comparison you can already make. Whether `0.9e9` falls inside
 wrapping a one-line comparison is ceremony that makes the check feel done.
 
 ```bash
-python3 scripts/decompose.py --demo       # worked examples, no data needed
-python3 scripts/decompose.py --selftest   # 46 assertions, verifies it still works
+python3 scripts/decompose.py --demo # worked examples, no data needed
+python3 scripts/decompose.py --selftest # 46 assertions, verifies it still works
 python3 scripts/decompose.py --help
 ```
 

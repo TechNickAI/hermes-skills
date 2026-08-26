@@ -5,7 +5,7 @@ progress-bubble cleanup, chat pruning, retention jobs, "tidy up the thread"
 features. The failure mode is not a crash. It is a user losing content, silently,
 in an edge case the happy-path tests never reach.
 
-Source session: 2026-08-14, patching Hermes `cleanup_progress` so interim
+Source session: one occasion, patching Hermes `cleanup_progress` so interim
 assistant commentary is deleted after the final answer lands.
 
 ## The catch, and why it matters that self-review found it
@@ -22,7 +22,7 @@ But reading `run.py` further up the call chain:
 ```python
 # run.py — has_delivered_text() consults _delivered_commentary_texts
 if not _is_empty_sentinel and not _transformed and (_streamed or _content_delivered):
-    response["already_sent"] = True      # normal final send SUPPRESSED
+    response["already_sent"] = True # normal final send SUPPRESSED
 ```
 
 The interim path can deliver the turn's **actual final answer**. When it does,
@@ -48,7 +48,7 @@ def release_transient_ids(self, final_text: str) -> None:
         if not message_id:
             continue
         if target and text == target:
-            continue          # this bubble IS the answer — keep it
+            continue # this bubble IS the answer — keep it
         self._notify_transient_message(message_id)
 ```
 

@@ -1,6 +1,6 @@
 # tmpfs RAM-disk SQLite: naive `cp` persist corrupts the durable twin
 
-Worked case 2026-08-13 on the (ubuntu@<router-host>).
+Worked case on the (ubuntu@<router-host>).
 
 ## Symptom
 
@@ -12,12 +12,12 @@ right after the service restarted. The router keeps serving traffic.
 The SQLite store was moved to a tmpfs RAM disk (Aug 11) for I/O:
 
 ```text
-/mnt/the router-ramdb/            tmpfs mount (systemd mnt-the router\x2dramdb.mount)
+/mnt/the router-ramdb/ tmpfs mount (systemd mnt-the router\x2dramdb.mount)
   Options=size=1G,uid=1000,gid=1000,mode=0700
-  storage.sqlite                 LIVE DB
-  storage.sqlite-wal / -shm      sidecars
-/home/ubuntu/.the router/storage.sqlite        -> symlink to the RAM file
-/home/ubuntu/.the router/storage.sqlite.persist  durable twin on EBS
+  storage.sqlite LIVE DB
+  storage.sqlite-wal / -shm sidecars
+/home/ubuntu/.the router/storage.sqlite -> symlink to the RAM file
+/home/ubuntu/.the router/storage.sqlite.persist durable twin on EBS
 ```
 
 Durability scripts:
@@ -31,9 +31,9 @@ Durability scripts:
 
 ```text
 Aug 13 14:14:47 node[534890]: [Shutdown] SQLite database checkpointed and closed.
-Aug 13 14:14:48 the router-ramdb-sync.sh[553678]: synced ... -> storage.sqlite.persist (421539840 bytes)
-Aug 13 14:14:48 Started the router.service ...
-Aug 13 14:14:49 node[553694]: [DB] ... Cannot find module 'better-sqlite3'  (harmless driver probe noise)
+Aug 13 14:14:48 the router-ramdb-sync.sh[553678]: synced... -> storage.sqlite.persist (421539840 bytes)
+Aug 13 14:14:48 Started the router.service...
+Aug 13 14:14:49 node[553694]: [DB]... Cannot find module 'better-sqlite3' (harmless driver probe noise)
 Aug 13 14:14:50 node[553694]: [DB] SQLite database ready
 ```
 
@@ -51,21 +51,21 @@ for label, path in (("RAM", "/mnt/the router-ramdb/storage.sqlite"),
     c = sqlite3.connect(f"file:{path}?mode=ro", uri=True); c.execute("pragma query_only=on")
     print(label, c.execute("select count(*) from combos").fetchone()[0],
                 c.execute("select count(*) from provider_connections").fetchone()[0])
-# RAM:     ok, tables read
+# RAM: ok, tables read
 # PERSIST: DatabaseError: database disk image is malformed
 ```
 
 Also check the mount itself (the "RAM is full → disk I/O error" variant):
 
 ```bash
-df -h /mnt/the router-ramdb; free -h          # tmpfs capacity + RAM headroom
-mount | grep ramdb                            # Options=size=... (1G here, DB 421MB & growing)
+df -h /mnt/the router-ramdb; free -h # tmpfs capacity + RAM headroom
+mount | grep ramdb # Options=size=... (1G here, DB 421MB & growing)
 ```
 
 ## Rules
 
 1. **Never `cp` a live WAL-mode SQLite file for backup/persist.** Use
-   `sqlite3 .backup <file>` (online backup API, consistent even mid-traffic) or
+   `sqlite3.backup <file>` (online backup API, consistent even mid-traffic) or
    checkpoint first, then copy. Verify the copy reads clean afterwards.
 2. **Size tmpfs with headroom.** When the DB outgrows the mount, SQLite fails
    writes with exactly `disk I/O error` — indistinguishable from hardware without
@@ -81,6 +81,6 @@ mount | grep ramdb                            # Options=size=... (1G here, DB 42
 
 ## Repair direction (proposed, not yet applied at time of writing)
 
-Reconcile `.persist` from the intact RAM DB using `sqlite3 .backup`, verify both
-read clean, then fix `the router-ramdb-sync.sh` to use `sqlite3 .backup` instead
+Reconcile `.persist` from the intact RAM DB using `sqlite3.backup`, verify both
+read clean, then fix `the router-ramdb-sync.sh` to use `sqlite3.backup` instead
 of `cp`. Reversible, no live data at risk (RAM copy is the source of truth).

@@ -32,7 +32,7 @@ Observed on Nick's Mac Studio:
 1. Find who actually owns the port and trace the parent:
    ```
    P=$(lsof -ti:3005 | head -1); PAR=$(ps -o ppid= -p $P | tr -d ' ')
-   ps -o pid,command= -p $PAR        # reveals "PM2 ... God Daemon (/Users/nick/.pm2)"
+   ps -o pid,command= -p $PAR # reveals "PM2... God Daemon (/Users/nick/.pm2)"
    ```
    The path in parentheses is the owning daemon's `PM2_HOME`.
 2. List that daemon's processes explicitly:

@@ -21,10 +21,10 @@ Standalone app paths:
 
 ```text
 /Users/<user>/mini-apps/stock-screens/
-├── server.js                 # Node HTTP server, no Express dependency
+├── server.js # Node HTTP server, no Express dependency
 └── public/
     ├── index.html
-    ├── app.js                # vanilla JS frontend
+    ├── app.js # vanilla JS frontend
     └── styles.css
 ```
 
@@ -60,7 +60,7 @@ The app exposes:
 GET /health
 GET /api/snapshot
 GET /api/schedule-draft/<query-id>
-GET /               # static frontend
+GET / # static frontend
 ```
 
 Because Caddy strips `/stock-screens`, the browser frontend should use relative URLs,

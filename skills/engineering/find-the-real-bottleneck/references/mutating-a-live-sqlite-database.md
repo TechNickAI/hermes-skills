@@ -6,9 +6,9 @@ Every external mutation attempt silently reverted. Everything below is measured.
 ## The symptom: deletes that vanish
 
 ```
-Jul-20 rows: 22515 -> 0  (deleted 22515)
-... 6 seconds later ...
-after 6s, Jul-20 rows: 22515   <-- RESTORED
+Jul-20 rows: 22515 -> 0 (deleted 22515)
+... 6 seconds later...
+after 6s, Jul-20 rows: 22515 <-- RESTORED
 ```
 
 July 20 data — a date the running router **cannot** be writing. So this is not
@@ -34,7 +34,7 @@ flushes its stale pages over yours. Row counts even keep climbing
 `wal_checkpoint(TRUNCATE)` makes the delete **momentarily** visible —
 
 ```
-before=22515  after_delete=0  after_checkpoint=0
+before=22515 after_delete=0 after_checkpoint=0
 t+0s (new connection): 0
 ```
 
@@ -51,7 +51,7 @@ stop service → prove the process is gone → mutate → checkpoint → VACUUM 
 systemctl --user stop the router
 for i in 1 2 3 4 5 6; do pgrep -f "dev/run-standalone" >/dev/null || break; sleep 2; done
 pgrep -f "dev/run-standalone" >/dev/null && { echo "STILL RUNNING - abort"; exit 1; }
-# ... deletes via the app's own better-sqlite3 ...
+#... deletes via the app's own better-sqlite3...
 # PRAGMA wal_checkpoint(TRUNCATE); VACUUM;
 systemctl --user start the router
 for i in $(seq 1 18); do
@@ -93,7 +93,7 @@ retry loop:
 ```js
 function go() {
   const D = require("better-sqlite3")(FILE, { readonly: true });
-  /* ... */ D.close();
+  /*... */ D.close();
   return r;
 }
 var r = null;
@@ -112,18 +112,18 @@ A 7-day retention purge across the 12 tables the app's own `runAutoCleanup()`
 targets. Column names and time formats are **not** uniform:
 
 ```
-quota_snapshots           created_at   ISO text
-call_logs                 timestamp    ISO text
-usage_history             timestamp    ISO text
-compression_analytics     timestamp    ISO text
-mcp_tool_audit            created_at   ISO text     <- NOT `timestamp`
-a2a_task_events           created_at   ISO text     <- NOT `timestamp`
-memories                  created_at   ISO text
-domain_cost_history       timestamp    INTEGER epoch MILLISECONDS
-compression_cache_stats   created_at   ISO text
-xp_audit_log              created_at   TEXT 'YYYY-MM-DD HH:MM:SS' (no T/Z)
-compression_run_telemetry timestamp    INTEGER epoch seconds (VERIFY per source)
-proxy_logs                timestamp    ISO text
+quota_snapshots created_at ISO text
+call_logs timestamp ISO text
+usage_history timestamp ISO text
+compression_analytics timestamp ISO text
+mcp_tool_audit created_at ISO text <- NOT `timestamp`
+a2a_task_events created_at ISO text <- NOT `timestamp`
+memories created_at ISO text
+domain_cost_history timestamp INTEGER epoch MILLISECONDS
+compression_cache_stats created_at ISO text
+xp_audit_log created_at TEXT 'YYYY-MM-DD HH:MM:SS' (no T/Z)
+compression_run_telemetry timestamp INTEGER epoch seconds (VERIFY per source)
+proxy_logs timestamp ISO text
 ```
 
 A first pass using epoch **seconds** against `domain_cost_history` deleted **0
@@ -131,8 +131,8 @@ rows** and looked like "already clean." Only comparing the column type
 (`PRAGMA table_info`) and `MIN`/`MAX` values against the cutoff exposed it:
 
 ```
-domain_cost_history  timestamp type: INTEGER
-  min: 1784487629606   max: 1785781075850     <- 13 digits = milliseconds
+domain_cost_history timestamp type: INTEGER
+  min: 1784487629606 max: 1785781075850 <- 13 digits = milliseconds
 ```
 
 **A delete that removes 0 rows is a claim to verify, not a result to report.**
@@ -142,14 +142,14 @@ cutoff) before concluding nothing needed deleting.
 ## Results worth knowing
 
 ```
-520 MB -> 331 MB   (12 tables, 342k+ rows, VACUUM reclaimed 189 MB)
-usage_history          247k -> 135k
-compression_analytics  247k -> 135k
-xp_audit_log           244k -> 127k
-domain_cost_history    244k -> 134k   (only after the epoch-ms fix)
-compression_cache_stats 167k ->  90k
-quota_snapshots          10k ->   4k
-call_logs / proxy_logs  unchanged — genuinely inside 7 days
+520 MB -> 331 MB (12 tables, 342k+ rows, VACUUM reclaimed 189 MB)
+usage_history 247k -> 135k
+compression_analytics 247k -> 135k
+xp_audit_log 244k -> 127k
+domain_cost_history 244k -> 134k (only after the epoch-ms fix)
+compression_cache_stats 167k -> 90k
+quota_snapshots 10k -> 4k
+call_logs / proxy_logs unchanged — genuinely inside 7 days
 ```
 
 Median endpoint latency roughly halved (2.2s → ~1.2s). Helpful, **not**

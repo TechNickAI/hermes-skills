@@ -27,7 +27,7 @@ const freshness = (iso) => {
   return { label: `${age}d old`, cls: "stale", age };
 };
 // Banner: collect {label, iso, age, critical}, sort by age desc.
-// worst = points[0]; cls = staleCriticals.length ? 'stale' : worst.age > 2 ? 'aging' : 'fresh'.
+// worst = points[0]; cls = staleCriticals.length ? 'stale': worst.age > 2 ? 'aging': 'fresh'.
 // Pill: if cls !== 'fresh' && age !== null -> `<span class="stale-pill ${cls}">${age}d old</span>`.
 ```
 

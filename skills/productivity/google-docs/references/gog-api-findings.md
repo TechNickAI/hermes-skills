@@ -1,9 +1,9 @@
-# gog CLI Empirical Findings (tested 2026-06-23)
+# gog CLI Empirical Findings (tested one occasion)
 
 ## Local version: v0.9.0
 
 ```
-gog --version  # Build: v0.9.0 (99d9575)
+gog --version # Build: v0.9.0 (99d9575)
 ```
 
 Upstream (steipete/gogcli) is at v0.29+ with much richer Docs editing. The

@@ -3,7 +3,7 @@
 Implementation companion to `channel-cleanup-and-alarm-escalation.md`. That file settles
 **what** to build and why (measure first; repetition is an alarm; allowlist + archive;
 pin-and-edit; shared-room conduct). This file records **how**, from probing the platform
-live and shipping a working steward on 2026-08-21.
+live and shipping a working steward on one occasion.
 
 Read the policy reference first. Everything here assumes those rules are already agreed.
 

@@ -1,6 +1,6 @@
 # Decision Panel + Anti-Veto Aggregator (MoA "court" variant)
 
-Session origin: <agent-d> Rumor Desk "court", 2026-07-21. The panel decides **whether to take a
+Session origin: <agent-d> Rumor Desk "court", one occasion. The panel decides **whether to take a
 bounded action** (make this trade), not **how to solve an open problem**. Same MoA skeleton
 (proposers + aggregator) but the roles and aggregator math differ. This pattern generalizes to any
 gated go/no-go: ship a release, approve a spend, greenlight a candidate, publish, send.
@@ -39,14 +39,14 @@ masquerade as a "no" on all.
 def adjudicate(verdicts):
     by = {v.seat: v for v in verdicts}
     # 1. HARD VETO is CORRECTNESS-ONLY. Check the veto flag on the CORRECTNESS seat ONLY.
-    #    NEVER loop all seats for veto — that is the bug that lets a bear kill on pessimism.
+    # NEVER loop all seats for veto — that is the bug that lets a bear kill on pessimism.
     cv = by["catalyst_verifier"]
     if cv.hard_veto.trigger:
         return HARD_VETO(reason=cv.hard_veto.reason)
     # 2. bull strength (only if bull actually says act)
-    bull = confidence(bull) * scale  if bull.verdict in (BET, STOCK-ONLY) else 0
+    bull = confidence(bull) * scale if bull.verdict in (BET, STOCK-ONLY) else 0
     # 3. a bear/disconfirmation point SUBTRACTS only if specific & falsifiable
-    #    & NOT priced_in & has a disconfirmer. Everything else = weight 0.
+    # & NOT priced_in & has a disconfirmer. Everything else = weight 0.
     bear_weight = 0.5 * count_valid(bear.points)
     disc_weight = 0.5 * count_valid(disconfirmation.points)
     # 4. priced-in penalty
@@ -55,7 +55,7 @@ def adjudicate(verdicts):
     # 5. any STOCK-ONLY seat caps to a small/half action
     return TRADE if score>=1.0 and not stock_only else SMALL if score>=0.3 else PASS
 
-def count_valid(points):   # the anti-doom filter
+def count_valid(points): # the anti-doom filter
     return sum(1 for p in points
               if p.specific and p.falsifiable and not p.priced_in and p.disconfirmer)
 ```

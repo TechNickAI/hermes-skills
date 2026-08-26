@@ -416,17 +416,17 @@ Decision-first. What needs to change, why, and what it costs. Not an inventory.
 skill-librarian — <agent> — maintenance run
 
 BROKEN (2)
-  plan            in .archive/ and bundled -> resolves to NEITHER, no plan mode
-  cortex          enabled, SKILL.md missing, 2,448-page store unreachable
+  plan in.archive/ and bundled -> resolves to NEITHER, no plan mode
+  cortex enabled, SKILL.md missing, 2,448-page store unreachable
 
 SHADOWING (3)
-  llm-model-selection-eval / -evals   near-identical triggers, 2% shared body
-  ...
+  llm-model-selection-eval / -evals near-identical triggers, 2% shared body
+...
 
-ROLE MISFIT (12)   finance agent carrying software-delivery skills
-  github-pr-workflow, kanban-worker, claude-code, ...
+ROLE MISFIT (12) finance agent carrying software-delivery skills
+  github-pr-workflow, kanban-worker, claude-code,...
 
-CONFIG LIES (4)    disabled entries matching nothing on disk
+CONFIG LIES (4) disabled entries matching nothing on disk
 
 No action needed: 118 skills verified healthy.
 ```

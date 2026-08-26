@@ -116,7 +116,7 @@ msgs = [r[0] for r in c.execute(
     if r[0] and len(r[0]) < 3000]
 for label, pat in PATTERNS.items():
     n = sum(1 for m in msgs if re.search(pat, m, re.I))
-    print(f'{label:18}{n:5}  ({100*n//len(msgs)}%)')
+    print(f'{label:18}{n:5} ({100*n//len(msgs)}%)')
 ```
 
 Corollaries:

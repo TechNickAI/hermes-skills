@@ -1,6 +1,6 @@
 # Verifying a rebuilt database before you swap it in
 
-**Six real bugs, one session (2026-08-22).** Every one passed
+**Six real bugs, one session (one occasion).** Every one passed
 `PRAGMA integrity_check` and would have shipped silently. The lesson is that
 **`integrity: ok` on the new file proves nothing about whether the rebuild
 preserved your data** — you must diff the rebuilt copy against the source.
@@ -10,8 +10,8 @@ preserved your data** — you must diff the rebuilt copy against the source.
 Set on the reader so odd encodings can't abort a long copy. Consequence:
 
 ```
-SOURCE:   typeof(source) = text  ->  where source='telegram'  ->  326
-REBUILT:  typeof(source) = blob  ->  where source='telegram'  ->  0
+SOURCE: typeof(source) = text -> where source='telegram' -> 326
+REBUILT: typeof(source) = blob -> where source='telegram' -> 0
 ```
 
 Every byte present, `integrity_check: ok`, search returning hits — and the
@@ -74,9 +74,9 @@ def read_range(table, cols, key, lo, hi):
 The single most confusing finding. Measured:
 
 ```
-live count(*)          455,522
-live actually readable 455,487     <- 1,937 PHANTOM rows
-rebuilt                455,483
+live count(*) 455,522
+live actually readable 455,487 <- 1,937 PHANTOM rows
+rebuilt 455,483
 ```
 
 A damaged B-tree counts rows from interior-page metadata that it **cannot
@@ -88,9 +88,9 @@ Allow a small bounded shortfall, print the unrecoverable ids explicitly, and
 refuse anything larger:
 
 ```
-sessions  live readable=3638  new=3635  missing=3 (tolerance 20) OK
-  unrecoverable ids: ['20260822_173623_b6fe1e', ...]
-messages  live readable=455487 new=455483 missing=4 (tolerance 22) OK
+sessions live readable=3638 new=3635 missing=3 (tolerance 20) OK
+  unrecoverable ids: ['20260822_173623_b6fe1e',...]
+messages live readable=455487 new=455483 missing=4 (tolerance 22) OK
   unrecoverable ids: [976098, 976116, 976117, 976118]
 ```
 
@@ -102,7 +102,7 @@ the corruption window.
 ## 5. Holding down a `Restart=always` service
 
 `systemctl stop` is undone 5s later. `systemctl mask` **fails** when the unit is
-a real file (`Failed to mask unit: File ... already exists`) — it only works on
+a real file (`Failed to mask unit: File... already exists`) — it only works on
 symlinks. The lever that works is a drop-in, removed in an `EXIT` trap:
 
 ```bash

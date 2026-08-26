@@ -14,8 +14,8 @@ of `0 matches` is only meaningful next to `scanned 3,493 rows`. A result of
 n = 0
 for row in db.execute(q):
     n += 1
-    ...
-print('scanned', n)          # ← mandatory, not optional
+...
+print('scanned', n) # ← mandatory, not optional
 ```
 
 If the scan count is zero against a store you know is populated, stop and fix the
@@ -23,14 +23,14 @@ query. Do not report a finding.
 
 ## Trap: SQLite type affinity makes date filters match nothing
 
-Measured 2026-08-24 while searching a 176,837-row `chat.db`. This filter returned
+Measured on one run while searching a 176,837-row `chat.db`. This filter returned
 **zero rows** with no error:
 
 ```sql
 WHERE m.date/1000000000 + 978307200 > strftime('%s','now','-14 days')
 ```
 
-`strftime('%s', ...)` returns a **TEXT** value. The left side is an INTEGER
+`strftime('%s',...)` returns a **TEXT** value. The left side is an INTEGER
 expression. SQLite compares INTEGER against TEXT using storage-class ordering, in
 which every integer sorts _before_ every string, so the predicate is false for
 every row in the table. Forever. Silently.
@@ -44,9 +44,9 @@ The diagnostic that caught it was a three-line control query, not more staring a
 the WHERE clause:
 
 ```python
-print(db.execute("select count(*) from message").fetchone())                     # 176837
+print(db.execute("select count(*) from message").fetchone()) # 176837
 print(db.execute("select datetime(max(date)/1000000000+978307200,'unixepoch') from message").fetchone())
-print(db.execute("select count(*) from message where <the filter>").fetchone())  # 0  ← the bug
+print(db.execute("select count(*) from message where <the filter>").fetchone()) # 0 ← the bug
 ```
 
 Total rows non-zero, max timestamp recent, filtered count zero. That triple

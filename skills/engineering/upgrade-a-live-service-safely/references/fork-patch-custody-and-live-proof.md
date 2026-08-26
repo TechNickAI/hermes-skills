@@ -44,11 +44,11 @@ Use several proofs instead:
 ```bash
 # Compare patch identity when applicable
 git show <original-sha> | git patch-id --stable
-git show <carrier-sha>  | git patch-id --stable
+git show <carrier-sha> | git patch-id --stable
 
 # Confirm the behavior symbols and focused test on the release ref
 git show <release-ref>:path/to/source | grep '<feature-symbol>'
-git show <release-ref>:path/to/test   >/dev/null
+git show <release-ref>:path/to/test >/dev/null
 
 # Inspect the release delta and PR merge
  git log --oneline <upstream-release>..<fork-release>

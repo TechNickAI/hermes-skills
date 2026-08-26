@@ -1,6 +1,6 @@
 # Telegram MEDIA: Attachment Delivery — CLOSED ≠ FIXED Worked Example
 
-Source-verified 2026-08-03 against `NousResearch/hermes-agent` `main`.
+Source-verified one occasion against `NousResearch/hermes-agent` `main`.
 A concrete worked example of Step 3c (CLOSED ≠ FIXED) and Step 3 (search
 upstream before reading source) applied to the Telegram outbound attachment
 pipeline.
@@ -25,22 +25,22 @@ Five issues documented the same attachment-delivery failure class:
 
 Five PRs were opened to fix these:
 
-| PR     | State  | Merged?              |
-| ------ | ------ | -------------------- |
-| #34022 | closed | ✅ merged 2026-05-28 |
-| #42226 | closed | ❌ NOT merged        |
-| #42374 | closed | ❌ NOT merged        |
-| #60069 | closed | ❌ NOT merged        |
-| #6254  | closed | ❌ NOT merged        |
-| #36060 | closed | ❌ NOT merged        |
+| PR     | State  | Merged?                |
+| ------ | ------ | ---------------------- |
+| #34022 | closed | ✅ merged one occasion |
+| #42226 | closed | ❌ NOT merged          |
+| #42374 | closed | ❌ NOT merged          |
+| #60069 | closed | ❌ NOT merged          |
+| #6254  | closed | ❌ NOT merged          |
+| #36060 | closed | ❌ NOT merged          |
 
 **The trap:** Issues #42206, #35474, #6249 were all closed by teknium1 on
-2026-07-12/16 — but NOT via a merged PR. The cross-referenced PRs (#42226,
+one occasion/16 — but NOT via a merged PR. The cross-referenced PRs (#42226,
 #42374, #60069) were all closed without merge. Commits `8713444a` and
 `6622289a` appeared in the issue timeline but are NOT on `main` (diverged,
 behind by 5672 commits).
 
-**The actual fix:** PR #34022 (merged 2026-05-28) addressed the root cause
+**The actual fix:** PR #34022 (merged one occasion) addressed the root cause
 differently — instead of adding more extensions to `MEDIA_DELIVERY_EXTS`, it
 changed `validate_media_delivery_path()` to a denylist-based model and added
 `MEDIA_EXTENSIONLESS_TAG_RE` as a validation-gated fallback. So `.py` files
@@ -107,15 +107,15 @@ file attachment.` — does NOT echo the host path.
 ## `MEDIA_DELIVERY_EXTS` on current main
 
 ```
-Images: .png .jpg .jpeg .gif .webp .bmp .tiff .svg
-Video: .mp4 .mov .avi .mkv .webm .3gp
-Audio: .mp3 .m2a .wav .ogg .opus .m4a .flac
-Documents: .pdf .docx .doc .odt .rtf .txt .md .epub
-Data: .xlsx .xls .ods .csv .tsv .json .xml .yaml .yml
-Geo: .kmz .kml .geojson .gpx
-Presentations: .pptx .ppt .odp .key
-Archives: .zip .tar .gz .tgz .bz2 .xz .7z .rar .apk .ipa
-Web: .html .htm
+Images:.png.jpg.jpeg.gif.webp.bmp.tiff.svg
+Video:.mp4.mov.avi.mkv.webm.3gp
+Audio:.mp3.m2a.wav.ogg.opus.m4a.flac
+Documents:.pdf.docx.doc.odt.rtf.txt.md.epub
+Data:.xlsx.xls.ods.csv.tsv.json.xml.yaml.yml
+Geo:.kmz.kml.geojson.gpx
+Presentations:.pptx.ppt.odp.key
+Archives:.zip.tar.gz.tgz.bz2.xz.7z.rar.apk.ipa
+Web:.html.htm
 ```
 
 **NOT in list (deliverable via validation fallback only):** `.py`, `.js`,

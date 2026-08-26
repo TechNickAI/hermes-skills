@@ -1,6 +1,6 @@
 # Adapting `stage_and_smoke.sh` to a real systemd unit
 
-Three failures burned on the 2026-08-16 the router cutover while adapting the
+Three failures burned on the one occasion the router cutover while adapting the
 packaged staging script. None reached production (live stayed HTTP 200
 throughout), but each cost a full ~4-minute staging round-trip. All three come
 from GUESSING the unit's contract instead of READING it.
@@ -17,7 +17,7 @@ systemctl --user show <unit> -p ExecStart -p WorkingDirectory -p EnvironmentFile
 Real output from the:
 
 ```
-{ path=/usr/bin/node ; argv[]=/usr/bin/node dev/run-standalone.mjs ; ... }
+{ path=/usr/bin/node; argv[]=/usr/bin/node dev/run-standalone.mjs;... }
 /home/ubuntu/src/the router/.env (ignore_errors=no)
 /home/ubuntu/src/the router/current/.build/next/standalone
 ```
@@ -51,7 +51,7 @@ while IFS= read -r line; do
   case "$line" in *=*) ENV_ARGS+=("$line");; esac
 done < "$ENV_FILE"
 ENV_ARGS+=("PORT=$TEST_PORT" "DATA_DIR=$TEST_DATA" "BASE_URL=http://127.0.0.1:$TEST_PORT")
-echo "    loaded ${#ENV_ARGS[@]} env entries (systemd-style, no shell eval)"
+echo " loaded ${#ENV_ARGS[@]} env entries (systemd-style, no shell eval)"
 env "${ENV_ARGS[@]}" node "$ENTRY" > "$TEST_LOG" 2>&1 &
 ```
 
@@ -78,8 +78,8 @@ under the standalone dir, not the release root.
 Mirror the unit exactly:
 
 ```bash
-cd "$REL/.build/next/standalone"   # == WorkingDirectory
-node "$ENTRY"                      # == argv, relative
+cd "$REL/.build/next/standalone" # == WorkingDirectory
+node "$ENTRY" # == argv, relative
 ```
 
 The staged process should differ from production in exactly three things: port,
@@ -95,7 +95,7 @@ Both releases carry BOTH trees:
 
 ```
 releases/<name>/dist/dev/run-standalone.mjs
-releases/<name>/.build/next/standalone/dev/run-standalone.mjs   <- the one used
+releases/<name>/.build/next/standalone/dev/run-standalone.mjs <- the one used
 ```
 
 Resolve by `find` against the NEW artifact and the CURRENT release, then compare:

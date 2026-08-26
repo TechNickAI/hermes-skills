@@ -2,7 +2,7 @@
 
 Covers the class: one pinned branch/tag, N hosts, each running one or more
 long-lived gateway/daemon processes out of a git checkout. Written from the
-2026-08-22 v0.20.1 → v0.20.5 rollout across 8 hosts.
+one occasion v0.20.1 → v0.20.5 rollout across 8 hosts.
 
 ---
 
@@ -13,12 +13,12 @@ Not "is it reachable" — capture the state a deploy would destroy:
 ```bash
 cd "$CO"
 git rev-parse --abbrev-ref HEAD; git rev-parse HEAD
-git status --porcelain | wc -l          # <-- the load-bearing one
+git status --porcelain | wc -l # <-- the load-bearing one
 git remote -v
 ```
 
 **A dirty working tree on one box is the single highest-value finding of the
-whole rollout.** On 2026-08-22 exactly one host of eight had 4 modified files —
+whole rollout.** On one occasion exactly one host of eight had 4 modified files —
 66 lines that existed _nowhere else in the world_: not in the release tag, not
 in the fleet branch, not in any commit. They were two real user-protecting
 fixes. A `git reset --hard` would have silently reverted them, and one of them
@@ -61,7 +61,7 @@ When the dirty files turn out to be genuine fixes:
 
 ```bash
 grep '^+' theirs.diff | grep -v '^+++' | sed 's/[[:space:]]*$//' | shasum -a 256
-grep '^+' mine.diff   | grep -v '^+++' | sed 's/[[:space:]]*$//' | shasum -a 256
+grep '^+' mine.diff | grep -v '^+++' | sed 's/[[:space:]]*$//' | shasum -a 256
 ```
 
 Identical hashes = their work survived byte-for-byte.
@@ -83,7 +83,7 @@ proves the new logic is live in a way no string grep can.
 
 ### The half-deploy this actually caught: uv venvs have no pip
 
-On 2026-08-22 the dependency-resync step failed on **6 of 7 hosts** with
+On one occasion the dependency-resync step failed on **6 of 7 hosts** with
 
 ```
 /home/ubuntu/.hermes/hermes-agent/venv/bin/python: No module named pip
@@ -93,7 +93,7 @@ The venvs were created by **uv**, which does not install pip inside them.
 Confirm from the venv's own marker rather than guessing:
 
 ```bash
-cat "$CO/venv/pyvenv.cfg"      # a `uv = 0.12.4` line means no pip
+cat "$CO/venv/pyvenv.cfg" # a `uv = 0.12.4` line means no pip
 ```
 
 Reinstall with `uv pip`, naming the interpreter, and export `~/.local/bin`
@@ -106,7 +106,7 @@ uv pip install --python "$CO/venv/bin/python" -q -e ".[messaging,cron,cli,voice]
 
 Two rules that go with it:
 
-- **Always name the extras.** A bare `-e .` drops the messaging stack and the
+- **Always name the extras.** A bare `-e.` drops the messaging stack and the
   gateway comes back up deaf. Re-assert the key packages after the install
   rather than trusting the exit code.
 - **Do not install pip into the venv to "fix" it.** That puts two package
@@ -158,7 +158,7 @@ ps -o pid=,etime=,rss=,comm= -p "$PID"
 
 ## 7. A restart that outlives your SSH timeout is UNKNOWN, not failed
 
-A busy agent mid-turn can take minutes to drain. On 2026-08-22 the trading box
+A busy agent mid-turn can take minutes to drain. On one occasion the trading box
 took ~2.5 min and blew a 180s timeout mid-restart. **Do not retry the restart** —
 re-read state. It had already come up cleanly, and a blind retry against a
 money-adjacent agent is the dangerous move. Reconnect, check

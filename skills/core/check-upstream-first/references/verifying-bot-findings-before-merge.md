@@ -1,6 +1,6 @@
 # Verifying bot findings before you merge
 
-Measured 2026-08-21 merging a skill PR with 7 outstanding review comments and all
+Measured on one run merging a skill PR with 7 outstanding review comments and all
 checks green. Green checks plus outstanding comments is not a merge signal — the
 comments have to be adjudicated, and most of them were already dead.
 
@@ -35,7 +35,7 @@ import importlib.util, io, contextlib
 spec = importlib.util.spec_from_file_location("m", "path/to/module.py")
 m = importlib.util.module_from_spec(spec); spec.loader.exec_module(m)
 
-def cap(fn, *a, **k):                      # capture printed output
+def cap(fn, *a, **k): # capture printed output
     buf = io.StringIO()
     try:
         with contextlib.redirect_stdout(buf):
@@ -88,16 +88,16 @@ nothing.
 
 Running the repo's scripts from a scratch clone left `__pycache__/*.pyc` files
 whose frozen absolute path contained the working directory name. The repo's own
-PII scanner then reported `blockers=1 ... 'bosun'` — an apparent secret leak,
+PII scanner then reported `blockers=1... 'bosun'` — an apparent secret leak,
 seconds before merge.
 
 The string was `/private/tmp/the operations agent-repo-review/.../decompose.py` inside a
 gitignored `.pyc`, never in the PR. Diagnose in this order:
 
 ```bash
-grep -n -i '<term>' path/to/source.py          # is it in the SOURCE at all?
-git check-ignore -v path/to/artifact.pyc       # is the hit even tracked?
-find . -name __pycache__ -type d -exec rm -rf {} +
+grep -n -i '<term>' path/to/source.py # is it in the SOURCE at all?
+git check-ignore -v path/to/artifact.pyc # is the hit even tracked?
+find. -name __pycache__ -type d -exec rm -rf {} +
 ```
 
 Then re-run and confirm the count returns to baseline. A scanner hit on a

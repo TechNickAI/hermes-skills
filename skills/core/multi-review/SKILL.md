@@ -114,7 +114,7 @@ Use the strongest practical isolation mechanism available, but match it to the t
 shape:
 
 1. **Headless Hermes one-shots in isolated scratch homes**
-   (`hermes -z ... -t ''`, each with its own `HERMES_HOME`) — the default. This
+   (`hermes -z... -t ''`, each with its own `HERMES_HOME`) — the default. This
    is the only path that delivers a **different prompt AND a different model per
    seat** ("Grok, be critical"; "Claude, be empathetic"), and **the only path
    where you can size the timeout to the job.** Isolation is mandatory, not
@@ -359,7 +359,7 @@ and never a substitute for the different-family independence rule above.
 | Synthesize findings into a coherent verdict     | Claude                                                         |
 | Write the evaluation framework or rubric        | GPT                                                            |
 | Apply a rubric and verify claims                | Claude or GPT (not the one that wrote it)                      |
-| Generate novel objections and unlisted failures | Open-weight (Kimi, Qwen, MiniMax, ...)                         |
+| Generate novel objections and unlisted failures | Open-weight (Kimi, Qwen, MiniMax,...)                          |
 | Adversarial kill / mandate discipline           | Grok                                                           |
 | Read a large diff or corpus for coverage        | Gemini                                                         |
 | Extract evidence with numbers behind it         | Not Gemini — Claude or GPT                                     |
@@ -406,13 +406,13 @@ offline from readable rows.
 
 ```bash
 source "$SKILL_DIR/scripts/reviewer_home.sh"
-reviewer_pool_init                    # REQUIRED; never inside $( )
+reviewer_pool_init # REQUIRED; never inside $( )
 
-reviewer_run "$CRITICAL_PROMPT"   -m grok         &
+reviewer_run "$CRITICAL_PROMPT" -m grok &
 reviewer_run "$EMPATHETIC_PROMPT" -m claude-think &
-reviewer_run "$SECURITY_PROMPT"   -m gpt-5.6-sol  &
+reviewer_run "$SECURITY_PROMPT" -m gpt-5.6-sol &
 wait
-reviewer_pool_destroy                 # or let the EXIT trap do it
+reviewer_pool_destroy # or let the EXIT trap do it
 ```
 
 `HERMES_HOME` roots config.yaml, `.env`, `auth.json`, skills, memories **and**
@@ -453,7 +453,7 @@ write your own, handle all five — every one fails _silently_.
    control to the next statement, so a Ctrl-C'd fan-out destroys the pool and
    then seeds a fresh one and keeps spending model calls. Kill live reviewers,
    restore the default disposition, re-raise.
-4. **A sourced `trap ... EXIT` clobbers the caller's own cleanup.** Chain it.
+4. **A sourced `trap... EXIT` clobbers the caller's own cleanup.** Chain it.
 5. **An exported pool variable is inherited by child shells,** which skip init,
    adopt the parent's pool, and delete it on their own exit while the parent's
    reviewers are still running. Do not export it.
@@ -498,7 +498,7 @@ execution rules that prevent silent failures:**
    message) are fine. For large inputs — big PR diffs, full logs, multi-file dumps —
    argv can hit `ARG_MAX` (`Argument list too long`). When the artifact is large, prefer
    **chunking** into per-file/per-section reviews or gather in the parent and send a
-   bounded brief. Do not pretend a temp file plus `$(cat ...)` solves this; it doesn't.
+   bounded brief. Do not pretend a temp file plus `$(cat...)` solves this; it doesn't.
 2. **Always disable tools with `-t ''`.** A headless reviewer that tries to call a tool
    will hang waiting for an approval that never comes. `-t ''` keeps it a pure text-in /
    text-out review. Do not remove it when customizing.
@@ -592,9 +592,9 @@ execution rules that prevent silent failures:**
 # (see execution rule 3): ~300s normal, ~600s deep/slow panels, background+poll beyond
 # the foreground ceiling. An omitted timeout inherits the environment default, which is
 # usually sized for ordinary shell commands and will kill a healthy reviewer early.
-hermes -z "$PROMPT_GROK"   --provider <grok-provider>   -m <current-grok-model>   --ignore-rules -t ''
+hermes -z "$PROMPT_GROK" --provider <grok-provider> -m <current-grok-model> --ignore-rules -t ''
 hermes -z "$PROMPT_GEMINI" --provider <gemini-provider> -m <current-gemini-model> --ignore-rules -t ''
-hermes -z "$PROMPT_GPT"    --provider <gpt-provider>    -m <current-gpt-model>    --ignore-rules -t ''
+hermes -z "$PROMPT_GPT" --provider <gpt-provider> -m <current-gpt-model> --ignore-rules -t ''
 ```
 
 Do not copy a version number out of this document. Resolve each family's **current**

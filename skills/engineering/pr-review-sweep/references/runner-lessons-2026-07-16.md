@@ -1,4 +1,4 @@
-# Runner lessons — 2026-07-16
+# Runner lessons — one occasion
 
 Session context: nightly PR review sweep across `carmentacollective` and `TechNickAI`,
 lookback 7 days, max 10 PRs, excluding `TechNickAI/openclaw-config`. Scanned 68 merged

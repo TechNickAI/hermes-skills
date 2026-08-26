@@ -102,7 +102,7 @@ concerns behind one boolean:
 Operators reach for `enabled: false` to fix an inbound problem and silently
 destroy the outbound capability they were relying on.
 
-Verified 2026-08-22: an agent was texting **pairing codes to a real owner's real
+Verified in one case: an agent was texting **pairing codes to a real owner's real
 contacts** over iMessage. The local remedy set `bluebubbles.enabled: false`,
 which stopped the codes AND made the send path refuse
 (`tools/send_message_tool.py` bails on `not pconfig.enabled`). The agent lost
@@ -222,7 +222,7 @@ ignored** until you have read it back out of the loaded structure.
 Worse than a dropped key: the official write path stores your value in the wrong
 _shape_, so the reader parses it into something harmless-looking and wrong.
 
-Verified 2026-08-15 on `hermes config set`, which takes a scalar and serializes a
+Verified on `hermes config set`, which takes a scalar and serializes a
 list argument as a **quoted string**:
 
 ```bash
@@ -238,7 +238,7 @@ skills:
 
 ```python
 get_disabled_skills({'skills': {'disabled': '["alpha","beta","gamma"]'}})
-# -> {'["alpha","beta","gamma"]'}     ONE bogus entry; nothing is disabled
+# -> {'["alpha","beta","gamma"]'} ONE bogus entry; nothing is disabled
 ```
 
 The CLI prints a success line. `config get` echoes the value back. The file
@@ -306,7 +306,7 @@ schema the service actually consumes.
 Every local check passes. `HTTP 200`. Readback shows your exact value. A diff
 against intent is clean. And the feature is dead.
 
-Live case (2026-08-06, Vapi voice assistants): the base prompt was written to
+Live case: the base prompt was written to
 `model.systemPrompt`, a field that appears throughout third-party examples and
 older docs. The API accepted it, returned it verbatim on `GET /assistant/<id>`,
 and never delivered it to the model — the real field is
@@ -327,9 +327,9 @@ python3 - <<'EOF'
 import json
 d = json.load(open('/tmp/vendor_openapi.json'))
 schemas = d['components']['schemas']
-for name in ['CreateXDTO', 'UpdateXDTO', 'X']:          # the write + read DTOs
+for name in ['CreateXDTO', 'UpdateXDTO', 'X']: # the write + read DTOs
     props = set((schemas.get(name, {}).get('properties') or {}).keys())
-    print(name, '->', 'systemPrompt' in props)           # the field in question
+    print(name, '->', 'systemPrompt' in props) # the field in question
 EOF
 ```
 
@@ -358,7 +358,7 @@ fixed, a deliberate refusal, or a capability that exists somewhere else in the
 product under another name. Answer those from the **issue tracker and the
 official docs** before you design around a limitation.
 
-Verified 2026-08-22, `delegate_task` per-task model override. Source was
+Verified in one case, `delegate_task` per-task model override. Source was
 unambiguous — `creds` resolves once from `delegation.*` and applies to every
 child (`delegate_tool.py:3622`), and the `tasks[]` schema has no model field.
 Correct, and it led to the wrong recommendation, because three things were only
@@ -382,8 +382,8 @@ Cheap checks, run them before recommending an architecture:
 
 ```bash
 # is the gap known, and what did maintainers decide?
-gh issue list  --repo <org>/<repo> --state all --search "<feature> <symptom>"
-gh pr list     --repo <org>/<repo> --state all --search "<feature>"
+gh issue list --repo <org>/<repo> --state all --search "<feature> <symptom>"
+gh pr list --repo <org>/<repo> --state all --search "<feature>"
 # read the CLOSING COMMENT on refused PRs — that is the design position
 ```
 
@@ -416,7 +416,7 @@ axis. Fan-out ≠ broadcast; parallel ≠ independent.
 
 When a mechanism needs isolation, look for the first-class unit the product
 already ships before inventing one. In the same session the working answer was
-an ordinary **profile** (`hermes -z ... -p reviewer`) — separate `state.db` by
+an ordinary **profile** (`hermes -z... -p reviewer`) — separate `state.db` by
 design, credentials intact, nothing copied. The invented alternative
 (`HERMES_HOME=$(mktemp -d)`) redirected far more than intended and returned
 `HTTP 401` while exiting 0.
@@ -428,7 +428,7 @@ a native unit — profile, workspace, namespace, project — doing it properly.
 A rule captured from a specific incident often gets generalized in the writing.
 When a rule would block an otherwise-correct approach, test the rule.
 
-Live case (2026-07-31): memory said a given model must never be reached through
+Live case: memory said a given model must never be reached through
 a particular transport surface. Probing both surfaces showed the rule was true
 for _proxied_ variants of that model, and false for the bare first-party alias,
 which the router served natively either way. Both returned HTTP 200, so the
@@ -476,7 +476,7 @@ The sibling of "the setting exists, but startup ignores it": the value is
 _accepted, validated, and offered in the UI_ — and the dispatcher has no branch
 for it, so it silently degrades to the default.
 
-Verified 2026-08-16 on the router combo routing strategies.
+Verified on the router combo routing strategies.
 `src/shared/constants/routingStrategies.ts` exports **18** strategy values, each
 with a UI label and icon, including a very on-the-nose `context-optimized`
 documented as "Maximize context window." The function that actually selects a
@@ -528,9 +528,9 @@ because **startup applies the compiled-in default instead of the persisted value
 Symptom that gives it away: **three different numbers for one setting.**
 
 ```
-source default   DEFAULT_SETTINGS.optimization.cacheSize = 65536   (64 MB)
-live runtime     PRAGMA cache_size                       = -16000  (16 MB)
-UI fallback      parseInt(e.target.value) || 16384        (16 MB)   <-- matches live
+source default DEFAULT_SETTINGS.optimization.cacheSize = 65536 (64 MB)
+live runtime PRAGMA cache_size = -16000 (16 MB)
+UI fallback parseInt(e.target.value) || 16384 (16 MB) <-- matches live
 ```
 
 When the live value matches a **fallback literal in the UI** rather than either the
@@ -546,8 +546,8 @@ grep -n "<settingName>" src/types/*Settings.ts
 # 2. every place the underlying knob is applied
 grep -rn "<pragma_or_env_name>" --include=*.ts src/ lib/
 
-# 3. is the persisted value even stored?  (key/value or settings row)
-#    "no stored row -> defaults apply" is itself a finding
+# 3. is the persisted value even stored? (key/value or settings row)
+# "no stored row -> defaults apply" is itself a finding
 
 # 4. WHO calls the applier, and WHEN
 grep -rn "applyXSettings\|setX(" --include=*.ts src/ | grep -v "export function"
@@ -583,7 +583,7 @@ effect. This one is the opposite failure: **the declaration was correct and
 readable the whole time, and it was never read** — the value got reconstructed
 from output instead, and the reconstruction was wrong.
 
-Verified 2026-08-24. A scheduled job's cadence was reported as "fires every 90
+Verified in one case. A scheduled job's cadence was reported as "fires every 90
 seconds" and repeated confidently three times, becoming the basis of a
 remediation plan. The number came from dividing ledger rows by elapsed time.
 Event ledgers write **several rows per occurrence** (`started`, `finished`,
@@ -706,11 +706,11 @@ routing stays fleet-uniform — see
   on a release branch. Resolve the deployed commit before branching:
 
   ```bash
-  ls -la current                      # symlink -> releases/standalone-<sha>
-  cat releases/<name>/BUILD_SHA       # or grep version in the standalone bundle
+  ls -la current # symlink -> releases/standalone-<sha>
+  cat releases/<name>/BUILD_SHA # or grep version in the standalone bundle
   curl -s localhost:PORT/api/.../health | grep version
-  git branch -a --contains <sha>      # find which branch actually carries it
-  git checkout -b <fix-branch> <sha>  # branch from the SHA, never the tag
+  git branch -a --contains <sha> # find which branch actually carries it
+  git checkout -b <fix-branch> <sha> # branch from the SHA, never the tag
   ```
 
   Then confirm `git rev-parse --short HEAD` equals the deployed sha before
@@ -720,10 +720,10 @@ routing stays fleet-uniform — see
 
 Once a lever is proven live, editing it across many fleet configs must stay a one-line, reviewable change. ruamel.yaml will try to churn the file in ways that hide your edit:
 
-- **Global sequence re-indent.** ruamel applies one `y.indent(sequence=…)` to the whole doc; the default turns indentless lists (`- item`) into indented (`  - item`) or vice-versa. Detect from the backup: if any line starts with ` -` use `y.indent(mapping=2, sequence=4, offset=2)`, else `y.indent(mapping=2, sequence=2, offset=0)`.
+- **Global sequence re-indent.** ruamel applies one `y.indent(sequence=…)` to the whole doc; the default turns indentless lists (`- item`) into indented (` - item`) or vice-versa. Detect from the backup: if any line starts with ` -` use `y.indent(mapping=2, sequence=4, offset=2)`, else `y.indent(mapping=2, sequence=2, offset=0)`.
 - **Folded-scalar unfolding.** Even with `width=4096`, ruamel collapses a multi-line `system_prompt` / quoted string onto one line; `y.fold_pos = 4096` does NOT preserve it.
 
-Guard with a **diff-gate**: after dumping, the unified diff vs backup must be exactly one `-`/one `+` line containing the key (present-value case) or zero `-`/one `+` (absent-key case). If it's larger, **restore and fall back to text-surgical**: find the parent block, replace only the `  key:` value line (preserve trailing ` # comment` and EOL), rewrite, re-parse. Full implementation + readback verification: `scripts/surgical_scalar_edit.py`. Run it per profile; it backs up, gates, falls back, and asserts the value landed. See `references/safe-scalar-edit.md` for the reproduction recipe.
+Guard with a **diff-gate**: after dumping, the unified diff vs backup must be exactly one `-`/one `+` line containing the key (present-value case) or zero `-`/one `+` (absent-key case). If it's larger, **restore and fall back to text-surgical**: find the parent block, replace only the ` key:` value line (preserve trailing ` # comment` and EOL), rewrite, re-parse. Full implementation + readback verification: `scripts/surgical_scalar_edit.py`. Run it per profile; it backs up, gates, falls back, and asserts the value landed. See `references/safe-scalar-edit.md` for the reproduction recipe.
 
 ## A version bump is a config lever too — probe the new value before pinning
 
@@ -732,7 +732,7 @@ new version string is an unverified lever: the config will parse, the call will
 return 200, and the behavior can still be worse. Newest is frequently worse on a
 specific capability during launch week.
 
-Verified 2026-08-13 (grok-4.6, one day post-release). Probing the real code path
+Verified in one case (grok-4.6, one day post-release). Probing the real code path
 before pinning found a **reproducible defect**: through the xAI `x_search`
 Responses tool, grok-4.6 leaked raw control tokens into user-facing prose —
 `<|eos|>`, and literally `show render_inline_citation with citation_id is 23` —
@@ -787,7 +787,7 @@ measurement shape and the rule against crediting a change that had not yet run:
 ## The edit list in a work order is rarely the whole inventory
 
 A change order naming "profiles X, Y, Z" is a starting point, not a census.
-Verified 2026-08-13: the order named three profiles; a filesystem sweep found the
+Verified in one case: the order named three profiles; a filesystem sweep found the
 pin in **four**. Enumerate from disk before editing, excluding backup and test
 trees so the count is honest:
 
@@ -795,7 +795,7 @@ trees so the count is honest:
 cd ~/.hermes/profiles
 for d in */config.yaml; do
   case "$d" in *opus5-ab*|*backups*|*home/.hermes*) continue;; esac
-  grep -nE '<pattern>' "$d" && echo "  ^ $d"
+  grep -nE '<pattern>' "$d" && echo " ^ $d"
 done
 ```
 
@@ -814,7 +814,7 @@ edit) instead of reporting the batch as done.
 When a delegated work order says a class of change is "routine and yours," that
 grants autonomy from the _steward's_ side only. If the principal has a standing
 constraint covering the same action, the steward cannot clear it — escalate and
-hold. Verified 2026-08-13: a work order declared version bumps routine while a
+hold. Verified in one case: a work order declared version bumps routine while a
 standing freeze on `config.yaml` edits was in force; the correct move was to
 stage the change fully, report it ready, and wait for the principal. Executing on
 the steward's authority alone would have silently overridden the person who set

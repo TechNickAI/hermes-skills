@@ -16,10 +16,10 @@ On arrival the live DB was throwing `file is not a database`. Before planning
 anything, a directory listing found another operator/agent mid-recovery:
 
 ```
-~/dbfix/  →  snap.db, rebuilt.db, clean.db, phase1.log, phase3.log,
-             final2.log, <profile>_go.sh   (mtimes: MINUTES old)
-ps aux    →  python -c "...connect('file:~/dbfix/clean.db?mode=ro')...
-                        pragma integrity_check"   (running RIGHT NOW)
+~/dbfix/ → snap.db, rebuilt.db, clean.db, phase1.log, phase3.log,
+             final2.log, <profile>_go.sh (mtimes: MINUTES old)
+ps aux → python -c "...connect('file:~/dbfix/clean.db?mode=ro')...
+                        pragma integrity_check" (running RIGHT NOW)
 ```
 
 Two writers racing a 2.8 GB rebuild is a lost-update disaster. The correct move
@@ -66,7 +66,7 @@ diagnosis:
 
 ```bash
 grep -ci "disk I/O error\|database or disk is full\|no space" logs/errors.log
-grep -ci "malformed\|not a database\|corrupt"                 logs/errors.log
+grep -ci "malformed\|not a database\|corrupt" logs/errors.log
 ```
 
 Measured here: **174 `disk I/O error`** occurrences preceding the malformed
@@ -145,21 +145,21 @@ harmless and a read/write one is fatal. `lsof -F` exposes the access mode —
 
 ```bash
 lsof -F pcfan /path/state.db
-# tag p=pid  c=command  f=fd  a=access-mode
+# tag p=pid c=command f=fd a=access-mode
 ```
 
 Measured on the corrupting host:
 
 ```
-pid=2788769  cmd=hermes  fd=33  mode=u   GATEWAY
-pid=2795631  cmd=hermes  fd=6   mode=u   *** NON-GATEWAY WRITER ***
+pid=2788769 cmd=hermes fd=33 mode=u GATEWAY
+pid=2795631 cmd=hermes fd=6 mode=u *** NON-GATEWAY WRITER ***
 ```
 
 The parent chain is what indicts the mechanism:
 
 ```
-2795602  ppid 2788769  bash -lic ... for M in gemini grok ...
-2795628  ppid 2795602  hermes -z "Review PRODUCTION CODE..."
+2795602 ppid 2788769 bash -lic... for M in gemini grok...
+2795628 ppid 2795602 hermes -z "Review PRODUCTION CODE..."
 ```
 
 **The gateway spawned a shell, which spawned a headless one-shot, which opened the
@@ -280,7 +280,7 @@ Sample the size twice, ~20 s apart, before drawing any conclusion. Confirm the
 end state:
 
 ```python
-conn.execute("pragma journal_mode").fetchone()   # -> ('wal',)
+conn.execute("pragma journal_mode").fetchone() # -> ('wal',)
 ```
 
 Deleting a `-wal` mid-conversion while a process holds the DB is how a scary
@@ -322,7 +322,7 @@ again on the way out via a `trap`:
 
 ```bash
 DROPIN=$HOME/.config/systemd/user/$UNIT.d/zz-maintenance.conf
-cleanup() {                      # runs on EVERY exit path, including abort
+cleanup() { # runs on EVERY exit path, including abort
   rm -f "$DROPIN"; rmdir "$(dirname "$DROPIN")" 2>/dev/null || true
   systemctl --user daemon-reload
   systemctl --user reset-failed "$UNIT" 2>/dev/null || true
@@ -333,7 +333,7 @@ mkdir -p "$(dirname "$DROPIN")"
 printf '[Service]\nRestart=no\n' > "$DROPIN"
 systemctl --user daemon-reload
 systemctl --user stop "$UNIT" || true
-for i in $(seq 1 45); do                      # poll for release, do not sleep
+for i in $(seq 1 45); do # poll for release, do not sleep
   [ "$(lsof -t "$DB" 2>/dev/null | wc -l | tr -d ' ')" = "0" ] && break; sleep 1
 done
 ```
@@ -366,7 +366,7 @@ conn.execute("PRAGMA writable_schema=ON")
 conn.execute("DELETE FROM sqlite_master WHERE name LIKE 'messages_fts%'")
 conn.commit()
 conn.execute("PRAGMA writable_schema=OFF")
-conn.close()                 # MUST reopen: the schema cache is stale
+conn.close() # MUST reopen: the schema cache is stale
 ```
 
 Then recreate — **views before the indexes that read them**. An

@@ -114,7 +114,7 @@ moa:
 
 Each trace line carries `references[]` with per-slot `label`, `provider`, `model`,
 `output`, `usage`, and cost fields. **There is no `error` key** — a failed slot records
-its failure _inside_ `output` as `[failed: ...]`, and a skipped one as `[skipped: ...]`.
+its failure _inside_ `output` as `[failed:...]`, and a skipped one as `[skipped:...]`.
 So the check is: every configured reference must have `output` that is non-empty AND
 does not start with `[failed:` / `[skipped:`. Read against the trace schema of your
 installed Hermes version. If fewer families answered than your panel intended, stamp the

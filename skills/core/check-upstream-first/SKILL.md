@@ -61,7 +61,7 @@ is running**, then reports the fix as applied.
 clone, `origin/<branch>` is YOUR FORK's mirror and already contains your own
 commits, so diffing against it reports "already upstream, nothing to PR" for
 every local fix you hold. `git cherry` / patch-id is likewise unreliable after a
-rebase — in one 2026-08-16 session it reported ALL FOUR local commits as already
+rebase — in one session it reported ALL FOUR local commits as already
 upstream, including one whose buggy line was still sitting in the upstream file.
 Answer the question with FILE CONTENT against a verified `upstream` remote:
 `references/determining-what-is-actually-upstream.md`. Getting this wrong in the
@@ -99,7 +99,7 @@ patch, wrong advice to the captain, and lost credibility.
 🔴 **Before MERGING a PR that carries review comments, adjudicate them — green
 checks plus outstanding comments is not a merge signal.** A branch that
 refactored mid-review strands comments against deleted files (3 of 7 on one
-2026-08-21 PR named modules that no longer existed), so pull the file list at
+one occasion PR named modules that no longer existed), so pull the file list at
 HEAD first and set those aside. Verify every surviving finding by EXECUTING the
 input it describes, not by reading the diff; assert on the output string. Report
 any finding that does not reproduce as such rather than accepting a false premise
@@ -172,7 +172,7 @@ owner's stated intent; a reviewer optimizes their lens, not your goal.
 Do not analyze a source tree until you have proven the gateway runs from it.
 
 ```bash
-ps aux | grep "gateway run" | grep -v grep      # read the argv path
+ps aux | grep "gateway run" | grep -v grep # read the argv path
 lsof -p <PID> | grep -o "/Users/<u>/[^ ]*site-packages" | sort -u
 ```
 
@@ -196,10 +196,10 @@ actually invokes the venv interpreter; read the unit, and trust the resolved
 Before proposing any local patch to such a tree, capture three facts:
 
 ```bash
-git status --porcelain | wc -l                              # uncommitted work
-git log origin/main..HEAD --format='%h %an %ad %s'          # UNPUSHED commits
+git status --porcelain | wc -l # uncommitted work
+git log origin/main..HEAD --format='%h %an %ad %s' # UNPUSHED commits
 git fetch origin main -q
-git rev-list --left-right --count origin/main...HEAD        # behind / ahead
+git rev-list --left-right --count origin/main...HEAD # behind / ahead
 ```
 
 Local commits that exist nowhere else change the recommendation: any
@@ -216,21 +216,21 @@ uv/pip package install, or is referenced in old notes after being deleted.
 
 The editable-checkout case above inverts one way; a **release-directory deploy
 inverts the other way**, and it is the one that produced a wrong answer to the
-captain on 2026-08-16. When a service runs from `releases/<build>` chosen by a
+captain. When a service runs from `releases/<build>` chosen by a
 `current` symlink, the git checkout is a _build input_, not the running code —
 and it can sit weeks behind while the deployed build is nearly current.
 
 ```bash
-ls -l <app>/current                      # -> releases/standalone-<sha>
-basename "$(readlink <app>/current)"     # the DEPLOYED build id
-git log -1 --format='%h %ci %s' <sha>    # prove that sha is a real commit we have
-git rev-list --left-right --count <sha>...upstream/release/vX.Y.Z   # ahead<TAB>behind
+ls -l <app>/current # -> releases/standalone-<sha>
+basename "$(readlink <app>/current)" # the DEPLOYED build id
+git log -1 --format='%h %ci %s' <sha> # prove that sha is a real commit we have
+git rev-list --left-right --count <sha>...upstream/release/vX.Y.Z # ahead<TAB>behind
 ```
 
 **What went wrong:** I reported "we are 1,131 commits behind upstream" after
 reading `git log -1` in `~/src/the router` (HEAD three weeks old, parked on branch
 `the operator/upgrade-v3.8.49-plus-fork`). The deployed build was **136 behind / 8
-ahead**. the operator caught it: _"Is this really true? ... I think we just bumped
+ahead**. the operator caught it: _"Is this really true?... I think we just bumped
 everything."_ The bug under investigation was real either way, but the version
 claim — the thing that decides _upgrade vs patch_ — was off by ~1,000 commits.
 
@@ -265,10 +265,10 @@ possible argument for your PR, and its absence on your line is often the whole
 story.
 
 ```bash
-grep -nE "Date\.now\(\)" <file>        # cheap: find every cutoff computation
+grep -nE "Date\.now\(\)" <file> # cheap: find every cutoff computation
 ```
 
-Live example (the router, 2026-08-16): `cleanupCompressionRunTelemetry` compared
+Live example (the router, one occasion): `cleanupCompressionRunTelemetry` compared
 millisecond-stamped rows against a **seconds** cutoff, so its retention sweep
 deleted nothing, forever — and it exists specifically to bound storage and
 prevent OOM. Thirty lines earlier, `cleanupDomainCostHistory` had the _identical_
@@ -301,14 +301,14 @@ upstream state, diff the dates:
 
 ```bash
 cd ~/.h‍ermes/h‍ermes-agent && git log -1 --format='%h %ci'
-gh api repos/NousResearch/h‍ermes-agent/commits/main --jq '.sha[0:10] + "  " + .commit.committer.date'
+gh api repos/NousResearch/h‍ermes-agent/commits/main --jq '.sha[0:10] + " " +.commit.committer.date'
 ```
 
 If they differ, re-fetch the decisive file from `main` before forming a verdict.
 Recipes, large-file gotchas, and the stalled-PR diagnostic are in
 `references/reading-current-main-and-stalled-prs.md`.
 
-**Live example (an assistant agent, 2026-07-30):** an agent hand-patched `telegram.py` in
+**Live example (an assistant agent, one occasion):** an agent hand-patched `telegram.py` in
 the git checkout — 48 lines plus a test — while the gateway ran entirely from
 `~/.local/share/uv/tools/hermes-agent/...`. The patch was **never live**. A
 separate "you are 2,149 commits behind" analysis was computed against that same
@@ -326,9 +326,9 @@ tool install. Do not use that field to determine install method.
 ## Step 2 — Version vs latest release
 
 ```bash
-uv tool list                       # authoritative for uv installs
+uv tool list # authoritative for uv installs
 hermes --version
-ls ~/.cache/uv/archive-v0          # shows upgrade HISTORY; a version never
+ls ~/.cache/uv/archive-v0 # shows upgrade HISTORY; a version never
                                    # fetched was never installed
 gh api "repos/NousResearch/hermes-agent/releases/latest" --jq '{tag:.tag_name,published:.published_at}'
 ```
@@ -342,7 +342,7 @@ definitions, and shadowing user plugins. Check each of these read-only on every
 machine you believe is current:
 
 ```bash
-uv tool list                       # is the install exact-version pinned?
+uv tool list # is the install exact-version pinned?
 readlink -f "$(command -v <tool>)" # is the binary the one you think it is?
 ```
 
@@ -354,7 +354,7 @@ discrepancy appears.
 Some tags ship deliberately contentless notes. v2026.7.30 (v0.19.1) reads:
 
 > Patch release... **Full curated release notes for this window will ship with
-> v0.20.0** ... ~2,789 commits · ~4,748 files changed
+> v0.20.0**... ~2,789 commits · ~4,748 files changed
 
 A commit count is not a reason to upgrade. "Should we update?" is answerable only
 by checking whether the release fixes something **we actually hit**. Two moves:
@@ -363,7 +363,7 @@ by checking whether the release fixes something **we actually hit**. Two moves:
 
 ```bash
 gh api "repos/NousResearch/hermes-agent/commits?sha=<tag>&path=hermes_cli/model_switch.py&since=<prev-release-date>&per_page=100" \
-  -q '.[] | .commit.message | split("\n")[0]'
+  -q '.[] |.commit.message | split("\n")[0]'
 ```
 
 **2. Verify YOUR open gaps against the tag's source — don't infer from the log.**
@@ -373,7 +373,7 @@ gh api repos/NousResearch/hermes-agent/contents/<file>?ref=<tag> -q '.content' |
 grep -n "<symbol>" /tmp/new.py
 ```
 
-Worked example (2026-08-03): checked whether the two picker gaps were fixed at
+Worked example: checked whether the two picker gaps were fixed at
 v2026.7.30. `_KNOWN_KEYS` still had 22 keys with `enabled` absent, and
 `include_moa=True` was still hardcoded at the `/model` call site. **Upgrading
 would have bought back nothing** from that session's work — so the honest answer
@@ -392,7 +392,7 @@ the receipt:
 grep requirements ~/.local/share/uv/tools/hermes-agent/uv-receipt.toml
 ```
 
-Live finding (2026-08-03), the operations agent's Studio install:
+Live finding (one occasion), the operations agent's Studio install:
 
 ```toml
 requirements = [{ name = "hermes-agent", extras = ["mcp"], git = "https://github.com/NousResearch/hermes-agent.git" }]
@@ -425,7 +425,7 @@ gh search issues --repo NousResearch/hermes-agent "slack socket mode disconnect"
 gh api "repos/NousResearch/hermes-agent/issues/<n>" \
   --jq '{n:.number,state:.state,reason:.state_reason,title:.title,body:(.body[:1200])}'
 gh api "repos/NousResearch/hermes-agent/issues/<n>/timeline" \
-  --jq '.[] | select(.event=="cross-referenced" or .event=="referenced")
+  --jq '.[] | select(.event=="cross-referenced" or.event=="referenced")
         | {ev:.event, sha:(.commit_id // null), src:(.source.issue.number // null), t:(.source.issue.title // null)}'
 ```
 
@@ -438,11 +438,11 @@ gh api "repos/NousResearch/hermes-agent/pulls/<n>" --jq '{state:.state,merged:.m
 ```
 
 ⚠️ **If `gh issue view` / `gh pr view` fails on this repo** with
-`GraphQL: Projects (classic) is being deprecated ... (repository.issue.projectCards)`,
+`GraphQL: Projects (classic) is being deprecated... (repository.issue.projectCards)`,
 fall back to `gh api repos/.../issues/<n>` with `--jq` — it dodges the deprecated
-field. Do not conclude the issue doesn't exist from a `gh ... view` failure.
+field. Do not conclude the issue doesn't exist from a `gh... view` failure.
 
-This failure is **intermittent, not permanent** — as of 2026-08-01 both
+This failure is **intermittent, not permanent** — at time of writing both
 `gh issue view --json` and `gh pr view --json` worked normally against this repo,
 and `gh search issues --json number,title,state,createdAt` is a fast way to sweep
 a symptom across many issues at once. Try the ergonomic command first; only fall
@@ -476,14 +476,14 @@ grep -rn "<the_field_you_would_set>" agent/ --include=*.py
 
 **If the only hits are the assignment and a debug/log line, the field is inert.**
 
-Live example (2026-07-31). `agent/error_classifier.py` computes a rich
+Live example (one occasion). `agent/error_classifier.py` computes a rich
 `ClassifiedError` with `retryable` / `should_compress` /
 `should_rotate_credential` / `should_fallback`. I was one command away from
 adding a status-code entry setting `should_fallback=True`, and would have
 reported it shipped. The grep:
 
 ```
-conversation_loop.py:2762:   ... classified.should_fallback,     # debug log ONLY
+conversation_loop.py:2762:... classified.should_fallback, # debug log ONLY
 ```
 
 The actual failover decision, ~600 lines later, never consults it:
@@ -515,7 +515,7 @@ classifier:
 grep -rn "<predicateName>" --include=*.ts src/ open-sse/ | grep -v node_modules
 ```
 
-Live example (the router, 2026-08-01): `isStreamReadinessFailureErrorBody()` fed
+Live example (the router, one occasion): `isStreamReadinessFailureErrorBody()` fed
 the circuit-breaker gate, a transient-retry decision, AND a round-robin semaphore
 cooldown. Deleting `|| code === "STREAM_EARLY_EOF"` would have changed the retry
 behavior the operator had explicitly asked to preserve two messages earlier. The safe
@@ -538,7 +538,7 @@ it** and already documents a supported alternative.
 **Code tells you what IS. The tracker tells you what is INTENDED. The docs tell
 you what is SUPPORTED INSTEAD. Read all three before proposing an architecture.**
 
-Live example (2026-08-22). `delegate_task` ignores a per-task `model` field.
+Live example (one occasion). `delegate_task` ignores a per-task `model` field.
 Reading `tools/delegate_tool.py` proved it in two minutes: `creds` is resolved
 once from `delegation.provider`/`delegation.model` and applied to every child in
 the batch loop. Accurate — and nearly worthless on its own. The tracker showed:
@@ -562,7 +562,7 @@ gh search prs --repo <owner>/<repo> "<capability phrase>" --limit 20 \
   --json number,title,state,closedAt
 # then read the CLOSING COMMENT on the most recent one — that is where the
 # maintainer's actual position is, and it never appears in the code
-gh api repos/<owner>/<repo>/issues/<n>/comments --jq '.[-3:] | .[] | .body[0:400]'
+gh api repos/<owner>/<repo>/issues/<n>/comments --jq '.[-3:] |.[] |.body[0:400]'
 ```
 
 🔴 **Corollary: check whether a stale hierarchy in our own docs points at the
@@ -598,7 +598,7 @@ lines and reads like the bug survived. Filter strictly by timestamps after the
 restart minute before concluding anything:
 
 ```bash
-awk '/^2026-07-30 10:(1[89]|[2-9][0-9])/' gateway.log | grep -c "Socket Mode unhealthy"
+awk '/^one occasion 10:(1[89]|[2-9][0-9])/' gateway.log | grep -c "Socket Mode unhealthy"
 ```
 
 Healthy startup proves the platforms actually came up:
@@ -638,10 +638,10 @@ the signature of a fix that was proposed and abandoned:
 
 ```bash
 gh pr view <n> --repo NousResearch/hermes-agent \
-  --json state,mergedAt -q '"state=" + .state + " merged=" + (.mergedAt // "NEVER")'
+  --json state,mergedAt -q '"state=" +.state + " merged=" + (.mergedAt // "NEVER")'
 ```
 
-**Live example (a trading agent, 2026-08-01).** 24 orphaned `pyright-langserver`
+**Live example (a trading agent, one occasion).** 24 orphaned `pyright-langserver`
 processes, 2.1 GB RSS, oldest alive 21.7h. Three issues — #25016, #36681, #47314
 — all CLOSED, all describing the same root cause precisely:
 `agent/lsp/manager.py` defines `DEFAULT_IDLE_TIMEOUT = 600` and tracks
@@ -697,7 +697,7 @@ exists upstream and moves the gate in the direction you need:**
 ```bash
 gh api "search/code?q=<config_key>+repo:NousResearch/hermes-agent" --jq '.total_count'
 # 0 → local invention, not a supported setting. Say "there is no config-only
-#     equivalent" rather than substituting a knob that only rhymes.
+# equivalent" rather than substituting a knob that only rhymes.
 ```
 
 Names mislead: `mention_patterns` **widens** triggering and cannot narrow it;
@@ -719,7 +719,7 @@ If a local source patch is genuinely warranted:
 - **Quoting a drift number from checkout HEAD on a symlink deploy.** The mirror
   of the above, and it produces a _confidently wrong_ version claim rather than an
   obviously wrong one. Resolve `current` → `releases/<sha>` and count from that
-  sha, with `--left-right --count`. Off-by-1000-commits was the real 2026-08-16
+  sha, with `--left-right --count`. Off-by-1000-commits was the real one occasion
   result; it flips the upgrade-vs-patch recommendation. Then check whether the
   missing commits touch the file at all before claiming an upgrade helps.
 - **Fixing a unit/format bug without grepping for its siblings.** The same bug
@@ -821,7 +821,7 @@ If a local source patch is genuinely warranted:
   patch families and 16k lines. State the finding as "the extension point does
   not exist," not "a plugin is a bad idea."
 - **Evaluating a third-party plugin without checking the LICENSE first.** A repo
-  with **no LICENSE file** (`gh api repos/<o>/<r> --jq .license` → `null`) is
+  with **no LICENSE file** (`gh api repos/<o>/<r> --jq.license` → `null`) is
   default-copyright: no legal right to copy, modify, or vendor it, no matter how
   good it is. Check that before measuring anything else, then `requires-python`
   against the actual fleet interpreters — both are cheap disqualifiers.

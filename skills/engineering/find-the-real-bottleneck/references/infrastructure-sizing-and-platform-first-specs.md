@@ -1,6 +1,6 @@
 # Sizing and speccing infrastructure: measure, and check the platform first
 
-Three failure modes hit in one session (2026-08-15) while sizing and speccing a
+Three failure modes hit in one session (one occasion) while sizing and speccing a
 cloud host. All three produced confident, wrong recommendations the operator had
 to push back on. All three are attribution failures: asserting a plausible
 mechanism instead of measuring the real one.
@@ -13,8 +13,8 @@ that much disk space?"_
 Measuring took two SSH commands and cut the spec — and the bill — nearly in half:
 
 ```bash
-ps -eo rss,comm --sort=-rss | head -8     # what actually holds memory
-du -sh ~/.hermes/* | sort -rh | head      # what actually holds disk
+ps -eo rss,comm --sort=-rss | head -8 # what actually holds memory
+du -sh ~/.hermes/* | sort -rh | head # what actually holds disk
 free -m; df -h /
 ```
 
@@ -82,7 +82,7 @@ common problems that beat bolt-ons on integration, licensing, and support.
 
 ```bash
 # HEAD returns 200 with size 0 on CDNs; a RANGE GET proves real bytes exist
-curl -sS -o /dev/null -w '%{http_code} %{size_download}' -r 0-0 "$URL"   # want 206
+curl -sS -o /dev/null -w '%{http_code} %{size_download}' -r 0-0 "$URL" # want 206
 
 # container images: read manifest platforms, never assume multi-arch
 curl -sS -H "Authorization: Bearer $TOK" \

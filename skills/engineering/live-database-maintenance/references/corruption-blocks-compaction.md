@@ -34,8 +34,8 @@ the live file failed too, which made it real:
 
 ```python
 c = sqlite3.connect(f"file:{db}?mode=ro", uri=True)
-c.execute("pragma quick_check")       # DatabaseError: malformed
-c.execute("pragma integrity_check")   # DatabaseError: malformed
+c.execute("pragma quick_check") # DatabaseError: malformed
+c.execute("pragma integrity_check") # DatabaseError: malformed
 ```
 
 Note the service was **still running and serving normally**. SQLite only faults
@@ -53,7 +53,7 @@ tables = [r[0] for r in c.execute(
 for t in tables:
     try:
         c.execute(f'select count(*) from "{t}"').fetchone()
-        print("ok  ", t)
+        print("ok ", t)
     except Exception as e:
         print("BAD ", t, str(e)[:70])
 ```
@@ -129,11 +129,11 @@ Page 341812: never used
 Read the whole result and count the categories explicitly:
 
 ```python
-rows  = [r[0] for r in c.execute("pragma integrity_check(100000)").fetchall()]
+rows = [r[0] for r in c.execute("pragma integrity_check(100000)").fetchall()]
 never = [m for m in rows if "never used" in m]
 other = [m for m in rows if "never used" not in m and m != "ok"
          and not m.startswith("*** in database")]
-print(f"orphaned pages: {len(never)}   other problems: {other or 'NONE'}")
+print(f"orphaned pages: {len(never)} other problems: {other or 'NONE'}")
 ```
 
 **`never used` pages are leaked space, not data damage** — allocated in the

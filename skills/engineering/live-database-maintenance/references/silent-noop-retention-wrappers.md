@@ -10,7 +10,7 @@ healthy retention job with nothing to do.** Nobody investigates a green run.
 
 ## 1. The CLI rejects your invocation and exits 0
 
-Measured with Hermes: `hermes -p _root sessions prune ...` prints an argparse
+Measured with Hermes: `hermes -p _root sessions prune...` prints an argparse
 usage banner and **exits 0**. A wrapper checking only `returncode` reports
 success forever.
 
@@ -38,7 +38,7 @@ Pin it explicitly:
 ```python
 env = dict(os.environ)
 env["HERMES_HOME"] = str(profile_home(profile))
-subprocess.run(cmd, env=env, ...)
+subprocess.run(cmd, env=env,...)
 ```
 
 Do **not** rely on `HERMES_PROFILE` — the Hermes CLI silently ignores it.
@@ -61,8 +61,8 @@ Fix: **reconcile against the database**, not stdout.
 
 ```python
 before = _source_count(db, src)
-subprocess.run(cmd, ...)
-deleted = before - _source_count(db, src)   # ground truth
+subprocess.run(cmd,...)
+deleted = before - _source_count(db, src) # ground truth
 ```
 
 And when you must parse (dry runs), **raise on unrecognised output** rather
@@ -84,7 +84,7 @@ count matches and the loss is invisible.
 Track **identities** and require a subset relation:
 
 ```python
-before = _protected_ids(db)          # set of ids
+before = _protected_ids(db) # set of ids
 ...
 lost = before - _protected_ids(db)
 if lost:
@@ -122,7 +122,7 @@ other run still needs. SQLite serializes individual transactions, not your
 protocol.
 
 ```python
-fcntl.flock(fh.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)   # held for the whole run
+fcntl.flock(fh.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB) # held for the whole run
 ```
 
 ## 7. The launcher hardcodes which profile it maintains
@@ -135,7 +135,7 @@ arguments and exports no profile name. So a launcher written while testing one
 target acquires a default:
 
 ```python
-PROFILE = os.environ.get("DBMAINT_PROFILE", "<profile>")   # WRONG
+PROFILE = os.environ.get("DBMAINT_PROFILE", "<profile>") # WRONG
 ```
 
 Deployed to a second host, every job on it maintains `a trading agent` — which does not
@@ -148,7 +148,7 @@ an explicit override for manual runs and tests:
 
 ```python
 def _detect_profile() -> str:
-    if override := os.environ.get("DBMAINT_PROFILE"):
+    if override:= os.environ.get("DBMAINT_PROFILE"):
         return override
     home = Path(os.environ.get("HERMES_HOME") or (Path.home() / ".hermes"))
     return home.name if home.parent.name == "profiles" else "_root"

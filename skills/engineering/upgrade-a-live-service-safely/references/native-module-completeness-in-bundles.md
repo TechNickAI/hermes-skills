@@ -5,7 +5,7 @@ The app does not crash. It falls back to a pure-JS/WASM implementation, keeps
 answering health checks, and degrades in a way that surfaces days later as an
 unrelated-looking error — here, `disk I/O error` on a button click.
 
-Worked case: the router, 2026-08-11 cutover → symptom reported 2026-08-13.
+Worked case: the router, one occasion cutover → symptom reported one occasion.
 
 ## The shape
 
@@ -13,9 +13,9 @@ A CI artifact was cut over after passing every bundle assertion in the workflow.
 It was missing three things the previous release had:
 
 ```
-node_modules/better-sqlite3/build/Release/better_sqlite3.node   (compiled driver)
-node_modules/bindings/                                          (better-sqlite3 requires it)
-node_modules/file-uri-to-path/                                  (bindings requires it)
+node_modules/better-sqlite3/build/Release/better_sqlite3.node (compiled driver)
+node_modules/bindings/ (better-sqlite3 requires it)
+node_modules/file-uri-to-path/ (bindings requires it)
 ```
 
 With no native driver the app fell through its driver ladder to **sql.js**
@@ -33,8 +33,8 @@ The workflow asserted _feature strings_ present in the bundle
 "some native modules exist":
 
 ```bash
-if find .build -name "*.node" | head -1 | grep -q .; then
-  echo "native modules present: $(find .build -name '*.node' | wc -l)"
+if find.build -name "*.node" | head -1 | grep -q.; then
+  echo "native modules present: $(find.build -name '*.node' | wc -l)"
 ```
 
 The new bundle had **87** `.node` files versus the old one's 81 — more, not
@@ -48,13 +48,13 @@ Add to the artifact-verification step:
 for m in \
   "node_modules/better-sqlite3/build/Release/better_sqlite3.node" \
   "node_modules/bindings" \
-  "node_modules/file-uri-to-path" ; do
+  "node_modules/file-uri-to-path"; do
   if [ ! -e ".build/next/standalone/$m" ]; then
     echo "::error::missing required native dep: $m"; fail=1
   fi
 done
 # and prove it LOADS, not merely that it exists:
-( cd .build/next/standalone && node -e "require('better-sqlite3')" ) \
+( cd.build/next/standalone && node -e "require('better-sqlite3')" ) \
   || { echo "::error::better-sqlite3 present but will not load"; fail=1; }
 ```
 
@@ -73,7 +73,7 @@ ladder announces itself:
 [DB] Sync driver 'better-sqlite3' failed to open, will try next driver: Cannot find module 'better-sqlite3'
 [DB] Sync driver 'node:sqlite' failed to open, will try next driver: Cannot find module 'node:sqlite'
 [DB] Pre-initializing sql.js WASM (synchronous drivers unavailable)...
-[DB] SQLite database ready: ...
+[DB] SQLite database ready:...
 ```
 
 That last line says **ready**. A health check passes. Only the three lines above
@@ -90,7 +90,7 @@ line.** Stack traces confirm it: the error frames named
 ```bash
 MAIN=$(systemctl --user show <svc> -p MainPID --value)
 CHILD=$(pgrep -P "$MAIN" | head -1)
-grep -o '/[^ ]*better_sqlite3\.node' /proc/$CHILD/maps | sort -u   # Linux
+grep -o '/[^ ]*better_sqlite3\.node' /proc/$CHILD/maps | sort -u # Linux
 ```
 
 Checking the parent's maps reports zero mappings and looks like failure even
@@ -111,7 +111,7 @@ directory mixes an ABI with a JS wrapper it was not built against. The new
 package already carried platform prebuilds:
 
 ```
-prebuilds/linux-arm64.node  linux-x64.node  darwin-arm64.node  ...
+prebuilds/linux-arm64.node linux-x64.node darwin-arm64.node...
 cp prebuilds/linux-arm64.node build/Release/better_sqlite3.node
 ```
 

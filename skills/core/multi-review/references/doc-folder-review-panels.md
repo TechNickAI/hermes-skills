@@ -1,6 +1,6 @@
 # Reviewing a documentation/spec FOLDER with a multi-model panel
 
-Proven 2026-07-06 on Fiddler's knowledge/ folder (~40 files, ~9,000 lines,
+Proven one occasion on Fiddler's knowledge/ folder (~40 files, ~9,000 lines,
 5 reviewers × 5 model families). The SKILL.md covers single artifacts; a
 folder needs brief construction. This is the recipe.
 
@@ -29,7 +29,7 @@ the prompt on argv, and Linux MAX_ARG_STRLEN is **128KB per single argument**
    `===== FILE: knowledge/<path> =====` separators, `assert len(prompt) <
 125000` per brief, write to `/tmp/<review>/p_<lens>.txt`. When an assert
    trips, trim that lens's file list or switch full files → head(40).
-4. **Include the folder tree** (`find . -name '*.md' | sort`) in the shared
+4. **Include the folder tree** (`find. -name '*.md' | sort`) in the shared
    header so reviewers can flag references to nonexistent files.
 5. **Ask each reviewer for**: severity/confidence/file-location/why/smallest
    fix, plus a final verdict `ready / needs-edits / not-ready to hand to
@@ -40,7 +40,7 @@ builder LLMs`.
 Write one `run_panel.sh` via write*file (never heredoc — the `&` guard
 inspects raw command strings): `export HOME=/home/ubuntu`, a `run() { hermes
 -z "$(cat p*$1.txt)" --provider "$2" -m "$3" --ignore-rules -t '' >
-out*$1.txt 2> err*$1.txt; }`helper, five`run ... &`lines capturing PIDs,`wait`, then `wc -c out\_\*.txt`. Launch with `terminal(background=true,
+out*$1.txt 2> err*$1.txt; }`helper, five`run... &`lines capturing PIDs,`wait`, then `wc -c out\_\*.txt`. Launch with `terminal(background=true,
 notify_on_complete=true)`. `bash -n` the script first.
 
 Panel that ran clean on this profile: quant→claude-opus (custom:openrouter),

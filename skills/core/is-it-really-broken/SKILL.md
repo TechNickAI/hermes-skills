@@ -28,7 +28,7 @@ loses its reader's trust.
 This skill governs the gap between "the audit said X" and "here is what actually
 needs your attention."
 
-Measured rate on a real run (2026-08-12, a fleet member's weekly Integration
+Measured rate on a real run (one occasion, a fleet member's weekly Integration
 Health Check): 7 items came back BROKEN/PARTIAL, and **3 of the 7 were audit
 bugs, not outages.** Assume roughly a third of any verdict list is wrong until
 verified.
@@ -111,7 +111,7 @@ For each `BROKEN` / `PARTIAL`:
 3. **For credentials, check BOTH stores** before believing "not found":
    ```bash
    grep -c 'THE_KEY' "$HERMES_HOME/.env"
-   security find-generic-password -a THE_KEY -w | wc -c   # macOS
+   security find-generic-password -a THE_KEY -w | wc -c # macOS
    ```
 4. **For CLI-based probes, confirm the CLI and the agent share a config.**
    They frequently do not — see Trap 1.
@@ -136,7 +136,7 @@ python3 -c "
 import sqlite3
 c=sqlite3.connect('<store>/.plugin.db')
 print('pages', c.execute('select count(*) from pages').fetchone()[0])
-print('fts',   c.execute('select count(*) from pages_fts where pages_fts match ?',('listing',)).fetchone()[0])
+print('fts', c.execute('select count(*) from pages_fts where pages_fts match ?',('listing',)).fetchone()[0])
 print(c.execute('select rel_path from pages order by rowid desc limit 3').fetchall())
 "
 ```
@@ -199,7 +199,7 @@ often bolted onto unrelated conversations, which reads to the owner as the agent
 malfunctioning.
 
 Verify before relaying, and verify before accepting the "it's glitching" frame.
-Measured 2026-08-12: an agent reported two open items to its owner mid-task and
+Measured on one run: an agent reported two open items to its owner mid-task and
 **both were already resolved**. Decisive checks:
 
 - _"Plugin X needs a restart to activate"_ → compare plugin file mtime against
@@ -220,7 +220,7 @@ clearing the note guarantees the nagging resumes next session. Full procedure in
 The inverse of Trap 3. There, silence hid failure; here, a perfectly chatty
 service hid a fully broken persistence layer.
 
-Measured 2026-08-21: a trading agent answered Telegram normally while **every**
+Measured on one run: a trading agent answered Telegram normally while **every**
 database operation had been failing for ~20 hours. The messaging path does not
 touch the session store, so any check that pings the chat surface — or asks the
 agent "are you OK?" — returns GREEN over a dead subsystem. Silently failing the

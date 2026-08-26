@@ -52,9 +52,9 @@ For a Hermes gateway that is:
 
 ```python
 import hermes_cli.config as hcfg
-for k, v in (hcfg.load_env() or {}).items():   # profile .env -> os.environ
+for k, v in (hcfg.load_env() or {}).items(): # profile.env -> os.environ
     os.environ.setdefault(k, v)
-cfg = gcfg.load_gateway_config()               # NOT GatewayConfig.from_dict
+cfg = gcfg.load_gateway_config() # NOT GatewayConfig.from_dict
 ```
 
 `load_gateway_config()` does not itself parse `.env`. `get_hermes_home()` honors
@@ -98,8 +98,8 @@ Pass condition: unknown inbound DM resolves to `ignore` while outbound remains c
 Before editing a live owner's config, fetch a copy and apply the exact edit locally, then `diff`. The expected result is one line:
 
 ```diff
--      enabled: false
-+      enabled: true
+- enabled: false
++ enabled: true
 ```
 
 Anchor the edit on the platform block by regex and assert the replacement count, so a stray `enabled:` elsewhere in an 800-line config cannot be hit. Then verify on the target host by re-running the probe against the REAL config before restarting anything.
@@ -109,8 +109,8 @@ Anchor the edit on the platform block by regex and assert the replacement count,
 After restart, re-run the probe on the box and require both properties:
 
 ```text
-STRANGER GETS PAIRING CODE?    : False
-OUTBOUND SEND CONFIGURED?      : True
+STRANGER GETS PAIRING CODE?: False
+OUTBOUND SEND CONFIGURED?: True
 ```
 
 `OUTBOUND SEND CONFIGURED` is a configuration proof, not a delivery proof. Do not claim outbound works until a message has actually been delivered — and never send a test message to a real human without the owner naming the recipient.

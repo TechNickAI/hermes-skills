@@ -23,7 +23,7 @@ curl -sS --fail-with-body -X POST https://api.vapi.ai/phone-number \
   -d '{"provider": "vapi", "name": "<assistant name>"}' > phone-created.json \
   || { echo "provisioning failed:"; cat phone-created.json; rm -f phone-created.json; exit 1; }
 
-jq -e '.id and .number' phone-created.json >/dev/null \
+jq -e '.id and.number' phone-created.json >/dev/null \
   || { echo "no id/number in response — see the half-provisioned record warning"; exit 1; }
 ```
 
@@ -193,10 +193,10 @@ export VAPI_ASSISTANT_ID="${ASSISTANT_ID:-$VAPI_ASSISTANT_ID}"
 
 curl -sS --fail-with-body -H "Authorization: Bearer $VAPI_API_KEY" \
   "https://api.vapi.ai/assistant/$VAPI_ASSISTANT_ID" \
-  | jq '{model: .model.model, prompt_chars: (.model.messages[0].content | length),
-         tools: [.model.tools[].type], transcriber: .transcriber.model,
-         maxDurationSeconds, recording: .artifactPlan.recordingEnabled,
-         control: .monitorPlan.controlEnabled}'
+  | jq '{model:.model.model, prompt_chars: (.model.messages[0].content | length),
+         tools: [.model.tools[].type], transcriber:.transcriber.model,
+         maxDurationSeconds, recording:.artifactPlan.recordingEnabled,
+         control:.monitorPlan.controlEnabled}'
 ```
 
 A `201` means Vapi accepted the request, not that every field applied the way you meant.
@@ -262,7 +262,7 @@ curl -sS --fail-with-body -H "Authorization: Bearer $VAPI_API_KEY" \
   "https://api.vapi.ai/assistant/$VAPI_ASSISTANT_ID" > "$BACKUP.tmp" \
   || { echo "backup failed:"; cat "$BACKUP.tmp"; rm -f "$BACKUP.tmp"; exit 1; }
 
-jq -e '.id and .model' "$BACKUP.tmp" >/dev/null \
+jq -e '.id and.model' "$BACKUP.tmp" >/dev/null \
   || { echo "backup is not a valid assistant, refusing to patch"; rm -f "$BACKUP.tmp"; exit 1; }
 
 mv "$BACKUP.tmp" "$BACKUP"

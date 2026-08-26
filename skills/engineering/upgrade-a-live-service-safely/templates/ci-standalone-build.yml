@@ -1,7 +1,7 @@
 # Template: build a Next.js/Node standalone bundle in CI instead of on the live host.
 #
-# Copy to .github/workflows/ and adapt the MARKED lines. Proven on the
-# router (2026-07-26) after an in-place build caused a ~30 min fleet outage.
+# Copy to.github/workflows/ and adapt the MARKED lines. Proven on the
+# router (one occasion) after an in-place build caused a ~30 min fleet outage.
 #
 # Why: the service's runtime RSS was ~1.2 GB but the build peaked at ~15 GB. The
 # host had been upsized to 16 GB purely to survive the build. Moving the build
@@ -48,7 +48,7 @@ jobs:
 
       - name: Report runner resources
         run: |
-          echo "arch: $(uname -m)  cores: $(nproc)"
+          echo "arch: $(uname -m) cores: $(nproc)"
           free -h
 
       - uses: actions/setup-node@v4
@@ -90,12 +90,12 @@ jobs:
       - name: Verify artifact shape
         run: |
           fail=0
-          [ -s .build/next/standalone/server.js ] || { echo "::error::missing server.js"; fail=1; }
-          if find .build -path "*sharp-darwin*" | grep -q .; then
+          [ -s.build/next/standalone/server.js ] || { echo "::error::missing server.js"; fail=1; }
+          if find.build -path "*sharp-darwin*" | grep -q.; then
             echo "::error::darwin native modules present — wrong build platform"; fail=1
           fi
           # ADAPT: assert your fork's marker string survived into the bundle
-          if grep -rq "MY_FORK_MARKER" .build/next/standalone 2>/dev/null; then
+          if grep -rq "MY_FORK_MARKER".build/next/standalone 2>/dev/null; then
             echo "OK: fork patch present"
           else
             echo "::error::fork patch missing from bundle"; fail=1
@@ -107,7 +107,7 @@ jobs:
         run: |
           SHORT=$(git rev-parse --short HEAD)
           NAME="standalone-${SHORT}"
-          tar --zstd -cf "${NAME}.tar.zst" .build dist
+          tar --zstd -cf "${NAME}.tar.zst".build dist
           sha256sum "${NAME}.tar.zst" > "${NAME}.tar.zst.sha256"
           echo "name=${NAME}" >> "$GITHUB_OUTPUT"
 

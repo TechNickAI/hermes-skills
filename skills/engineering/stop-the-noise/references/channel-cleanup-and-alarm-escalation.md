@@ -5,7 +5,7 @@ summarization, dedupe, roll-up, or deletion.** The obvious design — collapse r
 delete the copies — is backwards in the most dangerous way. Read this before building
 any janitor, digest, or dedupe job against a live channel.
 
-Derived from the 2026-08-21 fleet signal-management session (the operator/the operations agent), where the
+Derived from a fleet signal-management session (the operator/the operations agent), where the
 measurement inverted the plan twice.
 
 ---

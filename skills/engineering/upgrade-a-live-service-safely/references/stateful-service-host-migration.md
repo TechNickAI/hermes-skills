@@ -2,7 +2,7 @@
 
 Moving a live, stateful service (trading agent, gateway, anything with a local
 database plus credentials plus scheduled jobs) from one box to another. Worked
-end-to-end on the a trading agent the co-tenant host → trading.<internal-domain> cutover, 2026-08-12.
+end-to-end on the a trading agent the co-tenant host → trading.<internal-domain> cutover, one occasion.
 
 The governing rule: **a copy is not a migration until you have diffed what you
 believe copied against what actually did.** Four separate things looked fine and
@@ -30,10 +30,10 @@ Correct method:
 
 ```bash
 U=hermes-gateway-<profile>.service
-PID=$(systemctl --user show "$U" -p MainPID --value)   # capture FIRST
+PID=$(systemctl --user show "$U" -p MainPID --value) # capture FIRST
 
-systemctl --user disable "$U"        # cannot return on boot
-systemctl --user stop "$U" &         # allow the full drain window
+systemctl --user disable "$U" # cannot return on boot
+systemctl --user stop "$U" & # allow the full drain window
 for i in $(seq 1 60); do
     st=$(systemctl --user is-active "$U")
     [ "$st" = "inactive" ] || [ "$st" = "failed" ] && break
@@ -68,7 +68,7 @@ systemctl --user show "$U" -p Restart -p UnitFileState
 ls ~/.config/systemd/user/default.target.wants/ | grep -i <svc>
 
 # 2. the process manager's SAVED boot list — pm2 resurrects from a dump,
-#    so `pm2 stop` alone comes back on reboot
+# so `pm2 stop` alone comes back on reboot
 python3 -c "import json;print([a['name'] for a in json.load(open('$HOME/.pm2/dump.pm2'))])"
 pm2 delete <svc-entries> && pm2 save
 
@@ -76,7 +76,7 @@ pm2 delete <svc-entries> && pm2 save
 crontab -l | grep -iE 'restart|start|systemctl|pm2'
 
 # 4. the agent framework's OWN scheduled jobs — search the whole job blob,
-#    not just names
+# not just names
 python3 - <<'PY'
 import json
 jobs = json.load(open('.../cron/jobs.json'))
@@ -164,19 +164,19 @@ database. First isolation test caught the shadow role reading the live ledger �
 exactly the phantom-writes contamination shadow mode exists to prevent.
 
 ```sql
-REVOKE CONNECT ON DATABASE live   FROM PUBLIC;
+REVOKE CONNECT ON DATABASE live FROM PUBLIC;
 REVOKE CONNECT ON DATABASE shadow FROM PUBLIC;
-GRANT  CONNECT ON DATABASE live   TO live_app;
-GRANT  CONNECT ON DATABASE shadow TO shadow_app;
+GRANT CONNECT ON DATABASE live TO live_app;
+GRANT CONNECT ON DATABASE shadow TO shadow_app;
 ```
 
 **Test isolation in BOTH directions and require the denials to fail:**
 
 ```
-live_app   -> live    PASS
-shadow_app -> shadow  PASS
-shadow_app -> live    PASS (denied)   <- the one that matters
-live_app   -> shadow  PASS (denied)
+live_app -> live PASS
+shadow_app -> shadow PASS
+shadow_app -> live PASS (denied) <- the one that matters
+live_app -> shadow PASS (denied)
 ```
 
 Also: **an RDS master user is not a true superuser.** `CREATE DATABASE x OWNER
@@ -236,10 +236,10 @@ have written live state to the root disk while reporting healthy.
 
 ```bash
 #!/bin/bash
-# require-state-volume.sh  — ExecStartPre
+# require-state-volume.sh — ExecStartPre
 set -u
 MP=/srv/<app>/shared
-mountpoint -q "$MP"     || { echo "FATAL: $MP not mounted" >&2; exit 1; }
+mountpoint -q "$MP" || { echo "FATAL: $MP not mounted" >&2; exit 1; }
 [ -f "$MP/config/env" ] || { echo "FATAL: wrong/empty volume" >&2; exit 1; }
 touch "$MP/.probe" 2>/dev/null || { echo "FATAL: not writable" >&2; exit 1; }
 rm -f "$MP/.probe"

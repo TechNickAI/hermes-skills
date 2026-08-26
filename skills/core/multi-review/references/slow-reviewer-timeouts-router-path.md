@@ -8,7 +8,7 @@ reviewer calls are slow or seem to time out.
 ## Lesson
 
 A slow reviewer is not automatically a broken model path. Headless Hermes reviewer calls
-(`hermes -z ... -t ''`) pay session/context startup (config load, memory prefetch, skill
+(`hermes -z... -t ''`) pay session/context startup (config load, memory prefetch, skill
 scan, system-prompt build) before the model even reasons. Deep reviewers can take a
 minute or more and still be perfectly healthy.
 

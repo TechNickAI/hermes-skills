@@ -81,13 +81,13 @@ gh api graphql -f query="$(< /tmp/prthreads.graphql)" \
   --jq '.data.repository.pullRequest.reviewThreads.nodes
     | "threads=\(length) unresolved=\(map(select(.isResolved|not))|length)",
       (.[] | select(.isResolved|not) | {
-        id: .comments.nodes[0].databaseId,
-        author: .comments.nodes[0].author.login,
-        path: .comments.nodes[0].path,
-        line: .comments.nodes[0].line,
+        id:.comments.nodes[0].databaseId,
+        author:.comments.nodes[0].author.login,
+        path:.comments.nodes[0].path,
+        line:.comments.nodes[0].line,
         replies: (.comments.nodes|length-1),
         reactions: (.comments.nodes[0].reactions.nodes|length),
-        body: .comments.nodes[0].body[0:400]
+        body:.comments.nodes[0].body[0:400]
       })'
 ```
 
@@ -100,7 +100,7 @@ When `gh run list --branch=<branch>` or `gh run view <run_id>` returns HTTP 503 
 ```bash
 SHA=$(gh pr view <N> --repo <owner>/<repo> --json headRefOid --jq '.headRefOid')
 gh api repos/<owner>/<repo>/commits/$SHA/check-runs \
-  --jq '.check_runs[] | [.name, .status, .conclusion] | @tsv'
+  --jq '.check_runs[] | [.name,.status,.conclusion] | @tsv'
 ```
 
 This endpoint is often available when the actions/runs endpoint is degraded. Check-runs also show `queued` status when GitHub is experiencing runner-queue delays — this is not a code problem; wait and re-poll.
@@ -113,7 +113,7 @@ Before retrying:
 
 ```bash
 gh api repos/OWNER/REPO/pulls/N \
-  --jq '{state, merged, merged_at, head: .head.ref}'
+  --jq '{state, merged, merged_at, head:.head.ref}'
 ```
 
 If `merged: true`, do not rerun the merge. Delete the branch separately:

@@ -30,10 +30,10 @@ skills:
   claude_note: Version-then-issue-tracker method works anywhere with a shell and network.
   size:
     files: 16
-    bytes_skill_md: 50684
-    bytes_total: 156412
-    approx_tokens_skill_md: 12671
-    approx_tokens_total: 39103
+    bytes_skill_md: 50505
+    bytes_total: 155799
+    approx_tokens_skill_md: 12626
+    approx_tokens_total: 38950
   tags:
   - hermes
   - upstream
@@ -58,10 +58,10 @@ skills:
   claude_note: Stdlib-only check library and eval harness; the protocol needs no Hermes runtime.
   size:
     files: 2
-    bytes_skill_md: 23905
-    bytes_total: 72717
-    approx_tokens_skill_md: 5976
-    approx_tokens_total: 18179
+    bytes_skill_md: 23894
+    bytes_total: 72706
+    approx_tokens_skill_md: 5974
+    approx_tokens_total: 18176
   tags:
   - data-quality
   - analysis
@@ -109,10 +109,10 @@ skills:
   claude_note: The briefing and artifact-verification discipline transfers; the background-dispatch examples assume a delegation toolset.
   size:
     files: 3
-    bytes_skill_md: 18448
-    bytes_total: 30637
-    approx_tokens_skill_md: 4612
-    approx_tokens_total: 7659
+    bytes_skill_md: 18382
+    bytes_total: 30507
+    approx_tokens_skill_md: 4596
+    approx_tokens_total: 7627
   tags:
   - delegation
   - subagent
@@ -158,10 +158,10 @@ skills:
   claude_note: Re-probing a failure verdict needs no host runtime beyond the failing check.
   size:
     files: 6
-    bytes_skill_md: 17979
-    bytes_total: 47596
-    approx_tokens_skill_md: 4495
-    approx_tokens_total: 11899
+    bytes_skill_md: 17977
+    bytes_total: 47468
+    approx_tokens_skill_md: 4494
+    approx_tokens_total: 11867
   tags:
   - monitoring
   - diagnostics
@@ -206,10 +206,10 @@ skills:
   claude_note: Cleans Hermes MEMORY.md / USER.md / SOUL.md files, which do not exist in Claude.
   size:
     files: 8
-    bytes_skill_md: 17524
-    bytes_total: 50529
-    approx_tokens_skill_md: 4381
-    approx_tokens_total: 12632
+    bytes_skill_md: 17458
+    bytes_total: 50373
+    approx_tokens_skill_md: 4364
+    approx_tokens_total: 12593
   tags:
   - memory
   - cleanup
@@ -230,10 +230,10 @@ skills:
   claude_note: Requires the native Hermes MoA fan-out runtime.
   size:
     files: 5
-    bytes_skill_md: 19681
-    bytes_total: 41130
+    bytes_skill_md: 19679
+    bytes_total: 41123
     approx_tokens_skill_md: 4920
-    approx_tokens_total: 10282
+    approx_tokens_total: 10281
   tags:
   - orchestration
   - multi-model
@@ -254,9 +254,9 @@ skills:
   claude_note: Works in Claude with no additional setup.
   size:
     files: 4
-    bytes_skill_md: 16908
-    bytes_total: 58589
-    approx_tokens_skill_md: 4227
+    bytes_skill_md: 16906
+    bytes_total: 58587
+    approx_tokens_skill_md: 4226
     approx_tokens_total: 14647
   tags:
   - research
@@ -282,10 +282,10 @@ skills:
   claude_note: The review method transfers, but cross-model-family diversity needs Hermes; in Claude it becomes Claude reviewing Claude.
   size:
     files: 18
-    bytes_skill_md: 54443
-    bytes_total: 150934
-    approx_tokens_skill_md: 13611
-    approx_tokens_total: 37734
+    bytes_skill_md: 54377
+    bytes_total: 150828
+    approx_tokens_skill_md: 13594
+    approx_tokens_total: 37707
   tags:
   - review
   - quality
@@ -307,10 +307,10 @@ skills:
   claude_note: Drives a Hermes living board and cron cadence.
   size:
     files: 9
-    bytes_skill_md: 23679
-    bytes_total: 122549
-    approx_tokens_skill_md: 5920
-    approx_tokens_total: 30637
+    bytes_skill_md: 23672
+    bytes_total: 122472
+    approx_tokens_skill_md: 5918
+    approx_tokens_total: 30618
   tags:
   - orchestration
   - cron
@@ -332,10 +332,10 @@ skills:
   claude_note: Sandbox-probe method is runtime-agnostic; it needs only a copyable config and the ability to re-run the real code path.
   size:
     files: 16
-    bytes_skill_md: 45322
-    bytes_total: 135104
-    approx_tokens_skill_md: 11330
-    approx_tokens_total: 33776
+    bytes_skill_md: 45143
+    bytes_total: 134566
+    approx_tokens_skill_md: 11286
+    approx_tokens_total: 33642
   tags:
   - config
   - verification
@@ -356,10 +356,10 @@ skills:
   claude_note: Reads Hermes session and memory stores, which Claude does not have.
   size:
     files: 4
-    bytes_skill_md: 11028
-    bytes_total: 20672
-    approx_tokens_skill_md: 2757
-    approx_tokens_total: 5168
+    bytes_skill_md: 11003
+    bytes_total: 20649
+    approx_tokens_skill_md: 2751
+    approx_tokens_total: 5162
   tags:
   - context
   - session
@@ -381,10 +381,10 @@ skills:
   claude_note: Uses Hermes reporting and routing tools.
   size:
     files: 3
-    bytes_skill_md: 11568
-    bytes_total: 30517
-    approx_tokens_skill_md: 2892
-    approx_tokens_total: 7629
+    bytes_skill_md: 11552
+    bytes_total: 30480
+    approx_tokens_skill_md: 2888
+    approx_tokens_total: 7620
   tags:
   - bugs
   - feedback
@@ -408,10 +408,10 @@ skills:
   claude_note: Inspects a Hermes runtime and HERMES_HOME layout.
   size:
     files: 4
-    bytes_skill_md: 16283
-    bytes_total: 74933
-    approx_tokens_skill_md: 4071
-    approx_tokens_total: 18733
+    bytes_skill_md: 16258
+    bytes_total: 74908
+    approx_tokens_skill_md: 4064
+    approx_tokens_total: 18727
   tags:
   - monitoring
   - diagnostics
@@ -434,9 +434,9 @@ skills:
   size:
     files: 5
     bytes_skill_md: 13065
-    bytes_total: 91532
+    bytes_total: 91497
     approx_tokens_skill_md: 3266
-    approx_tokens_total: 22883
+    approx_tokens_total: 22874
   tags:
   - skills
   - audit
@@ -459,10 +459,10 @@ skills:
   claude_note: Portable governance rules; no runtime dependency.
   size:
     files: 6
-    bytes_skill_md: 22932
-    bytes_total: 44717
-    approx_tokens_skill_md: 5733
-    approx_tokens_total: 11179
+    bytes_skill_md: 22945
+    bytes_total: 44734
+    approx_tokens_skill_md: 5736
+    approx_tokens_total: 11184
   tags:
   - governance
   - autonomy
@@ -485,10 +485,10 @@ skills:
   claude_note: Works in Claude Code with an authenticated gh CLI.
   size:
     files: 10
-    bytes_skill_md: 19751
-    bytes_total: 63422
-    approx_tokens_skill_md: 4938
-    approx_tokens_total: 15856
+    bytes_skill_md: 19727
+    bytes_total: 63326
+    approx_tokens_skill_md: 4932
+    approx_tokens_total: 15832
   tags:
   - github
   - code-review
@@ -512,10 +512,10 @@ skills:
   claude_note: Works in Claude once its render prerequisites exist.
   size:
     files: 4
-    bytes_skill_md: 10197
-    bytes_total: 37552
-    approx_tokens_skill_md: 2549
-    approx_tokens_total: 9388
+    bytes_skill_md: 10183
+    bytes_total: 37540
+    approx_tokens_skill_md: 2546
+    approx_tokens_total: 9385
   tags:
   - diagrams
   - charts
@@ -539,10 +539,10 @@ skills:
   claude_note: Measuring each hop in a causal chain needs only a shell and the system under test.
   size:
     files: 16
-    bytes_skill_md: 40027
-    bytes_total: 141679
-    approx_tokens_skill_md: 10007
-    approx_tokens_total: 35420
+    bytes_skill_md: 39911
+    bytes_total: 140715
+    approx_tokens_skill_md: 9978
+    approx_tokens_total: 35179
   tags:
   - performance
   - latency
@@ -565,10 +565,10 @@ skills:
   claude_note: SQLite maintenance and corruption triage are runtime-agnostic; the bundled scripts are stdlib Python.
   size:
     files: 36
-    bytes_skill_md: 41909
-    bytes_total: 322402
-    approx_tokens_skill_md: 10477
-    approx_tokens_total: 80600
+    bytes_skill_md: 41830
+    bytes_total: 321289
+    approx_tokens_skill_md: 10458
+    approx_tokens_total: 80322
   tags:
   - sqlite
   - retention
@@ -593,10 +593,10 @@ skills:
   claude_note: Operates Hermes-config mini-app host services.
   size:
     files: 12
-    bytes_skill_md: 45652
-    bytes_total: 87321
-    approx_tokens_skill_md: 11413
-    approx_tokens_total: 21830
+    bytes_skill_md: 45350
+    bytes_total: 86823
+    approx_tokens_skill_md: 11338
+    approx_tokens_total: 21706
   tags:
   - devops
   - app-router
@@ -622,10 +622,10 @@ skills:
   claude_note: Depends on the Hermes delegation toolset.
   size:
     files: 11
-    bytes_skill_md: 8107
-    bytes_total: 52992
-    approx_tokens_skill_md: 2027
-    approx_tokens_total: 13248
+    bytes_skill_md: 8159
+    bytes_total: 53060
+    approx_tokens_skill_md: 2040
+    approx_tokens_total: 13265
   tags:
   - github
   - code-review
@@ -646,10 +646,10 @@ skills:
   claude_note: The runner and its exit-code contract are portable Python; the cron wiring examples assume a scheduler that dispatches by file extension.
   size:
     files: 2
-    bytes_skill_md: 13573
-    bytes_total: 69590
-    approx_tokens_skill_md: 3393
-    approx_tokens_total: 17398
+    bytes_skill_md: 13452
+    bytes_total: 69469
+    approx_tokens_skill_md: 3363
+    approx_tokens_total: 17367
   tags:
   - cron
   - jobs
@@ -672,10 +672,10 @@ skills:
   claude_note: Diagnosing and silencing a noisy source transfers; the scheduled-job and gateway examples assume a long-running agent runtime.
   size:
     files: 14
-    bytes_skill_md: 27642
-    bytes_total: 157348
-    approx_tokens_skill_md: 6910
-    approx_tokens_total: 39337
+    bytes_skill_md: 27618
+    bytes_total: 157201
+    approx_tokens_skill_md: 6904
+    approx_tokens_total: 39300
   tags:
   - cron
   - webhook
@@ -704,10 +704,10 @@ skills:
   claude_note: Stage-verify-cut-rollback sequencing applies to any supervised service.
   size:
     files: 42
-    bytes_skill_md: 70156
-    bytes_total: 381004
-    approx_tokens_skill_md: 17539
-    approx_tokens_total: 95251
+    bytes_skill_md: 69914
+    bytes_total: 378935
+    approx_tokens_skill_md: 17478
+    approx_tokens_total: 94734
   tags:
   - deploy
   - upgrade
@@ -731,10 +731,10 @@ skills:
   claude_note: Falsify-the-claim-first evaluation needs only the vendor's own API and a shell.
   size:
     files: 4
-    bytes_skill_md: 13369
-    bytes_total: 26234
+    bytes_skill_md: 13368
+    bytes_total: 26195
     approx_tokens_skill_md: 3342
-    approx_tokens_total: 6558
+    approx_tokens_total: 6549
   tags:
   - vendor
   - migration
@@ -756,10 +756,10 @@ skills:
   claude_note: Writing guidance with no runtime dependency at all.
   size:
     files: 4
-    bytes_skill_md: 19640
-    bytes_total: 33502
-    approx_tokens_skill_md: 4910
-    approx_tokens_total: 8376
+    bytes_skill_md: 19622
+    bytes_total: 33484
+    approx_tokens_skill_md: 4906
+    approx_tokens_total: 8371
   tags:
   - communication
   - writing
@@ -784,9 +784,9 @@ skills:
   size:
     files: 12
     bytes_skill_md: 13873
-    bytes_total: 42428
+    bytes_total: 42438
     approx_tokens_skill_md: 3468
-    approx_tokens_total: 10607
+    approx_tokens_total: 10610
   tags:
   - email
   - inbox
@@ -810,10 +810,10 @@ skills:
   claude_note: Works in Claude once the gog CLI is authorized.
   size:
     files: 5
-    bytes_skill_md: 10575
-    bytes_total: 35680
-    approx_tokens_skill_md: 2644
-    approx_tokens_total: 8920
+    bytes_skill_md: 10513
+    bytes_total: 35618
+    approx_tokens_skill_md: 2628
+    approx_tokens_total: 8904
   tags:
   - google
   - docs
@@ -840,10 +840,10 @@ skills:
   claude_note: Works in Claude once the gog CLI is authorized.
   size:
     files: 4
-    bytes_skill_md: 14728
-    bytes_total: 34909
-    approx_tokens_skill_md: 3682
-    approx_tokens_total: 8727
+    bytes_skill_md: 14691
+    bytes_total: 34868
+    approx_tokens_skill_md: 3673
+    approx_tokens_total: 8717
   tags:
   - google
   - sheets
@@ -867,10 +867,10 @@ skills:
   claude_note: Works in Claude once the gog CLI is authorized.
   size:
     files: 2
-    bytes_skill_md: 9307
-    bytes_total: 24155
-    approx_tokens_skill_md: 2327
-    approx_tokens_total: 6039
+    bytes_skill_md: 9300
+    bytes_total: 24148
+    approx_tokens_skill_md: 2325
+    approx_tokens_total: 6037
   tags:
   - google
   - slides
@@ -897,10 +897,10 @@ skills:
   claude_note: Works in Claude on macOS once BlueBubbles is set up.
   size:
     files: 8
-    bytes_skill_md: 21156
-    bytes_total: 84352
-    approx_tokens_skill_md: 5289
-    approx_tokens_total: 21088
+    bytes_skill_md: 20993
+    bytes_total: 84167
+    approx_tokens_skill_md: 5248
+    approx_tokens_total: 21042
   tags:
   - imessage
   - bluebubbles
@@ -923,10 +923,10 @@ skills:
   claude_note: Works in Claude once VAPI_API_KEY is available.
   size:
     files: 2
-    bytes_skill_md: 14218
-    bytes_total: 27996
+    bytes_skill_md: 14216
+    bytes_total: 27988
     approx_tokens_skill_md: 3554
-    approx_tokens_total: 6999
+    approx_tokens_total: 6997
   tags:
   - vapi
   - voice

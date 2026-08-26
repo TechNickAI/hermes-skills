@@ -1,6 +1,6 @@
 # The agent that corrupts its own database by shelling out to its own CLI
 
-> **STATUS: SHIPPED 2026-08-23.** The hardened helper is
+> **STATUS: SHIPPED one occasion.** The hardened helper is
 > `skills/core/multi-review/scripts/reviewer_home.sh` in the public
 > `hermes-skills` repo (PR #24, merged `6e0a485`), and the bundled
 > the multi-review skill's parallel reviewer runner uses it. Installed and functionally
@@ -18,7 +18,7 @@
 > first. This also sidesteps hub-install provenance: adding files and inserting
 > at an anchor needs no curator write permission on the target.
 
-**Measured 2026-08-22, `trading.<internal-domain>` / profile `a trading agent`.** A gateway had
+**Measured on one run, `trading.<internal-domain>` / profile `a trading agent`.** A gateway had
 corrupted repeatedly over several days (`delivery_obligations`, then four FTS
 shadow tables, then structural B-tree damage in `messages`). Volume was the
 leading hypothesis. It was wrong. The cause was a **second OS process writing
@@ -36,16 +36,16 @@ lsof -F pcfan /path/to/state.db
 pid is not the service's `MainPID` is the answer.
 
 ```
-pid=2788769  cmd=hermes  fd=33  mode=u   GATEWAY
-pid=2795631  cmd=hermes  fd=6   mode=u   *** NON-GATEWAY WRITER ***
+pid=2788769 cmd=hermes fd=33 mode=u GATEWAY
+pid=2795631 cmd=hermes fd=6 mode=u *** NON-GATEWAY WRITER ***
 ```
 
 Then read the parent chain — this is what names the mechanism:
 
 ```
-2788769  hermes gateway run --profile a trading agent        <- the gateway
-  └─ 2795602  bash -lic ... for M in gemini grok ...  <- agent's terminal tool
-       └─ 2795631  hermes -z "Review PRODUCTION CODE..."
+2788769 hermes gateway run --profile a trading agent <- the gateway
+  └─ 2795602 bash -lic... for M in gemini grok... <- agent's terminal tool
+       └─ 2795631 hermes -z "Review PRODUCTION CODE..."
 ```
 
 The gateway spawned a shell, which spawned a headless one-shot, which opened the
@@ -63,10 +63,10 @@ self._session_db = SessionDB()
 # cli.py:8566
 self._session_db.create_session(
     session_id=self.session_id,
-    source=os.environ.get("HERMES_SESSION_SOURCE", "cli"), ...)
+    source=os.environ.get("HERMES_SESSION_SOURCE", "cli"),...)
 
 # hermes_state.py:2798
-self.db_path = db_path or _default_db_path()   # -> the profile's state.db
+self.db_path = db_path or _default_db_path() # -> the profile's state.db
 ```
 
 Corroborating evidence in the data itself: **15,090 messages with
@@ -102,16 +102,16 @@ the mechanism. Only one agent was spawning a headless one-shot against itself.
 The instinct is to give the one-shot its own throwaway store:
 
 ```bash
-HERMES_HOME=$(mktemp -d) hermes -z "..." --provider X -m Y -t ''   # ← DOES NOT WORK
+HERMES_HOME=$(mktemp -d) hermes -z "..." --provider X -m Y -t '' # ← DOES NOT WORK
 ```
 
-🔴 **Tested 2026-08-22 and it fails silently.** `HERMES_HOME` is not a
+🔴 **Tested one occasion and it fails silently.** `HERMES_HOME` is not a
 `state.db` pointer — it is the ROOT for `config.yaml`, `.env`, skills,
 memories and cortex. An empty temp dir has none of them:
 
 ```
-real profile   config.yaml=True   .env=True   skills=True
-empty temp     config.yaml=False  .env=False  skills=False
+real profile config.yaml=True.env=True skills=True
+empty temp config.yaml=False.env=False skills=False
 ```
 
 Measured behaviour of a real one-shot under each home (`-z 'Reply with exactly
@@ -154,8 +154,8 @@ dedicated `-p reviewer` profile does move writes off the gateway, and a
 single reviewer tests clean:
 
 ```
-CONTROL: 15s, no reviewer     caller state.db mtime changed on its own: False
-exit=0   stdout: PONG                     <- real model call, credentials work
+CONTROL: 15s, no reviewer caller state.db mtime changed on its own: False
+exit=0 stdout: PONG <- real model call, credentials work
 reviewer process EVER held caller's state.db: False
 caller state.db size: 1889136640 -> 1889136640 (unchanged)
 ```
@@ -178,7 +178,7 @@ credentials and deleted afterwards. Measured peak holders per database: **1**.
 
 ```bash
 H=$(mktemp -d); chmod 700 "$H"
-for f in config.yaml .env auth.json; do
+for f in config.yaml.env auth.json; do
   [ -f "$SRC/$f" ] && { cp "$SRC/$f" "$H/$f"; chmod 600 "$H/$f"; }
 done
 HERMES_HOME="$H" hermes -z "$PROMPT" -t '' --provider X -m Y
@@ -233,8 +233,8 @@ echo a path, and make lazy auto-init a hard error.
 **2. A trap cannot fire while bash blocks in a FOREGROUND child.** Measured:
 
 ```
-foreground `sleep 60`   -> SIGTERM -> trap NEVER fired, scratch leaked
-`sleep 60 & wait $!`    -> SIGTERM -> trap fired, scratch removed
+foreground `sleep 60` -> SIGTERM -> trap NEVER fired, scratch leaked
+`sleep 60 & wait $!` -> SIGTERM -> trap fired, scratch removed
 ```
 
 Background the child and `wait "$pid"`.
@@ -286,7 +286,7 @@ store was ever the bug.
 
 ## Upstream has REFUSED per-task model in `delegate_task` — stop proposing it
 
-Do not plan around this arriving. Researched 2026-08-22:
+Do not plan around this arriving. Researched One case:
 
 - **Issue #17685** — the `model` field inside a task object is _"completely
   ignored… silently accepted and discarded — no error, no warning."_ A reporter
@@ -296,7 +296,7 @@ Do not plan around this arriving. Researched 2026-08-22:
 - Maintainer `teknium1` closed #34773 with **"We do not want this"**.
 - Official docs state the pin is global and name the supported alternative:
   _"hand the task to the kanban board, which does support a per-task model
-  override"_ — `hermes kanban create ... --model X --provider Y`, or
+  override"_ — `hermes kanban create... --model X --provider Y`, or
   `hermes kanban set-model <task> <model> --provider <p>` later.
 
 Consequence for `multi-review`: its execution hierarchy ranks native subagents
@@ -420,13 +420,13 @@ it is in-process and never opens a second connection.
     to the caller's live db, i.e. the exact corruption); lazy auto-init inside
     `$(...)` self-destructing and handing back an unseeded home; a signal
     handler that returns instead of re-raising, letting the script _resume_ and
-    seed a fresh pool; a sourced `trap ... EXIT` clobbering the caller's own
+    seed a fresh pool; a sourced `trap... EXIT` clobbering the caller's own
     cleanup; an exported pool variable inherited by children that delete it
     mid-run. Test each with a mutation that removes the guard and assert the
     test fails without it.
 16. **`$(...)` and `&` break shell state you think you own.** Two distinct
     traps, both measured. A variable assigned inside a backgrounded function
-    (`reviewer_run ... &`) mutates only the _subshell's_ copy — the parent's
+    (`reviewer_run... &`) mutates only the _subshell's_ copy — the parent's
     live-PID list read `[]` while two reviewers ran, so its signal handler
     killed nothing; use `jobs -p`, which the parent evaluates. And a trap
     **cannot fire while bash blocks in a foreground child**: SIGTERM during a

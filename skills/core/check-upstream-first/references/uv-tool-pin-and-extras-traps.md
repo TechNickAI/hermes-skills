@@ -1,7 +1,7 @@
 # uv tool install traps: exact-version pins + dropped extras
 
 Two independent traps that BOTH bit while upgrading an assistant agent (Ali's Mac mini)
-0.18.2 → 0.19.0 on 2026-07-30. Either one alone produces an upgrade that looks
+0.18.2 → 0.19.0 on one occasion. Either one alone produces an upgrade that looks
 successful but is a silent no-op — or that takes the member offline on restart.
 
 ---
@@ -32,9 +32,9 @@ has been quietly no-opping everywhere.
 ### Detect before trusting any upgrade
 
 ```bash
-uv tool list                     # shows the actually-installed version
-hermes --version                 # must agree
-ls ~/.cache/uv/archive-v0        # upgrade HISTORY — if the target version was
+uv tool list # shows the actually-installed version
+hermes --version # must agree
+ls ~/.cache/uv/archive-v0 # upgrade HISTORY — if the target version was
                                  # never fetched, it was never installed
 ```
 
@@ -59,7 +59,7 @@ MISS slack_sdk
 MISS slack_bolt
 MISS telegram
 MISS discord
-OK   websockets
+OK websockets
 ```
 
 **Restarting the gateway at this point takes the member completely offline** — no
@@ -99,7 +99,7 @@ Never restart the gateway until this prints all-OK:
 ```bash
 SP=~/.local/share/uv/tools/hermes-agent/lib/python3.11/site-packages
 for d in slack_sdk slack_bolt telegram discord websockets; do
-  if [ -d "$SP/$d" ]; then echo "OK   $d"; else echo "MISS $d"; fi
+  if [ -d "$SP/$d" ]; then echo "OK $d"; else echo "MISS $d"; fi
 done
 ```
 
@@ -108,7 +108,7 @@ done
 ```bash
 TS=$(date +%Y%m%d-%H%M%S)
 cp ~/.hermes/config.yaml ~/.hermes/config.yaml.bak.preupgrade-$TS
-cp ~/.hermes/.env        ~/.hermes/.env.bak.preupgrade-$TS 2>/dev/null || true
+cp ~/.hermes/.env ~/.hermes/.env.bak.preupgrade-$TS 2>/dev/null || true
 ```
 
 ## Misc gotchas hit in the same session
@@ -145,15 +145,15 @@ cp ~/.hermes/.env        ~/.hermes/.env.bak.preupgrade-$TS 2>/dev/null || true
   ```bash
   TS=$(date +%Y%m%d-%H%M%S)
   cp ~/Library/LaunchAgents/ai.hermes.gateway.plist ~/.hermes/ai.hermes.gateway.plist.bak.$TS
-  HERMES_HOME=$HOME/.hermes hermes gateway start   # prints "✓ Service started"
-  hermes gateway status                            # expect: ✓ Service definition matches
+  HERMES_HOME=$HOME/.hermes hermes gateway start # prints "✓ Service started"
+  hermes gateway status # expect: ✓ Service definition matches
   ```
 
-  Verified on an assistant agent 2026-07-30: went from ⚠ stale → ✓ matches, new PID.
+  Verified on an assistant agent One case: went from ⚠ stale → ✓ matches, new PID.
   **Sweep this across the fleet after any rollout** — it drifts silently and only
   ever surfaces in `gateway status`. Observed stale on a personal-assistant agent (thomas) and Bob
   Steel (gil) while a personal-assistant agent/Dos (an owner) were fine, so it is per-box, not uniform.
   Note it restarts that member's gateway → owner-facing boxes need the operator's go.
 
 - **The file-edit tool refuses to write Hermes config files.** Use
-  `hermes config set ...`, or patch via a python heredoc on the remote host.
+  `hermes config set...`, or patch via a python heredoc on the remote host.

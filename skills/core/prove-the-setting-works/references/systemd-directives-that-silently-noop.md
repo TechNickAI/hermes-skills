@@ -8,7 +8,7 @@ skill exists to catch: the directive is **accepted, parsed, echoed back by
 
 ---
 
-## Case: `RequiresMountsFor=` in a USER unit (verified 2026-08-11)
+## Case: `RequiresMountsFor=` in a USER unit (verified one occasion)
 
 ### What happened
 
@@ -47,7 +47,7 @@ That is about as convincing as static evidence gets. It was still wrong.
 sudo umount /srv/<app>/shared
 systemctl --user start hermes-gateway-<profile>.service
 systemctl --user is-active hermes-gateway-<profile>.service
-#   -> active        *** started with the volume gone ***
+# -> active *** started with the volume gone ***
 ```
 
 ### Root cause
@@ -91,7 +91,7 @@ mountpoint -q "$MP" || { echo "FATAL: $MP not mounted" >&2; exit 1; }
 # 2. is it the RIGHT volume, not an empty dir that happens to be a mount?
 [ -f "$MP/config/env" ] || { echo "FATAL: $MP mounted but empty/wrong" >&2; exit 1; }
 
-# 3. is it WRITABLE?  a remounted-read-only EBS still passes mountpoint -q
+# 3. is it WRITABLE? a remounted-read-only EBS still passes mountpoint -q
 touch "$MP/.mount-guard-probe" 2>/dev/null || {
     echo "FATAL: $MP mounted but NOT WRITABLE" >&2; exit 1; }
 rm -f "$MP/.mount-guard-probe"

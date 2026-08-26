@@ -6,7 +6,7 @@ the agent then reports to a human as a fact about the world.
 
 A crash produces a retry. A confident wrong answer produces a lost user.
 
-## The incident (2026-08-17, verified end to end)
+## The incident (one occasion, verified end to end)
 
 A fleet owner asked her agent whether she had any messages with her contractor about
 a foundation repair and its warranty. She had explicitly pre-instructed the agent:
@@ -33,11 +33,11 @@ lives in `message.attributedBody`, an NSKeyedArchiver binary blob.
 The extraction guidance in play recommended:
 
 ```python
-re.findall(rb'[\x20-\x7e]{3,}', blob)   # WRONG
+re.findall(rb'[\x20-\x7e]{3,}', blob) # WRONG
 ```
 
 That character class is ASCII-printable only. It silently deletes every emoji, curly
-quote (`'`), accented character, and "Liked ..." tapback. On an emoji-heavy personal
+quote (`'`), accented character, and "Liked..." tapback. On an emoji-heavy personal
 thread the surviving bytes are the archiver's own framing characters, so the decoded
 "message" comes back as a run of `+` and stray punctuation.
 
@@ -46,9 +46,9 @@ The agent read that as _empty messages_, and empty messages as _no messages_.
 ### The two-step corruption
 
 ```
-tool returns garbage  ->  agent interprets garbage as EMPTY
-                      ->  agent interprets EMPTY as ABSENT
-                      ->  agent reports ABSENT as FACT to the user
+tool returns garbage -> agent interprets garbage as EMPTY
+                      -> agent interprets EMPTY as ABSENT
+                      -> agent reports ABSENT as FACT to the user
 ```
 
 Each arrow is a place a check belongs. The last one is unforgivable.
@@ -75,7 +75,7 @@ for row in rows:
     s = extract(row)
     if s:
         usable += 1
-        ...
+...
 rate = 100 * usable / total if total else 0
 if rate < 95:
     raise SystemExit(f"EXTRACTION BROKEN: {rate:.1f}% decoded - findings are invalid")
@@ -108,16 +108,16 @@ def decode_attributed_body(blob):
     i = ab.find(b"NSString")
     if i < 0:
         return None
-    j = ab.find(b"+", i)          # type marker preceding the length prefix
+    j = ab.find(b"+", i) # type marker preceding the length prefix
     if j < 0:
         return None
     k = j + 1
     b0 = ab[k]
-    if b0 == 0x81:                # 2-byte little-endian length
+    if b0 == 0x81: # 2-byte little-endian length
         length = int.from_bytes(ab[k + 1:k + 3], "little"); k += 3
-    elif b0 == 0x82:              # 4-byte little-endian length
+    elif b0 == 0x82: # 4-byte little-endian length
         length = int.from_bytes(ab[k + 1:k + 5], "little"); k += 5
-    else:                         # single-byte length
+    else: # single-byte length
         length = b0; k += 1
     return ab[k:k + length].decode("utf-8", errors="replace")
 

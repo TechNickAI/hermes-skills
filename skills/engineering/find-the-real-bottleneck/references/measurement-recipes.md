@@ -1,7 +1,7 @@
 # Measurement recipes
 
 Copy-paste probes. Each isolates ONE arrow in a causal chain. All verified
-2026-08-03 against a live Node/Next.js LLM router on `m8g.large` (2 vCPU, 7.6GB).
+one occasion against a live Node/Next.js LLM router on `m8g.large` (2 vCPU, 7.6GB).
 
 ---
 
@@ -46,21 +46,21 @@ Splits "working hard" from "queued" — completely different fixes.
 
 ```bash
 PID=<pid>
-c1=$(awk '{print $14+$15}' /proc/$PID/stat)      # utime + stime, in clock ticks
+c1=$(awk '{print $14+$15}' /proc/$PID/stat) # utime + stime, in clock ticks
 t0=$(date +%s%N)
 curl -s -m 60 -o /dev/null http://127.0.0.1:PORT/slow-route
 t1=$(date +%s%N)
 c2=$(awk '{print $14+$15}' /proc/$PID/stat)
 HZ=$(getconf CLK_TCK)
 echo "wall: $(( (t1-t0)/1000000 ))ms"
-echo "cpu:  $(echo "scale=0; ($c2-$c1)*1000/$HZ" | bc)ms"
+echo "cpu: $(echo "scale=0; ($c2-$c1)*1000/$HZ" | bc)ms"
 ```
 
 Observed:
 
 ```
 wall time: 5,583 ms
-CPU used:  2,360 ms      # 42%
+CPU used: 2,360 ms # 42%
 ```
 
 **Interpretation:** `cpu << wall` → the process spent most of the request
@@ -77,10 +77,10 @@ Highest value-per-keystroke test in this file. Request something that executes
 **no application code**: a 404 on a nonexistent static asset, or a bare redirect.
 
 ```bash
-sleep 9   # ensure any short-TTL cache has expired
+sleep 9 # ensure any short-TTL cache has expired
 curl -s -m 30 -o /dev/null -w "404 static: %{http_code} %{time_total}s\n" \
   http://127.0.0.1:PORT/_next/static/chunks/does-not-exist.js
-curl -s -m 30 -o /dev/null -w "redirect:   %{http_code} %{time_total}s\n" \
+curl -s -m 30 -o /dev/null -w "redirect: %{http_code} %{time_total}s\n" \
   http://127.0.0.1:PORT/dashboard
 ```
 
@@ -88,7 +88,7 @@ Observed:
 
 ```
 404 static: 404 5.583361s
-redirect:   307 4.529344s
+redirect: 307 4.529344s
 ```
 
 **Interpretation:** a 404 on a missing file and a 307 redirect both took seconds.
@@ -107,7 +107,7 @@ Under bursty load, cold-vs-warm is an illusion created by _when you sampled_.
 for i in $(seq 1 8); do
   c=$(ss -tn state established 2>/dev/null | grep -c ":PORT")
   t=$(curl -s -m 30 -o /dev/null -w "%{time_total}" http://127.0.0.1:PORT/api/health)
-  echo "conns=$c  latency=${t}s"
+  echo "conns=$c latency=${t}s"
   sleep 3
 done
 ```
@@ -115,12 +115,12 @@ done
 Observed:
 
 ```
-conns=46  latency=1.768s
-conns=44  latency=1.590s
-conns=44  latency=4.792s
-conns=44  latency=4.066s
-conns=44  latency=2.141s
-conns=44  latency=3.663s
+conns=46 latency=1.768s
+conns=44 latency=1.590s
+conns=44 latency=4.792s
+conns=44 latency=4.066s
+conns=44 latency=2.141s
+conns=44 latency=3.663s
 ```
 
 **Interpretation:** latency swung 1.3–4.8s at essentially constant connection
@@ -189,8 +189,8 @@ SELECT COUNT(*) n, SUM(tokens_input) ti
 Observed:
 
 ```
-openrouter/~anthropic/claude-sonnet-latest   6 sessions
-=> 452 calls, 105.4M tokens, ~$211    => 75x amplification per ignition
+openrouter/~anthropic/claude-sonnet-latest 6 sessions
+=> 452 calls, 105.4M tokens, ~$211 => 75x amplification per ignition
 ```
 
 **Interpretation:** 6 root events produced 452 expensive calls. The story is the
@@ -202,8 +202,8 @@ vs 86% cache differs ~7x in cost, so volume can look flat while spend explodes.
 ## 8. Ceiling-of-the-win before recommending a resize
 
 ```
-router overhead (warm)      2.4 ms
-upstream LLM (avg TTFT) 16,130 ms   (n=21,409 successful calls, 24h)
+router overhead (warm) 2.4 ms
+upstream LLM (avg TTFT) 16,130 ms (n=21,409 successful calls, 24h)
 => router = 0.015% of a request
 ```
 

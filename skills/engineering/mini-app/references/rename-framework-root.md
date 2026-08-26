@@ -47,7 +47,7 @@ patch**. Those are dated notes, not active config. Let them age.
 # 1. Stop everything that holds the path open
 PM2_HOME=/Users/<user>/.pm2 pm2 stop all
 kill $(pgrep -f "caddy run" | head -1)
-sleep 2 && pgrep -f "caddy run"  # verify caddy is down
+sleep 2 && pgrep -f "caddy run" # verify caddy is down
 
 # 2. Move (NOT symlink). Guard against existing target.
 test -e /Users/<user>/NEWNAME && { echo "ERROR target exists"; exit 1; }
@@ -65,7 +65,7 @@ sed -i '' 's|OLDNAME|NEWNAME|g' \
   /Users/<user>/NEWNAME/README.md
 
 # 5. Patch PM2 dump (25+ cwd refs auto-rewritten on `pm2 save` after restart,
-#    but dump is what PM2 reads on resurrect — patch it now to be safe)
+# but dump is what PM2 reads on resurrect — patch it now to be safe)
 sed -i '' 's|/Users/<user>/OLDNAME|/Users/<user>/NEWNAME|g' /Users/<user>/.pm2/dump.pm2
 
 # 6. Patch outside refs (mini-app skill is the only known one)
@@ -86,7 +86,7 @@ grep -l "OLDNAME" \
 
 ## Restart
 
-**Caddy** — must run as background process, NOT via `nohup ... &` (Hermes harness
+**Caddy** — must run as background process, NOT via `nohup... &` (Hermes harness
 rejects shell-level backgrounding):
 
 ```python
@@ -106,7 +106,7 @@ PM2_HOME=/Users/<user>/.pm2 pm2 save
 ## Verify
 
 ```bash
-# Caddy health endpoint (defined in Caddyfile :8080 block, no auth)
+# Caddy health endpoint (defined in Caddyfile:8080 block, no auth)
 python3 -c "import urllib.request; print(urllib.request.urlopen('http://127.0.0.1:8080/health', timeout=3).read().decode())"
 # Expected: "ok"
 
@@ -127,8 +127,8 @@ usually a missed path patch.
   `ls -d /Users/<user>/NEWNAME /Users/<user>/OLDNAME` after the `mv` to prove the old
   one was gone — that `ls` exited 1 (correctly) and `set -e` killed the whole script
   before the patches ran. Either drop `set -e` for verifications or use
-  `ls ... || true`.
-- **Don't try `nohup ... &` in foreground mode.** Hermes harness intercepts and refuses.
+  `ls... || true`.
+- **Don't try `nohup... &` in foreground mode.** Hermes harness intercepts and refuses.
   Use `terminal(background=true, watch_patterns=[...])` for Caddy.
 - **Don't recursive-grep all of `/Users/<user>`.** Times out on node_modules. Target
   known config files instead.

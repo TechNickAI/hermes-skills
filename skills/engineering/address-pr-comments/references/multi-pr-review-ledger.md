@@ -57,7 +57,7 @@ and use those for follow-up operations rather than creating new ones.
 **`gh pr merge --squash` is silent on success** — always verify:
 
 ```bash
-gh pr view <n> --json state --jq '.state'  # should be "MERGED"
+gh pr view <n> --json state --jq '.state' # should be "MERGED"
 ```
 
 ## Orchestrator verification commands
@@ -71,7 +71,7 @@ git fetch origin <branch> && git log --oneline origin/<branch> -2
 gh pr checks <n> | grep -E "pass|fail"
 # Merge after green (non-money-path PRs only; money-path → leave for human)
 gh pr merge <n> --squash
-gh pr view <n> --json state --jq '.state'  # verify "MERGED"
+gh pr view <n> --json state --jq '.state' # verify "MERGED"
 ```
 
 ## Common batch-run mistakes this prevents

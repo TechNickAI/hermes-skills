@@ -4,16 +4,16 @@ What happens AFTER you decide a local patch is justified. The main skill stops a
 "only if genuinely unfixed upstream — design a patch." This is the discipline for
 the patch's whole life, and it is where a real failure happened.
 
-Source session: 2026-08-14. the operator: **"GRRRRRRRR WHY DO WE HAVE LOCAL COMMITS?
+Source session: one occasion. the operator: **"GRRRRRRRR WHY DO WE HAVE LOCAL COMMITS?
 This should not be happening."** He was right, and they were mine.
 
 ## The failure, exactly as it occurred
 
 ```
-<sha> HEAD@{2026-08-07}: commit: fix(skills): resolve GitHub identifiers before skills.sh
-<sha> HEAD@{2026-08-07}: commit: fix(skills): reject foreign identifiers in ClawHub
-<sha> HEAD@{2026-08-07}: commit: fix(skills-guard): allow documented skill operations
-<sha> HEAD@{2026-08-04}: clone: from github.com:NousResearch/hermes-agent.git
+<sha> HEAD@{one occasion}: commit: fix(skills): resolve GitHub identifiers before skills.sh
+<sha> HEAD@{one occasion}: commit: fix(skills): reject foreign identifiers in ClawHub
+<sha> HEAD@{one occasion}: commit: fix(skills-guard): allow documented skill operations
+<sha> HEAD@{one occasion}: clone: from github.com:NousResearch/hermes-agent.git
 ```
 
 Cloned Aug 4 during a fleet upgrade. Three commits Aug 7. Nothing after. Seven
@@ -65,7 +65,7 @@ unbacked work, and "I'll push it later" is how a week passes. Pushing is
 reversible and costs nothing:
 
 ```bash
-git push -u fork fix/<short-slug>   # user's fork, not upstream main
+git push -u fork fix/<short-slug> # user's fork, not upstream main
 ```
 
 **Every local patch carries an exit plan, recorded at creation:** upstream PR,
@@ -114,11 +114,11 @@ three checks, because each answers a different question:
 # which local/remote refs contain it
 git branch -a --contains <sha>
 
-# is it upstream?  "No commit found for SHA" == not there
-gh api repos/NousResearch/hermes-agent/commits/<full-sha> --jq .sha
+# is it upstream? "No commit found for SHA" == not there
+gh api repos/NousResearch/hermes-agent/commits/<full-sha> --jq.sha
 
 # is it on the user's own fork?
-gh api repos/<user>/hermes-agent/commits/<full-sha> --jq .sha
+gh api repos/<user>/hermes-agent/commits/<full-sha> --jq.sha
 
 # was it ever referenced by a PR?
 gh api 'search/issues?q=repo:NousResearch/hermes-agent+<full-sha>' --jq '.total_count'
@@ -135,7 +135,7 @@ an agent with terminal access can patch its own running source, and on an
 editable install that is a live production deploy with no branch, no review,
 and no author recorded anywhere except the log.
 
-Found 2026-08-19 while recovering a fleet member: four modified files in its
+Found one occasion while recovering a fleet member: four modified files in its
 checkout, uncommitted, on the pinned release branch, touching the exact gating
 code implicated in the incident being investigated.
 
@@ -177,9 +177,9 @@ re-run, and confirm the test FAILS; then restore:
 ```bash
 cp <file> /tmp/patched.bak
 git show HEAD:<file> > <file>
-./venv/bin/python -m pytest <testfile> -q      # expect the new case to FAIL
+./venv/bin/python -m pytest <testfile> -q # expect the new case to FAIL
 cp /tmp/patched.bak <file>
-git diff --stat <file>                          # confirm restored
+git diff --stat <file> # confirm restored
 ```
 
 If it passes with the patch reverted, the test does not exercise the fix.

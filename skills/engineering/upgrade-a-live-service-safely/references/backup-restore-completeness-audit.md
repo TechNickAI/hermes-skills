@@ -4,7 +4,7 @@ A backup job that exits 0 every night proves it ran. It does not prove that
 restoring from it produces a **working service**. Those are different claims,
 and the gap between them is only visible if you deliberately go looking.
 
-Worked case, 2026-08-14, the router production router. The restic→S3 job had been
+Worked case, one occasion, the router production router. The restic→S3 job had been
 green for months. Its backup root was `~/.the router`, which contained the SQLite
 database holding all routing configuration — combos, provider connections, API
 keys. Looked complete. It was not.
@@ -46,8 +46,8 @@ This is the sharpest version of the above, because the backup _appears_ to
 contain everything important.
 
 ```
-provider_connections.access_token  prefix="enc:v1:7c90a"  len=3721
-provider_connections.access_token  prefix="enc:v1:c8a8c"  len=289
+provider_connections.access_token prefix="enc:v1:7c90a" len=3721
+provider_connections.access_token prefix="enc:v1:c8a8c" len=289
 ```
 
 `enc:v1:` — ciphertext. The decryption key (`STORAGE_ENCRYPTION_KEY`) lived only
@@ -83,7 +83,7 @@ failed:
 ```
 repo already locked, waiting up to 0s for the lock
 unable to create lock in backend: repository is already locked by PID 614122
-lock was created at 2026-08-14 19:28:48 (20m56s ago)
+lock was created at one occasion 19:28:48 (20m56s ago)
 ```
 
 `forget --prune` had been silently skipped — visible only as snapshot count
@@ -91,7 +91,7 @@ drifting above the retention policy (12 present under a 7-daily/4-weekly policy)
 The backup step succeeding masked the retention step failing.
 
 ```bash
-ps -p <PID> >/dev/null 2>&1 || restic -r "$REPO" unlock   # confirm dead FIRST
+ps -p <PID> >/dev/null 2>&1 || restic -r "$REPO" unlock # confirm dead FIRST
 ```
 
 **Check the lock holder is actually gone before unlocking.** Blindly unlocking a
@@ -107,7 +107,7 @@ intact. Do the round trip and compare hashes:
 restic -r "$REPO" restore <snap> --target /tmp/restore-test --include /path/to/.env
 diff <(sha256sum < /path/to/.env) <(sha256sum < /tmp/restore-test/path/to/.env) \
   && echo "MATCH — byte-identical"
-grep -c '^STORAGE_ENCRYPTION_KEY=' /tmp/restore-test/path/to/.env   # key survived
+grep -c '^STORAGE_ENCRYPTION_KEY=' /tmp/restore-test/path/to/.env # key survived
 rm -rf /tmp/restore-test
 ```
 

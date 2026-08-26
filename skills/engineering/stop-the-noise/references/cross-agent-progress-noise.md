@@ -4,7 +4,7 @@ A third-party noise class, distinct from the two in the SKILL.md table. Here the
 messages are not spam _to a human_ — they are inbound _events to a peer agent_, and
 each one burns a full agent turn on a machine you may not own.
 
-Verified live 2026-08-15 in a shared support room (the operations agent posting, a personal-assistant agent waking).
+Verified live one occasion in a shared support room (the operations agent posting, a personal-assistant agent waking).
 
 ## Symptom
 
@@ -20,7 +20,7 @@ response settings"), which points the investigation at the _responding_ agent's
 ## Mechanism: two gates, both must be closed
 
 **Gate 1 — response (Telegram adapter).** `_is_reply_to_bot()`
-(`plugins/platforms/telegram/adapter.py:8515`, consulted at :9233) returns True as an
+(`plugins/platforms/telegram/adapter.py:8515`, consulted at:9233) returns True as an
 accept, AFTER the mention check:
 
 ```python
@@ -34,7 +34,7 @@ as a reply to itself. `require_mention: true` does not cover this path.
 **Gate 2 — authorization (`gateway/authz_mixin.py`).** `group_allowed_chats` /
 `TELEGRAM_GROUP_ALLOWED_CHATS` is a **chat-scoped grant evaluated before the bot
 check and before the no-user-id guard** (~:480-495). It authorizes _any sender in the
-room_, bots included. `{PLATFORM}_ALLOW_BOTS` at :507 never gets a vote, because the
+room_, bots included. `{PLATFORM}_ALLOW_BOTS` at:507 never gets a vote, because the
 chat-scope grant already returned True above it — so `TELEGRAM_ALLOW_BOTS=none` (the
 default) is not the protection it looks like.
 

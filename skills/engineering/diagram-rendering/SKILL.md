@@ -96,7 +96,7 @@ Use for **fast, auto-laid-out diagrams or charts when hosted rendering is accept
 > call it by absolute path — do **not** assume the caller's working directory:
 >
 > ```bash
-> SKILL_DIR="$(dirname "$(realpath path/to/this/SKILL.md)")"   # or the skill dir you loaded
+> SKILL_DIR="$(dirname "$(realpath path/to/this/SKILL.md)")" # or the skill dir you loaded
 > ```
 
 ### 1. Write the diagram text
@@ -118,8 +118,8 @@ straight through to Kroki.
 ### 2. Render to PNG
 
 ```bash
-python3 "$SKILL_DIR/scripts/render.py" diagram --lang d2       --in ~/flow.d2  --out ~/flow.png
-python3 "$SKILL_DIR/scripts/render.py" diagram --lang mermaid  --in ~/flow.mmd --out ~/flow.png
+python3 "$SKILL_DIR/scripts/render.py" diagram --lang d2 --in ~/flow.d2 --out ~/flow.png
+python3 "$SKILL_DIR/scripts/render.py" diagram --lang mermaid --in ~/flow.mmd --out ~/flow.png
 python3 "$SKILL_DIR/scripts/render.py" diagram --lang graphviz --in ~/flow.dot --out ~/flow.png
 ```
 
@@ -173,7 +173,7 @@ lighter (the platform fetches it; no local file):
 
 ```bash
 python3 "$SKILL_DIR/scripts/render.py" chart --config ~/pnl.json --short-url
-#   -> https://quickchart.io/chart/render/zf-...   (a public bearer link)
+# -> https://quickchart.io/chart/render/zf-... (a public bearer link)
 ```
 
 Prefer the **local PNG + `MEDIA:`** default — it renders on every platform and you can

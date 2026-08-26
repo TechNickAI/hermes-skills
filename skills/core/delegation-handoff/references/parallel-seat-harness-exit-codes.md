@@ -2,7 +2,7 @@
 
 Applies to any harness that fans work out to N parallel subprocesses and judges
 each one by its output file — review panels, model bake-offs, parallel probes,
-multi-host collectors. Verified live 2026-08-15.
+multi-host collectors. Verified live one occasion.
 
 ## The failure
 
@@ -16,10 +16,10 @@ Every part of that conclusion was wrong. Router logs showed both models
 answering correctly for the entire run:
 
 ```
-16:09:18  200  ~x-ai/grok-latest   6,852 tok  121.9s
-16:18:08  200  ~x-ai/grok-latest  12,303 tok  207.1s
-16:21:49  499  Client disconnected: request_signal_aborted
-16:11:06  502  moonshotai/kimi-k3      0 tok  261.7s  (throughput guard)
+16:09:18 200 ~x-ai/grok-latest 6,852 tok 121.9s
+16:18:08 200 ~x-ai/grok-latest 12,303 tok 207.1s
+16:21:49 499 Client disconnected: request_signal_aborted
+16:11:06 502 moonshotai/kimi-k3 0 tok 261.7s (throughput guard)
 ```
 
 The 499 lands ~900s after launch: the harness's own `timeout 900` killed a
@@ -57,15 +57,15 @@ treating it as a judgment failure.
 ## Minimum viable harness
 
 ```bash
-run_seat() {                        # $1 = tag, $2 = model
+run_seat() { # $1 = tag, $2 = model
   timeout "$BUDGET" "$H" -z "$P" --provider "$PROV" -m "$2" \
     --ignore-rules -t '' >"$D/$1.out" 2>"$D/$1.err"
   printf '%s\n' "$?" >"$D/$1.rc"
 }
 
-run_seat grok   "$GROK_MODEL"  &  P1=$!
-run_seat gemini "$GEM_MODEL"   &  P2=$!
-wait $P1; wait $P2                # wait EACH pid individually
+run_seat grok "$GROK_MODEL" & P1=$!
+run_seat gemini "$GEM_MODEL" & P2=$!
+wait $P1; wait $P2 # wait EACH pid individually
 ```
 
 Classify before synthesis:

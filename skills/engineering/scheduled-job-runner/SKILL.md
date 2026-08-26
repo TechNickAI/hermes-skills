@@ -14,7 +14,7 @@ metadata:
     tags: [cron, jobs, reliability, uv, pep723, alerting, fleet]
 
     # referenced but not shipped here (another source):
-    #   stop-the-noise
+    # stop-the-noise
 ---
 
 # Scheduled Job Runner
@@ -49,7 +49,7 @@ mkdir -p "$HERMES_HOME/scripts"
 cp scripts/jobrun.py "$HERMES_HOME/scripts/jobrun.py"
 chmod +x "$HERMES_HOME/scripts/jobrun.py"
 
-python3 "$HERMES_HOME/scripts/jobrun.py" --selftest   # 26 checks, real processes
+python3 "$HERMES_HOME/scripts/jobrun.py" --selftest # 26 checks, real processes
 ```
 
 The self-test spawns real processes and asserts real exit codes; it is the gate,
@@ -76,17 +76,17 @@ Each was previously hand-rolled per script:
 jobrun.py --bootstrap
 
 cat > $HERMES_HOME/jobs.d/my-job.toml <<'EOF'
-job_id        = "my-job"
-script        = "my_script.py"   # relative to $HERMES_HOME/scripts/
-runtime       = "auto"           # auto | uv | python | bash
-timeout       = 300
-overlap       = "skip"           # skip | allow | queue
-output_policy = "passthrough"    # passthrough | silent
-args          = ["--mode", "daily"]
-owner         = "platform-team"
+job_id = "my-job"
+script = "my_script.py" # relative to $HERMES_HOME/scripts/
+runtime = "auto" # auto | uv | python | bash
+timeout = 300
+overlap = "skip" # skip | allow | queue
+output_policy = "passthrough" # passthrough | silent
+args = ["--mode", "daily"]
+owner = "platform-team"
 EOF
 
-jobrun.py --spec my-job --dry-run    # validate, run nothing
+jobrun.py --spec my-job --dry-run # validate, run nothing
 ```
 
 Then point the cron job's `script:` at `jobrun.py --spec my-job`.
@@ -97,10 +97,10 @@ exit on any failure).
 ## Day-2 operations
 
 ```bash
-jobrun.py --list             # every job on this host + its last outcome
-jobrun.py --status my-job    # recent runs, exit codes, durations, log path
-jobrun.py --failures 24      # failures in the last N hours; SILENT when clean
-jobrun.py --bootstrap        # install/verify uv + python floor
+jobrun.py --list # every job on this host + its last outcome
+jobrun.py --status my-job # recent runs, exit codes, durations, log path
+jobrun.py --failures 24 # failures in the last N hours; SILENT when clean
+jobrun.py --bootstrap # install/verify uv + python floor
 ```
 
 `--failures` prints nothing when nothing is wrong, so it is safe to schedule as its own
@@ -136,7 +136,7 @@ For a job that moves real money, set `critical` in the spec:
 
 ```toml
 critical = true
-timeout  = 600     # REQUIRED for critical jobs, and shorter than the interval
+timeout = 600 # REQUIRED for critical jobs, and shorter than the interval
 ```
 
 What it changes:
@@ -163,7 +163,7 @@ dangerous for a job that guards something.
 The runner already knows the job failed, so it notifies directly:
 
 ```toml
-notify_target = "telegram:-100123:456"   # any `hermes send --to` target
+notify_target = "telegram:-100123:456" # any `hermes send --to` target
 ```
 
 - Sends ONLY on failure. Quiet success is still the point.
@@ -222,7 +222,7 @@ relies on whatever happens to be in the agent's venv.
 ```
 
 ```bash
-uv lock --script my_script.py     # creates my_script.py.lock — COMMIT IT
+uv lock --script my_script.py # creates my_script.py.lock — COMMIT IT
 ```
 
 `runtime = "auto"` detects the PEP 723 block and runs `uv run --locked --script`. No
@@ -297,7 +297,7 @@ import json,collections,os
 p=os.path.expandvars('\$HERMES_HOME/jobstate/runs.jsonl')
 rows=[json.loads(l) for l in open(p)][-200:]
 c=collections.Counter((r['job_id'],r['state']) for r in rows)
-for (j,s),n in c.most_common(): print(f'{n:4d}  {j}  {s}')"
+for (j,s),n in c.most_common(): print(f'{n:4d} {j} {s}')"
 ```
 
 This is the status API. **Never grep raw stdout for status.**

@@ -1,7 +1,7 @@
 # Dispatching a review panel (native runtime)
 
 `moa-solve` used to ship a `scripts/panel.py` that fanned a brief out to N model seats.
-**That script is gone** (retired 2026-07-29). MoA now runs on Hermes' native runtime, and
+**That script is gone** (retired one occasion). MoA now runs on Hermes' native runtime, and
 review panels use one of the two native paths below. Do not reintroduce a bespoke
 dispatcher — it bypasses provider config, cost accounting, and credential handling.
 
@@ -42,7 +42,7 @@ silently narrow while every signal says it ran at full width.**
   structurally complete. A reviewer that returned nothing is a missing lens, not a pass.
 - Running a `moa:` preset: enable `moa.save_traces: true` and read
   `<hermes_home>/moa-traces/<session_id>.jsonl`. There is **no `error` key** — a failed
-  slot records `[failed: ...]` inside its `output`, a skipped one `[skipped: ...]`.
+  slot records `[failed:...]` inside its `output`, a skipped one `[skipped:...]`.
 
 Count the lenses you actually received before synthesizing. If fewer families answered than
 intended, stamp the result `degraded: <n>-family` and say so.

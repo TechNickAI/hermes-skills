@@ -1,6 +1,6 @@
 # Nested bundle staleness, and the control test that catches a lying probe
 
-Worked case: the router, 2026-08-11. A dashboard provider (`xai-oauth`)
+Worked case: the router, one occasion. A dashboard provider (`xai-oauth`)
 was "missing" from a live service for ~3 weeks. Nothing was deleted, nothing was
 misconfigured, and every obvious version signal read as current.
 
@@ -9,8 +9,8 @@ misconfigured, and every obvious version signal read as current.
 The standalone tarball unpacks to TWO complete Next.js bundles:
 
 ```
-<release>/.build/next/                            BUILD_ID ef-naVy3Rd6gd2YcFlrUn   (Aug 3)
-<release>/.build/next/standalone/.build/next/     BUILD_ID aqoF-Ldw-n08SEFVDvPta   (Jul 19)  <-- SERVED
+<release>/.build/next/ BUILD_ID ef-naVy3Rd6gd2YcFlrUn (Aug 3)
+<release>/.build/next/standalone/.build/next/ BUILD_ID aqoF-Ldw-n08SEFVDvPta (Jul 19) <-- SERVED
 ```
 
 systemd's `WorkingDirectory` points at the **nested** path, so the nested bundle
@@ -65,11 +65,11 @@ containing that literal string, before hydration decides what to render.
 Running the control made it obvious in one shot:
 
 ```
-grok-cli             notfound_hits=1   bytes=629808   <- known GOOD
-xai-oauth            notfound_hits=1   bytes=629808   <- suspect
-claude               notfound_hits=1   bytes=629808   <- known GOOD
-codex                notfound_hits=1   bytes=629808   <- known GOOD
-bogus-provider-xyz   notfound_hits=1   bytes=629808   <- known BAD
+grok-cli notfound_hits=1 bytes=629808 <- known GOOD
+xai-oauth notfound_hits=1 bytes=629808 <- suspect
+claude notfound_hits=1 bytes=629808 <- known GOOD
+codex notfound_hits=1 bytes=629808 <- known GOOD
+bogus-provider-xyz notfound_hits=1 bytes=629808 <- known BAD
 ```
 
 Identical output for a valid provider and a provider that cannot exist. The
@@ -91,9 +91,9 @@ done < /tmp/chunks.txt
 This separated the states cleanly and became the cutover gate:
 
 ```
-LIVE   (before fix)   26 chunks, 0 containing the provider
-STAGED (corrected)    27 chunks, 1 containing it
-LIVE   (after swap)   1 chunk  — plus the authHint string rendering
+LIVE (before fix) 26 chunks, 0 containing the provider
+STAGED (corrected) 27 chunks, 1 containing it
+LIVE (after swap) 1 chunk — plus the authHint string rendering
 ```
 
 ### Rules this produces
@@ -128,7 +128,7 @@ LIVE   (after swap)   1 chunk  — plus the authHint string rendering
 
 ## 4. Shell traps hit while building the probes
 
-- `find ... | head -3 | while read` — `head` closing the pipe kills `find` with
+- `find... | head -3 | while read` — `head` closing the pipe kills `find` with
   SIGPIPE and the script exits **141**, aborting a `set -e` run midway. Write
   results to a temp file first, then loop over the file.
 - `find <no matches> | xargs file` runs `file` with zero arguments, which prints

@@ -13,7 +13,7 @@ layer, not a prompt surface. Do not reach for the SKILL.md diagnostic order.
 
 ## The message classes in a turn
 
-**Line numbers below are from upstream `main` @ `d6a5cb9725` (2026-08-14).** They move
+**Line numbers below are from upstream `main` @ `d6a5cb9725` (one occasion).** They move
 constantly — `gateway/run.py` is ~29.7k lines and churns daily. Re-grep rather than
 trusting any number here:
 
@@ -35,7 +35,7 @@ commits behind `main` (this fleet's was 21,966 behind and a week stale), so ever
 number and every "is it fixed yet" answer is unreliable. Pull the actual file first —
 `git clone --depth 1 --filter=blob:none --sparse` then `git sparse-checkout set gateway
 tools`. The GitHub contents API returns empty for files as large as `run.py`; use the
-clone, not `gh api ... -H "Accept: application/vnd.github.raw"`.
+clone, not `gh api... -H "Accept: application/vnd.github.raw"`.
 
 Verifying a "new" tracked site matters: `run.py:4353` did not exist in the older
 checkout and had to be read before claiming a gap — it turned out to be a native
@@ -116,8 +116,8 @@ c=yaml.safe_load(open(sys.argv[1])) or {}
 d=c.get('display') or {}
 for k in ('cleanup_progress','tool_progress','interim_assistant_messages',
           'long_running_notifications','tool_progress_grouping'):
-    print(f'  {k} = {d.get(k)!r}')
-print('  platforms:', d.get('platforms') or {})
+    print(f' {k} = {d.get(k)!r}')
+print(' platforms:', d.get('platforms') or {})
 " ~/.hermes/profiles/<name>/config.yaml
 ```
 
@@ -133,10 +133,10 @@ exactly the "one editable bubble with a rolling tail" UX: tools/todos/reasoning/
 progress in a single edited message, `native_gateway.suppress` to silence Hermes'
 built-in progress, and its own `cleanup.auto_delete`.
 
-**Evaluated and rejected for adoption 2026-08-14.** Check these four things in order — the
+**Evaluated and rejected for adoption one occasion.** Check these four things in order — the
 first two are hard blockers that end the conversation before taste enters it:
 
-1. **License.** `gh api repos/<o>/<r> --jq .license` returned `null` and there is no
+1. **License.** `gh api repos/<o>/<r> --jq.license` returned `null` and there is no
    LICENSE file. Under default copyright there is **no right to copy, modify, or
    redistribute** — so vendoring it into a public MIT repo is not a decision that is ours
    to make. Fixable by asking the author to add MIT; until then every other argument is
@@ -167,7 +167,7 @@ Upstream history worth not re-deriving:
 - #30864 made Telegram status callbacks edit one bubble per `status_key`.
 - #21889 (open) — Discord never overrode `delete_message`, so `cleanup_progress` silently
   no-ops there while the docs claim support.
-- **#22613 (open, `mergeable: false`/dirty since 2026-07-19, zero review)** already
+- **#22613 (open, `mergeable: false`/dirty since then, zero review)** already
   contains the commentary fix — its commit 2 is literally `expose commentary_message_ids
   - redirect hook`. It stalled because it bundles six concerns into +550/-20 (queue-merge,
 cross-restart persistence via a new `~/.hermes/.cross_restart_cleanup.json`,

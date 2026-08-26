@@ -2,7 +2,7 @@
 
 When a multi-review panel governs a **go / no-go decision** (place a trade, ship a
 risky change, approve a spend), the red-team / bear / adversarial lens has a structural
-failure mode Nick named directly (2026-07-21):
+failure mode Nick named directly (one occasion):
 
 > "Don't just fall victim to always listening to the BEAR case or we will never trade.
 > Find a way to balance that."
@@ -19,7 +19,7 @@ Do NOT vote-count and do NOT let the adversarial lens veto on pessimism. Instead
     decision = bull_strength
              - (weight of ONLY the valid bear points)
              - priced_in_penalty
-             - (correctness_ok ? 0 : hard_veto)
+             - (correctness_ok ? 0: hard_veto)
 
 A bear/adversarial point counts toward the subtraction **only if it is ALL of**:
 
@@ -67,7 +67,7 @@ Give distinct lenses distinct jobs and keep their answers separate:
 
 ## Where this was proven
 
-Rumor Desk "court" (<agent-d>, 2026-07-21): a 5-seat MoA panel (bull / bear /
+Rumor Desk "court" (<agent-d>, one occasion): a 5-seat MoA panel (bull / bear /
 priced-in / catalyst-verifier / disconfirmation-scout) + a synthesizing judge encoding
 the rules above. Implemented in `scripts/rumor_desk/rumor_court.py` with
 `build_role_prompts()` + `adjudicate()`; the anti-doom scoring is covered by durable

@@ -73,7 +73,7 @@ This repo's review checks run on GitHub. Drive everything through the `gh` CLI.
 - Resolve owner/repo from the remote when you need it raw:
   ```bash
   REMOTE_URL=$(git remote get-url origin)
-  R=$(echo "$REMOTE_URL" | sed -E 's#.*github\.com[:/]##; s#\.git$##')   # owner/repo
+  R=$(echo "$REMOTE_URL" | sed -E 's#.*github\.com[:/]##; s#\.git$##') # owner/repo
   ```
 
 ## Workflow
@@ -105,7 +105,7 @@ before you wait on feedback that will never arrive:
 
 ```bash
 gh pr view <N> --repo $R --json mergeable,mergeStateStatus,statusCheckRollup \
-  --jq '{mergeable, state: .mergeStateStatus,
+  --jq '{mergeable, state:.mergeStateStatus,
          checks: [(.statusCheckRollup // [])[] | {name, status, conclusion}]}'
 ```
 
@@ -129,12 +129,12 @@ comment sits unread.
 
 # PR-level / issue comments from bots (Claude Code Review, some Greptile/CodeRabbit)
 gh api repos/$R/issues/<N>/comments --paginate \
-  --jq '.[] | select(.user.login | endswith("[bot]")) | {id, user: .user.login, created_at, body}'
+  --jq '.[] | select(.user.login | endswith("[bot]")) | {id, user:.user.login, created_at, body}'
 
 # Line-level / inline review comments from bots (Cursor, Codex, Greptile inline)
 gh api repos/$R/pulls/<N>/comments --paginate \
   --jq '.[] | select(.user.login | endswith("[bot]"))
-            | "\n=== \(.path):\(.line // .original_line) — \(.user.login) [id \(.id)] ===\n\(.body)"'
+            | "\n=== \(.path):\(.line //.original_line) — \(.user.login) [id \(.id)] ===\n\(.body)"'
 
 # Bot review summaries (Cursor/Codex headers, verdict bodies). Use real jq with
 # --slurp (`-s`) so pagination is sorted globally, not page-by-page. Include review IDs
@@ -144,7 +144,7 @@ gh api repos/$R/pulls/<N>/reviews --paginate \
   | jq -sr 'add
             | map(select(.user.login | endswith("[bot]")))
             | sort_by(.submitted_at) | reverse
-            | .[] | "--- review_id \(.id) \(.user.login) [\(.state)] \(.submitted_at) ---\n\(.body[0:600])"'
+            |.[] | "--- review_id \(.id) \(.user.login) [\(.state)] \(.submitted_at) ---\n\(.body[0:600])"'
 
 # --- HUMAN feedback (surface separately; do NOT auto-react or auto-decline — step 10) ---
 
@@ -154,7 +154,7 @@ gh api repos/$R/issues/<N>/comments --paginate \
 
 # Human inline + review-body feedback
 gh api repos/$R/pulls/<N>/comments --paginate \
-  --jq '.[] | select((.user.login | endswith("[bot]")) | not) | "\(.path):\(.line // .original_line) \(.user.login): \(.body[0:300])"'
+  --jq '.[] | select((.user.login | endswith("[bot]")) | not) | "\(.path):\(.line //.original_line) \(.user.login): \(.body[0:300])"'
 gh api repos/$R/pulls/<N>/reviews --paginate \
   --jq '.[] | select((.user.login | endswith("[bot]")) | not) | select(.body != "") | "\(.user.login) [\(.state)]: \(.body[0:300])"'
 ```
@@ -192,8 +192,8 @@ current code. To isolate findings actually tied to the current head:
 HEAD=$(gh pr view <N> --repo $R --json headRefOid --jq '.headRefOid')
 # gh's --jq does NOT forward jq's --arg; pipe to a real jq with --arg instead.
 gh api repos/$R/pulls/<N>/comments --paginate \
-  | jq -r --arg h "$HEAD" 'map(select(.commit_id == $h or .original_commit_id == $h))
-                           | .[] | "\(.path):\(.line // .original_line) — \(.body[0:140])"'
+  | jq -r --arg h "$HEAD" 'map(select(.commit_id == $h or.original_commit_id == $h))
+                           |.[] | "\(.path):\(.line //.original_line) — \(.body[0:140])"'
 ```
 
 Read each finding's _description_ against the current file state. If your fix already
@@ -319,7 +319,7 @@ Codex, Greptile). After a push, bots re-analyze:
 - Re-run the preflight (step 2) and check-status loop after each push.
 
 ```bash
-gh pr checks <N> --repo $R          # one-shot status
+gh pr checks <N> --repo $R # one-shot status
 # or watch until checks settle:
 gh pr checks <N> --repo $R --watch
 ```
@@ -347,8 +347,8 @@ When all bots have settled and no actionable feedback remains, report:
 
 ```
 ## Bot Feedback Addressed
-**PR:** #<N> — <title>   (<url>)
-**Fixed:** <n>    **Declined:** <n> (<incorrect> incorrect, <wontfix> wontfix)
+**PR:** #<N> — <title> (<url>)
+**Fixed:** <n> **Declined:** <n> (<incorrect> incorrect, <wontfix> wontfix)
 **Issues created:** <n>
 **Checks:** <pre-commit/Cursor/claude-review status>
 <one-line summary of key fixes and notable declines>

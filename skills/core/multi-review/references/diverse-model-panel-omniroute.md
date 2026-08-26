@@ -3,7 +3,7 @@
 Private profile reference for running true multi-model reviews from this Hermes profile.
 Keep profile-specific routing details here, not in the public-facing SKILL.md body.
 
-## Confirmed working aliases (2026-06-18)
+## Confirmed working aliases (one occasion)
 
 These were used successfully in a 6-reviewer Lendy strategy panel:
 
@@ -20,7 +20,7 @@ These were used successfully in a 6-reviewer Lendy strategy panel:
 
 Default chat provider on this profile is `custom:omniroute`.
 
-## No `custom:deepseek` provider exists on this profile (verified 2026-07-18)
+## No `custom:deepseek` provider exists on this profile (verified one occasion)
 
 Do not use `--provider custom:deepseek` in a reviewer runner — it fails immediately with
 `Unknown provider 'custom:deepseek'. Check 'hermes model' for available providers` and the
@@ -31,12 +31,12 @@ whenever a lens comes back empty. To get a deepseek-family model, route it THROU
 `work`/`think`/`simple`/`cheap`/`fallback` server-side — it does not take a raw
 `openrouter/deepseek/...` slug the way `custom:grok`/`custom:gemini` do). If a lens
 specifically needs a deepseek-family model rather than whatever `omniroute` happens to route
-`think`/`work` to, that mapping is not confirmed on this profile as of 2026-07-18 — verify
+`think`/`work` to, that mapping is not confirmed on this profile at time of writing — verify
 with `hermes model` (interactive only, cannot be piped) before assuming a slug works.
 
-## `custom:grok` / `custom:gemini` / `custom:openrouter` do NOT exist on this profile (2026-08-15, trading.example.com)
+## `custom:grok` / `custom:gemini` / `custom:openrouter` do NOT exist on this profile (one occasion, trading.example.com)
 
-The aliases recorded in the 2026-06-18 section above are STALE on this host. All
+The aliases recorded in the one occasion section above are STALE on this host. All
 three fail instantly with `Unknown provider 'custom:grok'` (etc.), leaving
 0-byte `.txt` and a one-line `.err`. The profile config
 (`~/.hermes/profiles/<agent-f>/config.yaml`) defines exactly TWO provider keys —
@@ -45,8 +45,8 @@ three fail instantly with `Unknown provider 'custom:grok'` (etc.), leaving
 Working panel form on this host, models resolved server-side by omniroute:
 
 ```bash
-hermes -z "$P" --provider custom:omniroute -m grok    --ignore-rules -t ''
-hermes -z "$P" --provider custom:omniroute -m gemini  --ignore-rules -t ''
+hermes -z "$P" --provider custom:omniroute -m grok --ignore-rules -t ''
+hermes -z "$P" --provider custom:omniroute -m gemini --ignore-rules -t ''
 hermes -z "$P" --provider custom:omniroute -m codex/gpt-5.6-sol --ignore-rules -t ''
 ```
 
@@ -62,10 +62,10 @@ Observed twice in one session: `grok` and `kimi-k3` each produced an empty
 while `gemini` and `codex/gpt-5.6-sol` on the same launcher returned full
 reviews. An empty `.err` therefore does NOT mean "still running" or "it worked".
 
-### A 0-byte seat is USUALLY YOUR TIMEOUT, not a broken model (root-caused 2026-08-15)
+### A 0-byte seat is USUALLY YOUR TIMEOUT, not a broken model (root-caused one occasion)
 
 **Measured, same model and same prompt:** killed at `timeout 20` → `rc=124`,
-**0-byte .txt AND 0-byte .err**. Allowed `timeout 900` → **18,486 bytes**,
+**0-byte.txt AND 0-byte.err**. Allowed `timeout 900` → **18,486 bytes**,
 completed at **389s**. `hermes -z` buffers stdout and writes it at the END, so a
 kill discards the entire review and leaves NO diagnostic anywhere. A slow seat
 and a broken seat are byte-for-byte indistinguishable.
@@ -126,18 +126,18 @@ hermes -z "$PROMPT" --provider custom:grok -m openrouter/x-ai/grok-4.3 --ignore-
 
 Important details:
 
-- **Use the venv hermes path in panel scripts (verified 2026-07-09):** the shim at
+- **Use the venv hermes path in panel scripts (verified one occasion):** the shim at
   `/home/ubuntu/.local/bin/hermes` can point at a DELETED install
   (`~/.hermes/hermes-agent/venv/...`) and every reviewer then exits instantly with empty
   output files.
 
-  **RESOLVE THE PATH, DO NOT HARDCODE IT (2026-08-15, trading.example.com).** The
+  **RESOLVE THE PATH, DO NOT HARDCODE IT (one occasion, trading.example.com).** The
   correct path differs per host and the hardcoded one goes stale. On hex it was
   `/home/ubuntu/.hermes/venv/bin/hermes`; on trading.example.com that path does NOT
   exist and the working binary is `/home/ubuntu/.hermes/hermes-agent/venv/bin/hermes`
   — the exact inverse of the 07-09 note. A panel launched with the wrong one produced
   three 0-byte reviews and three 101-byte `.err` files reading
-  `timeout: failed to run command ... No such file or directory`.
+  `timeout: failed to run command... No such file or directory`.
 
   Resolve it once at the top of every launcher instead:
 
@@ -156,7 +156,7 @@ Important details:
 - Use `--ignore-rules` for lens independence, but paste any necessary privacy/PII constraints into the prompt/brief because ignore-rules strips them too.
 - Prefer one shared brief file plus a parallel runner (see `templates/parallel_reviewer_runner.sh`) for 5+ reviewer panels.
 
-## Launching parallel reviewers past the terminal `&` guard (confirmed 2026-06-29)
+## Launching parallel reviewers past the terminal `&` guard (confirmed one occasion)
 
 The Hermes terminal tool REFUSES any foreground command containing `&` backgrounding —
 and it inspects the raw command string, so `... &` is blocked even _inside a heredoc_ or
@@ -167,7 +167,7 @@ a `bash -c "..."`. You cannot fan out reviewers with `cmd1 & cmd2 & wait` in a n
    2-reviewer Grok+Gemini panel):
    - Create the `.sh` with the `write_file` tool (NOT a heredoc — heredoc `&` is also
      caught, and `write_file` avoids the guard entirely).
-   - Inside the script: each reviewer `hermes -z ... &`, capture `$!`, then `wait $P1 $P2`.
+   - Inside the script: each reviewer `hermes -z... &`, capture `$!`, then `wait $P1 $P2`.
      Start with `export HOME=/home/ubuntu`.
    - Build the prompt files separately (`/tmp/p_grok.txt`, `/tmp/p_gem.txt`) with a brace
      group redirect, not argv, so large briefs don't hit `ARG_MAX`.
@@ -181,7 +181,7 @@ Provider aliases: bare `--provider grok` and `--provider gemini` (the profile's 
 KEYS) work just as well as the `custom:grok` form — both routed fine this session. Use
 whichever the local `config.yaml` `model.providers` actually defines.
 
-## `wait $PID` breaks in backgrounded launchers — judge by output files (2026-07-12)
+## `wait $PID` breaks in backgrounded launchers — judge by output files (one occasion)
 
 A 3-reviewer launcher started via `terminal(background=true)` on this host runs under a
 shell where job control is off (`setopt: can't change option: monitor`) and `wait $P1`
@@ -201,7 +201,7 @@ OUTPUT FILES (non-empty, size-stable), never by process exit or `wait`. Prefer b
 the launcher around a poll loop instead of `wait` from the start; keep per-reviewer
 `timeout 900` so stragglers self-terminate.
 
-## Never poll liveness with `pgrep -fc "hermes -z"` (measured 2026-08-15)
+## Never poll liveness with `pgrep -fc "hermes -z"` (measured one occasion)
 
 A poll loop written as `alive=$(pgrep -fc "hermes -z" 2>/dev/null || echo 0)` /
 `[ "${alive:-0}" -eq 0 ] && break` **never breaks**, and the panel burns its entire

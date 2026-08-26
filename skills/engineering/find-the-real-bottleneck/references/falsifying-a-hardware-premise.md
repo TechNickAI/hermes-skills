@@ -1,6 +1,6 @@
 # Falsifying a hardware premise before a rebuild
 
-Learned 2026-08-13 auditing the co-tenant host before deciding rebuild-vs-clean. the operator carried a
+Learned one occasion auditing the co-tenant host before deciding rebuild-vs-clean. the operator carried a
 long-standing premise: _"the co-tenant host does so much code reading and looking at small
 files, it should be on an NVMe drive."_ He half-doubted it himself ("now that I
 think about it, the EBS is not likely a limitation") and asked for an audit.
@@ -31,13 +31,13 @@ Use `scripts/ebs_saturation_probe.py` (in this skill). Output from the co-tenant
 
 ```
 window: 13 days, 5-min resolution, 3744 samples
-IOPS      p50=45    p95=1778   p99=2964   max=6234    provisioned 6000
-MB/s      p50=0.6   p95=26.8   p99=63.0   max=174     provisioned 250
-QueueLen  p50=0.04  p95=1.14   p99=2.10   max=4.03
+IOPS p50=45 p95=1778 p99=2964 max=6234 provisioned 6000
+MB/s p50=0.6 p95=26.8 p99=63.0 max=174 provisioned 250
+QueueLen p50=0.04 p95=1.14 p99=2.10 max=4.03
 
 5-min windows >80% provisioned IOPS: 7 of 3744
 5-min windows >50% provisioned IOPS: 37 of 3744
-5-min windows with QueueLen >1:      267 of 3744
+5-min windows with QueueLen >1: 267 of 3744
 ```
 
 Median 45 IOPS against a 6000 IOPS budget. Verdict: the premise is dead.
@@ -145,7 +145,7 @@ contents.
 Working shape — write the file, copy it, run it remotely by path:
 
 ```bash
-# write_file to /tmp/probe.py   (heredocs via terminal can hit 'embedded null byte')
+# write_file to /tmp/probe.py (heredocs via terminal can hit 'embedded null byte')
 scp -q /private/tmp/probe.py host:/tmp/probe.py && ssh host 'python3 /tmp/probe.py'
 ```
 

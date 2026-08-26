@@ -6,7 +6,7 @@ bundling defect and its four downstream symptoms) and
 POST-DEPLOY half: what to measure once the fix is live, what NOT to undo yet, and
 what the fix will not improve.
 
-Worked case: the router v3.8.50 cutover, 2026-08-14.
+Worked case: the router v3.8.50 cutover, one occasion.
 
 ## The before/after table is the deliverable
 
@@ -72,7 +72,7 @@ storage-throughput reduction, measure the BURST, not the average — an average 
 `/proc/<pid>/io` separates the service's own writes from everything else:
 
 ```bash
-sudo awk '/^write_bytes/{print $2}' /proc/<child_pid>/io   # sample twice, delta
+sudo awk '/^write_bytes/{print $2}' /proc/<child_pid>/io # sample twice, delta
 ```
 
 Post-fix this read 25 KB/s for the router — evidence the storm was gone, not

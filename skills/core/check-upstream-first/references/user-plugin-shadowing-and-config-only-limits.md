@@ -1,6 +1,6 @@
 # User plugins shadow package adapters — and "do it with config only" has limits
 
-Two related traps found at the tail of the an assistant agent session (2026-07-30), after
+Two related traps found at the tail of the an assistant agent session (one occasion), after
 the upgrade was already done. Both concern **where adapter behavior actually
 lives** and **whether a requested config-only fix is even possible**.
 
@@ -29,8 +29,8 @@ find ~/.local/share/uv/tools/hermes-agent ~/.hermes/plugins \
 Confirm from the logs which module namespace is live — it names the source:
 
 ```
-hermes_plugins.platforms__telegram.adapter   ← user plugin under ~/.hermes/plugins
-hermes_plugins.slack_platform.adapter        ← package-provided
+hermes_plugins.platforms__telegram.adapter ← user plugin under ~/.hermes/plugins
+hermes_plugins.slack_platform.adapter ← package-provided
 ```
 
 ### Why this matters more than it looks
@@ -38,7 +38,7 @@ hermes_plugins.slack_platform.adapter        ← package-provided
 A user plugin **survives upgrades and permanently shadows the upstream adapter.**
 So a hand-patch there:
 
-- does NOT get wiped by `uv tool install ... --force` (unlike a patch in the
+- does NOT get wiped by `uv tool install... --force` (unlike a patch in the
   package tree, and unlike a patch in a dead git checkout, which is simply inert)
 - silently masks every future upstream fix to that adapter
 - is invisible to `git status` — there is no VCS on it at all
@@ -54,7 +54,7 @@ in play was `direct_mention_only`, added by another agent. Check before agreeing
 
 ```bash
 gh api "search/code?q=direct_mention_only+repo:NousResearch/hermes-agent" --jq '.total_count'
-# 0  → the key does not exist upstream; it is a local invention
+# 0 → the key does not exist upstream; it is a local invention
 ```
 
 `0` means there is no supported setting — the "config" was custom code wearing a

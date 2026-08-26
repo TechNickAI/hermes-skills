@@ -1,6 +1,6 @@
 # Migrations are the one-way door, not the code
 
-The single most important correction from the 2026-07-28 the router v3.8.49
+The single most important correction from the one occasion the router v3.8.49
 deploy. I had told the user **"rollback is just flipping the symlink back."**
 That was wrong, and would have produced a broken rollback under pressure.
 
@@ -11,7 +11,7 @@ nothing for the **database**. If the new build applies schema migrations on
 first boot, the moment it serves one request you have:
 
 ```
-old code  +  new schema  =  not the state you rolled back to
+old code + new schema = not the state you rolled back to
 ```
 
 Measured case: v3.8.49 applied **11 pending migrations (123→133)** on first boot
@@ -39,7 +39,7 @@ readlink -f "$CURRENT" | xargs basename > "$APP_DIR/.previous_release"
 Rollback then restores both, in this order: **stop → restore DB → flip symlink
 → start → verify**.
 
-Use the engine's own backup API (`sqlite3 .backup`, `pg_dump`) rather than `cp`
+Use the engine's own backup API (`sqlite3.backup`, `pg_dump`) rather than `cp`
 where possible — `cp` on a live WAL-mode SQLite file can capture a torn state.
 Keep the `cp` fallback so a missing binary can't block the deploy.
 
@@ -78,9 +78,9 @@ difference between an informed go-ahead and a surprise.
 ## Verify the destructive ones were survivable, after
 
 ```
-provider_connections: 14 rows   ✅ intact
-api_keys: 12                    ✅ intact
-breakers: all CLOSED            ✅
+provider_connections: 14 rows ✅ intact
+api_keys: 12 ✅ intact
+breakers: all CLOSED ✅
 ```
 
 A migration named `remove_unregistered_*` may well be correct and harmless —
@@ -89,10 +89,10 @@ but confirm it with a row count rather than assuming.
 ## Outcome when done right
 
 ```
-[19:27:01] live PID=3060  migrations=122
-[19:27:01] DB   -> storage-pre-6c26483d4-...sqlite (309M)
+[19:27:01] live PID=3060 migrations=122
+[19:27:01] DB -> storage-pre-6c26483d4-...sqlite (309M)
 [19:27:16] PID 3060 -> 53438
-[19:27:25] === DEPLOY VERIFIED ===  migrations now: 133
+[19:27:25] === DEPLOY VERIFIED === migrations now: 133
 ```
 
 ~15s downtime, 8/8 verification gates green, full restore path available.

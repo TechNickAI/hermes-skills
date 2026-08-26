@@ -13,7 +13,7 @@ out-log shows, repeating:
 ```
 ✗ --skip-build was passed but no web dist found at:
   /Users/<user>/.hermes/hermes-agent/hermes_cli/web_dist
-  Pre-build first:  cd web && npm install && npm run build
+  Pre-build first: cd web && npm install && npm run build
 ```
 
 **Cause:** a fresh Hermes install has the dashboard SOURCE (`hermes-agent/web/`) but not
@@ -26,7 +26,7 @@ without it. Mac Studio worked only because its dist was already built.
 export PATH=$HOME/.nvm/versions/node/<ver>/bin:/opt/homebrew/bin:$PATH
 cd ~/.hermes/hermes-agent/web
 npm install --no-audit --no-fund
-npm run build          # writes ../hermes_cli/web_dist/
+npm run build # writes../hermes_cli/web_dist/
 ```
 
 Build takes ~2-5s once deps install. Then `pm2 restart <dashboard>` and confirm
@@ -63,7 +63,7 @@ door (e.g. `tailscale serve --http=4243`) can never complete login.
   `:443`:
   ```bash
   tailscale serve --bg --https=8443 http://127.0.0.1:8080
-  # → https://<host>.<tailnet>.ts.net:8443/  (tailnet only, real TLS cert)
+  # → https://<host>.<tailnet>.ts.net:8443/ (tailnet only, real TLS cert)
   ```
   `--bg` config persists across reboots. No funnel = not public.
 
@@ -74,18 +74,18 @@ BASE="https://<host>.<tailnet>.ts.net:8443"
 JAR=/tmp/j.txt; rm -f $JAR
 curl -sk -o /dev/null -w "%{http_code}\n" -c $JAR -X POST "$BASE/auth/login" \
   --data-urlencode "app=<slug>" --data-urlencode "password=<pw>" \
-  --data-urlencode "next=/<slug>/" -H "Origin: $BASE"   # 303
-curl -sk -o /dev/null -w "%{http_code}\n" -b $JAR "$BASE/<slug>/"   # 200 = WORKS
+  --data-urlencode "next=/<slug>/" -H "Origin: $BASE" # 303
+curl -sk -o /dev/null -w "%{http_code}\n" -b $JAR "$BASE/<slug>/" # 200 = WORKS
 ```
 
-## Check who owns :443 BEFORE making exposure decisions
+## Check who owns:443 BEFORE making exposure decisions
 
 Do not assume Caddy owns the public door. On hosts where another service holds it, the
 gateway often owns the `:443` funnel (→ its own gateway port, e.g. 18080), and the Caddy
 router is only on a tailnet port. Check first:
 
 ```bash
-tailscale serve status            # who maps :443 / which ports exist
+tailscale serve status # who maps:443 / which ports exist
 tailscale serve status --json | python3 -c "import json,sys; d=json.load(sys.stdin); print('TCP',d.get('TCP')); print('Funnel',d.get('AllowFunnel'))"
 ```
 
@@ -101,13 +101,13 @@ the wrong DB shows an empty dashboard. Triage:
 
 ```bash
 for db in ~/.hermes/state.db ~/.hermes/profiles/*/state.db; do
-  [ -f "$db" ] && echo "$(sqlite3 "$db" 'SELECT COUNT(*) FROM sessions' 2>/dev/null)  $db"
+  [ -f "$db" ] && echo "$(sqlite3 "$db" 'SELECT COUNT(*) FROM sessions' 2>/dev/null) $db"
 done
 ```
 
-- Root-DB agent: dashboard args `dashboard --port N ...`, env `HERMES_HOME=~/.hermes`,
+- Root-DB agent: dashboard args `dashboard --port N...`, env `HERMES_HOME=~/.hermes`,
   NO `--profile`.
-- Profile agent: dashboard args `--profile <name> dashboard --port N ...`.
+- Profile agent: dashboard args `--profile <name> dashboard --port N...`.
 
 ## SSH-hairpin: a box can't reliably reach its own tailnet hostname
 
@@ -121,7 +121,7 @@ node. Both together prove the path end-to-end.
 If `/` and every route 502 but `pm2 list` shows the backends `online`, the Caddy process
 itself is down. Most common cause: Caddy was started as a bare process (not under PM2),
 so nothing restarted it when it crashed. Always run Caddy UNDER PM2
-(`pm2 start <caddy> --name caddy --interpreter none -- run --config ...`) and `pm2 save`
+(`pm2 start <caddy> --name caddy --interpreter none -- run --config...`) and `pm2 save`
 so it resurrects. Verify with `ps aux | grep "caddy.*run"` and
 `curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8080/health`.
 

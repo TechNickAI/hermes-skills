@@ -58,10 +58,10 @@ than assuming.
 ## Chat GUID format
 
 ```
-iMessage;-;+15551234567     1:1 by phone
-iMessage;-;user@icloud.com  1:1 by email
-iMessage;+;chat<id>         group chat
-SMS;-;+15551234567          green-bubble SMS
+iMessage;-;+15551234567 1:1 by phone
+iMessage;-;user@icloud.com 1:1 by email
+iMessage;+;chat<id> group chat
+SMS;-;+15551234567 green-bubble SMS
 ```
 
 ## Attachments and message text

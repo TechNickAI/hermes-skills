@@ -5,7 +5,7 @@ is the phase that comes BEFORE any of that: **quantify the noise, by class, per 
 against a real baseline.** Skipping it means fixing the class the user complained about
 rather than the class actually producing the volume.
 
-Measured 2026-08-21 across an 11-forum Telegram fleet. Every number below is an output
+Measured on one run across an 11-forum Telegram fleet. Every number below is an output
 of the method, kept as calibration for what "normal" looks like at this scale.
 
 ## Why measure first
@@ -98,7 +98,7 @@ Operational details that cost time to rediscover:
   ```python
   await c.connect()
   if await c.is_user_authorized():
-      me = await c.get_me()          # check me.bot
+      me = await c.get_me() # check me.bot
   ```
 
 - **Forum topic ID** comes off the reply header, and both fields matter:

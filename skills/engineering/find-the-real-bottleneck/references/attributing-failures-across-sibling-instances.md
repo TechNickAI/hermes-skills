@@ -1,6 +1,6 @@
 # Attributing a failure to the right process (multi-agent / multi-bot hosts)
 
-Verified 2026-08-07. Class: you are diagnosing "component X is broken" on a host
+Verified in one case. Class: you are diagnosing "component X is broken" on a host
 or channel where **several near-identical instances of X are running**, and the
 error you are reading may not belong to the instance you are investigating.
 
@@ -35,7 +35,7 @@ sibling instance's log, not just the suspect's.
 ```bash
 for p in <all profiles/instances>; do
   n=$(grep -c "<failure string>" <root>/$p/logs/<log> 2>/dev/null || echo 0)
-  printf "  %-10s %s\n" "$p" "$n"
+  printf " %-10s %s\n" "$p" "$n"
 done
 ```
 
@@ -43,8 +43,8 @@ done
 rather than eyeballing a tail. With ISO-ish log prefixes, string comparison works:
 
 ```bash
-awk '$0 >= "2026-08-07 14:26:09"' gateway.log | grep "<failure string>" \
-  || echo "  (none after restart)"
+awk '$0 >= "one occasion 14:26:09"' gateway.log | grep "<failure string>" \
+  || echo " (none after restart)"
 ```
 
 Also pin the restart instant independently — do not trust memory:

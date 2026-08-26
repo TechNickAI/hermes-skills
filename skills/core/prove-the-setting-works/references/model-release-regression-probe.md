@@ -1,4 +1,4 @@
-# Model-release regression probe — grok-4.6, 2026-08-13
+# Model-release regression probe — grok-4.6, one occasion
 
 Worked case behind "a version bump is a config lever too." A one-day-old release
 was ordered pinned everywhere; probing first found a reproducible output defect
@@ -26,10 +26,10 @@ done
 ```
 
 ```
-a monitoring agent     38: grok:            50: x-ai/grok-4.3    614: x_search model: grok-4.5   652: moa model: grok
-the operations agent     38: grok:            53: x-ai/grok-4.3    686: x_search model: grok-4.5   730: moa model: grok
-a personal-assistant agent      38: grok:            50: x-ai/grok-4.3    642: x_search model: grok-4.5   703: moa model: grok
-a research agent  38: grok:            50: x-ai/grok-4.3    673: x_search model: grok-4.5   455: moa model: grok
+a monitoring agent 38: grok: 50: x-ai/grok-4.3 614: x_search model: grok-4.5 652: moa model: grok
+the operations agent 38: grok: 53: x-ai/grok-4.3 686: x_search model: grok-4.5 730: moa model: grok
+a personal-assistant agent 38: grok: 50: x-ai/grok-4.3 642: x_search model: grok-4.5 703: moa model: grok
+a research agent 38: grok: 50: x-ai/grok-4.3 673: x_search model: grok-4.5 455: moa model: grok
 ```
 
 Excluding `opus5-ab/`, `backups/`, and `home/.hermes/` matters — those trees held
@@ -54,9 +54,9 @@ calls the vendor directly, bypassing the router entirely:
 ```python
 # tools/x_search_tool.py
 def _get_x_search_model() -> str:
-    cfg = _load_x_search_config()          # load_config().get("x_search", {})
+    cfg = _load_x_search_config() # load_config().get("x_search", {})
     return (str(cfg.get("model") or "").strip() or DEFAULT_X_SEARCH_MODEL)
-# ... POSTs to {base_url}/responses with tools=[{"type": "x_search"}]
+#... POSTs to {base_url}/responses with tools=[{"type": "x_search"}]
 ```
 
 The two combo-alias references need no edit at all — they name `grok`, not a
@@ -78,17 +78,17 @@ package and its ImportError looks like a config problem.
 
 ```
 ########## grok-4.6
-  q1 t1   39.5s  LEAK ['render_inline_citation', 'citation_id is']
+  q1 t1 39.5s LEAK ['render_inline_citation', 'citation_id is']
       xAI's newest Grok model is Grok 4.6. show render_inline_citation with citation_id is 23
-  q1 t2   64.2s  clean
-  q2 t1   50.6s  LEAK ['render_inline_citation', 'citation_id is']
-  q2 t2   35.8s  clean
+  q1 t2 64.2s clean
+  q2 t1 50.6s LEAK ['render_inline_citation', 'citation_id is']
+  q2 t2 35.8s clean
 
 ########## grok-4.5
-  q1 t1    2.6s  clean
-  q1 t2   10.0s  clean
-  q2 t1   15.5s  clean
-  q2 t2   13.1s  clean
+  q1 t1 2.6s clean
+  q1 t2 10.0s clean
+  q2 t1 15.5s clean
+  q2 t2 13.1s clean
 ```
 
 An earlier single probe had also produced a bare `<|eos|>` in the output text.
@@ -122,9 +122,9 @@ site was classified and tested separately instead of swept.
 ## Step 5 — verify the three layers separately
 
 ```
-LAYER 1  parse    a personal-assistant agent/a monitoring agent/a research agent PARSE OK  grok_pin=x-ai/grok-4.6  ctx=500000
-LAYER 2  resolve  openrouter/x-ai/grok-4.6 -> provider openrouter, model x-ai/grok-4.6, 200
-LAYER 3  call     real payload returned, no error, no fallback
+LAYER 1 parse a personal-assistant agent/a monitoring agent/a research agent PARSE OK grok_pin=x-ai/grok-4.6 ctx=500000
+LAYER 2 resolve openrouter/x-ai/grok-4.6 -> provider openrouter, model x-ai/grok-4.6, 200
+LAYER 3 call real payload returned, no error, no fallback
 ```
 
 Layer 1 via the app's interpreter reading the _loaded dict_, not the file text.

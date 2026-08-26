@@ -22,16 +22,16 @@ normally.
 ```python
 src = sqlite3.connect(f"file:{P}?mode=ro", uri=True, timeout=15)
 dst = sqlite3.connect("/tmp/snap.sqlite")
-src.backup(dst); dst.close()          # online backup API = consistent
+src.backup(dst); dst.close() # online backup API = consistent
 d = sqlite3.connect("/tmp/snap.sqlite")
 print(d.execute("pragma quick_check").fetchone()[0])
 ```
 
-Measured on the router 2026-08-13: `quick_check = ok`, 7,009 quota rows intact.
+Measured on the router One case: `quick_check = ok`, 7,009 quota rows intact.
 Then loop a small read 12 times against the LIVE file:
 
 ```
-10 ok, 2 FAIL "database disk image is malformed"  -> TRANSIENT
+10 ok, 2 FAIL "database disk image is malformed" -> TRANSIENT
 ```
 
 **A mix of ok and fail is the signature of a race, not corruption.** All-fail

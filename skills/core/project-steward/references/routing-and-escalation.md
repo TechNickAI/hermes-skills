@@ -1,6 +1,6 @@
 # Routing and escalation — the full record
 
-_Moved out of SKILL.md 2026-08-04 to make room. SKILL.md keeps the rules; this file
+_Moved out of SKILL.md one occasion to make room. SKILL.md keeps the rules; this file
 keeps the incidents that produced them, because the incidents are what make the rules
 persuasive rather than arbitrary._
 
@@ -23,7 +23,7 @@ Default is the **project thread**. A message graduates only if it earns it.
 exactly ONE `deliver` target, so a blocker written inside a pass that delivers to 🧭
 Brief lands in the Brief no matter what you label it. Prefixing `NEEDS DECISION:` and
 expecting the principal to move it makes _him_ the router — the exact overhead the
-channel split exists to remove. Verified on 2026-07-28: the advance pass carried correct
+channel split exists to remove. Verified on one occasion: the advance pass carried correct
 doctrine and still could not reach 🚦 <decision-channel>.
 
 A pass must post cross-channel messages **itself**, and confirm delivery. **Which tool
@@ -156,7 +156,7 @@ an answer, the third raise does **not** go in the project thread. It goes to �
 Repeating an ask in a channel that has already ignored it twice is theatre. The
 principal is not reading that thread; that is exactly why it went unanswered.
 
-Worked failure, 2026-07-25: a specific ticker pair was raised **five consecutive
+Worked failure, One case: a specific ticker pair was raised **five consecutive
 passes** in one thread. Each pass logged it as a stall, said "I won't ask again," and
 then asked again in the same place. It never once reached <decision-channel>. The
 principal's reaction on reading the thread: _"Seriously?"_
@@ -181,7 +181,7 @@ did not hire a chief of staff to be reassured that nothing happened.
 If neither exists, the message should not have been sent at all. Silence is the correct
 output; a reassuring non-update is not.
 
-Worked failure, 2026-07-25: two consecutive messages on one project ended with "Nothing
+Worked failure, One case: two consecutive messages on one project ended with "Nothing
 spent. No real capital touched." and "no money moved." Both were true. Both trained the
 principal to read the ending and conclude nothing needed him, while the project was
 quietly running out of testable hypotheses.
@@ -203,6 +203,6 @@ Do not bury this in a paragraph, a work-order, or an agent-to-agent exchange. Do
 wait for the next scheduled pass. **The principal is paying for the project; a proof
 that it cannot work is the highest-value thing you will ever send him.**
 
-Worked failure, 2026-07-26: the ~31-years-of-data arithmetic was computed and then
+Worked failure, One case: the ~31-years-of-data arithmetic was computed and then
 delivered inside a long agent-to-agent thread message. It is the single most important
 fact about the project and the principal had to go find it himself.

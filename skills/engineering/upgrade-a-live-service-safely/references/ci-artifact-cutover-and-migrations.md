@@ -1,6 +1,6 @@
 # Repeatable CI-artifact cutover with atomic rollback
 
-Executed 2026-07-28 on a live LLM router: **~15s downtime, 8/8 verification
+Executed one occasion on a live LLM router: **~15s downtime, 8/8 verification
 gates green first try, zero rollbacks.** The same operation two days earlier had
 caused a 30-minute fleet outage (on-box build blew past RAM, box swap-thrashed
 until cloud auto-reboot).
@@ -8,14 +8,14 @@ until cloud auto-reboot).
 ## The pipeline
 
 ```
-1. trigger CI workflow           free arm64 runner, exact arch match, ~11 min, $0
-2. download + sha256 verify      refuse on mismatch
-3. unpack to releases/<sha>/     verify native modules + any fork patches
+1. trigger CI workflow free arm64 runner, exact arch match, ~11 min, $0
+2. download + sha256 verify refuse on mismatch
+3. unpack to releases/<sha>/ verify native modules + any fork patches
 4. start on TEST PORT w/ DB COPY run the full gate; ABORT here on any failure
-5. snapshot the DB               <-- the actual one-way door, see below
-6. ln -sfn + mv -Tf              atomic symlink swap
-7. systemctl restart             ~3s
-8. verify prod, same gate        ANY failure -> auto-rollback
+5. snapshot the DB <-- the actual one-way door, see below
+6. ln -sfn + mv -Tf atomic symlink swap
+7. systemctl restart ~3s
+8. verify prod, same gate ANY failure -> auto-rollback
 9. prune to N releases
 ```
 
@@ -44,13 +44,13 @@ database** — often worse than the bug you were rolling back from.
 
 1. **Enumerate pending migrations BEFORE deploying.** Compare max applied
    version in the live DB against migration files shipped in the artifact, and
-   grep them for `DROP|DELETE|ALTER .* DROP|TRUNCATE`.
+   grep them for `DROP|DELETE|ALTER.* DROP|TRUNCATE`.
 2. **Rehearse them on a throwaway.** The test-port instance must run against a
    _copy_ of the DB, so all migrations execute for real before prod sees them.
 3. **Snapshot the DB immediately before cutover** — never a plain `cp` of a live
    WAL database.
    🔴 **Prefer python, and RETRY WITH VERIFICATION.** Two corrections to earlier
-   guidance here, both measured on the router 2026-08-04:
+   guidance here, both measured on the router One case:
    - The `sqlite3` CLI **is** present on that host (3.45.1), so a
      `command -v sqlite3` guard takes the CLI branch — and the CLI's `.backup`
      failed 1 run in 10 against the busy WAL DB. Probe order matters.
@@ -62,7 +62,7 @@ database** — often worse than the bug you were rolling back from.
      for attempt in $(seq 1 10); do
        if python3 - "$LIVE_DB" "$DEST" <<'PY'
    import sqlite3, sys
-   src = sqlite3.connect(sys.argv[1], timeout=60)   # NOT ?mode=ro
+   src = sqlite3.connect(sys.argv[1], timeout=60) # NOT ?mode=ro
    src.execute("PRAGMA query_only=ON")
    dst = sqlite3.connect(sys.argv[2])
    src.backup(dst); dst.close(); src.close()
@@ -137,17 +137,17 @@ died, and `grep -q "event:"` reported FAILED. The server log showed
 `disconnect: request_signal_aborted` — the server watching its _client_ hang up.
 
 ```
-streaming captured to a FILE:   8 SSE events, 1602 bytes   <- release is fine
-same request | head -c 300:     FAILED                     <- harness artifact
+streaming captured to a FILE: 8 SSE events, 1602 bytes <- release is fine
+same request | head -c 300: FAILED <- harness artifact
 ```
 
 Capture to a file and count. Never pipe a stream into a truncating reader —
 `head`, `read -n`, and an early `break` in a `while read` loop all do this.
 
 ```bash
-curl -sN ... > "$OUT" 2>&1
+curl -sN... > "$OUT" 2>&1
 EV=$(grep -c '^event:' "$OUT" || true)
-[ "${EV:-0}" -ge 2 ] || FAIL=1     # >=2 proves progress, not just connection
+[ "${EV:-0}" -ge 2 ] || FAIL=1 # >=2 proves progress, not just connection
 ```
 
 **2. A result variable computed and never read.** `SMOKE_FAIL` was assigned in
@@ -202,7 +202,7 @@ the unmodified base; our tests are green"_ is a very different sentence from
 
 - **The remote login shell may not be bash.** `ssh host '<bash syntax>'` fails
   with e.g. `zsh: command not found: mapfile`. Use
-  `ssh host 'bash -s' <<'EOF' ... EOF` for anything using bash builtins.
+  `ssh host 'bash -s' <<'EOF'... EOF` for anything using bash builtins.
 - **macOS bash is 3.2** — no `mapfile`/`readarray`. Test bash-5 constructs on
   the host that will actually run them, not on the Mac authoring them.
 - **`A && B || C` is not if-then-else.** Shellcheck SC2015. In a rollback path
@@ -214,4 +214,4 @@ the unmodified base; our tests are green"_ is a very different sentence from
 - Run `shellcheck -S style` and fix the real findings; some remain intentional
   (single-quoted remote commands are _meant_ to expand server-side, SC2016/2029).
 - **Suppress the downtime watchdog for the maintenance window** with a
-  self-expiring flag, and clear it via `trap ... EXIT`.
+  self-expiring flag, and clear it via `trap... EXIT`.

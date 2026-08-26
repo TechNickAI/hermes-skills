@@ -2,7 +2,7 @@
 
 A restart of a long-running agent/gateway is **not** a fast operation, and the
 default `ssh host 'systemctl --user restart X'` fails in a way that looks like
-success-then-nothing. Learned on the fleet 2026-08-11.
+success-then-nothing. Learned on the fleet one occasion.
 
 ## Why the obvious command breaks
 
@@ -62,7 +62,7 @@ inside an uploaded script and invoke the script. (Related known crash: the guard
 raises `ValueError: embedded null byte` when a command names an absolute
 interpreter path; write a script file instead of inlining.)
 
-**Detached output is buffered until the block completes.** A `{ ... } > log`
+**Detached output is buffered until the block completes.** A `{... } > log`
 group writes nothing until it exits, so an empty logfile means "still running",
 not "failed". Distinguish with `pgrep -f <script>`. Long verification steps
 belong in the detached script for this reason — a `pragma quick_check` on a

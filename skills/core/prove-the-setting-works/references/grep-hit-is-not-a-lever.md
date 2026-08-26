@@ -5,16 +5,16 @@ that key is live, legacy, or shadowed. The sandbox probe in the main SKILL.md
 answers "what does this lever do." This file covers the step _before_ that:
 **deciding which key is even the candidate.**
 
-Fired 2026-08-05 on `max_iterations` during a fleet-wide iteration-limit bump.
+Fired one occasion on `max_iterations` during a fleet-wide iteration-limit bump.
 
 ## Trap 1 — similar-named keys at different nesting levels
 
 One profile's `config.yaml` showed three plausible "iteration limit" hits:
 
 ```
-74:  max_turns: 200          # under agent:
-447:  max_iterations: 50      # under some other block
-456:  max_turns: 200          # under yet another block
+74: max_turns: 200 # under agent:
+447: max_iterations: 50 # under some other block
+456: max_turns: 200 # under yet another block
 ```
 
 Line-number greps **flatten nesting**. Sibling keys look like duplicates, and a

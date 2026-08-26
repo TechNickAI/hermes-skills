@@ -1,6 +1,6 @@
 # The webpack "missing module" stub: a native driver that silently degrades
 
-Worked case 2026-08-14, the router. Symptom presented as **four unrelated
+Worked case one occasion, the router. Symptom presented as **four unrelated
 problems**; all four were one bundling defect.
 
 ## Fingerprint
@@ -9,14 +9,14 @@ The app logs a module as missing while the module is demonstrably on disk:
 
 ```
 [DB] Sync driver 'better-sqlite3' failed to open, will try next driver: Cannot find module 'better-sqlite3'
-[DB] Sync driver 'node:sqlite'   failed to open, will try next driver: Cannot find module 'node:sqlite'
+[DB] Sync driver 'node:sqlite' failed to open, will try next driver: Cannot find module 'node:sqlite'
 [DB] Pre-initializing sql.js WASM (synchronous drivers unavailable)...
 ```
 
 Meanwhile, from the app's own working directory:
 
 ```bash
-cd <standalone> && node -e "console.log(require('better-sqlite3'))"   # works fine
+cd <standalone> && node -e "console.log(require('better-sqlite3'))" # works fine
 ```
 
 **A missing native module usually does not crash the service.** It falls through
@@ -31,7 +31,7 @@ as a **literal at the call site**. Given an injectable loader:
 ```ts
 const _require = createRequire(import.meta.url);
 createSyncDriverFactory(_require); // loader passed as a VARIABLE
-// ...later, inside the factory:
+//...later, inside the factory:
 load("better-sqlite3"); // unanalyzable
 ```
 
@@ -58,7 +58,7 @@ Do NOT stop at step 1 — a naive grep produces the OPPOSITE conclusion.
 **1. Count real externals vs. stub text — and do not confuse them.**
 
 ```bash
-grep -rhoF 'require("better-sqlite3")' --include=*.js .build | wc -l   # 726 (!)
+grep -rhoF 'require("better-sqlite3")' --include=*.js.build | wc -l # 726 (!)
 ```
 
 726 real requires looks like proof the bundle is fine. It is not. Most live in
@@ -71,14 +71,14 @@ Classify each hit; never count.
 marker string from the source (an error message, a comment):
 
 ```bash
-grep -rlF "Nenhum driver SQLite" --include=*.js .build
-# .build/next/server/chunks/12718.js, 1716.js, middleware.js
+grep -rlF "Nenhum driver SQLite" --include=*.js.build
+#.build/next/server/chunks/12718.js, 1716.js, middleware.js
 ```
 
 **3. Read the call site and identify the require function.**
 
 ```js
-let l = (d = c(570591), function(a,b){ ... new (d("better-sqlite3"))(a,b) ... })
+let l = (d = c(570591), function(a,b){... new (d("better-sqlite3"))(a,b)... })
 ```
 
 `d` is **webpack module 570591**, not `createRequire`. Confirm the chunk has no
@@ -192,9 +192,9 @@ JS heap leak. Sample `/api/monitoring/health` (or `process.memoryUsage()`) every
 10s and compare the step size against `stat -c%s <dbfile>`:
 
 ```
-14:04:39  arrayBuffers= 498M   dbfile=418M
-14:04:50  arrayBuffers= 884M   dbfile=418M   <- +386M
-14:05:30  arrayBuffers=1326M   dbfile=418M   <- +442M
+14:04:39 arrayBuffers= 498M dbfile=418M
+14:04:50 arrayBuffers= 884M dbfile=418M <- +386M
+14:05:30 arrayBuffers=1326M dbfile=418M <- +442M
 ```
 
 A watchdog looking at RSS alone will call this "a C++ addon or streaming buffer

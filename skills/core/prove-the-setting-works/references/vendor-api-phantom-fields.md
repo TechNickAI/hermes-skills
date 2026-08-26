@@ -6,7 +6,7 @@ is still dead. This is the remote-API analogue of a normalizer silently strippin
 a config key, but strictly harder to catch, because the readback _confirms your
 value_.
 
-## The case that established this (2026-08-06, Vapi)
+## The case that established this (one occasion, Vapi)
 
 Updating a voice assistant that places real outbound phone calls. The base prompt
 (persona, phone-speech rules, task instructions) was written to
@@ -17,7 +17,7 @@ What the evidence said at the time:
 ```
 [OK ] model: HTTP 200
 === READBACK ===
-model     : anthropic claude-sonnet-4-6 temp 0.5 maxTok 400 tools ['dtmf', 'endCall']
+model: anthropic claude-sonnet-4-6 temp 0.5 maxTok 400 tools ['dtmf', 'endCall']
 systemPrompt chars: 3901
 prompt matches file: True
 ```
@@ -37,20 +37,20 @@ docs. Verified independently before acting on it:
 import json
 d = json.load(open('/tmp/vapi_openapi.json'))
 s = json.dumps(d)
-print(s.count('"systemPrompt"'))          # -> 0
+print(s.count('"systemPrompt"')) # -> 0
 
 schemas = d['components']['schemas']
 for name in ['CreateAssistantDTO', 'UpdateAssistantDTO', 'Assistant',
              'AssistantOverrides']:
     props = set((schemas[name].get('properties') or {}).keys())
-    print(name, 'systemPrompt:', 'systemPrompt' in props)   # -> False, all four
+    print(name, 'systemPrompt:', 'systemPrompt' in props) # -> False, all four
 
 print(sorted(schemas['AnthropicModel']['properties']))
-# ['maxTokens', 'messages', 'model', 'provider', 'temperature', 'thinking', ...]
+# ['maxTokens', 'messages', 'model', 'provider', 'temperature', 'thinking',...]
 ```
 
 Zero occurrences across two million characters of schema. The real field is
-`model.messages[{role: "system", content: ...}]`.
+`model.messages[{role: "system", content:...}]`.
 
 Two sibling fields behave identically — `backchannelingEnabled` and
 `silenceTimeoutSeconds` both round-trip on a `GET` while being absent from

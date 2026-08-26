@@ -9,7 +9,7 @@ try to churn the file in ways that hide your edit, beyond the well-known
 
 ruamel applies ONE global `y.indent(sequence=…, offset=…)` to the whole
 document. The default (`sequence=4, offset=2`) turns **indentless** block
-sequences (`- item` at the parent's indent) into indented ones (`  - item`)
+sequences (`- item` at the parent's indent) into indented ones (` - item`)
 — and vice-versa if you set it the other way. A single scalar edit then churns
 _every_ list in the file (fallback_providers, toolsets, disabled,
 reference_models, …), producing a huge spurious diff.
@@ -17,10 +17,10 @@ reference_models, …), producing a huge spurious diff.
 **Detect before dumping (from the backup text):**
 
 ```python
-if any(line.startswith("  - ") for line in source_text.splitlines()):
-    y.indent(mapping=2, sequence=4, offset=2)   # file uses indented sequences
+if any(line.startswith(" - ") for line in source_text.splitlines()):
+    y.indent(mapping=2, sequence=4, offset=2) # file uses indented sequences
 else:
-    y.indent(mapping=2, sequence=2, offset=0)   # file uses indentless sequences
+    y.indent(mapping=2, sequence=2, offset=0) # file uses indentless sequences
 ```
 
 ## Pitfall 2 — ruamel unfolds multi-line scalars
@@ -43,7 +43,7 @@ a noisy diff:
 3. **Absent-key case** (adding the key): exactly one `+ ` line containing `key:`,
    zero `- ` lines.
 4. **Text-surgical fallback (present case):** find the parent block (`agent:`),
-   locate the unique `  key:` line within it, replace only the value (preserve
+   locate the unique ` key:` line within it, replace only the value (preserve
    any trailing ` # comment` and the original EOL), rewrite. Re-parse with
    ruamel to confirm the value landed and the file still parses.
 5. Re-read the final live file with ruamel and assert the new value; only then

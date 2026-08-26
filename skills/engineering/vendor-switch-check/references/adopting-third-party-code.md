@@ -6,7 +6,7 @@ it has different, harder blockers. Triggers: _"can we put this into our repo?"_,
 _"copy it over and make it ours"_, _"this feels like a worthwhile plugin"_,
 _"we want to keep tweaking it ourselves"_.
 
-Grounded in the `hermes-progress-tail` evaluation (2026-08-14), where the
+Grounded in the `hermes-progress-tail` evaluation, where the
 adoption question looked like a policy debate and was actually settled by two
 facts nobody had checked.
 
@@ -31,8 +31,8 @@ invites a re-litigation you deserve to lose.**
 ## 1 — License FIRST, and never assume one exists
 
 ```bash
-gh api repos/<owner>/<repo> --jq '.license.spdx_id'   # null == no license
-ls LICENSE* COPYING* 2>/dev/null                       # confirm in-tree too
+gh api repos/<owner>/<repo> --jq '.license.spdx_id' # null == no license
+ls LICENSE* COPYING* 2>/dev/null # confirm in-tree too
 ```
 
 `hermes-progress-tail`: **`license: null`, no LICENSE file.** 277 commits, 11
@@ -81,7 +81,7 @@ find <pkg> -name '*.py' | wc -l
 find <pkg> -name '*.py' -exec wc -l {} + | tail -1
 
 # b. private-API reach into the fast-moving host project
-grep -rhn "^\s*from \(agent\|tools\|gateway\|hermes_c\)[a-z_.]* import .*" <pkg>/ \
+grep -rhn "^\s*from \(agent\|tools\|gateway\|hermes_c\)[a-z_.]* import.*" <pkg>/ \
   | sed 's/^[0-9]*://;s/^ *//' | sort -u
 
 # c. monkeypatch families (the real breakage count)

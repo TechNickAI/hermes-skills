@@ -60,13 +60,13 @@ caps are character limits and multibyte content (smart quotes, emoji, non-Englis
 would otherwise overstate usage:
 
 ```text
-current = char_count(memory file)        # wc -m under a UTF-8 locale, or Python len()
-cap     = recommended cap (~2200), or the profile's configured cap if different
+current = char_count(memory file) # wc -m under a UTF-8 locale, or Python len()
+cap = recommended cap (~2200), or the profile's configured cap if different
 goal_chars =
-  if target is "<n>%":                round(current * (1 - n/100))
-  if target is "<n>" or "<n> chars":  n
-  if target is a word:                round(current * (1 - {aggressive:0.6, moderate:0.4, light:0.2}))
-  if no target:                       min(cap, current)   # aim for the cap, never above it
+  if target is "<n>%": round(current * (1 - n/100))
+  if target is "<n>" or "<n> chars": n
+  if target is a word: round(current * (1 - {aggressive:0.6, moderate:0.4, light:0.2}))
+  if no target: min(cap, current) # aim for the cap, never above it
 ```
 
 A bloated file with no explicit target should aim for the cap, not half its size. With

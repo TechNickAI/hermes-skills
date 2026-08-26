@@ -34,9 +34,9 @@ subagents are isolated and cheap.
 
 ```
 tasks: [
-  {goal: "Empathy review as recipient X", context: "<full artifact text>\n\nReview lens: ..."},
-  {goal: "Negotiation/positioning review", context: "<full artifact text>\n\nReview lens: ..."},
-  {goal: "Voice and clarity review",       context: "<full artifact text>\n\nReview lens: ..."},
+  {goal: "Empathy review as recipient X", context: "<full artifact text>\n\nReview lens:..."},
+  {goal: "Negotiation/positioning review", context: "<full artifact text>\n\nReview lens:..."},
+  {goal: "Voice and clarity review", context: "<full artifact text>\n\nReview lens:..."},
 ]
 ```
 

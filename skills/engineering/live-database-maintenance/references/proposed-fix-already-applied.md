@@ -1,6 +1,6 @@
 # When your "easy win" is already in place (or was never the problem)
 
-Measured 2026-08-22 on a 2.8 GB Hermes `state.db` (a trading agent) after a real
+Measured on a 2.8 GB Hermes `state.db` (a trading agent) after a real
 corruption. Two fixes were proposed to the user with confidence. **Both were
 wrong**, and each failed in a different, generalizable way. Verifying them took
 about two minutes; proposing them cost credibility.
@@ -19,7 +19,7 @@ strand a multi-GB WAL and fill the disk."
 
 ```python
 c = sqlite3.connect(f'file:{db}?mode=ro', uri=True)
-c.execute("pragma journal_size_limit").fetchone()   # (-1,)
+c.execute("pragma journal_size_limit").fetchone() # (-1,)
 ```
 
 **Why it was wrong:** `journal_size_limit`, `cache_size`, `busy_timeout`,
@@ -30,7 +30,7 @@ app's setup path, so it reports _its own_ defaults — not the writer's state.
 The application in fact set it, at `hermes_state.py:806`:
 
 ```python
-conn.execute(f"PRAGMA journal_size_limit={_WAL_SIZE_LIMIT_BYTES}")  # 64 MiB
+conn.execute(f"PRAGMA journal_size_limit={_WAL_SIZE_LIMIT_BYTES}") # 64 MiB
 ```
 
 **The falsifier, in order of strength:**
@@ -63,8 +63,8 @@ not: **I never checked whether that process had the database open.**
 **The falsifier, one command:**
 
 ```bash
-ls -l /proc/<pid>/fd | grep -i '\.db'      # dashboard: zero matches
-lsof -p <pid> | grep state.db              # zero matches
+ls -l /proc/<pid>/fd | grep -i '\.db' # dashboard: zero matches
+lsof -p <pid> | grep state.db # zero matches
 ```
 
 For contrast, the actual writer:
@@ -97,7 +97,7 @@ Before presenting any fix, run the three-line audit:
 grep -rn "<pragma_or_setting>" <app_source> | grep -v test
 
 # 2. Does the artifact show it working?
-ls -la <db>-wal        # capped at a round number == limit is live
+ls -la <db>-wal # capped at a round number == limit is live
 
 # 3. Is there already a disabled/paused mechanism for this?
 grep -i "prune\|vacuum\|retention\|hygiene" <profile>/cron/jobs.json

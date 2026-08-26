@@ -32,9 +32,9 @@ merge-base commit into a throwaway worktree and run the identical command:
 ```bash
 git worktree add --detach /tmp/baseline <merge-base-sha>
 cd /tmp/baseline && <same test command> 2>&1 | grep '^FAILED' | sort > /tmp/fail_baseline.txt
-cd <repo>          && <same test command> 2>&1 | grep '^FAILED' | sort > /tmp/fail_head.txt
-comm -13 /tmp/fail_baseline.txt /tmp/fail_head.txt   # NEW failures — must be empty
-comm -23 /tmp/fail_baseline.txt /tmp/fail_head.txt   # failures your change FIXED
+cd <repo> && <same test command> 2>&1 | grep '^FAILED' | sort > /tmp/fail_head.txt
+comm -13 /tmp/fail_baseline.txt /tmp/fail_head.txt # NEW failures — must be empty
+comm -23 /tmp/fail_baseline.txt /tmp/fail_head.txt # failures your change FIXED
 ```
 
 Set-difference on sorted `FAILED` lines is the evidence. "Both runs had 14

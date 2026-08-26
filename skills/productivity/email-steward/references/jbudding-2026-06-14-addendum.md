@@ -1,6 +1,6 @@
-# jbudding@gmail.com — 2026-06-14 addendum
+# jbudding@gmail.com — one occasion addendum
 
-Condensed learning from the 2026-06-14 Email Steward runs. Use with the main jbudding heuristics and `references/jbudding-sender-patterns.md`.
+Condensed learning from the one occasion Email Steward runs. Use with the main jbudding heuristics and `references/jbudding-sender-patterns.md`.
 
 ## Flag / keep visible
 

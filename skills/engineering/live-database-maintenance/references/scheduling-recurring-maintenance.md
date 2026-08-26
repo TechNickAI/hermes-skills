@@ -72,9 +72,9 @@ problem cannot take out the thing meant to repair it.
 ## Downtime accounting from a real run
 
 ```
-backup created:  storage.sqlite.preclean-<ts>   353 MB   19:10:36 UTC
-service stopped:                                          ~19:11:0x UTC
-service started (healthy):                                 19:11:37 UTC
+backup created: storage.sqlite.preclean-<ts> 353 MB 19:10:36 UTC
+service stopped: ~19:11:0x UTC
+service started (healthy): 19:11:37 UTC
 ```
 
 Backup ran ~30s while serving traffic. Actual outage was the stop→healthy gap,
@@ -89,20 +89,20 @@ of these appears. A creation call returning success tells you nothing about what
 was actually stored.
 
 ```
-stop service          systemctl --user stop <svc>
-prove process gone    pgrep -f '<fingerprint>'
-online backup         (taken BEFORE stop)
-abort on bad backup   ABORT / do not proceed on an unverified backup
-checkpoint            wal_checkpoint
-compaction            VACUUM
-restart               systemctl --user start <svc>
-health poll           <health URL>, HTTP 200 required
-library choice        app's own SQLite binding, not the CLI
-transient-read retry  retry loop on 'malformed'
-timestamp gotchas     per-table column + format contracts
-recovery diagnose     journalctl
-rollback              restore verified backup
-build prohibition     never build/release on the live host
+stop service systemctl --user stop <svc>
+prove process gone pgrep -f '<fingerprint>'
+online backup (taken BEFORE stop)
+abort on bad backup ABORT / do not proceed on an unverified backup
+checkpoint wal_checkpoint
+compaction VACUUM
+restart systemctl --user start <svc>
+health poll <health URL>, HTTP 200 required
+library choice app's own SQLite binding, not the CLI
+transient-read retry retry loop on 'malformed'
+timestamp gotchas per-table column + format contracts
+recovery diagnose journalctl
+rollback restore verified backup
+build prohibition never build/release on the live host
 ```
 
 A one-line Python check over `jobs.json` that prints OK/MISSING per item catches
@@ -113,7 +113,7 @@ a truncated or paraphrased prompt in seconds.
 Observed with a `repeat: once` job whose fire time had already passed:
 
 ```
-cronjob action=run  ->  executed: true, execution_success: false
+cronjob action=run -> executed: true, execution_success: false
                         job disappears from jobs.json
                         target host untouched — nothing ran
 ```

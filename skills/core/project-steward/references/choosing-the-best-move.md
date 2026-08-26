@@ -214,7 +214,7 @@ means ledger with a forcing function on the READ.
 
 ## The proxy is better, not solved
 
-Outward research, 2026-08-04, with every arXiv ID verified against the API rather than
+Outward research, one occasion, with every arXiv ID verified against the API rather than
 trusted:
 
 **Skalse et al., _Defining and Characterizing Reward Hacking_ (arXiv:2209.13085), prove

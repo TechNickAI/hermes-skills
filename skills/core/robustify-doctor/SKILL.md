@@ -72,8 +72,8 @@ Designate one agent per **machine** (not per owner) as the host reporter:
 
 ```bash
 mkdir -p "$HERMES_HOME/robustify"
-echo no > "$HERMES_HOME/robustify/host_reporter"   # co-tenant: collect, don't alert
-echo yes > "$HERMES_HOME/robustify/host_reporter"  # designated reporter
+echo no > "$HERMES_HOME/robustify/host_reporter" # co-tenant: collect, don't alert
+echo yes > "$HERMES_HOME/robustify/host_reporter" # designated reporter
 ```
 
 Every agent still runs the full collector — the host-level facts remain useful context
@@ -89,9 +89,9 @@ different boxes are not co-tenants — each is its own reporter.
 ## Running it
 
 ```bash
-python3 scripts/robustify_collect.py              # ~1-2s, all collectors
-python3 scripts/robustify_collect.py --deep       # force PRAGMA quick_check on every db
-python3 scripts/robustify_collect.py --show-host  # real hostname instead of a hash
+python3 scripts/robustify_collect.py # ~1-2s, all collectors
+python3 scripts/robustify_collect.py --deep # force PRAGMA quick_check on every db
+python3 scripts/robustify_collect.py --show-host # real hostname instead of a hash
 ```
 
 The hostname is hashed by default (`host-c3263a4b`) so reports can be pasted into
@@ -105,7 +105,7 @@ HERMES_HOME=/path/to/other/.hermes python3 scripts/robustify_collect.py
 ssh <host> 'python3 -' < scripts/robustify_collect.py
 ```
 
-Pipe the script over stdin rather than quoting it into `ssh ... python3 -c`. Multiline
+Pipe the script over stdin rather than quoting it into `ssh... python3 -c`. Multiline
 inline shell over SSH silently returns a single blank line often enough to waste an
 hour.
 
@@ -271,7 +271,7 @@ the very evidence needed to diagnose the cause.
 1. **Log** — within variance, or a first occurrence that self-resolved
 2. **Auto-fix (allowlisted actions only)** — each requires the stated evidence first:
    rotate or truncate a log file, given `LARGE_LOG` plus a confirmed rotation gap;
-   re-run a single failed job, given `FAILING_JOB ... STILL_FAILING` and a job known to
+   re-run a single failed job, given `FAILING_JOB... STILL_FAILING` and a job known to
    be idempotent; restart a gateway that is absent from `PROCESSES` while its supervisor
    expects it. Anything else, including config edits, is tier 3.
 3. **Surface, don't fix** — anything touching user-visible data, credentials, memory,

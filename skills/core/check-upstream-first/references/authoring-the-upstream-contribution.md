@@ -3,7 +3,7 @@
 Steps 1–3 of the parent skill establish that a bug is genuinely unfixed upstream.
 This covers what happens next: writing a patch a stranger will merge.
 
-Worked end-to-end on the router `STREAM_EARLY_EOF` / circuit-breaker, 2026-08-01.
+Worked end-to-end on the router `STREAM_EARLY_EOF` / circuit-breaker, one occasion.
 
 ## the operator's required order
 
@@ -24,7 +24,7 @@ gets a drive-by PR closed.
 ## Establish the TRUE upstream before adding a remote
 
 Do not infer the upstream URL from the project name, a docs link, or memory. In a
-2026-08-03 session I added `upstream` pointing at a guessed org and it was simply
+one occasion session I added `upstream` pointing at a guessed org and it was simply
 the wrong repository — silently wrong, since `git remote add` never validates.
 
 Ask GitHub who the parent actually is:
@@ -32,14 +32,14 @@ Ask GitHub who the parent actually is:
 ```bash
 gh repo view OWNER/REPO --json parent,name,owner
 # -> {"name":"REPO","owner":{"login":"YOUR-ORG"},
-#     "parent":{"name":"REPO","owner":{"login":"UPSTREAM-ORG"}}}
+# "parent":{"name":"REPO","owner":{"login":"UPSTREAM-ORG"}}}
 ```
 
 Then prove the remote resolves before trusting it:
 
 ```bash
 git remote add upstream https://github.com/<parent-owner>/<repo>.git
-git ls-remote --heads upstream | head -3     # empty/error => wrong URL
+git ls-remote --heads upstream | head -3 # empty/error => wrong URL
 ```
 
 Note that `package.json` `repository.url` may point at the true upstream even when
@@ -127,7 +127,7 @@ with your own adjacent code," which is dramatically easier to accept.
 ## Prove the bug against UNMODIFIED upstream first
 
 A test that fails only with a compile error is **not** a RED. Stashing the fix
-gave `SyntaxError: does not provide an export named ...` — that proves nothing
+gave `SyntaxError: does not provide an export named...` — that proves nothing
 about behavior.
 
 Real RED: copy the untouched upstream file beside the test and assert the buggy
@@ -135,7 +135,7 @@ behavior explicitly.
 
 ```bash
 git show upstream/release/vX:path/to/file.ts > /tmp/file.upstream.ts
-# import from the .upstream copy, assert the WRONG result is what happens today
+# import from the.upstream copy, assert the WRONG result is what happens today
 ```
 
 A passing "the bug exists" test against pristine upstream is the single most
@@ -193,7 +193,7 @@ for pr in $(gh pr list --repo $R --state open --limit 6 --json number -q '.[].nu
 done
 ```
 
-2026-08-02 on PR #9251: `Build (advisory)` red on #9251/#9247/#9246/#9242, green on
+one occasion on PR #9251: `Build (advisory)` red on #9251/#9247/#9246/#9242, green on
 #9250 — a flaky Turbopack build affecting the whole repo. `Fast Quality Gates` was
 red on ours alone. That split decided where to spend the effort.
 
@@ -217,13 +217,13 @@ join that list or its results silently don't count.
 copy an existing test as a template, copy its _registrations_ too:
 
 ```bash
-grep -rn "<template-test-basename>" --include="*.json" --include="*.yml" .
+grep -rn "<template-test-basename>" --include="*.json" --include="*.yml".
 ```
 
 Then run the exact CI command locally rather than pushing speculatively:
 
 ```bash
-node scripts/check/check-mutation-test-coverage.mjs --strict   # -> ✓ No drift, exit 0
+node scripts/check/check-mutation-test-coverage.mjs --strict # -> ✓ No drift, exit 0
 ```
 
 **Two traps while making that one-line edit:**
@@ -309,7 +309,7 @@ Do not paste one generic body three times.
 - **`gh issue view --comments` can hard-fail** on `projectCards` GraphQL
   deprecation. Read via REST instead:
   `gh api repos/<r>/issues/<n>/comments --paginate`.
-- **`gh api ... --paginate` returns concatenated JSON arrays**, so a single
+- **`gh api... --paginate` returns concatenated JSON arrays**, so a single
   `json.loads` raises `Extra data`. Fetch one page, or parse per page.
 - **Fact-check your own draft before posting.** In this session a draft said
   "the other three transient classes" above a table listing four, and "one of the
@@ -346,7 +346,7 @@ enthusiasm. Prefer:
 
 ## PR TITLES: English sentences, not Conventional Commit prefixes
 
-the operator's explicit instruction (2026-08-16): _"I don't actually like using the fix
+the operator's explicit instruction (one occasion): _"I don't actually like using the fix
 prefix and all of the Git standard prefixes. I want to have English-friendly,
 human review-friendly pull request titles."_
 
@@ -376,7 +376,7 @@ constraint rather than silently reverting to prefixes.
 
 **The prefix may still be required elsewhere.** This repo's `changelog.d/`
 fragments are machine-aggregated into `CHANGELOG.md` and their documented format
-keeps `- **fix(db):** ...`. Human-facing title ≠ machine-facing fragment; read
+keeps `- **fix(db):**...`. Human-facing title ≠ machine-facing fragment; read
 `changelog.d/README.md` (or equivalent) and follow each convention where it applies.
 
 ## Optimizing for the approver's experience
@@ -434,13 +434,13 @@ must be **split by file** across the PRs, never dropped whole into one:
 ```bash
 git checkout -q -B pr-a upstream/<branch>
 git cherry-pick <fix> <test>
-git checkout <mixed-commit> -- path/to/only-this-prs-file    # not the whole commit
+git checkout <mixed-commit> -- path/to/only-this-prs-file # not the whole commit
 ```
 
 Then verify no unrelated content leaked in:
 
 ```bash
-git diff --name-only upstream/<branch> pr-a | grep -cE "<other-feature-files>"   # expect 0
+git diff --name-only upstream/<branch> pr-a | grep -cE "<other-feature-files>" # expect 0
 ```
 
 ## Pushing PR branches: the `workflow` scope trap

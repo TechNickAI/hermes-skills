@@ -28,15 +28,15 @@ daemon — keeps running stale code and holding the port.
 
 1. Find who actually owns the port:
    ```bash
-   lsof -ti:<port>            # get the live PID
-   ps -o ppid= -p <PID>       # get its parent
-   ps -o command= -p <PPID>   # parent will be "PM2 vX: God Daemon (/path/.pm2)"
+   lsof -ti:<port> # get the live PID
+   ps -o ppid= -p <PID> # get its parent
+   ps -o command= -p <PPID> # parent will be "PM2 vX: God Daemon (/path/.pm2)"
    ```
    The path in `God Daemon (<path>)` is the `PM2_HOME` that owns the process.
 2. List each daemon's processes explicitly:
    ```bash
-   PM2_HOME=/Users/nick/.pm2 pm2 jlist        # default daemon
-   pm2 jlist                                  # whatever the current env points at
+   PM2_HOME=/Users/nick/.pm2 pm2 jlist # default daemon
+   pm2 jlist # whatever the current env points at
    ```
 
 ## Fix
@@ -65,4 +65,4 @@ Editing source requires a restart **under the correct daemon** to take effect.
 
 Restarting the wrong daemon "succeeds" but serves stale code. Confirm the new content
 is live by fetching the rendered page and grepping for a string you just added/removed,
-not by trusting the `pm2 restart ... ✓` message.
+not by trusting the `pm2 restart... ✓` message.

@@ -81,8 +81,8 @@ Or resolve via Hermes's skills directory convention:
 
 ```bash
 # The skill is installed at one of these locations:
-#   ~/.hermes/skills/report/scripts/file_report.py          (single-profile install)
-#   ~/.hermes/profiles/<name>/skills/*/report/scripts/file_report.py  (profile install)
+# ~/.hermes/skills/report/scripts/file_report.py (single-profile install)
+# ~/.hermes/profiles/<name>/skills/*/report/scripts/file_report.py (profile install)
 SCRIPT=$(find ~/.hermes -path "*/report/scripts/file_report.py" 2>/dev/null | head -1)
 ```
 
@@ -259,7 +259,7 @@ automatically delivers one message to the subscribed chat/thread:
 ✔ @<user> Kanban t_a1b2c3d4 done — <title>
 ```
 
-If the card is blocked: `⏸ Kanban ... blocked` If it fails: `✖ Kanban ... gave up`
+If the card is blocked: `⏸ Kanban... blocked` If it fails: `✖ Kanban... gave up`
 
 The subscription is removed automatically after the done notification. No polling, no
 manual DM required.

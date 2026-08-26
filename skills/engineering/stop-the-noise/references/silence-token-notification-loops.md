@@ -1,16 +1,16 @@
 # Silence-Token Notification Loops — Full Walkthrough
 
-Worked example: a trading agent, 2026-07-28. One Telegram thread flooded with dozens of
+Worked example: a trading agent, one occasion. One Telegram thread flooded with dozens of
 "no notification needed" messages while the rest of the bot behaved normally.
 
 ## What the thread looked like
 
 ```
-11:22 kens_agent_bot :: no notification needed
-11:22 kens_agent_bot :: ⚠️ COPY SKIPPED — budget exhausted: needed $4.80, only $1.94 cash
-11:22 kens_agent_bot :: no notification needed
-11:22 kens_agent_bot :: no notification needed | (placed=false, reason `one_clip_per_event_ever` …)
-11:21 kens_agent_bot :: no notification needed — routine decline (`one_clip_per_market_ever` …)
+11:22 kens_agent_bot:: no notification needed
+11:22 kens_agent_bot:: ⚠️ COPY SKIPPED — budget exhausted: needed $4.80, only $1.94 cash
+11:22 kens_agent_bot:: no notification needed
+11:22 kens_agent_bot:: no notification needed | (placed=false, reason `one_clip_per_event_ever` …)
+11:21 kens_agent_bot:: no notification needed — routine decline (`one_clip_per_market_ever` …)
 ```
 
 Two tells:
@@ -40,7 +40,7 @@ flood kept arriving between scheduled ticks.
 The frequency pattern pointed at an event source. The systemd unit list named it:
 
 ```
-pm-copytrade.service  loaded active running  PM-Copytrade listener (… -> Hermes webhook)
+pm-copytrade.service loaded active running PM-Copytrade listener (… -> Hermes webhook)
 ```
 
 The listener POSTs one signal per leader trade to
@@ -99,12 +99,12 @@ json.dump(d, open(P, "w"), indent=2)
 `gateway/platforms/webhook.py`:
 
 ```
-166:  self._dynamic_routes: Dict[str, dict] = {}
-167:  self._dynamic_routes_mtime: float = 0.0
-438:  def _reload_dynamic_routes(self) -> None:
-451:      if mtime <= self._dynamic_routes_mtime:   # mtime-gated
-528:  # Hot-reload dynamic subscriptions on each request (mtime-gated, cheap)
-529:  self._reload_dynamic_routes()
+166: self._dynamic_routes: Dict[str, dict] = {}
+167: self._dynamic_routes_mtime: float = 0.0
+438: def _reload_dynamic_routes(self) -> None:
+451: if mtime <= self._dynamic_routes_mtime: # mtime-gated
+528: # Hot-reload dynamic subscriptions on each request (mtime-gated, cheap)
+529: self._reload_dynamic_routes()
 ```
 
 Cron equivalent: `cron/jobs.py::load_jobs()` reads from disk inside
@@ -122,7 +122,7 @@ The pre-restart gateway logs showed, on the next bounce:
 
 ```
 pruning stale sessions.json entry 'agent:main:webhook:webhook:webhook:svc-copy:…'
-  (end_reason='webhook_complete'); left by a crashed gateway     × 20+
+  (end_reason='webhook_complete'); left by a crashed gateway × 20+
 Marked 13 interrupted cron execution(s) unknown after restart
 ```
 
