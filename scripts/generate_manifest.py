@@ -173,6 +173,24 @@ CLAUDE_COMPAT = {
         "Full method in Claude Code using its own web, file, and subagent tools; "
         "prior-session search and cross-family synthesis are unavailable.",
     ),
+    "stop-the-noise": (
+        "degraded",
+        "Diagnosing and silencing a noisy source transfers; the scheduled-job and "
+        "gateway examples assume a long-running agent runtime.",
+    ),
+    "vendor-switch-check": (
+        "native",
+        "Falsify-the-claim-first evaluation needs only the vendor's own API and a shell.",
+    ),
+    "writing-for-non-engineers": (
+        "native",
+        "Writing guidance with no runtime dependency at all.",
+    ),
+    "scheduled-job-runner": (
+        "degraded",
+        "The runner and its exit-code contract are portable Python; the cron "
+        "wiring examples assume a scheduler that dispatches by file extension.",
+    ),
     "prove-the-setting-works": (
         "native",
         "Sandbox-probe method is runtime-agnostic; it needs only a copyable config "
