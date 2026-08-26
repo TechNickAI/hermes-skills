@@ -209,6 +209,20 @@ CLAUDE_COMPAT = {
         "The briefing and artifact-verification discipline transfers; the "
         "background-dispatch examples assume a delegation toolset.",
     ),
+    "find-the-real-bottleneck": (
+        "native",
+        "Measuring each hop in a causal chain needs only a shell and the system "
+        "under test.",
+    ),
+    "live-database-maintenance": (
+        "native",
+        "SQLite maintenance and corruption triage are runtime-agnostic; the "
+        "bundled scripts are stdlib Python.",
+    ),
+    "upgrade-a-live-service-safely": (
+        "native",
+        "Stage-verify-cut-rollback sequencing applies to any supervised service.",
+    ),
 }
 
 

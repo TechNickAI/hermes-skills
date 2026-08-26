@@ -59,7 +59,7 @@ Fix: update the test to patch `import_trades` with matching keyword arguments.
 ### Shared module-level constant with env override (OmniRoute #1)
 
 `CLAUDE_CLI_USER_AGENT = claudeCliUserAgent(CLAUDE_CLI_VERSION)` evaluated at import time
-with `getClaudeEntrypoint()`, so `CLAUDE_CC_ENTRYPOINT=sdk-cli` affects ALL consumers including
+with `getClaudeEntrypoint()`, so `<NEW_FLAG>=sdk-cli` affects ALL consumers including
 API-key providers. Fix: make the constant always use `"cli"`, and only call the function
 in OAuth-specific paths.
 
