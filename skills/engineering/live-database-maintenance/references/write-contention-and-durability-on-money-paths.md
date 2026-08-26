@@ -10,7 +10,7 @@ database can be tiny and perfectly healthy and still lose records.
 Observed 2026-08 on a live trading agent:
 
 ```
-'database is locked' (two occurrences, 30 days apart on separate dates)
+'database is locked'  (two occurrences, 30 days apart on separate dates)
 "Both buys reached Kalshi, but their local order/signal provenance was
  dropped. I rebuilt both records from immutable exchange fills."
 ```
@@ -38,7 +38,7 @@ is answered by size.
 ### 1. Is WAL on?
 
 ```python
-c.execute("pragma journal_mode").fetchone()[0] # want: wal
+c.execute("pragma journal_mode").fetchone()[0]   # want: wal
 ```
 
 WAL lets readers and one writer proceed concurrently. Often already enabled —
@@ -52,7 +52,7 @@ pragma sitting two lines away creates a false impression of diligence:
 ```python
 # what you find (line 124) — no timeout, takes the ~5s default and gives up
 c = sqlite3.connect(str(db_path))
-c.execute("PRAGMA journal_mode=WAL") # line 126, looks reassuring
+c.execute("PRAGMA journal_mode=WAL")   # line 126, looks reassuring
 
 # what it should be
 c = sqlite3.connect(str(db_path), timeout=30.0)

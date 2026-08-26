@@ -66,8 +66,8 @@ value got there: nobody chose it, a fallback fired.
 ### How to diagnose it in ~4 greps
 
 ```bash
-grep -rn "<settingName>" --include=*.ts --include=*.tsx src/ # types, API, UI, applier
-grep -rn "<pragma_name>" --include=*.ts src/ # every place applied
+grep -rn "<settingName>" --include=*.ts --include=*.tsx src/   # types, API, UI, applier
+grep -rn "<pragma_name>" --include=*.ts src/                    # every place applied
 ```
 
 Then answer three questions in order:
@@ -96,8 +96,8 @@ correctly — but confirm rather than assume, and say which behavior you proved.
 EBS jitter swamps single-run signal. Same config, five alternating runs:
 
 ```
-12 indexes: 7.76 / 4.24 / 0.78 / 0.73 / 0.78 -> median 0.781 ms
- 9 indexes: 0.44 / 0.43 / 0.48 / 2.39 / 0.46 -> median 0.455 ms
+12 indexes: 7.76 / 4.24 / 0.78 / 0.73 / 0.78  -> median 0.781 ms
+ 9 indexes: 0.44 / 0.43 / 0.48 / 2.39 / 0.46  -> median 0.455 ms
 ```
 
 10x spread **within one config**. Single-run comparisons produced "37x" and
@@ -111,10 +111,10 @@ EBS jitter swamps single-run signal. Same config, five alternating runs:
 ### What actually moved (and what didn't)
 
 ```
-                          reads writes
-cache 16 MB, mmap 0 23.41 ms (all within noise)
-cache 256 MB, mmap 0 15.62 ms <- 33% faster, tight and repeatable
-cache 256 MB, mmap 512MB 15.62 ms <- mmap adds nothing on top
+                          reads       writes
+cache 16 MB,  mmap 0     23.41 ms     (all within noise)
+cache 256 MB, mmap 0     15.62 ms  <- 33% faster, tight and repeatable
+cache 256 MB, mmap 512MB 15.62 ms  <- mmap adds nothing on top
 ```
 
 **Cache size is the read-side win; write-side pragma tuning was noise.** Size the
@@ -125,9 +125,9 @@ benefit, and mmap with concurrent writers adds crash-consistency risk.
 `synchronous` is a genuine lever but a _source_ change, not a runtime toggle:
 
 ```
-OFF 0.066 ms/insert
-NORMAL 5.017 ms <- typical upstream default
-FULL 14.548 ms
+OFF     0.066 ms/insert
+NORMAL  5.017 ms          <- typical upstream default
+FULL   14.548 ms
 ```
 
 With WAL, `OFF` still survives process crashes; only the last WAL writes are at

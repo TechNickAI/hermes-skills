@@ -172,7 +172,7 @@ owner's stated intent; a reviewer optimizes their lens, not your goal.
 Do not analyze a source tree until you have proven the gateway runs from it.
 
 ```bash
-ps aux | grep "gateway run" | grep -v grep # read the argv path
+ps aux | grep "gateway run" | grep -v grep      # read the argv path
 lsof -p <PID> | grep -o "/Users/<u>/[^ ]*site-packages" | sort -u
 ```
 
@@ -196,10 +196,10 @@ actually invokes the venv interpreter; read the unit, and trust the resolved
 Before proposing any local patch to such a tree, capture three facts:
 
 ```bash
-git status --porcelain | wc -l # uncommitted work
-git log origin/main..HEAD --format='%h %an %ad %s' # UNPUSHED commits
+git status --porcelain | wc -l                              # uncommitted work
+git log origin/main..HEAD --format='%h %an %ad %s'          # UNPUSHED commits
 git fetch origin main -q
-git rev-list --left-right --count origin/main...HEAD # behind / ahead
+git rev-list --left-right --count origin/main...HEAD        # behind / ahead
 ```
 
 Local commits that exist nowhere else change the recommendation: any
@@ -221,10 +221,10 @@ captain. When a service runs from `releases/<build>` chosen by a
 and it can sit weeks behind while the deployed build is nearly current.
 
 ```bash
-ls -l <app>/current # -> releases/standalone-<sha>
-basename "$(readlink <app>/current)" # the DEPLOYED build id
-git log -1 --format='%h %ci %s' <sha> # prove that sha is a real commit we have
-git rev-list --left-right --count <sha>...upstream/release/vX.Y.Z # ahead<TAB>behind
+ls -l <app>/current                      # -> releases/standalone-<sha>
+basename "$(readlink <app>/current)"     # the DEPLOYED build id
+git log -1 --format='%h %ci %s' <sha>    # prove that sha is a real commit we have
+git rev-list --left-right --count <sha>...upstream/release/vX.Y.Z   # ahead<TAB>behind
 ```
 
 **What went wrong:** I reported "we are 1,131 commits behind upstream" after
@@ -265,7 +265,7 @@ possible argument for your PR, and its absence on your line is often the whole
 story.
 
 ```bash
-grep -nE "Date\.now\(\)" <file> # cheap: find every cutoff computation
+grep -nE "Date\.now\(\)" <file>        # cheap: find every cutoff computation
 ```
 
 Live example (the router, one occasion): `cleanupCompressionRunTelemetry` compared
@@ -326,9 +326,9 @@ tool install. Do not use that field to determine install method.
 ## Step 2 — Version vs latest release
 
 ```bash
-uv tool list # authoritative for uv installs
+uv tool list                       # authoritative for uv installs
 hermes --version
-ls ~/.cache/uv/archive-v0 # shows upgrade HISTORY; a version never
+ls ~/.cache/uv/archive-v0          # shows upgrade HISTORY; a version never
                                    # fetched was never installed
 gh api "repos/NousResearch/hermes-agent/releases/latest" --jq '{tag:.tag_name,published:.published_at}'
 ```
@@ -342,7 +342,7 @@ definitions, and shadowing user plugins. Check each of these read-only on every
 machine you believe is current:
 
 ```bash
-uv tool list # is the install exact-version pinned?
+uv tool list                       # is the install exact-version pinned?
 readlink -f "$(command -v <tool>)" # is the binary the one you think it is?
 ```
 
@@ -697,7 +697,7 @@ exists upstream and moves the gate in the direction you need:**
 ```bash
 gh api "search/code?q=<config_key>+repo:NousResearch/hermes-agent" --jq '.total_count'
 # 0 → local invention, not a supported setting. Say "there is no config-only
-# equivalent" rather than substituting a knob that only rhymes.
+#     equivalent" rather than substituting a knob that only rhymes.
 ```
 
 Names mislead: `mention_patterns` **widens** triggering and cannot narrow it;

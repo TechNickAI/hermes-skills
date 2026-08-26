@@ -23,7 +23,7 @@ question. The question is capability against measured demand.**
 
 ```
 production demand: 0.247 writes/sec typical
-                    0.83 writes/sec (busiest MINUTE in 24h)
+                    0.83  writes/sec  (busiest MINUTE in 24h)
 EBS headroom: 10,099x the worst minute ever recorded
 per-insert cost: +0.033 ms at p95
 as a share of a 5,643 ms p50 request: 0.0005%
@@ -41,8 +41,8 @@ just the average. An average hides the minute that actually hurts.
 
 ```sql
 -- typical
-select count(*)/900.0 from call_logs where timestamp >= <15 min ago>;
--- peak minute in 24h (the number the capacity decision hangs on)
+select count(*)/900.0  from call_logs where timestamp >= <15 min ago>;
+-- peak minute in 24h  (the number the capacity decision hangs on)
 select substr(timestamp,1,16) m, count(*) c
 from call_logs where timestamp >= <24h ago>
 group by m order by c desc limit 3;
@@ -92,7 +92,7 @@ will re-run after. Different methods produce uncomparable numbers.
 # same 60 s sampler, before and after
 A=$(awk '/nvme0n1 /{print $10}' /proc/diskstats); sleep 60
 B=$(awk '/nvme0n1 /{print $10}' /proc/diskstats)
-echo "sectors/60s: $((B-A)) = $(( (B-A)/2/1024 )) MB"
+echo "sectors/60s: $((B-A))  = $(( (B-A)/2/1024 )) MB"
 ```
 
 Result on the real migration:

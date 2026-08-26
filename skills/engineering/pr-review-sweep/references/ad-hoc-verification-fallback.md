@@ -30,7 +30,7 @@ from pathlib import Path
 
 
 def run(cmd: list[str], cwd: Path) -> None:
-    print(f"$ {' '.join(cmd)} # cwd={cwd}", flush=True)
+    print(f"$ {' '.join(cmd)}  # cwd={cwd}", flush=True)
     proc = subprocess.run(cmd, cwd=str(cwd), text=True)
     if proc.returncode:
         raise SystemExit(proc.returncode)

@@ -111,7 +111,7 @@ For each `BROKEN` / `PARTIAL`:
 3. **For credentials, check BOTH stores** before believing "not found":
    ```bash
    grep -c 'THE_KEY' "$HERMES_HOME/.env"
-   security find-generic-password -a THE_KEY -w | wc -c # macOS
+   security find-generic-password -a THE_KEY -w | wc -c   # macOS
    ```
 4. **For CLI-based probes, confirm the CLI and the agent share a config.**
    They frequently do not — see Trap 1.
@@ -136,7 +136,7 @@ python3 -c "
 import sqlite3
 c=sqlite3.connect('<store>/.plugin.db')
 print('pages', c.execute('select count(*) from pages').fetchone()[0])
-print('fts', c.execute('select count(*) from pages_fts where pages_fts match ?',('listing',)).fetchone()[0])
+print('fts',   c.execute('select count(*) from pages_fts where pages_fts match ?',('listing',)).fetchone()[0])
 print(c.execute('select rel_path from pages order by rowid desc limit 3').fetchall())
 "
 ```

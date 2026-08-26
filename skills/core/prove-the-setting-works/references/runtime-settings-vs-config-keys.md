@@ -82,7 +82,7 @@ When evaluating whether an object can be removed "permanently," read the
 creation path for whether it is **idempotently re-applied on every startup**.
 
 ```python
-cursor.executescript(ddl) # runs even when the table already exists
+cursor.executescript(ddl)   # runs even when the table already exists
 ```
 
 with DDL of the form `CREATE VIRTUAL TABLE IF NOT EXISTS...` means a manual

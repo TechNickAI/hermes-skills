@@ -4,16 +4,16 @@ One directory per project. All markdown, all plain English prose.
 
 ```
 projects/
-├── portfolio.md the principal's own briefing on what matters (they own this)
-├── portfolio-log.md one line per pass, append-only
-├── entities.md alias map: which agent owns what, and name collisions
+├── portfolio.md          the principal's own briefing on what matters (they own this)
+├── portfolio-log.md      one line per pass, append-only
+├── entities.md           alias map: which agent owns what, and name collisions
 └── <project-name>/
-    ├── charter.md what winning looks like, and the kill criteria
-    ├── now.md where this stands (REWRITTEN each pass, never appended)
-    ├── log.md append-only history
-    ├── roadmap.md five ranked falsifiable items
-    ├── decisions.md decisions with their re-open conditions
-    └── dead-ends.md what was tried and why it failed
+    ├── charter.md        what winning looks like, and the kill criteria
+    ├── now.md            where this stands (REWRITTEN each pass, never appended)
+    ├── log.md            append-only history
+    ├── roadmap.md        five ranked falsifiable items
+    ├── decisions.md      decisions with their re-open conditions
+    └── dead-ends.md      what was tried and why it failed
 ```
 
 ## Why prose, not JSON or a database

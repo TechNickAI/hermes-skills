@@ -97,7 +97,7 @@ Go to backup. That is the answer.
 ## 3. Restore ONE file from restic, verify before using it
 
 ```bash
-eval "$(grep '^export AWS_' ~/.hermes/scripts/backup-to-s3.sh)" # see pitfall
+eval "$(grep '^export AWS_' ~/.hermes/scripts/backup-to-s3.sh)"   # see pitfall
 REPO="s3:s3.amazonaws.com/openclaw-fleet-backups/$(hostname -s | tr '[:upper:]' '[:lower:]')"
 restic -r "$REPO" --insecure-no-password snapshots --latest 4
 restic -r "$REPO" --insecure-no-password restore <snapid> \
@@ -131,11 +131,11 @@ Correct sequence:
 ```python
 m.execute("ATTACH ? AS live", (live_path,))
 staged, aux =..., {}
-for t in aux_tables: # per-table tolerance
-    try: aux[t] = m.execute(f"select * from live.{t}").fetchall()
+for t in aux_tables:                      # per-table tolerance
+    try:    aux[t] = m.execute(f"select * from live.{t}").fetchall()
     except Exception as e: print("SKIP", t, e)
-m.execute("DETACH live") # <-- before any write
-#... inserts + commit per group...
+m.execute("DETACH live")                  # <-- before any write
+# ... inserts + commit per group ...
 ```
 
 Rows whose parent record lived in the destroyed table can be **synthesized** from

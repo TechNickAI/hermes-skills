@@ -43,8 +43,8 @@ Telegram collapse messages" — verified live, not from docs.
 ```
 🔥 <b>Favorite Grinder entry</b> — <b>191×</b> in 7d
 <i>Aug 15 04:25 → Aug 21 22:51 · unacknowledged</i>
-<blockquote expandable>08-21 22:51 …
-08-21 22:36 …
+<blockquote expandable>08-21 22:51  …
+08-21 22:36  …
 … and 41 earlier</blockquote>
 ```
 
@@ -190,8 +190,8 @@ wrong in a way that its own evidence table exposed.
 Naive `re.sub(r'\d','#', text.lower())` reported these as two families:
 
 ```
-Grinder position monitor 38×
-GRINDER position monitor 36×
+Grinder position monitor   38×
+GRINDER position monitor   36×
 ```
 
 Same job. The prose drifted; digit-masking destroyed the `job_id` that would have merged

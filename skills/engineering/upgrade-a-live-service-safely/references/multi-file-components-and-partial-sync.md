@@ -10,9 +10,9 @@ began importing `jobrun_severity` and `jobrun_repair`. The PR merged, the deploy
 reported success, and on the host:
 
 ```
-~/.hermes/profiles/<p>/scripts/jobrun.py exit_map: 10 hits (v2)
+~/.hermes/profiles/<p>/scripts/jobrun.py          exit_map: 10 hits   (v2)
 ~/.hermes/profiles/<p>/scripts/jobrun_severity.py MISSING
-~/.hermes/profiles/<p>/scripts/jobrun_repair.py MISSING
+~/.hermes/profiles/<p>/scripts/jobrun_repair.py   MISSING
 ```
 
 420 runs since the merge, **all success**, nothing in any alarm — while the
@@ -29,8 +29,8 @@ degrade rather than take every job down. That is the right call for availability
 and the wrong one for visibility:
 
 ```python
-HAVE_V2 = False # silently
-sev = None # every card renders with the OLD severity logic
+HAVE_V2 = False   # silently
+sev = None        # every card renders with the OLD severity logic
 ```
 
 **Availability-first error handling converts a deployment failure into an
@@ -52,8 +52,8 @@ point, both pass here. Three layers must be asserted separately:
 
 ```python
 import jobrun
-print(getattr(jobrun, "HAVE_V2", "attr missing")) # -> "attr missing"
-print(getattr(jobrun, "sev", None)) # -> None
+print(getattr(jobrun, "HAVE_V2", "attr missing"))  # -> "attr missing"
+print(getattr(jobrun, "sev", None))                # -> None
 ```
 
 Add such a probe to the deploy check for any feature that can degrade silently.
@@ -63,7 +63,7 @@ Add such a probe to the deploy check for any feature that can degrade silently.
 Treat the entry point and the modules it imports as **one unit**:
 
 ```python
-JOBRUN_RUNNER = "jobrun.py"
+JOBRUN_RUNNER  = "jobrun.py"
 JOBRUN_MODULES = ("jobrun_severity.py", "jobrun_repair.py")
 ```
 
@@ -120,7 +120,7 @@ own dry-run could not page the owner. Preserve such deltas verbatim and prove it
 in both directions:
 
 ```
-env set -> notify_failure() == "suppressed_validating"
+env set   -> notify_failure() == "suppressed_validating"
 env unset -> notify_failure() reports a real status
 ```
 

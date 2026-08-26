@@ -65,7 +65,7 @@ unbacked work, and "I'll push it later" is how a week passes. Pushing is
 reversible and costs nothing:
 
 ```bash
-git push -u fork fix/<short-slug> # user's fork, not upstream main
+git push -u fork fix/<short-slug>   # user's fork, not upstream main
 ```
 
 **Every local patch carries an exit plan, recorded at creation:** upstream PR,
@@ -114,7 +114,7 @@ three checks, because each answers a different question:
 # which local/remote refs contain it
 git branch -a --contains <sha>
 
-# is it upstream? "No commit found for SHA" == not there
+# is it upstream?  "No commit found for SHA" == not there
 gh api repos/NousResearch/hermes-agent/commits/<full-sha> --jq.sha
 
 # is it on the user's own fork?
@@ -177,9 +177,9 @@ re-run, and confirm the test FAILS; then restore:
 ```bash
 cp <file> /tmp/patched.bak
 git show HEAD:<file> > <file>
-./venv/bin/python -m pytest <testfile> -q # expect the new case to FAIL
+./venv/bin/python -m pytest <testfile> -q      # expect the new case to FAIL
 cp /tmp/patched.bak <file>
-git diff --stat <file> # confirm restored
+git diff --stat <file>                          # confirm restored
 ```
 
 If it passes with the patch reverted, the test does not exercise the fix.

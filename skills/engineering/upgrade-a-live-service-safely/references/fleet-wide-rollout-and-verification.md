@@ -13,7 +13,7 @@ Not "is it reachable" — capture the state a deploy would destroy:
 ```bash
 cd "$CO"
 git rev-parse --abbrev-ref HEAD; git rev-parse HEAD
-git status --porcelain | wc -l # <-- the load-bearing one
+git status --porcelain | wc -l          # <-- the load-bearing one
 git remote -v
 ```
 
@@ -61,7 +61,7 @@ When the dirty files turn out to be genuine fixes:
 
 ```bash
 grep '^+' theirs.diff | grep -v '^+++' | sed 's/[[:space:]]*$//' | shasum -a 256
-grep '^+' mine.diff | grep -v '^+++' | sed 's/[[:space:]]*$//' | shasum -a 256
+grep '^+' mine.diff   | grep -v '^+++' | sed 's/[[:space:]]*$//' | shasum -a 256
 ```
 
 Identical hashes = their work survived byte-for-byte.
@@ -93,7 +93,7 @@ The venvs were created by **uv**, which does not install pip inside them.
 Confirm from the venv's own marker rather than guessing:
 
 ```bash
-cat "$CO/venv/pyvenv.cfg" # a `uv = 0.12.4` line means no pip
+cat "$CO/venv/pyvenv.cfg"      # a `uv = 0.12.4` line means no pip
 ```
 
 Reinstall with `uv pip`, naming the interpreter, and export `~/.local/bin`

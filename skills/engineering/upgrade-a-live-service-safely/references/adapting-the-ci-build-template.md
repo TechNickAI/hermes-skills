@@ -10,11 +10,11 @@ the router (one occasion).
 ssh host 'bash -s' <<'EOF'
 systemctl --user show <svc> -p MainPID -p WorkingDirectory -p EnvironmentFiles -p ExecStart --value
 grep -E "^PORT=|^DATA_DIR=" ~/src/<App>/.env
-ls -l ~/src/<App>/current # is a release symlink already in place?
+ls -l ~/src/<App>/current            # is a release symlink already in place?
 ls -1 ~/src/<App>/releases | tail -5
 node --version; uname -m
-which gh # needed for `gh run download` on the host
-df -h /home | tail -1 # room for another ~5 GB release?
+which gh                             # needed for `gh run download` on the host
+df -h /home | tail -1                # room for another ~5 GB release?
 EOF
 ```
 

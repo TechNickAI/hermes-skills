@@ -119,7 +119,7 @@ live v3.8.49: wreq-js.linux-arm64-gnu.node ← no SQLite driver
 staged v3.8.50: better-sqlite3/prebuilds/linux-arm64.node ← real dlopen
 
 arrayBuffers: 1,326 MB live → 17 MB staged (76x)
-DB file rewrites in 10s: ~5-9 live → 0 staged
+DB file rewrites in 10s: ~5-9 live  →  0 staged
 ```
 
 A before/after comparison on the SAME metric, across a known-bad and known-good

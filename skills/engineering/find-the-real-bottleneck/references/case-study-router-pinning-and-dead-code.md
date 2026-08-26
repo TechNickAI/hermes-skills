@@ -84,7 +84,7 @@ invoked — from a module **nothing imports**. Upstream's own comments admitted 
 **Cheapest possible check — does the log line the feature MUST emit exist?**
 
 ```bash
-journalctl --user -u <svc> --since "3 days ago" | grep -c "\[Cleanup\]" # 0
+journalctl --user -u <svc> --since "3 days ago" | grep -c "\[Cleanup\]"   # 0
 ```
 
 A scheduler that logs unconditionally on every run, with zero lines ever, has
@@ -94,7 +94,7 @@ never executed. That is a one-command disproof of "it's configured, so it runs."
 
 ```bash
 WD=$(systemctl --user show <svc> -p WorkingDirectory --value)
-grep -rl "<a string the feature must contain>" "$WD" # empty = not shipped
+grep -rl "<a string the feature must contain>" "$WD"    # empty = not shipped
 ```
 
 Source containing a fix proves nothing about the running bundle.
@@ -117,8 +117,8 @@ pages over the external change.
 delete rows the process _cannot_ be creating — dated two weeks ago.
 
 ```
-Jul-20 rows: 22515 -> 0 (deleted 22515)
-after 6s: 22515 <-- restored ⇒ overwrite, not re-insertion
+Jul-20 rows: 22515 -> 0  (deleted 22515)
+after 6s:    22515        <-- restored ⇒ overwrite, not re-insertion
 ```
 
 `wal_checkpoint(TRUNCATE)` makes the change briefly visible — a red herring.
@@ -146,10 +146,10 @@ A 12-table cleanup silently no-op'd on several tables because the schema is
 inconsistent — same logical concept, different column and different unit:
 
 ```
-usage_history, call_logs, proxy_logs timestamp ISO text
-mcp_tool_audit, a2a_task_events created_at ISO text (NOT timestamp)
-xp_audit_log created_at TEXT 'YYYY-MM-DD HH:MM:SS'
-domain_cost_history timestamp INTEGER epoch MILLIseconds
+usage_history, call_logs, proxy_logs      timestamp    ISO text
+mcp_tool_audit, a2a_task_events           created_at   ISO text   (NOT timestamp)
+xp_audit_log                              created_at   TEXT 'YYYY-MM-DD HH:MM:SS'
+domain_cost_history                       timestamp    INTEGER epoch MILLIseconds
 ```
 
 Passing an epoch-**seconds** cutoff to the milliseconds column deleted 0 rows and

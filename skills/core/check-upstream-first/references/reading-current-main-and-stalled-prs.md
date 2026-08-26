@@ -111,7 +111,7 @@ contents API gives you nothing:
 ```bash
 git clone --depth 1 --filter=blob:none --sparse \
   https://github.com/NousResearch/h‍ermes-agent.git hm-main
-cd hm-main && git sparse-checkout set gateway # NO -q flag
+cd hm-main && git sparse-checkout set gateway     # NO -q flag
 ```
 
 ⚠️ `git sparse-checkout set <dir> -q` **exits 129** — `-q` is not a valid switch

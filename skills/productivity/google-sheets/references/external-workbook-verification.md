@@ -37,7 +37,7 @@ wb=load_workbook(p, data_only=True)
 # Example:
 # ws=wb['Income Statement']
 # for r in [8, 20, 41]:
-# print(r, [ws.cell(r,c).value for c in range(1,7)])
+#     print(r, [ws.cell(r,c).value for c in range(1,7)])
 PY
 ```
 

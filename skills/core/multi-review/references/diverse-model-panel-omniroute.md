@@ -45,8 +45,8 @@ three fail instantly with `Unknown provider 'custom:grok'` (etc.), leaving
 Working panel form on this host, models resolved server-side by omniroute:
 
 ```bash
-hermes -z "$P" --provider custom:omniroute -m grok --ignore-rules -t ''
-hermes -z "$P" --provider custom:omniroute -m gemini --ignore-rules -t ''
+hermes -z "$P" --provider custom:omniroute -m grok    --ignore-rules -t ''
+hermes -z "$P" --provider custom:omniroute -m gemini  --ignore-rules -t ''
 hermes -z "$P" --provider custom:omniroute -m codex/gpt-5.6-sol --ignore-rules -t ''
 ```
 

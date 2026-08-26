@@ -65,13 +65,13 @@ Internet (optional)
    ▼
 Tailnet host: <machine>.<your-tailnet>.ts.net
    │
-   ▼ 127.0.0.1:8080 (Caddy — declarative, hot-reloadable)
-   ├── /auth/* → auth sidecar (Node + Express, JWT-style cookies)
-   ├── /health → "ok" 200
-   ├── /hooks/* → optional bearer-injected webhook proxy
-   ├── /<slug-1>/* → mini-app on a localhost port
-   ├── /<slug-2>/* → mini-app on a localhost port (password-gated)
-   └── / → static welcome page
+   ▼  127.0.0.1:8080  (Caddy — declarative, hot-reloadable)
+   ├── /auth/*       → auth sidecar      (Node + Express, JWT-style cookies)
+   ├── /health       → "ok" 200
+   ├── /hooks/*      → optional bearer-injected webhook proxy
+   ├── /<slug-1>/*   → mini-app on a localhost port
+   ├── /<slug-2>/*   → mini-app on a localhost port (password-gated)
+   └── /            → static welcome page
 ```
 
 **Single sources of truth on this machine** (after install):
@@ -94,7 +94,7 @@ Tailnet host: <machine>.<your-tailnet>.ts.net
 > # anchor on the caddy BINARY path so this cannot match your own shell.
 > # -ww keeps long argv from being width-clipped on platforms that do that.
 > APPS=$(ps -eww -o args= | grep '^/[^ ]*caddy run' \
-> | sed -n 's#.*--config \(.*\)/[^/]*/Caddyfile.*#\1#p' | head -1)
+>     | sed -n 's#.*--config \(.*\)/[^/]*/Caddyfile.*#\1#p' | head -1)
 > APPS=${APPS:-$(ls -d /Users/*/mini-apps /home/*/mini-apps 2>/dev/null | head -1)}
 > REG=$(ls -d "$APPS"/router "$APPS"/_registry 2>/dev/null | head -1)
 > echo "apps=$APPS reg=$REG"
@@ -111,10 +111,10 @@ Never run ad-hoc `tailscale serve …` commands. Edit the JSON, run the apply sc
 ## First-time install on this machine
 
 ```bash
-brew install caddy # macOS — use the equivalent on Linux
+brew install caddy            # macOS — use the equivalent on Linux
 npm install -g pm2
 
-cd ~/src/hermes-config # clone if you don't have it
+cd ~/src/hermes-config         # clone if you don't have it
 bash devops/app-router/scripts/install.sh
 ```
 
@@ -144,7 +144,7 @@ pm2 start ~/mini-apps/ecosystem.config.js
 pm2 start /opt/homebrew/bin/caddy --name caddy --interpreter none -- \
   run --config "$REG/Caddyfile" --adapter caddyfile
 pm2 save
-pm2 startup # paste the printed sudo command — needed for resurrect-on-reboot
+pm2 startup    # paste the printed sudo command — needed for resurrect-on-reboot
 ```
 
 **Apply Tailscale Serve:**
@@ -162,9 +162,9 @@ touch serve config, so a Hermes-only host needs no opt-out. A legacy agent runti
 on the same machine may still own it — check what else drives serve:
 
 ```bash
-tailscale serve status # what is configured now
+tailscale serve status                                    # what is configured now
 grep -rl "tailscale serve" ~/Library/LaunchAgents \
-    ~/.config/systemd/user 2>/dev/null # who else replays it
+    ~/.config/systemd/user 2>/dev/null                    # who else replays it
 ```
 
 ## Adding a mini-app
@@ -177,7 +177,7 @@ free localhost port (convention: apps start at `3001`).
 ```js
 {
   name: "my-app",
-  script: "./my-app/server.js", // or absolute path, or a python command via interpreter
+  script: "./my-app/server.js",     // or absolute path, or a python command via interpreter
   cwd: "~/mini-apps",
   env: { PORT: 3001 },
 },
@@ -187,8 +187,8 @@ If password-gating, also add to the `auth-service` block's `env`:
 
 ```js
 APP_PASSWORD_MY_APP: "the-password",
-APP_TITLE_MY_APP: "My App",
-APP_DESC_MY_APP: "One-line description shown on the login form.",
+APP_TITLE_MY_APP:    "My App",
+APP_DESC_MY_APP:     "One-line description shown on the login form.",
 ```
 
 The slug-to-env rule is uppercase + `-`→`_`. `my-app` ⇒ `APP_PASSWORD_MY_APP`.
@@ -234,7 +234,7 @@ Tailscale just sees one upstream (Caddy on `:8080`).
 **Verify:**
 
 ```bash
-curl -sI http://127.0.0.1:8080/my-app/ # expect 200 (open) or 302 (gated)
+curl -sI http://127.0.0.1:8080/my-app/   # expect 200 (open) or 302 (gated)
 ```
 
 ## Removing a mini-app
@@ -275,12 +275,12 @@ backends being healthy is what makes this confusing.
 **Recovery — bring the front door back, supervised this time:**
 
 ```bash
-export PM2_HOME=/Users/<user>/.pm2 # literal path, no ~ or $HOME under Hermes
+export PM2_HOME=/Users/<user>/.pm2          # literal path, no ~ or $HOME under Hermes
 CADDY=$(command -v caddy || echo /opt/homebrew/bin/caddy)
 
 # 1. Find the config path the OLD process actually used — do NOT assume the skill's
-# default. The router dir may have been renamed (see next pitfall).
-ps aux | grep "caddy.*run" | grep -v grep # reveals --config <path> if still running
+#    default. The router dir may have been renamed (see next pitfall).
+ps aux | grep "caddy.*run" | grep -v grep      # reveals --config <path> if still running
 
 # 2. Validate before starting
 "$CADDY" validate --config <real-Caddyfile> --adapter caddyfile
@@ -291,7 +291,7 @@ pm2 start "$CADDY" --name caddy --interpreter none -- \
 pm2 save
 
 # 4. Verify
-curl -s -o /dev/null -w "%{http_code}\n" http://127.0.0.1:8080/health # expect 200
+curl -s -o /dev/null -w "%{http_code}\n" http://127.0.0.1:8080/health   # expect 200
 ```
 
 After this, `pm2 list` should show a `caddy` entry. If it never had one, that was the
@@ -321,7 +321,7 @@ even though the stack is alive. Locate the real one from ground truth rather tha
 guessing:
 
 ```bash
-ps aux | grep "caddy.*run" | grep -v grep # --config reveals the registry dir
+ps aux | grep "caddy.*run" | grep -v grep           # --config reveals the registry dir
 find /Users/<user> -maxdepth 4 -name ecosystem.config.js 2>/dev/null | grep -v node_modules
 find /Users/<user> -maxdepth 5 -name Caddyfile 2>/dev/null | grep -v node_modules
 ```
@@ -372,7 +372,7 @@ public Funnel/auth routing, Linux PM2/Caddy notes, and browser verification stan
   cwd: "~/mini-apps",
   env: {
     PORT: 9120,
-    HERMES_PROFILE: "my-profile", // omit if you want the root state DB
+    HERMES_PROFILE: "my-profile",   // omit if you want the root state DB
   },
 },
 ```
@@ -413,7 +413,7 @@ Build it ONCE (takes ~1-2 min), then restart the PM2 process:
 cd ~/.hermes/hermes-agent/web && npm install --no-audit --no-fund && npm run build
 # build writes to../hermes_cli/web_dist/; then:
 PM2_HOME=/Users/<user>/.pm2 pm2 restart <name>-dashboard
-PM2_HOME=/Users/<user>/.pm2 pm2 reset <name>-dashboard # clear the crash-loop counter
+PM2_HOME=/Users/<user>/.pm2 pm2 reset <name>-dashboard   # clear the crash-loop counter
 ```
 
 Always check `ls ~/.hermes/hermes-agent/hermes_cli/web_dist/index.html` during
@@ -428,7 +428,7 @@ empty dashboard. Quick triage:
 ```bash
 for db in $(find ~/.hermes -name state.db 2>/dev/null); do
     n=$(sqlite3 "$db" "SELECT COUNT(*) FROM sessions;" 2>/dev/null)
-    echo " $n $db"
+    echo "  $n  $db"
 done
 ```
 
@@ -448,7 +448,7 @@ Fix — build it once (takes ~1-2 min), then restart:
 ```bash
 cd ~/.hermes/hermes-agent/web && npm install && npm run build
 # emits ~/.hermes/hermes-agent/hermes_cli/web_dist/
-pm2 restart <name> && pm2 reset <name> # reset clears the inflated restart counter
+pm2 restart <name> && pm2 reset <name>   # reset clears the inflated restart counter
 ```
 
 After that `--skip-build` is correct (fast start, no rebuild per boot).
@@ -599,8 +599,8 @@ under the rewritten environment:
 
 ```bash
 # Substitute your real username; do NOT use ~ or $HOME here.
-export PM2_HOME=/Users/<user>/.pm2 # macOS
-# export PM2_HOME=/home/<your-username>/.pm2 # Linux
+export PM2_HOME=/Users/<user>/.pm2     # macOS
+# export PM2_HOME=/home/<your-username>/.pm2    # Linux
 ```
 
 Quick sanity check after exporting — this should print the real user's home, not a
@@ -619,9 +619,9 @@ ps -ef | grep "PM2.*God" | grep -v grep
 Two daemons with different `$HOME` paths = you spawned a shadow. Clean up:
 
 ```bash
-pm2 kill # kills the shadow
-export PM2_HOME=/Users/<user>/.pm2 # the real one — literal path, no ~ or $HOME
-pm2 list # now shows the actual fleet
+pm2 kill                                  # kills the shadow
+export PM2_HOME=/Users/<user>/.pm2   # the real one — literal path, no ~ or $HOME
+pm2 list                                  # now shows the actual fleet
 ```
 
 Same trap applies to skill-asset paths: `~/mini-apps/...` resolves under the rewritten
@@ -638,7 +638,7 @@ Changing a password in `ecosystem.config.js` and running
 To actually reload:
 
 ```bash
-export PM2_HOME=/Users/<user>/.pm2 # literal path — no ~ or $HOME under Hermes
+export PM2_HOME=/Users/<user>/.pm2   # literal path — no ~ or $HOME under Hermes
 pm2 delete auth-service
 pm2 start ~/mini-apps/ecosystem.config.js --only auth-service
 ```
@@ -715,7 +715,7 @@ caddy reload --config ~/mini-apps/_registry/Caddyfile --adapter caddyfile
 for path in "" "auth/login?app=my-app" "my-app/" "health"; do
     code=$(curl -sk -o /dev/null -w "%{http_code}" \
         "https://<host>.<tailnet>.ts.net/$path")
-    echo " $code /$path"
+    echo "  $code  /$path"
 done
 
 # 5. Persist PM2 state across reboot
@@ -751,7 +751,7 @@ across hosts) will only send it back over **HTTPS**. Consequences:
 ```bash
 tailscale serve --bg --https=8443 http://127.0.0.1:8080
 # tailnet-only (no --funnel) — survives reboot natively. Verify:
-tailscale serve status # → https://<host>.<tailnet>.ts.net:8443 (tailnet only)
+tailscale serve status   # → https://<host>.<tailnet>.ts.net:8443 (tailnet only)
 ```
 
 Then the app is reachable at `https://<host>.<tailnet>.ts.net:8443/<slug>/`.
@@ -765,7 +765,7 @@ login=$(curl -sk -o /dev/null -w "%{http_code}" -c $JAR -X POST "$BASE/auth/logi
   --data-urlencode "app=<slug>" --data-urlencode "password=<pw>" \
   --data-urlencode "next=/<slug>/" -H "Origin: $BASE")
 authed=$(curl -sk -o /dev/null -w "%{http_code}" -b $JAR "$BASE/<slug>/")
-echo "login=$login authed=$authed" # want 303 + 200; wrong password → authed 302
+echo "login=$login authed=$authed"   # want 303 + 200; wrong password → authed 302
 ```
 
 Note: a box hitting its OWN tailnet hostname from inside an SSH session can hang
@@ -787,14 +787,14 @@ Before installing anything on a fresh fleet host, gather all of this at once:
 ```bash
 # identity + prereqs
 whoami; echo $HOME; sw_vers -productVersion; uname -m
-ls /opt/homebrew/bin/brew /opt/homebrew/bin/caddy 2>/dev/null # caddy often MISSING
+ls /opt/homebrew/bin/brew /opt/homebrew/bin/caddy 2>/dev/null   # caddy often MISSING
 which node pm2 hermes
 ls ~/.local/bin/hermes ~/.hermes/hermes-agent/venv/bin/hermes 2>/dev/null
 # sessions per DB (root vs profiles) — picks the right --profile flag
 for db in ~/.hermes/state.db ~/.hermes/profiles/*/state.db; do
   [ -f "$db" ] && echo "$(sqlite3 "$db" 'SELECT COUNT(*) FROM sessions') $db"; done
-ls ~/.hermes/hermes-agent/hermes_cli/web_dist/index.html 2>/dev/null # build needed?
-ls -d ~/mini-apps ~/openclaw-apps 2>/dev/null # existing router?
+ls ~/.hermes/hermes-agent/hermes_cli/web_dist/index.html 2>/dev/null  # build needed?
+ls -d ~/mini-apps ~/openclaw-apps 2>/dev/null                          # existing router?
 # who owns:443 / what serve routes exist already?
 /opt/homebrew/bin/tailscale serve status
 ```
@@ -832,7 +832,7 @@ the whole front door 502s while every backend stays healthy — a confusing outa
 returns 000. Fix and prevent:
 
 ```bash
-caddy validate --config <Caddyfile> --adapter caddyfile # validate first
+caddy validate --config <Caddyfile> --adapter caddyfile   # validate first
 pm2 start /opt/homebrew/bin/caddy --name caddy --interpreter none -- \
   run --config <Caddyfile> --adapter caddyfile
 pm2 save
@@ -987,7 +987,7 @@ browser click needed. The CLI path becomes the _lower-effort_ route. Check first
 cloudflared tunnel login
 
 # 1. create the tunnel (writes creds json next to cert.pem)
-cloudflared tunnel create <name> # e.g. miniapps → prints the tunnel-id
+cloudflared tunnel create <name>          # e.g. miniapps  → prints the tunnel-id
 
 # 2. write ~/.cloudflared/config.yml
 cat > ~/.cloudflared/config.yml <<'YML'

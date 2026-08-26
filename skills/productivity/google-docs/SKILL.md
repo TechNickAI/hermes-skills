@@ -207,10 +207,10 @@ first, preserve structure, then apply a minimal diff.
 The bundled helper also exposes Drive operations the skills reference:
 
 ```bash
-python3 scripts/gworkspace.py mkdir "Reports" # create a folder, returns its ID
-python3 scripts/gworkspace.py meta DOC_ID # metadata + webViewLink
-python3 scripts/gworkspace.py token # mint an access token for raw Docs API calls
-python3 scripts/gworkspace.py share DOC_ID --email a@b.com --role reader # share — IRREVERSIBLE
+python3 scripts/gworkspace.py mkdir "Reports"                 # create a folder, returns its ID
+python3 scripts/gworkspace.py meta DOC_ID                     # metadata + webViewLink
+python3 scripts/gworkspace.py token                           # mint an access token for raw Docs API calls
+python3 scripts/gworkspace.py share DOC_ID --email a@b.com --role reader   # share — IRREVERSIBLE
 ```
 
 **`share` sends a real, externally-visible grant.** Treat it like sending an email:

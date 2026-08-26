@@ -186,7 +186,7 @@ systemctl --user cat <svc> | grep -E 'ExecStart|WorkingDirectory'
 # 2. does the ref you intend to ship contain a build for THAT artifact shape?
 git show origin/<ref>:.github/workflows/<file> >/dev/null 2>&1 && echo PRESENT || echo ABSENT
 # 3. can the host even CONSUME the new artifact shape?
-getent group docker # empty group => this user cannot run containers unprivileged
+getent group docker    # empty group => this user cannot run containers unprivileged
 gh workflow list -R <owner>/<repo> --all | grep -i disabled
 ```
 
@@ -213,8 +213,8 @@ strings must be absent there and the pre-existing one present:
 
 ```
 FOUND: <OLD_FIX_SYMBOL> ← old fix, already shipped
-not found: no such (module|table): dbstat ← today's change, correctly absent
-not found: <NEW_FLAG> ← today's change, correctly absent
+not found: no such (module|table): dbstat   ← today's change, correctly absent
+not found: <NEW_FLAG>             ← today's change, correctly absent
 ```
 
 Use `grep -rqsF` for any assertion string containing regex metacharacters; plain
@@ -498,7 +498,7 @@ The data was sitting on the box the whole time. `sysstat` keeps 10-minute
 samples, so post-mortems are almost always possible:
 
 ```bash
-sar -r -f /var/log/sysstat/sa<DD> -s 22:00:00 -e 23:00:00 # memory
+sar -r -f /var/log/sysstat/sa<DD> -s 22:00:00 -e 23:00:00   # memory
 sar -S -f /var/log/sysstat/sa<DD>... # swap used
 sar -W -f /var/log/sysstat/sa<DD>... # swap in/out rate
 sar -u -f /var/log/sysstat/sa<DD>... # cpu (%nice = build)
@@ -523,11 +523,11 @@ Gather these first. Each one has burned a real deploy.
 1. **How is the service actually supervised?**
 
    ```bash
-   systemctl --user is-active <svc> # USER units are easy to miss
-   systemctl is-active <svc> # system level
-   systemctl --user cat <svc> # read WorkingDirectory + ExecStart
-   ps -o pid,ppid,cmd -p <pid> # ppid → /usr/lib/systemd/systemd --user ?
-   launchctl list | grep -i <svc> # macOS
+   systemctl --user is-active <svc>     # USER units are easy to miss
+   systemctl is-active <svc>            # system level
+   systemctl --user cat <svc>           # read WorkingDirectory + ExecStart
+   ps -o pid,ppid,cmd -p <pid>          # ppid → /usr/lib/systemd/systemd --user ?
+   launchctl list | grep -i <svc>       # macOS
    ```
 
    **A system-level `is-active` returning `inactive` does NOT mean unsupervised.**
@@ -584,7 +584,7 @@ This is the structural fix. It makes "the service has no working directory"
 impossible by construction.
 
 ```
-srv/releases/v1.2.3-<sha>/ <- build output lands here
+srv/releases/v1.2.3-<sha>/    <- build output lands here
 srv/current -> releases/v1.2.3-<sha>/
 ```
 
@@ -593,9 +593,9 @@ Point the supervisor's `WorkingDirectory` at `current`, never at a real build di
 ```bash
 REL=~/srv/releases/v1.2.3-$(git rev-parse --short HEAD)
 mkdir -p "$REL"
-#... build into $REL, or unpack a prebuilt artifact into it...
-ln -sfn "$REL" ~/srv/current # atomic flip
-systemctl --user restart <svc> # seconds of downtime
+# ... build into $REL, or unpack a prebuilt artifact into it ...
+ln -sfn "$REL" ~/srv/current          # atomic flip
+systemctl --user restart <svc>        # seconds of downtime
 ```
 
 Rollback = flip the symlink to the previous release dir and restart. Keep the
@@ -630,7 +630,7 @@ addons compile or vendor per-platform:
 
 ```bash
 find.build -name '*.node' | wc -l # count native binaries
-ls node_modules/@img # sharp ships per-platform variants
+ls node_modules/@img                        # sharp ships per-platform variants
 find. -path '*better-sqlite3*' -name '*.node'
 ```
 
@@ -724,7 +724,7 @@ the previous one cannot:
    grep -q '<title>MyApp' <<<"$dash" \
      && ! grep -qiE 'Application error|__NEXT_ERROR' <<<"$dash"
    chunk=$(grep -oE '/_next/static/[^"]+\.(js|css)' <<<"$dash" | head -1)
-   curl -s -o /dev/null -w '%{http_code}' "http://127.0.0.1:$PORT$chunk" # want 200
+   curl -s -o /dev/null -w '%{http_code}' "http://127.0.0.1:$PORT$chunk"   # want 200
    ```
    **Probe the routes the app really uses.** My first pass reported
    `/en/dashboard` etc. as 404 failures — they 404 on the _live_ instance too,

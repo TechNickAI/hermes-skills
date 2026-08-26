@@ -116,8 +116,8 @@ c=yaml.safe_load(open(sys.argv[1])) or {}
 d=c.get('display') or {}
 for k in ('cleanup_progress','tool_progress','interim_assistant_messages',
           'long_running_notifications','tool_progress_grouping'):
-    print(f' {k} = {d.get(k)!r}')
-print(' platforms:', d.get('platforms') or {})
+    print(f'  {k} = {d.get(k)!r}')
+print('  platforms:', d.get('platforms') or {})
 " ~/.hermes/profiles/<name>/config.yaml
 ```
 

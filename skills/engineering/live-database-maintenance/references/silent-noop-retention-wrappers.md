@@ -62,7 +62,7 @@ Fix: **reconcile against the database**, not stdout.
 ```python
 before = _source_count(db, src)
 subprocess.run(cmd,...)
-deleted = before - _source_count(db, src) # ground truth
+deleted = before - _source_count(db, src)   # ground truth
 ```
 
 And when you must parse (dry runs), **raise on unrecognised output** rather
@@ -84,7 +84,7 @@ count matches and the loss is invisible.
 Track **identities** and require a subset relation:
 
 ```python
-before = _protected_ids(db) # set of ids
+before = _protected_ids(db)          # set of ids
 ...
 lost = before - _protected_ids(db)
 if lost:
@@ -122,7 +122,7 @@ other run still needs. SQLite serializes individual transactions, not your
 protocol.
 
 ```python
-fcntl.flock(fh.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB) # held for the whole run
+fcntl.flock(fh.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)   # held for the whole run
 ```
 
 ## 7. The launcher hardcodes which profile it maintains
@@ -135,7 +135,7 @@ arguments and exports no profile name. So a launcher written while testing one
 target acquires a default:
 
 ```python
-PROFILE = os.environ.get("DBMAINT_PROFILE", "<profile>") # WRONG
+PROFILE = os.environ.get("DBMAINT_PROFILE", "<profile>")   # WRONG
 ```
 
 Deployed to a second host, every job on it maintains `a trading agent` — which does not

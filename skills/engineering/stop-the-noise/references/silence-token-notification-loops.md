@@ -40,7 +40,7 @@ flood kept arriving between scheduled ticks.
 The frequency pattern pointed at an event source. The systemd unit list named it:
 
 ```
-pm-copytrade.service loaded active running PM-Copytrade listener (… -> Hermes webhook)
+pm-copytrade.service  loaded active running  PM-Copytrade listener (… -> Hermes webhook)
 ```
 
 The listener POSTs one signal per leader trade to
@@ -99,12 +99,12 @@ json.dump(d, open(P, "w"), indent=2)
 `gateway/platforms/webhook.py`:
 
 ```
-166: self._dynamic_routes: Dict[str, dict] = {}
-167: self._dynamic_routes_mtime: float = 0.0
-438: def _reload_dynamic_routes(self) -> None:
-451: if mtime <= self._dynamic_routes_mtime: # mtime-gated
-528: # Hot-reload dynamic subscriptions on each request (mtime-gated, cheap)
-529: self._reload_dynamic_routes()
+166:  self._dynamic_routes: Dict[str, dict] = {}
+167:  self._dynamic_routes_mtime: float = 0.0
+438:  def _reload_dynamic_routes(self) -> None:
+451:      if mtime <= self._dynamic_routes_mtime:   # mtime-gated
+528:  # Hot-reload dynamic subscriptions on each request (mtime-gated, cheap)
+529:  self._reload_dynamic_routes()
 ```
 
 Cron equivalent: `cron/jobs.py::load_jobs()` reads from disk inside
@@ -122,7 +122,7 @@ The pre-restart gateway logs showed, on the next bounce:
 
 ```
 pruning stale sessions.json entry 'agent:main:webhook:webhook:webhook:svc-copy:…'
-  (end_reason='webhook_complete'); left by a crashed gateway × 20+
+  (end_reason='webhook_complete'); left by a crashed gateway     × 20+
 Marked 13 interrupted cron execution(s) unknown after restart
 ```
 

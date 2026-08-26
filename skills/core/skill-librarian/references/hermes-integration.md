@@ -13,7 +13,7 @@ the runtime tells you what _did_.
 import os, sys
 sys.path.insert(0, os.path.expanduser("~/.hermes/hermes-agent"))
 from agent.skill_commands import get_skill_commands
-live = {k.lstrip("/") for k in get_skill_commands()} # dict keyed "/name"
+live = {k.lstrip("/") for k in get_skill_commands()}   # dict keyed "/name"
 ```
 
 Run it with `HERMES_HOME=<profile-dir>` set, using the runtime's own interpreter

@@ -31,8 +31,8 @@ invites a re-litigation you deserve to lose.**
 ## 1 — License FIRST, and never assume one exists
 
 ```bash
-gh api repos/<owner>/<repo> --jq '.license.spdx_id' # null == no license
-ls LICENSE* COPYING* 2>/dev/null # confirm in-tree too
+gh api repos/<owner>/<repo> --jq '.license.spdx_id'   # null == no license
+ls LICENSE* COPYING* 2>/dev/null                       # confirm in-tree too
 ```
 
 `hermes-progress-tail`: **`license: null`, no LICENSE file.** 277 commits, 11

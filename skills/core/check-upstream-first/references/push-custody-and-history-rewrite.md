@@ -24,9 +24,9 @@ A clone made from a local path inherits that path as `origin`. Always confirm th
 destination before believing a push:
 
 ```bash
-git remote -v # is origin actually the REMOTE?
-git push origin HEAD:refs/heads/<branch> # no -q — read the output
-git ls-remote <remote-url> refs/heads/<branch> # the sha MUST come back
+git remote -v                                    # is origin actually the REMOTE?
+git push origin HEAD:refs/heads/<branch>         # no -q — read the output
+git ls-remote <remote-url> refs/heads/<branch>   # the sha MUST come back
 ```
 
 The `ls-remote` is the assertion. Everything before it is a claim.
@@ -55,7 +55,7 @@ git bundle create /tmp/x.bundle <base>..HEAD
 
 # on the scoped machine
 scp host:/tmp/x.bundle /tmp/x.bundle
-git bundle list-heads /tmp/x.bundle # bundle ref may just be HEAD
+git bundle list-heads /tmp/x.bundle                  # bundle ref may just be HEAD
 git fetch /tmp/x.bundle 'HEAD:refs/heads/incoming'
 git push origin incoming:refs/heads/<branch>
 ```
@@ -67,7 +67,7 @@ named branch will not expose the ref name you expect, and
 Check which credential has the scope before choosing where to push from:
 
 ```bash
-gh auth status # look for 'workflow' in the token scopes line
+gh auth status    # look for 'workflow' in the token scopes line
 ```
 
 ## Dropping an add/delete pair, safely, from a deployed branch
@@ -84,8 +84,8 @@ byte-identical to the currently deployed commit:
 
 ```bash
 git rev-parse <deployed-sha>^{tree}
-git rev-parse HEAD^{tree} # must match exactly
-git diff <deployed-sha> HEAD | wc -l # must be 0
+git rev-parse HEAD^{tree}              # must match exactly
+git diff <deployed-sha> HEAD | wc -l   # must be 0
 ```
 
 Matching tree hashes are the only proof that rewriting history left the shipped

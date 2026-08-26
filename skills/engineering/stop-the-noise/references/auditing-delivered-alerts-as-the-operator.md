@@ -123,11 +123,11 @@ only trustworthy has-the-human-seen-it signal.
 What matters is not the global unread rate but its **concentration**. Measured:
 
 ```
-26 unread of 230 cron cards overall — looks fine
-  Ken[Bot] 15 unread / 69 ← the two noisiest
-  an owner 9 unread / 59 ← rooms hold 24 of the 26
-  the operations agent 0 unread / 28
-  a monitoring agent 0 unread / 8
+26 unread of 230 cron cards overall  — looks fine
+  Ken[Bot]  15 unread / 69   ← the two noisiest
+  an owner   9 unread / 59   ← rooms hold 24 of the 26
+  the operations agent      0 unread / 28
+  a monitoring agent      0 unread / 8
 ```
 
 The owner had started skipping precisely the channels that shout most. That is
@@ -144,10 +144,10 @@ suppress, see the parent skill's "Wrong #1") or a re-detected transient. The
 **internal numbers** disambiguate:
 
 ```
-13:56 ticks=3 stale=0.8min
-13:58 ticks=3 stale=2.8min
-14:56 ticks=3 stale=0.8min ← byte-identical state, one hour later
-15:56 ticks=3 stale=0.8min
+13:56  ticks=3  stale=0.8min
+13:58  ticks=3  stale=2.8min
+14:56  ticks=3  stale=0.8min     ← byte-identical state, one hour later
+15:56  ticks=3  stale=0.8min
 ```
 
 A genuinely worsening fault has _moving_ numbers. State that resets to the same

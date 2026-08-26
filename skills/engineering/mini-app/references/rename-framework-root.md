@@ -47,7 +47,7 @@ patch**. Those are dated notes, not active config. Let them age.
 # 1. Stop everything that holds the path open
 PM2_HOME=/Users/<user>/.pm2 pm2 stop all
 kill $(pgrep -f "caddy run" | head -1)
-sleep 2 && pgrep -f "caddy run" # verify caddy is down
+sleep 2 && pgrep -f "caddy run"  # verify caddy is down
 
 # 2. Move (NOT symlink). Guard against existing target.
 test -e /Users/<user>/NEWNAME && { echo "ERROR target exists"; exit 1; }
@@ -65,7 +65,7 @@ sed -i '' 's|OLDNAME|NEWNAME|g' \
   /Users/<user>/NEWNAME/README.md
 
 # 5. Patch PM2 dump (25+ cwd refs auto-rewritten on `pm2 save` after restart,
-# but dump is what PM2 reads on resurrect — patch it now to be safe)
+#    but dump is what PM2 reads on resurrect — patch it now to be safe)
 sed -i '' 's|/Users/<user>/OLDNAME|/Users/<user>/NEWNAME|g' /Users/<user>/.pm2/dump.pm2
 
 # 6. Patch outside refs (mini-app skill is the only known one)

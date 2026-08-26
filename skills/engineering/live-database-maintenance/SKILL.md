@@ -330,13 +330,13 @@ The single slowest step is usually the **online backup** (a 353 MB backup on a
 before the stop is what takes a maintenance run from minutes to ~30–60 seconds.
 
 ```
-1. PRE-FLIGHT <- RUNNING (counts, disk, schema/timestamp verification)
-2. ONLINE BACKUP <- RUNNING (slowest step; verify 80-120% + integrity_check)
-3. STOP <-- downtime begins
+1. PRE-FLIGHT      <- RUNNING  (counts, disk, schema/timestamp verification)
+2. ONLINE BACKUP   <- RUNNING  (slowest step; verify 80-120% + integrity_check)
+3. STOP                                    <-- downtime begins
 4. DELETE (one transaction)
 5. wal_checkpoint(TRUNCATE) + VACUUM
-6. START + poll health <-- downtime ends
-7. POST-FLIGHT <- RUNNING (re-count, reconcile, prune old backups)
+6. START + poll health                     <-- downtime ends
+7. POST-FLIGHT     <- RUNNING  (re-count, reconcile, prune old backups)
 ```
 
 State the budget in the job prompt explicitly, and forbid discovery work inside

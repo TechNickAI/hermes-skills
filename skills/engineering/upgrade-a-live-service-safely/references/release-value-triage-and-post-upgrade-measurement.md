@@ -15,8 +15,8 @@ A `version` field usually names the release LINE, not what is deployed. On a
 standalone-release layout the truth is the `current` symlink:
 
 ```bash
-ls -l <app>/current # -> releases/standalone-<sha>
-cat <app>/.previous_release # the build you came FROM
+ls -l <app>/current            # -> releases/standalone-<sha>
+cat  <app>/.previous_release   # the build you came FROM
 git rev-list --count <old-sha>..<new-sha>
 ```
 
@@ -47,7 +47,7 @@ select status, count(*) from call_logs where timestamp > ? group by status;
 select provider, count(*) n, sum(tokens_in) ti, sum(tokens_cache_read) cr
   from call_logs where timestamp > ? and tokens_in > 0 group by provider;
 select duration from call_logs where timestamp > ? and duration is not null
-  order by duration; -- compute p50/p95/p99/max in code, never the mean
+  order by duration;   -- compute p50/p95/p99/max in code, never the mean
 ```
 
 A feature is only interesting if a number here moves.

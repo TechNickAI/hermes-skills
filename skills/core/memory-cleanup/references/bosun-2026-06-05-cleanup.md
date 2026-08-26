@@ -52,8 +52,8 @@ Achieved: 6,101 → 2,048 bytes (66.4%).
 ## Verification run (Python)
 
 ```
-before: 6101 after: 2048 saved: 4053 reduction: 66.4%
+before: 6101  after: 2048  saved: 4053  reduction: 66.4%
 firebreak intact: True
 firebreak unchanged: True (byte-identical entry)
-entries_before: 18 entries_after: 12
+entries_before: 18  entries_after: 12
 ```

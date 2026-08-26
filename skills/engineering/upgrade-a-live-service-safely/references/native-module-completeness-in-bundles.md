@@ -13,9 +13,9 @@ A CI artifact was cut over after passing every bundle assertion in the workflow.
 It was missing three things the previous release had:
 
 ```
-node_modules/better-sqlite3/build/Release/better_sqlite3.node (compiled driver)
-node_modules/bindings/ (better-sqlite3 requires it)
-node_modules/file-uri-to-path/ (bindings requires it)
+node_modules/better-sqlite3/build/Release/better_sqlite3.node   (compiled driver)
+node_modules/bindings/                                          (better-sqlite3 requires it)
+node_modules/file-uri-to-path/                                  (bindings requires it)
 ```
 
 With no native driver the app fell through its driver ladder to **sql.js**
@@ -90,7 +90,7 @@ line.** Stack traces confirm it: the error frames named
 ```bash
 MAIN=$(systemctl --user show <svc> -p MainPID --value)
 CHILD=$(pgrep -P "$MAIN" | head -1)
-grep -o '/[^ ]*better_sqlite3\.node' /proc/$CHILD/maps | sort -u # Linux
+grep -o '/[^ ]*better_sqlite3\.node' /proc/$CHILD/maps | sort -u   # Linux
 ```
 
 Checking the parent's maps reports zero mappings and looks like failure even

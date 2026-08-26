@@ -50,15 +50,15 @@ Call the product's own resolver:
 import os
 os.environ["HERMES_HOME"] = os.path.expanduser("~/.hermes")
 from dotenv import load_dotenv
-load_dotenv(os.path.expanduser("~/.hermes/.env"), override=True) # env can outrank the file
+load_dotenv(os.path.expanduser("~/.hermes/.env"), override=True)   # env can outrank the file
 
 mod = __import__("gateway.run", fromlist=["x"])
-gc = __import__("gateway.config", fromlist=["GatewayConfig"])
+gc  = __import__("gateway.config", fromlist=["GatewayConfig"])
 from gateway.session import Platform
 
-raw = getattr(mod, "_load_" + "gateway" + "_config")() # returns a dict
+raw = getattr(mod, "_load_" + "gateway" + "_config")()   # returns a dict
 cfg = gc.GatewayConfig.from_dict(raw) # NOT.from_env()
-print(cfg.platforms.get(Platform.BLUEBUBBLES)) # None => nothing read it
+print(cfg.platforms.get(Platform.BLUEBUBBLES))           # None => nothing read it
 ```
 
 Two traps inside the probe itself, both hit live:
@@ -72,10 +72,10 @@ For a top-level block (e.g. `telegram:`) that the loader bridges into `extra`,
 rebuild it the way the loader does before instantiating an adapter:
 
 ```python
-tg = dict(raw.get("telegram") or {})
+tg  = dict(raw.get("telegram") or {})
 ext = dict(tg.pop("extra", {}) or {})
 for k, v in tg.items():
-    ext.setdefault(k, v) # loader folds siblings into extra
+    ext.setdefault(k, v)          # loader folds siblings into extra
 tg["extra"] = ext
 pcfg = gc.PlatformConfig.from_dict(tg)
 ```

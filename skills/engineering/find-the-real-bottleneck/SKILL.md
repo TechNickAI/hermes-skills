@@ -168,8 +168,8 @@ run is not a measurement — it is a sample from a wide distribution.
 **Measured example (EBS gp3, same config, 5 alternating runs of 200 inserts):**
 
 ```
-12 indexes: 7.76, 4.24, 0.78, 0.73, 0.78 ms median 0.781
- 9 indexes: 0.44, 0.43, 0.48, 2.39, 0.46 ms median 0.455
+12 indexes: 7.76, 4.24, 0.78, 0.73, 0.78 ms   median 0.781
+ 9 indexes: 0.44, 0.43, 0.48, 2.39, 0.46 ms   median 0.455
 ```
 
 Within-config spread is ~10x. Any single-run comparison here can "prove" either
@@ -248,7 +248,7 @@ Always compute whether the observed load is _reasonable_ for the work being done
 ```
 service writes: 82 MB/s sustained
 DB file growth: 0.02 MB/s
-insert rate: 0.1 rows/sec
+insert rate:    0.1 rows/sec
 ```
 
 82 MB/s to persist 0.1 rows/sec is not a capacity problem — it is a **write
@@ -265,11 +265,11 @@ visible.
 Do not read RSS and conclude "GC pressure." Break it down:
 
 ```
-rss 2313 MB total process
-heapTotal 668 MB V8 heap reserved
-heapUsed 540 MB <- the ONLY thing GC manages
-external 1194 MB C++ objects tied to JS
-arrayBuffers 1092 MB raw buffers (in-flight stream payloads)
+rss           2313 MB   total process
+heapTotal      668 MB   V8 heap reserved
+heapUsed       540 MB   <- the ONLY thing GC manages
+external      1194 MB   C++ objects tied to JS
+arrayBuffers  1092 MB   raw buffers (in-flight stream payloads)
 ```
 
 If `arrayBuffers` dominates, the memory is **working set of in-flight work**, not
@@ -318,8 +318,8 @@ two weeks ago). If those come back, it is not re-insertion, it is page-cache
 overwrite:
 
 ```
-Jul-20 rows: 22515 -> 0 (deleted 22515)
-after 6s, Jul-20 rows: 22515 <-- restored
+Jul-20 rows: 22515 -> 0  (deleted 22515)
+after 6s, Jul-20 rows: 22515   <-- restored
 ```
 
 `wal_checkpoint(TRUNCATE)` makes it _briefly_ visible, which is a red herring —
@@ -356,7 +356,7 @@ and had been implied to.
 **Before recommending a machine resize, compute the ceiling of the win:**
 
 ```
-router overhead (warm) 2.4 ms
+router overhead (warm)     2.4 ms
 upstream LLM (avg TTFT) 16,130 ms
 => router is 0.015% of a request
 ```
@@ -479,7 +479,7 @@ covers versus what the real one does (here: 3 tables hand-written vs 12 in
   2. Startup logs said it outright:
      ```
      [DB] Sync driver 'better-sqlite3' failed to open: Cannot find module 'better-sqlite3'
-     [DB] Sync driver 'node:sqlite' failed to open: Cannot find module 'node:sqlite'
+     [DB] Sync driver 'node:sqlite'  failed to open: Cannot find module 'node:sqlite'
      [DB] Pre-initializing sql.js WASM (synchronous drivers unavailable)...
      ```
   3. File mtime advanced 5–9 times per 10s on a 438 MB DB ≈ **216 MB/s** of

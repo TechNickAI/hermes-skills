@@ -21,19 +21,19 @@ change absent, running the **same check CI ran**, and comparing.
 git diff --name-only HEAD~1 HEAD
 
 # 2. Do the CI-flagged files appear in that list?
-# If none of them do, that's suggestive — but not proof. Prove it:
+#    If none of them do, that's suggestive — but not proof. Prove it:
 
 # 3. Run the failing check on the untouched base
 git checkout -q upstream/release/vX.Y.Z
 node --import tsx/esm --test tests/unit/<the-file-CI-flagged>.test.ts \
   2>&1 | grep -E "^ℹ (tests|pass|fail)"
-# -> 40 tests, 38 pass, 2 fail
+#    -> 40 tests, 38 pass, 2 fail
 
 # 4. Run the identical command on your branch
 git checkout -q my-fix-branch
 node --import tsx/esm --test tests/unit/<the-file-CI-flagged>.test.ts \
   2>&1 | grep -E "^ℹ (tests|pass|fail)"
-# -> 40 tests, 38 pass, 2 fail <- identical => not yours
+#    -> 40 tests, 38 pass, 2 fail   <- identical => not yours
 ```
 
 Identical pass/fail counts on both sides is the evidence. Anything else — "those files
@@ -54,9 +54,9 @@ without reinstalling, so `node_modules` was stale. Every one of the six
 "missing" packages was already declared in `package.json`:
 
 ```
-                        BEFORE npm install AFTER
-typecheck:core 7 errors 0 errors
-tests/unit/api/** 196 pass, 5 fail 215 pass, 0 fail
+                        BEFORE npm install    AFTER
+typecheck:core          7 errors              0 errors
+tests/unit/api/**       196 pass, 5 fail      215 pass, 0 fail
 ```
 
 A 28-second `npm install` cleared what had been reported as an environmental
@@ -132,8 +132,8 @@ Verify the fix by running the _exact_ CI command locally, not a proxy:
 
 ```bash
 node scripts/check/check-mutation-test-coverage.mjs --strict
-# before: ✗ 1 covering unit test(s) missing (reproduces CI)
-# after: ✓ No drift — every covering unit test is listed. EXIT=0
+# before: ✗ 1 covering unit test(s) missing   (reproduces CI)
+# after:  ✓ No drift — every covering unit test is listed.  EXIT=0
 ```
 
 A local red→green on the identical command is real evidence. "The change looks
@@ -147,7 +147,7 @@ failure signal; jobs had never been _scheduled_.
 ```bash
 gh run list --repo OWNER/REPO --limit 12 \
   --json status,conclusion,headBranch -q '.[] | "\(.status) \(.headBranch)"'
-# all `queued`, including other contributors' branches => pool saturated, not you
+# all `queued`, including other contributors' branches  => pool saturated, not you
 gh run list --repo OWNER/REPO --status in_progress --limit 5
 # other PRs in_progress 29+ min => confirms a backlog
 ```
@@ -173,7 +173,7 @@ targeted single-line edit, and check whether a formatter complaint predates you:
 
 ```bash
 git stash push file.json -q
-npx prettier --check file.json # same warning on untouched upstream => pre-existing
+npx prettier --check file.json   # same warning on untouched upstream => pre-existing
 git stash pop -q
 ```
 
@@ -185,8 +185,8 @@ maintainer must review.
 Give the user the comparison, not the conclusion alone:
 
 ```
-BASE (fix absent): 40 tests, 38 pass, 2 fail
-OUR branch: 40 tests, 38 pass, 2 fail <- identical
+BASE (fix absent):  40 tests, 38 pass, 2 fail
+OUR branch:         40 tests, 38 pass, 2 fail   <- identical
 ```
 
 Then name the responsible commit and date. If you're about to open an upstream PR

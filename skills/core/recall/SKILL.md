@@ -77,8 +77,8 @@ a hardcoded path** — a named profile keeps its own store, and reading the wron
 returns an empty result that looks exactly like a missing session:
 
 ```
-$HERMES_HOME/state.db # active profile, when HERMES_HOME is set
-~/.hermes/state.db # root agent, when it is not
+$HERMES_HOME/state.db          # active profile, when HERMES_HOME is set
+~/.hermes/state.db             # root agent, when it is not
 ```
 
 Read the tail of a session directly:
@@ -91,9 +91,9 @@ import sqlite3, os
 home = os.environ.get("HERMES_HOME") or os.path.expanduser("~/.hermes")
 db = os.path.join(home, "state.db")
 
-con = sqlite3.connect(f"file:{db}?mode=ro", uri=True) # read-only: never disturb a live session
+con = sqlite3.connect(f"file:{db}?mode=ro", uri=True)   # read-only: never disturb a live session
 
-session_id = "..." # from session_search
+session_id = "..."   # from session_search
 rows = con.execute("""
     SELECT role, tool_name, content
     FROM messages

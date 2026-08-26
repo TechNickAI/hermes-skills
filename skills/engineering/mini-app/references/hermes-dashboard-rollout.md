@@ -13,7 +13,7 @@ out-log shows, repeating:
 ```
 ✗ --skip-build was passed but no web dist found at:
   /Users/<user>/.hermes/hermes-agent/hermes_cli/web_dist
-  Pre-build first: cd web && npm install && npm run build
+  Pre-build first:  cd web && npm install && npm run build
 ```
 
 **Cause:** a fresh Hermes install has the dashboard SOURCE (`hermes-agent/web/`) but not
@@ -63,7 +63,7 @@ door (e.g. `tailscale serve --http=4243`) can never complete login.
   `:443`:
   ```bash
   tailscale serve --bg --https=8443 http://127.0.0.1:8080
-  # → https://<host>.<tailnet>.ts.net:8443/ (tailnet only, real TLS cert)
+  # → https://<host>.<tailnet>.ts.net:8443/  (tailnet only, real TLS cert)
   ```
   `--bg` config persists across reboots. No funnel = not public.
 
@@ -74,8 +74,8 @@ BASE="https://<host>.<tailnet>.ts.net:8443"
 JAR=/tmp/j.txt; rm -f $JAR
 curl -sk -o /dev/null -w "%{http_code}\n" -c $JAR -X POST "$BASE/auth/login" \
   --data-urlencode "app=<slug>" --data-urlencode "password=<pw>" \
-  --data-urlencode "next=/<slug>/" -H "Origin: $BASE" # 303
-curl -sk -o /dev/null -w "%{http_code}\n" -b $JAR "$BASE/<slug>/" # 200 = WORKS
+  --data-urlencode "next=/<slug>/" -H "Origin: $BASE"   # 303
+curl -sk -o /dev/null -w "%{http_code}\n" -b $JAR "$BASE/<slug>/"   # 200 = WORKS
 ```
 
 ## Check who owns:443 BEFORE making exposure decisions
@@ -101,7 +101,7 @@ the wrong DB shows an empty dashboard. Triage:
 
 ```bash
 for db in ~/.hermes/state.db ~/.hermes/profiles/*/state.db; do
-  [ -f "$db" ] && echo "$(sqlite3 "$db" 'SELECT COUNT(*) FROM sessions' 2>/dev/null) $db"
+  [ -f "$db" ] && echo "$(sqlite3 "$db" 'SELECT COUNT(*) FROM sessions' 2>/dev/null)  $db"
 done
 ```
 

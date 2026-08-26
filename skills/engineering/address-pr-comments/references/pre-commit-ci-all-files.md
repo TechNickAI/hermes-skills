@@ -10,7 +10,7 @@ This has major implications for the fix-CI-and-merge workflow.
 ```bash
 # Read the workflow YAML — look for the pre-commit action usage
 grep -A2 "pre-commit".github/workflows/build.yml
-# If you see: uses: pre-commit/action@v3.0.1 (with no extra args)
+# If you see: uses: pre-commit/action@v3.0.1  (with no extra args)
 # → it runs --all-files by default
 ```
 
@@ -29,11 +29,11 @@ diff (50+ files) of unrelated formatting churn.
    command. If main also fails the same hooks with the same errors, those
    failures are pre-existing and not caused by the PR.
    ```bash
-   git stash # save any local changes
+   git stash  # save any local changes
    git checkout main
    pre-commit run --all-files 2>&1 | grep -E "Passed|Failed"
    git checkout <pr-branch>
-   git stash pop # restore changes
+   git stash pop  # restore changes
    ```
 3. **Commit all auto-fixes anyway**: because CI runs `--all-files`, you must
    push ALL auto-fixes (even for files the PR didn't touch) to make the lint
@@ -83,7 +83,7 @@ ruff-format wants to wrap it in parentheses. The ruff _check_ hook passes
 
 ```bash
 # After any manual edit, before committing:
-pip install ruff # if not already installed
+pip install ruff  # if not already installed
 ruff format <changed-files>
 pre-commit run --files <changed-files>
 # Then commit and push

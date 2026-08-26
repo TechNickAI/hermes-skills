@@ -81,8 +81,8 @@ Or resolve via Hermes's skills directory convention:
 
 ```bash
 # The skill is installed at one of these locations:
-# ~/.hermes/skills/report/scripts/file_report.py (single-profile install)
-# ~/.hermes/profiles/<name>/skills/*/report/scripts/file_report.py (profile install)
+#   ~/.hermes/skills/report/scripts/file_report.py          (single-profile install)
+#   ~/.hermes/profiles/<name>/skills/*/report/scripts/file_report.py  (profile install)
 SCRIPT=$(find ~/.hermes -path "*/report/scripts/file_report.py" 2>/dev/null | head -1)
 ```
 

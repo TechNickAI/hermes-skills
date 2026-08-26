@@ -25,8 +25,8 @@ The natural defensive pattern is broken:
 # WRONG — the first candidate always "succeeds", so the fallback never runs
 for uri in (f"file:{path}?mode=ro", f"file:{path}?immutable=1"):
     try:
-        return sqlite3.connect(uri, uri=True) # returns for mode=ro, then
-    except Exception: # explodes later at query time
+        return sqlite3.connect(uri, uri=True)   # returns for mode=ro, then
+    except Exception:                            # explodes later at query time
         continue
 ```
 

@@ -50,7 +50,7 @@ Edit these knobs at the top of your cron-job prompt (or pass via env):
   skill (the agent your sub-process actually runs)
 - `terminal` and `delegation` toolsets enabled
 - Workspace provisioning script (e.g. `workshop {repo} {branch}` or
-  `gh repo clone...; cd...`)
+  `gh repo clone ... ; cd ...`)
 
 ## How it thinks
 
@@ -68,48 +68,46 @@ Edit these knobs at the top of your cron-job prompt (or pass via env):
 2.  **For each PR, fetch comments from both endpoints and filter out anything the PR
     author has already engaged with:**
 
-        ```bash
-        # Line-level review comments. Three filters:
-        # 1. Not authored by the PR author
-        # 2. Top-level (no in_reply_to_id) — replies are handled via their parent
-        # 3. Zero reactions
-        # Then second pass: drop any top-level comment that has a child reply from the
-        # PR author (they already responded inline).
-        gh api repos/{owner}/{repo}/pulls/{pr}/comments > /tmp/line-comments.json
+    ```bash
+    # Line-level review comments. Three filters:
+    #   1. Not authored by the PR author
+    #   2. Top-level (no in_reply_to_id) — replies are handled via their parent
+    #   3. Zero reactions
+    # Then second pass: drop any top-level comment that has a child reply from the
+    # PR author (they already responded inline).
+    gh api repos/{owner}/{repo}/pulls/{pr}/comments > /tmp/line-comments.json
 
-        AUTHOR="{author}"
-        jq --arg author "$AUTHOR" '
-          # Collect IDs of parent comments that the author has replied to
-          (map(select(.user.login == $author and.in_reply_to_id != null) |.in_reply_to_id) | unique) as $replied_to
-          | map(select(
-
-    .user.login != $author
-          and.in_reply_to_id == null
+    AUTHOR="{author}"
+    jq --arg author "$AUTHOR" '
+      # Collect IDs of parent comments that the author has replied to
+      (map(select(.user.login == $author and .in_reply_to_id != null) | .in_reply_to_id) | unique) as $replied_to
+      | map(select(
+          .user.login != $author
+          and .in_reply_to_id == null
           and ((.reactions.total_count // 0) == 0)
           and (.id as $id | $replied_to | index($id) | not)
-    ))
+        ))
     ' /tmp/line-comments.json
 
-        # Issue-level (general PR) comments. These are flat (no threading), so use a
-        # timestamp heuristic: drop any comment if the PR author posted ANY issue comment
-        # AFTER it. That's a reasonable proxy for "the author saw it and moved on."
-        gh api repos/{owner}/{repo}/issues/{pr}/comments > /tmp/issue-comments.json
+    # Issue-level (general PR) comments. These are flat (no threading), so use a
+    # timestamp heuristic: drop any comment if the PR author posted ANY issue comment
+    # AFTER it. That's a reasonable proxy for "the author saw it and moved on."
+    gh api repos/{owner}/{repo}/issues/{pr}/comments > /tmp/issue-comments.json
 
-        jq --arg author "$AUTHOR" '
-          # Latest timestamp of any author issue comment (null if none)
-          (map(select(.user.login == $author) |.created_at) | sort | last // "0") as $author_last
-          | map(select(
-
-    .user.login != $author
-    and ((.reactions.total_count // 0) == 0)
-    and (.created_at > $author_last)
-    ))
+    jq --arg author "$AUTHOR" '
+      # Latest timestamp of any author issue comment (null if none)
+      (map(select(.user.login == $author) | .created_at) | sort | last // "0") as $author_last
+      | map(select(
+          .user.login != $author
+          and ((.reactions.total_count // 0) == 0)
+          and (.created_at > $author_last)
+        ))
     ' /tmp/issue-comments.json
     ```
 
-        "Unhandled" = not from PR author, zero reactions, AND no later author engagement
-        (inline reply for line comments, later issue comment for issue comments). No bot
-        allowlist — catches bot reviewers (CodeRabbit, claude-review) and humans alike.
+    "Unhandled" = not from PR author, zero reactions, AND no later author engagement
+    (inline reply for line comments, later issue comment for issue comments). No bot
+    allowlist — catches bot reviewers (CodeRabbit, claude-review) and humans alike.
 
 3.  **Filter:**
     - Skip dependabot/renovate PRs unless they have non-bot review comments
@@ -164,7 +162,7 @@ Do NOT merge anything. Leave merge for human review. """, ) ```
 ## Pitfalls
 
 - **ACP slash commands are meaningless** — `claude --print "/address-pr-comments"` does
-  NOT invoke the skill. Always use the explicit "Use the Skill tool to invoke..."
+  NOT invoke the skill. Always use the explicit "Use the Skill tool to invoke ..."
   prompt above. Verify in the output.
 - **Bot allowlist trap** — early versions hardcoded bot logins to skip. Don't. Use the
   zero-reactions heuristic — it covers any reviewer category.

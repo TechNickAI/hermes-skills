@@ -12,7 +12,7 @@ The single most damaging error of the session.
 # WRONG — what I did
 out=$(npm run check:file-size 2>&1)
 echo "$out" | grep -qiE "fail|error" && echo FAIL || echo PASS
-# -> printed PASS
+#   -> printed PASS
 ```
 
 The tool reports in **Portuguese**: `[file-size] 2 violação(ões):` with `✗`
@@ -40,8 +40,8 @@ currently-deployed bundle, which contained one of the three markers:
 
 ```
 FOUND: <OLD_FIX_SYMBOL> <- the old fix, present
-not found: no such (module|table): dbstat <- the new fix, correctly absent
-not found: <NEW_FLAG> <- the new fix, correctly absent
+not found: no such (module|table): dbstat   <- the new fix, correctly absent
+not found: <NEW_FLAG>             <- the new fix, correctly absent
 ```
 
 Correct in both directions, so the gate would genuinely have caught a bundle
@@ -59,8 +59,8 @@ Before running an inherited script against production, grep its own failure
 flags:
 
 ```bash
-grep -n 'FAIL\|ERR\|RC=' script.sh # is each one ever tested?
-shellcheck -S warning script.sh # SC2034 = computed and thrown away
+grep -n 'FAIL\|ERR\|RC=' script.sh    # is each one ever tested?
+shellcheck -S warning script.sh       # SC2034 = computed and thrown away
 ```
 
 ## `head`, `read -n`, and early `break` manufacture false failures on streams
@@ -75,7 +75,7 @@ actually the test hanging up. Capture to a file, then assert:
 
 ```bash
 curl -N... > /tmp/out.sse 2>&1
-[ "$(grep -c '^event:' /tmp/out.sse)" -ge 2 ] # >=2 proves it progressed
+[ "$(grep -c '^event:' /tmp/out.sse)" -ge 2 ]   # >=2 proves it progressed
 ```
 
 Verified: file capture gave 8 SSE events / 1602 bytes; the `head` pipeline
@@ -126,13 +126,13 @@ false "verified" would have stood.
 
 ```bash
 # 1. an explicit success line from the runner
-h‍ermes cron run <job_id> # -> "Ran now: succeeded."
+h‍ermes cron run <job_id>          # -> "Ran now: succeeded."
 
 # 2. a NEW artifact, newer than the change you are validating
 find ~/.h‍ermes/cron/output/<job_id> -name '*.md' -newermt "<change time>"
 
 # 3. the job record flipped, not just the log staying quiet
-# status: error -> ok, and the error field actually EMPTY
+#    status: error -> ok, and the error field actually EMPTY
 ```
 
 Only after all three does "0 auth failures" mean anything. The real re-run gave
@@ -157,9 +157,9 @@ reporting failure — and re-probe independently.
 ```bash
 python3 - <<'PY'
 ...
-assert anchor in s # raised -> file NEVER written
+assert anchor in s     # raised -> file NEVER written
 PY
-scp file remote:/tmp/ # STILL RUNS, uploads the unmodified template
+scp file remote:/tmp/  # STILL RUNS, uploads the unmodified template
 ```
 
 The upload "succeeded" and staging then ran the wrong file. Verify the
@@ -180,14 +180,14 @@ against an artifact that was correct the entire time. Each revision cost a full
 ~15 minute CI build to discover.
 
 ```
-v1 required a real require() external in the driverFactory's own chunk
+v1  required a real require() external in the driverFactory's own chunk
       -> webpack relocates it to a different module. FALSE BROKEN.
-v2 rejected any file containing a missing-module throw-stub
+v2  rejected any file containing a missing-module throw-stub
       -> that stub is a generic helper present in the BROKEN and FIXED bundles.
          FALSE BROKEN.
-v3 resolved the call site's module id, but searched only the SAME file
+v3  resolved the call site's module id, but searched only the SAME file
       -> webpack module ids are global to the chunk graph. FALSE BROKEN.
-v4 resolved globally, still could not classify the createRequire shim the fix
+v4  resolved globally, still could not classify the createRequire shim the fix
       actually compiles to. FALSE BROKEN.
 ```
 

@@ -406,13 +406,13 @@ offline from readable rows.
 
 ```bash
 source "$SKILL_DIR/scripts/reviewer_home.sh"
-reviewer_pool_init # REQUIRED; never inside $( )
+reviewer_pool_init                    # REQUIRED; never inside $( )
 
-reviewer_run "$CRITICAL_PROMPT" -m grok &
+reviewer_run "$CRITICAL_PROMPT"   -m grok         &
 reviewer_run "$EMPATHETIC_PROMPT" -m claude-think &
-reviewer_run "$SECURITY_PROMPT" -m gpt-5.6-sol &
+reviewer_run "$SECURITY_PROMPT"   -m gpt-5.6-sol  &
 wait
-reviewer_pool_destroy # or let the EXIT trap do it
+reviewer_pool_destroy                 # or let the EXIT trap do it
 ```
 
 `HERMES_HOME` roots config.yaml, `.env`, `auth.json`, skills, memories **and**
@@ -592,9 +592,9 @@ execution rules that prevent silent failures:**
 # (see execution rule 3): ~300s normal, ~600s deep/slow panels, background+poll beyond
 # the foreground ceiling. An omitted timeout inherits the environment default, which is
 # usually sized for ordinary shell commands and will kill a healthy reviewer early.
-hermes -z "$PROMPT_GROK" --provider <grok-provider> -m <current-grok-model> --ignore-rules -t ''
+hermes -z "$PROMPT_GROK"   --provider <grok-provider>   -m <current-grok-model>   --ignore-rules -t ''
 hermes -z "$PROMPT_GEMINI" --provider <gemini-provider> -m <current-gemini-model> --ignore-rules -t ''
-hermes -z "$PROMPT_GPT" --provider <gpt-provider> -m <current-gpt-model> --ignore-rules -t ''
+hermes -z "$PROMPT_GPT"    --provider <gpt-provider>    -m <current-gpt-model>    --ignore-rules -t ''
 ```
 
 Do not copy a version number out of this document. Resolve each family's **current**

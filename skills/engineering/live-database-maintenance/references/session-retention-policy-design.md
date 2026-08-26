@@ -41,9 +41,9 @@ Do not reason about this from the code; it is cheap to prove. Script at
 
 ```
 search hits BEFORE archive: 1
-search hits AFTER archive: 1 <- archive does NOT hide from search
+search hits AFTER  archive: 1     <- archive does NOT hide from search
 archived flag in DB: 1
-list include_archived=False: 0 <- but it IS hidden from /resume + sidebar
+list include_archived=False: 0    <- but it IS hidden from /resume + sidebar
 list include_archived=True: 1
 search hits AFTER prune: 0 <- prune is unrecoverable
 ```
@@ -104,8 +104,8 @@ for its advertised ~60%, confirm the DB is not **already** on the optimized v23
 external-content layout:
 
 ```sql
-select value from state_meta where key='fts_storage_version'; -- 1 = v23
-select sql from sqlite_master where name='messages_fts'; -- 'content=' = external
+select value from state_meta where key='fts_storage_version';   -- 1 = v23
+select sql from sqlite_master where name='messages_fts';        -- 'content=' = external
 ```
 
 Measured: 13 of 14 fleet profiles already reported `fts_storage_version=1` with

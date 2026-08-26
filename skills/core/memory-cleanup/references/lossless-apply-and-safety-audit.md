@@ -56,12 +56,12 @@ A whole-file hash may differ because the offload page has frontmatter and retrie
 A numbered inventory proves accounting, but generic classification rows can still hide a bad compression. Add a separate probe matrix for high-risk rules:
 
 ```text
-critical rule required semantic text in proposed core
-external-send authorization explicit same-exchange authorization
-channel boundary all unlisted groups silently dropped
-schedule boundary live calendar + allowed booking window
-source integrity verbal notes are not formal terms
-voice correction exact banned phrase/word remains banned
+critical rule                    required semantic text in proposed core
+external-send authorization      explicit same-exchange authorization
+channel boundary                 all unlisted groups silently dropped
+schedule boundary                live calendar + allowed booking window
+source integrity                 verbal notes are not formal terms
+voice correction                 exact banned phrase/word remains banned
 ```
 
 Check all of the following:

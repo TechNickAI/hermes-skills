@@ -56,9 +56,9 @@ the same two credentials.
 ## Setup
 
 ```bash
-./scripts/setup-bluebubbles.sh # full guided install
-./scripts/setup-bluebubbles.sh --verify # health-check an existing install
-./scripts/setup-bluebubbles.sh --exposure # check for public tunnel exposure
+./scripts/setup-bluebubbles.sh              # full guided install
+./scripts/setup-bluebubbles.sh --verify     # health-check an existing install
+./scripts/setup-bluebubbles.sh --exposure   # check for public tunnel exposure
 ./scripts/setup-bluebubbles.sh --wire # write BLUEBUBBLES_* to.env only
 
 ```
@@ -126,7 +126,7 @@ disk access, so the TCC table under-reports. The authoritative test is always a 
 `chat/query` call:
 
 ```bash
-./scripts/bb.py health # 'chat access: ok' is the only proof that counts
+./scripts/bb.py health      # 'chat access: ok' is the only proof that counts
 
 ```
 
@@ -194,7 +194,7 @@ sequence:
 # 1. quit cleanly so in-memory config is flushed
 osascript -e 'tell application "BlueBubbles" to quit'
 # 2. write the DB (values verified from the app bundle: dynamic-dns | lan-url |
-# cloudflare | ngrok)
+#    cloudflare | ngrok)
 sqlite3 ~/Library/Application\ Support/bluebubbles-server/config.db \
   "update config set value='dynamic-dns' where name='proxy_service';
    update config set value='http://localhost:1234' where name='server_address';"
@@ -209,7 +209,7 @@ session** and the public URL still answered HTTP 200. The config was correct and
 was still exposed.
 
 ```bash
-pgrep -f "BlueBubbles.app.*cloudflared" # BlueBubbles' own tunnel only
+pgrep -f "BlueBubbles.app.*cloudflared"     # BlueBubbles' own tunnel only
 kill <pid>
 
 ```
@@ -225,7 +225,7 @@ curl -m 25 -o /dev/null -w "%{http_code}\n" "https://<old-url>/api/v1/ping"
 ```
 
 ```bash
-./scripts/setup-bluebubbles.sh --exposure # reads the server's own config
+./scripts/setup-bluebubbles.sh --exposure   # reads the server's own config
 
 ```
 
@@ -237,10 +237,10 @@ Treat a public `server_address` on any machine as a finding to fix, not a note t
 record per line -- no JSON parsing.
 
 ```bash
-./scripts/bb.py health # server + auth + disk access
-./scripts/bb.py chats --limit 20 # recent conversations
-./scripts/bb.py find --query "alex" # locate a chat
-./scripts/bb.py history --chat "alex" --limit 30 # read a conversation
+./scripts/bb.py health                                   # server + auth + disk access
+./scripts/bb.py chats --limit 20                         # recent conversations
+./scripts/bb.py find --query "alex"                  # locate a chat
+./scripts/bb.py history --chat "alex" --limit 30     # read a conversation
 ./scripts/bb.py send --chat "alex" --text "on my way"
 
 ```
@@ -267,7 +267,7 @@ recoverable, so it never guesses.
 `chat/query`, which reads the message database:
 
 ```bash
-./scripts/bb.py health # exercises ping, server/info, AND chat/query
+./scripts/bb.py health     # exercises ping, server/info, AND chat/query
 
 ```
 
@@ -281,10 +281,10 @@ Run the suite. It exercises the bridge the way an agent actually uses it and rep
 PASS/FAIL/SKIP per check.
 
 ```bash
-./scripts/test-bluebubbles.py # read-only, safe, no messages
+./scripts/test-bluebubbles.py                      # read-only, safe, no messages
 ./scripts/test-bluebubbles.py --send-to "any;-;+15551234567" \
                               --from-name "YourAgent"
-./scripts/test-bluebubbles.py --json # machine-readable summary
+./scripts/test-bluebubbles.py --json               # machine-readable summary
 
 ```
 

@@ -29,7 +29,7 @@ body = json.dumps({
     "messages": [{"role": "system", "content": SYS}, {"role": "user", "content": USER}],
     "max_tokens": 4000,
     "temperature": 0.4,
-    "stream": False, # <-- without this you get SSE chunks, not JSON
+    "stream": False,          # <-- without this you get SSE chunks, not JSON
 }).encode()
 req = urllib.request.Request(
     "https://omniroute.example.com/v1/chat/completions", data=body,
@@ -78,13 +78,13 @@ Use one shared, self-contained brief and fixed headings so the outputs are compa
 ## Verified working one-shot commands (<agent-d> profile, re-verified one occasion)
 
 ```bash
-# Fable (think) -- provider is custom:omniroute, NOT custom:omniroute-anthropic
+# Fable (think)  -- provider is custom:omniroute, NOT custom:omniroute-anthropic
 hermes -z "$PROMPT" --provider custom:omniroute -m think --ignore-rules -t ''
 
 # Grok
 hermes -z "$PROMPT" --provider openrouter -m x-ai/grok-4.3 --ignore-rules -t ''
 
-# Gemini -- slug is google/gemini-2.5-pro
+# Gemini  -- slug is google/gemini-2.5-pro
 hermes -z "$PROMPT" --provider openrouter -m google/gemini-2.5-pro --ignore-rules -t ''
 
 # GPT (OpenAI compat via openrouter)
@@ -124,8 +124,8 @@ brief = """...your full review brief..."""
 write_file("/tmp/review_brief.txt", brief)
 
 reviewers = [
-    ("fable", "--provider custom:omniroute -m think"),
-    ("grok", "--provider openrouter -m x-ai/grok-4.3"),
+    ("fable",  "--provider custom:omniroute -m think"),
+    ("grok",   "--provider openrouter -m x-ai/grok-4.3"),
     ("gemini", "--provider openrouter -m google/gemini-2.5-pro"),
 ]
 

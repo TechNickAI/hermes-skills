@@ -14,8 +14,8 @@ of `0 matches` is only meaningful next to `scanned 3,493 rows`. A result of
 n = 0
 for row in db.execute(q):
     n += 1
-...
-print('scanned', n) # ← mandatory, not optional
+    ...
+print('scanned', n)          # ← mandatory, not optional
 ```
 
 If the scan count is zero against a store you know is populated, stop and fix the
@@ -44,9 +44,9 @@ The diagnostic that caught it was a three-line control query, not more staring a
 the WHERE clause:
 
 ```python
-print(db.execute("select count(*) from message").fetchone()) # 176837
+print(db.execute("select count(*) from message").fetchone())                     # 176837
 print(db.execute("select datetime(max(date)/1000000000+978307200,'unixepoch') from message").fetchone())
-print(db.execute("select count(*) from message where <the filter>").fetchone()) # 0 ← the bug
+print(db.execute("select count(*) from message where <the filter>").fetchone())  # 0  ← the bug
 ```
 
 Total rows non-zero, max timestamp recent, filtered count zero. That triple

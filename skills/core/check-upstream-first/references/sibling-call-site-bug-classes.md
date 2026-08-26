@@ -89,7 +89,7 @@ Fix it by seeding through the REAL writer where practical, so producer and
 consumer can never silently diverge again:
 
 ```js
-insertCompressionRunTelemetryRow({...}); // real producer stamps the unit
+insertCompressionRunTelemetryRow({...});           // real producer stamps the unit
 db.prepare("UPDATE... SET timestamp = ?").run(now - 40*DAY_MS, id); // backdate only
 ```
 
@@ -121,7 +121,7 @@ pristine upstream at the same ref and run them there:
 ```bash
 git clone -q --shared <local-repo> base && cd base
 git checkout -q <upstream-ref>
-ln -s <path>/node_modules node_modules # reuse deps, don't reinstall
+ln -s <path>/node_modules node_modules     # reuse deps, don't reinstall
 npx tsx --test tests/unit/<suite>.test.ts
 ```
 

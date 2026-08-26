@@ -43,7 +43,7 @@ the script.
 ```bash
 # FATAL when $running != 0:
 while...; do
-...
+    ...
     [ "$running" -eq 0 ] && break
 done
 
@@ -95,7 +95,7 @@ the SYSTEM interpreter, proving nothing about what production runs.
 ```bash
 if [ -f requirements.txt ]; then...
 elif [ -f pyproject.toml ]; then...
-fi # <- both miss when the repo pins under requirements/
+fi          # <- both miss when the repo pins under requirements/
 ```
 
 The step no-ops and the deploy reports success while shipping whatever was
@@ -117,7 +117,7 @@ on one human's home surviving. Install it to the shared state volume:
 ```bash
 export UV_PYTHON_INSTALL_DIR=/srv/<app>/shared/python
 uv python install "$(cat.python-version)"
-uv venv --python "$PYVER" /srv/<app>/shared/venv.new # build BESIDE, then swap
+uv venv --python "$PYVER" /srv/<app>/shared/venv.new    # build BESIDE, then swap
 ```
 
 Assert the result before swapping — `readlink -f venv.new/bin/python3` must be
@@ -217,8 +217,8 @@ file AND a deliberately-regressed copy — it could not fail, i.e. it was
 decoration. Always run both controls:
 
 ```python
-print(check(body)) # want PASS
-print(check(body.replace("bash /path/w.bash", "/path/w.bash"))) # want FAIL
+print(check(body))                      # want PASS
+print(check(body.replace("bash /path/w.bash", "/path/w.bash")))  # want FAIL
 ```
 
 Only the negative control catches a guard that matches nothing.

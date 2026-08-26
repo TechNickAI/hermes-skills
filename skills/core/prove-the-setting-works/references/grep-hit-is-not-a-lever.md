@@ -12,9 +12,9 @@ Fired one occasion on `max_iterations` during a fleet-wide iteration-limit bump.
 One profile's `config.yaml` showed three plausible "iteration limit" hits:
 
 ```
-74: max_turns: 200 # under agent:
-447: max_iterations: 50 # under some other block
-456: max_turns: 200 # under yet another block
+74:  max_turns: 200          # under agent:
+447:  max_iterations: 50      # under some other block
+456:  max_turns: 200          # under yet another block
 ```
 
 Line-number greps **flatten nesting**. Sibling keys look like duplicates, and a

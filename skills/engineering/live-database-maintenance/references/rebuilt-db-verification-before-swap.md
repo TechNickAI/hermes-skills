@@ -10,8 +10,8 @@ preserved your data** — you must diff the rebuilt copy against the source.
 Set on the reader so odd encodings can't abort a long copy. Consequence:
 
 ```
-SOURCE: typeof(source) = text -> where source='telegram' -> 326
-REBUILT: typeof(source) = blob -> where source='telegram' -> 0
+SOURCE:   typeof(source) = text  ->  where source='telegram'  ->  326
+REBUILT:  typeof(source) = blob  ->  where source='telegram'  ->  0
 ```
 
 Every byte present, `integrity_check: ok`, search returning hits — and the
@@ -74,9 +74,9 @@ def read_range(table, cols, key, lo, hi):
 The single most confusing finding. Measured:
 
 ```
-live count(*) 455,522
-live actually readable 455,487 <- 1,937 PHANTOM rows
-rebuilt 455,483
+live count(*)          455,522
+live actually readable 455,487     <- 1,937 PHANTOM rows
+rebuilt                455,483
 ```
 
 A damaged B-tree counts rows from interior-page metadata that it **cannot
@@ -88,9 +88,9 @@ Allow a small bounded shortfall, print the unrecoverable ids explicitly, and
 refuse anything larger:
 
 ```
-sessions live readable=3638 new=3635 missing=3 (tolerance 20) OK
+sessions  live readable=3638  new=3635  missing=3 (tolerance 20) OK
   unrecoverable ids: ['20260822_173623_b6fe1e',...]
-messages live readable=455487 new=455483 missing=4 (tolerance 22) OK
+messages  live readable=455487 new=455483 missing=4 (tolerance 22) OK
   unrecoverable ids: [976098, 976116, 976117, 976118]
 ```
 

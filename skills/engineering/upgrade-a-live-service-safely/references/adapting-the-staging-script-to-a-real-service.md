@@ -13,7 +13,7 @@ A scratch clone made with `git clone --shared /path/to/local/checkout` has
 `origin` pointing at **the local directory**, not GitHub. So:
 
 ```bash
-git push -q origin HEAD:refs/heads/my-branch # exit 0, prints nothing
+git push -q origin HEAD:refs/heads/my-branch    # exit 0, prints nothing
 ```
 
 ...reported success while pushing to the local checkout. The CI build then
@@ -25,7 +25,7 @@ Two rules:
 - **Never `-q` a push you intend to verify.** Read the output.
 - **Assert the ref landed on the REAL remote**, never infer it from exit code:
   ```bash
-  git remote -v # know where origin actually points
+  git remote -v                                   # know where origin actually points
   git ls-remote https://github.com/<owner>/<repo>.git refs/heads/<branch>
   ```
   Empty output means the branch does not exist there, whatever the push said.
@@ -51,9 +51,9 @@ scp host:/tmp/x.bundle /tmp/
 
 # locally, in a fresh clone of the real remote
 git fetch /tmp/x.bundle 'HEAD:refs/heads/incoming'
-git log --oneline origin/<base>..incoming # verify exactly your commits
+git log --oneline origin/<base>..incoming        # verify exactly your commits
 git push origin incoming:refs/heads/<branch>
-git ls-remote origin refs/heads/<branch> # confirm
+git ls-remote origin refs/heads/<branch>         # confirm
 ```
 
 `git bundle list-heads /tmp/x.bundle` tells you the ref names inside — a bundle
@@ -66,7 +66,7 @@ while `'HEAD:refs/heads/incoming'` works.
 Two cheap assertions that catch a bad rebase:
 
 ```bash
-git log --oneline origin/<base>..incoming # ONLY your commits, expected count
+git log --oneline origin/<base>..incoming        # ONLY your commits, expected count
 git ls-tree --name-only incoming:.github/workflows/ | grep -c <dropped-file>
 ```
 

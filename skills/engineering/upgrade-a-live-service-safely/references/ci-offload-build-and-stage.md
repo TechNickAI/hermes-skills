@@ -73,13 +73,13 @@ in an early step and reading them off the log:
 
 ```yaml
 - run: |
-    echo "arch: $(uname -m) cores: $(nproc)"
+    echo "arch: $(uname -m)  cores: $(nproc)"
     free -h
 ```
 
 ```
-arch: aarch64 cores: 2
-Mem: 7.7Gi Swap: 3.0Gi ← half of what the public runner gives
+arch: aarch64  cores: 2
+Mem: 7.7Gi   Swap: 3.0Gi          ← half of what the public runner gives
 ```
 
 Rule: **when moving a workflow between repos, re-check the runner's real specs

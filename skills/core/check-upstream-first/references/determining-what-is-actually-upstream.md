@@ -74,8 +74,8 @@ To enumerate every real delta a fork carries:
 
 ```bash
 git fetch upstream <release-branch>
-git rev-list --left-right --count upstream/<branch>...<forkbranch> # left=upstream-only right=ours
-git diff --stat upstream/<branch> <forkbranch> # the actual files
+git rev-list --left-right --count upstream/<branch>...<forkbranch>   # left=upstream-only right=ours
+git diff --stat upstream/<branch> <forkbranch>                        # the actual files
 ```
 
 If `--stat` returns hundreds of files for a fork you believe carries a handful of

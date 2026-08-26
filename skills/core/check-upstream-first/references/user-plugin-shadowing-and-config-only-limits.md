@@ -29,8 +29,8 @@ find ~/.local/share/uv/tools/hermes-agent ~/.hermes/plugins \
 Confirm from the logs which module namespace is live — it names the source:
 
 ```
-hermes_plugins.platforms__telegram.adapter ← user plugin under ~/.hermes/plugins
-hermes_plugins.slack_platform.adapter ← package-provided
+hermes_plugins.platforms__telegram.adapter   ← user plugin under ~/.hermes/plugins
+hermes_plugins.slack_platform.adapter        ← package-provided
 ```
 
 ### Why this matters more than it looks
@@ -54,7 +54,7 @@ in play was `direct_mention_only`, added by another agent. Check before agreeing
 
 ```bash
 gh api "search/code?q=direct_mention_only+repo:NousResearch/hermes-agent" --jq '.total_count'
-# 0 → the key does not exist upstream; it is a local invention
+# 0  → the key does not exist upstream; it is a local invention
 ```
 
 `0` means there is no supported setting — the "config" was custom code wearing a

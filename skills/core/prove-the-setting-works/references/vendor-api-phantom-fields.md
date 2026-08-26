@@ -37,13 +37,13 @@ docs. Verified independently before acting on it:
 import json
 d = json.load(open('/tmp/vapi_openapi.json'))
 s = json.dumps(d)
-print(s.count('"systemPrompt"')) # -> 0
+print(s.count('"systemPrompt"'))          # -> 0
 
 schemas = d['components']['schemas']
 for name in ['CreateAssistantDTO', 'UpdateAssistantDTO', 'Assistant',
              'AssistantOverrides']:
     props = set((schemas[name].get('properties') or {}).keys())
-    print(name, 'systemPrompt:', 'systemPrompt' in props) # -> False, all four
+    print(name, 'systemPrompt:', 'systemPrompt' in props)   # -> False, all four
 
 print(sorted(schemas['AnthropicModel']['properties']))
 # ['maxTokens', 'messages', 'model', 'provider', 'temperature', 'thinking',...]

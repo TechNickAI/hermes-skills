@@ -238,7 +238,7 @@ skills:
 
 ```python
 get_disabled_skills({'skills': {'disabled': '["alpha","beta","gamma"]'}})
-# -> {'["alpha","beta","gamma"]'} ONE bogus entry; nothing is disabled
+# -> {'["alpha","beta","gamma"]'}     ONE bogus entry; nothing is disabled
 ```
 
 The CLI prints a success line. `config get` echoes the value back. The file
@@ -327,9 +327,9 @@ python3 - <<'EOF'
 import json
 d = json.load(open('/tmp/vendor_openapi.json'))
 schemas = d['components']['schemas']
-for name in ['CreateXDTO', 'UpdateXDTO', 'X']: # the write + read DTOs
+for name in ['CreateXDTO', 'UpdateXDTO', 'X']:          # the write + read DTOs
     props = set((schemas.get(name, {}).get('properties') or {}).keys())
-    print(name, '->', 'systemPrompt' in props) # the field in question
+    print(name, '->', 'systemPrompt' in props)           # the field in question
 EOF
 ```
 
@@ -382,8 +382,8 @@ Cheap checks, run them before recommending an architecture:
 
 ```bash
 # is the gap known, and what did maintainers decide?
-gh issue list --repo <org>/<repo> --state all --search "<feature> <symptom>"
-gh pr list --repo <org>/<repo> --state all --search "<feature>"
+gh issue list  --repo <org>/<repo> --state all --search "<feature> <symptom>"
+gh pr list     --repo <org>/<repo> --state all --search "<feature>"
 # read the CLOSING COMMENT on refused PRs — that is the design position
 ```
 
@@ -528,9 +528,9 @@ because **startup applies the compiled-in default instead of the persisted value
 Symptom that gives it away: **three different numbers for one setting.**
 
 ```
-source default DEFAULT_SETTINGS.optimization.cacheSize = 65536 (64 MB)
-live runtime PRAGMA cache_size = -16000 (16 MB)
-UI fallback parseInt(e.target.value) || 16384 (16 MB) <-- matches live
+source default   DEFAULT_SETTINGS.optimization.cacheSize = 65536   (64 MB)
+live runtime     PRAGMA cache_size                       = -16000  (16 MB)
+UI fallback      parseInt(e.target.value) || 16384        (16 MB)   <-- matches live
 ```
 
 When the live value matches a **fallback literal in the UI** rather than either the
@@ -546,8 +546,8 @@ grep -n "<settingName>" src/types/*Settings.ts
 # 2. every place the underlying knob is applied
 grep -rn "<pragma_or_env_name>" --include=*.ts src/ lib/
 
-# 3. is the persisted value even stored? (key/value or settings row)
-# "no stored row -> defaults apply" is itself a finding
+# 3. is the persisted value even stored?  (key/value or settings row)
+#    "no stored row -> defaults apply" is itself a finding
 
 # 4. WHO calls the applier, and WHEN
 grep -rn "applyXSettings\|setX(" --include=*.ts src/ | grep -v "export function"
@@ -706,11 +706,11 @@ routing stays fleet-uniform — see
   on a release branch. Resolve the deployed commit before branching:
 
   ```bash
-  ls -la current # symlink -> releases/standalone-<sha>
-  cat releases/<name>/BUILD_SHA # or grep version in the standalone bundle
+  ls -la current                      # symlink -> releases/standalone-<sha>
+  cat releases/<name>/BUILD_SHA       # or grep version in the standalone bundle
   curl -s localhost:PORT/api/.../health | grep version
-  git branch -a --contains <sha> # find which branch actually carries it
-  git checkout -b <fix-branch> <sha> # branch from the SHA, never the tag
+  git branch -a --contains <sha>      # find which branch actually carries it
+  git checkout -b <fix-branch> <sha>  # branch from the SHA, never the tag
   ```
 
   Then confirm `git rev-parse --short HEAD` equals the deployed sha before
@@ -720,10 +720,10 @@ routing stays fleet-uniform — see
 
 Once a lever is proven live, editing it across many fleet configs must stay a one-line, reviewable change. ruamel.yaml will try to churn the file in ways that hide your edit:
 
-- **Global sequence re-indent.** ruamel applies one `y.indent(sequence=…)` to the whole doc; the default turns indentless lists (`- item`) into indented (` - item`) or vice-versa. Detect from the backup: if any line starts with ` -` use `y.indent(mapping=2, sequence=4, offset=2)`, else `y.indent(mapping=2, sequence=2, offset=0)`.
+- **Global sequence re-indent.** ruamel applies one `y.indent(sequence=…)` to the whole doc; the default turns indentless lists (`- item`) into indented (`  - item`) or vice-versa. Detect from the backup: if any line starts with ` -` use `y.indent(mapping=2, sequence=4, offset=2)`, else `y.indent(mapping=2, sequence=2, offset=0)`.
 - **Folded-scalar unfolding.** Even with `width=4096`, ruamel collapses a multi-line `system_prompt` / quoted string onto one line; `y.fold_pos = 4096` does NOT preserve it.
 
-Guard with a **diff-gate**: after dumping, the unified diff vs backup must be exactly one `-`/one `+` line containing the key (present-value case) or zero `-`/one `+` (absent-key case). If it's larger, **restore and fall back to text-surgical**: find the parent block, replace only the ` key:` value line (preserve trailing ` # comment` and EOL), rewrite, re-parse. Full implementation + readback verification: `scripts/surgical_scalar_edit.py`. Run it per profile; it backs up, gates, falls back, and asserts the value landed. See `references/safe-scalar-edit.md` for the reproduction recipe.
+Guard with a **diff-gate**: after dumping, the unified diff vs backup must be exactly one `-`/one `+` line containing the key (present-value case) or zero `-`/one `+` (absent-key case). If it's larger, **restore and fall back to text-surgical**: find the parent block, replace only the `  key:` value line (preserve trailing ` # comment` and EOL), rewrite, re-parse. Full implementation + readback verification: `scripts/surgical_scalar_edit.py`. Run it per profile; it backs up, gates, falls back, and asserts the value landed. See `references/safe-scalar-edit.md` for the reproduction recipe.
 
 ## A version bump is a config lever too — probe the new value before pinning
 
@@ -795,7 +795,7 @@ trees so the count is honest:
 cd ~/.hermes/profiles
 for d in */config.yaml; do
   case "$d" in *opus5-ab*|*backups*|*home/.hermes*) continue;; esac
-  grep -nE '<pattern>' "$d" && echo " ^ $d"
+  grep -nE '<pattern>' "$d" && echo "  ^ $d"
 done
 ```
 

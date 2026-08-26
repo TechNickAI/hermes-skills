@@ -35,7 +35,7 @@ sibling instance's log, not just the suspect's.
 ```bash
 for p in <all profiles/instances>; do
   n=$(grep -c "<failure string>" <root>/$p/logs/<log> 2>/dev/null || echo 0)
-  printf " %-10s %s\n" "$p" "$n"
+  printf "  %-10s %s\n" "$p" "$n"
 done
 ```
 
@@ -44,7 +44,7 @@ rather than eyeballing a tail. With ISO-ish log prefixes, string comparison work
 
 ```bash
 awk '$0 >= "one occasion 14:26:09"' gateway.log | grep "<failure string>" \
-  || echo " (none after restart)"
+  || echo "  (none after restart)"
 ```
 
 Also pin the restart instant independently — do not trust memory:

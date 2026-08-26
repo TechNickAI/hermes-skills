@@ -98,7 +98,7 @@ Operational details that cost time to rediscover:
   ```python
   await c.connect()
   if await c.is_user_authorized():
-      me = await c.get_me() # check me.bot
+      me = await c.get_me()          # check me.bot
   ```
 
 - **Forum topic ID** comes off the reply header, and both fields matter:

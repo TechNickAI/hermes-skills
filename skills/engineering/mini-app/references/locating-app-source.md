@@ -29,8 +29,8 @@ hangl-dashboard would have "fixed" the wrong app.
 2. **Check what's actually running** vs. the domain in the screenshot:
 
    ```bash
-   pm2 list # what processes serve apps here
-   grep -i "<domain-or-slug>" ~/mini-apps/router/Caddyfile # is it even routed here?
+   pm2 list                       # what processes serve apps here
+   grep -i "<domain-or-slug>" ~/mini-apps/router/Caddyfile   # is it even routed here?
    ```
 
    If the domain isn't in the Caddyfile and no PM2 process matches, it's hosted
@@ -45,8 +45,8 @@ hangl-dashboard would have "fixed" the wrong app.
 
 4. **Fingerprint the live site** — curl the HTML and read its metadata:
    ```bash
-   curl -sI https://<domain>/ # server header (cloudflare/vercel/render), x-deployment-id
-   curl -s https://<domain>/ | grep -iE "<title>|og:image|generator|/_next/|build|commit"
+   curl -sI https://<domain>/          # server header (cloudflare/vercel/render), x-deployment-id
+   curl -s  https://<domain>/ | grep -iE "<title>|og:image|generator|/_next/|build|commit"
    ```
 
 ## Platform fingerprints

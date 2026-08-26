@@ -23,7 +23,7 @@ A custom test runner, pre-commit, and GitHub checks may all have passed earlier,
 Final acceptable evidence looks like:
 
 ```text
-........ [100%]
+........                                                                 [100%]
 8 passed in 11.60s
 ```
 

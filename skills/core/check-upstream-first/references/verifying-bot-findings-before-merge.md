@@ -35,7 +35,7 @@ import importlib.util, io, contextlib
 spec = importlib.util.spec_from_file_location("m", "path/to/module.py")
 m = importlib.util.module_from_spec(spec); spec.loader.exec_module(m)
 
-def cap(fn, *a, **k): # capture printed output
+def cap(fn, *a, **k):                      # capture printed output
     buf = io.StringIO()
     try:
         with contextlib.redirect_stdout(buf):
@@ -95,8 +95,8 @@ The string was `/private/tmp/the operations agent-repo-review/.../decompose.py` 
 gitignored `.pyc`, never in the PR. Diagnose in this order:
 
 ```bash
-grep -n -i '<term>' path/to/source.py # is it in the SOURCE at all?
-git check-ignore -v path/to/artifact.pyc # is the hit even tracked?
+grep -n -i '<term>' path/to/source.py          # is it in the SOURCE at all?
+git check-ignore -v path/to/artifact.pyc       # is the hit even tracked?
 find. -name __pycache__ -type d -exec rm -rf {} +
 ```
 

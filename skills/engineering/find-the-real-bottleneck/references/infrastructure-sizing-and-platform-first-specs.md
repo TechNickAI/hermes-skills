@@ -13,8 +13,8 @@ that much disk space?"_
 Measuring took two SSH commands and cut the spec — and the bill — nearly in half:
 
 ```bash
-ps -eo rss,comm --sort=-rss | head -8 # what actually holds memory
-du -sh ~/.hermes/* | sort -rh | head # what actually holds disk
+ps -eo rss,comm --sort=-rss | head -8     # what actually holds memory
+du -sh ~/.hermes/* | sort -rh | head      # what actually holds disk
 free -m; df -h /
 ```
 
@@ -82,7 +82,7 @@ common problems that beat bolt-ons on integration, licensing, and support.
 
 ```bash
 # HEAD returns 200 with size 0 on CDNs; a RANGE GET proves real bytes exist
-curl -sS -o /dev/null -w '%{http_code} %{size_download}' -r 0-0 "$URL" # want 206
+curl -sS -o /dev/null -w '%{http_code} %{size_download}' -r 0-0 "$URL"   # want 206
 
 # container images: read manifest platforms, never assume multi-arch
 curl -sS -H "Authorization: Bearer $TOK" \

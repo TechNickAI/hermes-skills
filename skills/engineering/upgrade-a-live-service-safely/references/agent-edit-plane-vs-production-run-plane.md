@@ -24,9 +24,9 @@ Use this when autonomous agents can modify the same product that is currently ru
 > **Single-directory pattern that keeps the safety and drops the pileup:**
 >
 > ```text
-> /srv/app/app/ # THE one directory. git reset --hard <sha>.
-> /srv/app/shared/ # state, logs — separate EBS volume
-> /run/app/deploy.lock # held for the duration of the update
+> /srv/app/app/            # THE one directory. git reset --hard <sha>.
+> /srv/app/shared/         # state, logs — separate EBS volume
+> /run/app/deploy.lock     # held for the duration of the update
 > ```
 >
 > - Deploy: take lock → `git fetch && git reset --hard <sha>` → install deps →
@@ -104,27 +104,27 @@ separation:
 
 ```text
 ┌─ DEV BOX (separate small instance, or the operator's Mac) ─┐
-│ user: app-agent │
-│ /var/lib/app-agent/workspaces/<task-id>-<rand>/ │
-│ one full independent clone + one branch per task │
-│ Agent edits, runs tests, opens PRs HERE. │
-│ NO exchange/prod keys. NO prod DB. NO ssh key to prod. │
+│  user: app-agent                                           │
+│  /var/lib/app-agent/workspaces/<task-id>-<rand>/           │
+│     one full independent clone + one branch per task        │
+│  Agent edits, runs tests, opens PRs HERE.                   │
+│  NO exchange/prod keys. NO prod DB. NO ssh key to prod.     │
 └─────────────────────────────────────────────────────────────┘
-                    │ git push + gh pr create
+                    │  git push + gh pr create
                     ▼
 ┌─ GITHUB ────────────────────────────────────────────────────┐
-│ PR → required checks → merge queue → main │
-│ → deploy workflow fires on push to main │
+│  PR → required checks → merge queue → main                  │
+│  → deploy workflow fires on push to main                    │
 └─────────────────────────────────────────────────────────────┘
-                    │ OIDC → assume deploy role
-                    │ SSM Run Command (no SSH key in CI)
+                    │  OIDC → assume deploy role
+                    │  SSM Run Command (no SSH key in CI)
                     ▼
 ┌─ PROD BOX ──────────────────────────────────────────────────┐
-│ user: app-prod runs code, CANNOT write it │
-│ user: app-deploy writes code, CANNOT trade │
-│ /srv/app/app/ ← git reset --hard <sha> │
-│ /srv/app/shared/ ← state + logs (separate volume) │
-│ /run/secrets/ ← tmpfs, fetched from SSM at boot │
+│  user: app-prod    runs code, CANNOT write it               │
+│  user: app-deploy  writes code, CANNOT trade                │
+│  /srv/app/app/     ← git reset --hard <sha>                 │
+│  /srv/app/shared/  ← state + logs (separate volume)         │
+│  /run/secrets/     ← tmpfs, fetched from SSM at boot        │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -170,12 +170,12 @@ access after a split, and do not lock yourself out in the name of hardening.
 
 ```text
 /srv/app/
-  control/ # deploy identity only
-  releases/<timestamp>-<sha>/ # immutable after build
-  current -> releases/... # deploy identity alone may flip
-  shared/{env,state,logs}/ # narrowly writable runtime state
+  control/                       # deploy identity only
+  releases/<timestamp>-<sha>/    # immutable after build
+  current -> releases/...        # deploy identity alone may flip
+  shared/{env,state,logs}/        # narrowly writable runtime state
 /var/lib/app-agent/workspaces/
-  <task-id>-<random>/ # independent full clone per task
+  <task-id>-<random>/             # independent full clone per task
 ```
 
 Use three Unix identities:

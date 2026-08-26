@@ -32,9 +32,9 @@ has been quietly no-opping everywhere.
 ### Detect before trusting any upgrade
 
 ```bash
-uv tool list # shows the actually-installed version
-hermes --version # must agree
-ls ~/.cache/uv/archive-v0 # upgrade HISTORY — if the target version was
+uv tool list                     # shows the actually-installed version
+hermes --version                 # must agree
+ls ~/.cache/uv/archive-v0        # upgrade HISTORY — if the target version was
                                  # never fetched, it was never installed
 ```
 
@@ -59,7 +59,7 @@ MISS slack_sdk
 MISS slack_bolt
 MISS telegram
 MISS discord
-OK websockets
+OK   websockets
 ```
 
 **Restarting the gateway at this point takes the member completely offline** — no
@@ -99,7 +99,7 @@ Never restart the gateway until this prints all-OK:
 ```bash
 SP=~/.local/share/uv/tools/hermes-agent/lib/python3.11/site-packages
 for d in slack_sdk slack_bolt telegram discord websockets; do
-  if [ -d "$SP/$d" ]; then echo "OK $d"; else echo "MISS $d"; fi
+  if [ -d "$SP/$d" ]; then echo "OK   $d"; else echo "MISS $d"; fi
 done
 ```
 
@@ -108,7 +108,7 @@ done
 ```bash
 TS=$(date +%Y%m%d-%H%M%S)
 cp ~/.hermes/config.yaml ~/.hermes/config.yaml.bak.preupgrade-$TS
-cp ~/.hermes/.env ~/.hermes/.env.bak.preupgrade-$TS 2>/dev/null || true
+cp ~/.hermes/.env        ~/.hermes/.env.bak.preupgrade-$TS 2>/dev/null || true
 ```
 
 ## Misc gotchas hit in the same session
@@ -145,8 +145,8 @@ cp ~/.hermes/.env ~/.hermes/.env.bak.preupgrade-$TS 2>/dev/null || true
   ```bash
   TS=$(date +%Y%m%d-%H%M%S)
   cp ~/Library/LaunchAgents/ai.hermes.gateway.plist ~/.hermes/ai.hermes.gateway.plist.bak.$TS
-  HERMES_HOME=$HOME/.hermes hermes gateway start # prints "✓ Service started"
-  hermes gateway status # expect: ✓ Service definition matches
+  HERMES_HOME=$HOME/.hermes hermes gateway start   # prints "✓ Service started"
+  hermes gateway status                            # expect: ✓ Service definition matches
   ```
 
   Verified on an assistant agent One case: went from ⚠ stale → ✓ matches, new PID.

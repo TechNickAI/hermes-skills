@@ -8,17 +8,17 @@ When pm2 runs inside an agent/tool shell, `$HOME` is rewritten to the profile ho
 
 ```bash
 # Confirm the real registry, not a mis-homed view:
-export PM2_HOME=/Users/<user>/.pm2 # literal path, never ~ or $HOME
+export PM2_HOME=/Users/<user>/.pm2   # literal path, never ~ or $HOME
 pm2 list
 
 # Independent proof the app is actually alive (trust this over pm2 list):
 lsof -nP -iTCP:<port> -sTCP:LISTEN
-curl -s http://127.0.0.1:<port>/healthz # 200 == alive
+curl -s http://127.0.0.1:<port>/healthz   # 200 == alive
 
 # Kill a phantom daemon you accidentally spawned:
 PM2_HOME=/Users/<user>/.hermes/profiles/<agent>/home/.pm2 pm2 kill
 # Exactly one God daemon should remain:
-ps -ef | grep "PM2.*God" | grep -v grep | wc -l # -> 1
+ps -ef | grep "PM2.*God" | grep -v grep | wc -l   # -> 1
 pm2 save
 ```
 

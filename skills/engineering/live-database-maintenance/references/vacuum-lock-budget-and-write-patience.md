@@ -68,7 +68,7 @@ load, concurrent readers, storage behaviour).
 **The method that actually works — copy, then time the copy:**
 
 ```bash
-cp state.db /tmp/vactest.db # see the torn-copy caveat below
+cp state.db /tmp/vactest.db          # see the torn-copy caveat below
 python3 - <<'EOF'
 import sqlite3, time
 c = sqlite3.connect("/tmp/vactest.db"); c.execute("PRAGMA busy_timeout=60000")
@@ -130,7 +130,7 @@ Rank candidates by `freelist_count * page_size` (the bytes you actually get
 back) and gate on recent human activity (the thing a lock can harm):
 
 ```sql
-PRAGMA freelist_count; -- x PRAGMA page_size = reclaimable bytes
+PRAGMA freelist_count;  -- x PRAGMA page_size = reclaimable bytes
 SELECT count(*) FROM sessions
  WHERE coalesce(source,'') NOT IN ('cron','subagent')
    AND coalesce(last_activity_at, started_at) > strftime('%s','now') - 3600;
@@ -163,8 +163,8 @@ in the WAL — because a live reader holding a snapshot turns the trailing
 `wal_checkpoint(TRUNCATE)` into a partial no-op. Measured on a personal-assistant agent:
 
 ```
-right after VACUUM: db 3510 MB wal 2264 MB -> report says "reclaimed 0 MB"
-after reader released: db 2251 MB wal 0 MB -> actually reclaimed 1259 MB
+right after VACUUM:   db 3510 MB   wal 2264 MB   -> report says "reclaimed 0 MB"
+after reader released: db 2251 MB   wal    0 MB   -> actually reclaimed 1259 MB
 ```
 
 A run that genuinely worked reports **zero reclaimed** and looks like a
@@ -209,8 +209,8 @@ _whether to back up at all_ moves earlier.
 Verified in the deployed source (`hermes_state.py:2719-2720`):
 
 ```python
-_WRITE_PATIENCE_S = 20.0 # routine session writes
-_TRANSCRIPT_WRITE_PATIENCE_S = 60.0 # transcript-critical writes
+_WRITE_PATIENCE_S = 20.0             # routine session writes
+_TRANSCRIPT_WRITE_PATIENCE_S = 60.0  # transcript-critical writes
 _ACTIVITY_WRITE_PATIENCE_S = 0.5
 ```
 
@@ -227,7 +227,7 @@ long `VACUUM` itself may run. There is no execution deadline on the statement.
 
 ```python
 VACUUM_SECONDS_PER_GB = 14.4
-MAX_UNATTENDED_LOCK_SECONDS = 45.0 # margin under the 60 s cliff
+MAX_UNATTENDED_LOCK_SECONDS = 45.0   # margin under the 60 s cliff
 
 def predicted_lock_seconds(db_bytes):
     return (db_bytes / 1024**3) * VACUUM_SECONDS_PER_GB

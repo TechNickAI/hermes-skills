@@ -146,7 +146,7 @@ Not the primary creation backend.
 ## Verification
 
 ```bash
-python3 scripts/gworkspace.py meta PRESENTATION_ID # native Slides MIME?
+python3 scripts/gworkspace.py meta PRESENTATION_ID      # native Slides MIME?
 gog slides export --help >/dev/null 2>&1 || { echo "gog slides export unavailable"; exit 1; }
 gog slides export PRESENTATION_ID --format pptx --output /tmp/deck-check.pptx --json --no-input
 python3 - <<'PY'

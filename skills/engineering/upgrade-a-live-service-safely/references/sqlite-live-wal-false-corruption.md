@@ -20,8 +20,8 @@ before re-testing. The corrected model:
 Measured on the router, same file, seconds apart:
 
 ```
-integrity_check on the LIVE file ok, FAIL, ok, FAIL, FAIL, FAIL
-integrity_check on a fresh COPY FAIL, FAIL, ok, ok, ok, ok
+integrity_check on the LIVE file    ok, FAIL, ok, FAIL, FAIL, FAIL
+integrity_check on a fresh COPY     FAIL, FAIL, ok, ok, ok, ok
 sqlite3 CLI.backup 1 failure in 10
 python.backup 0 failures in 10 — then failed in-script
 ```
@@ -55,7 +55,7 @@ print(c.execute('select count(*) from key_value').fetchone()[0])"
 Worked case — the same database that had just failed four of six live checks:
 
 ```
-snapshot integrity: ok key_value: 577 (x4 runs, identical)
+snapshot integrity: ok    key_value: 577   (x4 runs, identical)
 ```
 
 4/4 clean with stable row counts. **That settles it.** Row counts drifting
@@ -70,7 +70,7 @@ Read-only diagnosis of a live router DB reported catastrophic damage:
 PRAGMA integrity_check ->
   Freelist: size is 267 but should be 268
   Tree 224 page 27539: btreeInitPage() returns error code 11
-... 101 lines, 13 tables unreadable
+  ... 101 lines, 13 tables unreadable
 ```
 
 Thirteen tables raised `database disk image is malformed` on `count(*)` --
@@ -81,11 +81,11 @@ A `.dump` recovered only 170 `key_value` rows and terminated in
 **All of it was an artifact.** The live database was perfectly healthy:
 
 ```
-PRAGMA integrity_check -> ok
-PRAGMA quick_check -> ok
+PRAGMA integrity_check   -> ok
+PRAGMA quick_check       -> ok
 PRAGMA foreign_key_check -> 0 violations
-key_value -> 587 rows (the dump had "recovered" 170)
-all 13 "damaged" tables -> read fine (usage_history 234,007 rows)
+key_value                -> 587 rows (the dump had "recovered" 170)
+all 13 "damaged" tables  -> read fine (usage_history 234,007 rows)
 ```
 
 Had the "repair" proceeded from that dump, it would have **destroyed 417 rows of
@@ -110,7 +110,7 @@ snapshot test above when you need a real answer.
 
 ```python
 import sqlite3
-src = sqlite3.connect("/path/storage.sqlite", timeout=60) # NOT ?mode=ro
+src = sqlite3.connect("/path/storage.sqlite", timeout=60)   # NOT ?mode=ro
 src.execute("PRAGMA query_only=ON")
 dst = sqlite3.connect("/tmp/repro.sqlite")
 src.backup(dst); dst.close(); src.close()

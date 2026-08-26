@@ -186,7 +186,7 @@ A one-shot is spent by any trigger, whether or not the work ran. Instead:
 
 ```
 cronjob(action="create", schedule="0 9 * * 0",...) # real recurring cadence
-cronjob(action="run", job_id="<id>") # immediate validation run
+cronjob(action="run", job_id="<id>")                  # immediate validation run
 ```
 
 `action="run"` on a **recurring** job executes now and leaves `next_run_at`
@@ -216,18 +216,18 @@ j = [x for x in json.load(open('cron/jobs.json'))['jobs']
      if x.get('job_id') == JOB_ID][0]
 p = j['prompt']
 for name, needle in [
-    ("stop service", "systemctl --user stop the router"),
-    ("verify gone", "pgrep"),
-    ("backup first", "preclean"),
-    ("abort if bad", "ABORT"),
-    ("VACUUM", "VACUUM"),
-    ("restart", "systemctl --user start the router"),
-    ("health poll", "monitoring/health"),
-    ("no CLI", "better-sqlite3"),
-    ("torn-read retry", "malformed"),
-    ("epoch ms gotcha", "MILLISECOND"),
-    ("recovery", "journalctl"),
-    ("restore on fail", "restore"),
+    ("stop service",      "systemctl --user stop the router"),
+    ("verify gone",       "pgrep"),
+    ("backup first",      "preclean"),
+    ("abort if bad",      "ABORT"),
+    ("VACUUM",            "VACUUM"),
+    ("restart",           "systemctl --user start the router"),
+    ("health poll",       "monitoring/health"),
+    ("no CLI",            "better-sqlite3"),
+    ("torn-read retry",   "malformed"),
+    ("epoch ms gotcha",   "MILLISECOND"),
+    ("recovery",          "journalctl"),
+    ("restore on fail",   "restore"),
 ]:
     print(("OK " if needle in p else "MISSING"), name)
 ```

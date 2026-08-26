@@ -72,7 +72,7 @@ storage-throughput reduction, measure the BURST, not the average — an average 
 `/proc/<pid>/io` separates the service's own writes from everything else:
 
 ```bash
-sudo awk '/^write_bytes/{print $2}' /proc/<child_pid>/io # sample twice, delta
+sudo awk '/^write_bytes/{print $2}' /proc/<child_pid>/io   # sample twice, delta
 ```
 
 Post-fix this read 25 KB/s for the router — evidence the storm was gone, not

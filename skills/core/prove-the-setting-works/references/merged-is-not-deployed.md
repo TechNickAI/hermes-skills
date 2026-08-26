@@ -19,9 +19,9 @@ runner was one file — still mirrored exactly that one file.
 A PR merged. The deploy reported success. Measured on the host afterwards:
 
 ```text
-<profile>/scripts/jobrun.py exit_map: 10 hits (v2, current)
-<profile>/scripts/jobrun_severity.py MISSING
-<profile>/scripts/jobrun_repair.py MISSING
+<profile>/scripts/jobrun.py            exit_map: 10 hits   (v2, current)
+<profile>/scripts/jobrun_severity.py   MISSING
+<profile>/scripts/jobrun_repair.py     MISSING
 ```
 
 **420 runs since the merge, all success, no errors in any alarm — and the feature that
@@ -38,7 +38,7 @@ behavior under a v2 filename.
 # not: does the file exist?
 # but: what does the loaded runner believe about itself?
 print("HAVE_V2 =", getattr(jobrun, "HAVE_V2", "attr missing"))
-print("sev =", getattr(jobrun, "sev", None))
+print("sev     =", getattr(jobrun, "sev", None))
 ```
 
 **Rule:** when a component grows a dependency, every mirror, deploy, drift check, and
@@ -121,11 +121,11 @@ Fix: make the worker _declare_ its outcome in a parseable line, and parse it rat
 infer:
 
 ```text
-REPAIR-OUTCOME: patched <pr-url> code changed, PR opened
-REPAIR-OUTCOME: spec-defect <why> the spec is wrong, not the code
-REPAIR-OUTCOME: environmental <why> credential/outage/disk, unpatchable
+REPAIR-OUTCOME: patched <pr-url>       code changed, PR opened
+REPAIR-OUTCOME: spec-defect <why>      the spec is wrong, not the code
+REPAIR-OUTCOME: environmental <why>    credential/outage/disk, unpatchable
 REPAIR-OUTCOME: not-reproducible <why> did not fail when run
-REPAIR-OUTCOME: declined <why> deliberately made no change
+REPAIR-OUTCOME: declined <why>         deliberately made no change
 ```
 
 Only `patched` routes to review. A missing or invented declaration **fails closed** —

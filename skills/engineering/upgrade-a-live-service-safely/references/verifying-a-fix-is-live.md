@@ -25,7 +25,7 @@ Then print surrounding context to confirm the logic survived minification, and
 
 ```
 NEW build: try{...FROM dbstat...}catch(a){if(/no such (module|table): dbstat/i
-.test(a.message))return!1;throw a}
+           .test(a.message))return!1;throw a}
 OLD build: unguarded "FROM dbstat WHERE name", guard string ABSENT
 ```
 
@@ -80,16 +80,16 @@ Pruning one stale release took the host from 3.1G → 54G free.
 ## Post-cutover checklist that actually proves the thing works
 
 ```
-service systemd active + MainPID CHANGED (proves restart) + NRestarts=0
-health loopback 200 AND public HTTPS 200
-provenance readlink -f current -> the new release
-inference real requests across EVERY distinct upstream backend, asserting
+service        systemd active + MainPID CHANGED (proves restart) + NRestarts=0
+health         loopback 200 AND public HTTPS 200
+provenance     readlink -f current  -> the new release
+inference      real requests across EVERY distinct upstream backend, asserting
                the SERVED model name, not just HTTP 200
-streaming >=2 SSE frames captured to a file (proves progress, not just open)
-UI fetch the dashboard; a 307 -> /login -> 200 is normal auth, not
+streaming      >=2 SSE frames captured to a file (proves progress, not just open)
+UI             fetch the dashboard; a 307 -> /login -> 200 is normal auth, not
                an error. grep the followed page for "Application error"
-bundle grep the fix's marker string in current/ (see above)
-errors journalctl since restart — and say so if the count is
+bundle         grep the fix's marker string in current/ (see above)
+errors         journalctl since restart — and say so if the count is
                uninformative
 ```
 

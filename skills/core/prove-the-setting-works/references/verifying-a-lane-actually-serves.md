@@ -51,8 +51,8 @@ diagnosis, and guessing produces confidently wrong answers.
 
 ```python
 # On the error response:
-# rl = {k:v for k,v in e.headers.items() if "ratelimit" in k.lower()}
-# err = json.loads(body)["error"] -> err["type"], err["code"]
+#   rl = {k:v for k,v in e.headers.items() if "ratelimit" in k.lower()}
+#   err = json.loads(body)["error"]  -> err["type"], err["code"]
 ```
 
 | signal                                                                                   | meaning                                     | retry helps?  |

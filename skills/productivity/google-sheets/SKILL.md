@@ -112,7 +112,7 @@ Use `--input RAW` only when you want literal text, not evaluated formulas.
 Best for loading an existing CSV/TSV/XLSX as a fresh native Sheet:
 
 ```bash
-python3 scripts/gworkspace.py upload data.csv --as sheet --name "Imported Dataset" --parent FOLDER_ID
+python3 scripts/gworkspace.py upload data.csv  --as sheet --name "Imported Dataset" --parent FOLDER_ID
 python3 scripts/gworkspace.py upload data.xlsx --as sheet --name "Imported Workbook"
 ```
 
@@ -144,8 +144,8 @@ to Path A (`gog sheets format`) for header styling.
 ## Verification
 
 ```bash
-gog sheets get "$SID" "Sheet1!A1:E7" --json --no-input # values correct?
-python3 scripts/gworkspace.py meta "$SID" # native Sheet MIME?
+gog sheets get "$SID" "Sheet1!A1:E7" --json --no-input          # values correct?
+python3 scripts/gworkspace.py meta "$SID"                        # native Sheet MIME?
 ```
 
 For financial/legal spreadsheets, verify **labels and values together** on key rows, not

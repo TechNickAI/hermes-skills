@@ -48,7 +48,7 @@ jobs:
 
       - name: Report runner resources
         run: |
-          echo "arch: $(uname -m) cores: $(nproc)"
+          echo "arch: $(uname -m)  cores: $(nproc)"
           free -h
 
       - uses: actions/setup-node@v4

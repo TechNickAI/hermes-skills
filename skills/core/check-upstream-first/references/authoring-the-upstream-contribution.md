@@ -32,14 +32,14 @@ Ask GitHub who the parent actually is:
 ```bash
 gh repo view OWNER/REPO --json parent,name,owner
 # -> {"name":"REPO","owner":{"login":"YOUR-ORG"},
-# "parent":{"name":"REPO","owner":{"login":"UPSTREAM-ORG"}}}
+#     "parent":{"name":"REPO","owner":{"login":"UPSTREAM-ORG"}}}
 ```
 
 Then prove the remote resolves before trusting it:
 
 ```bash
 git remote add upstream https://github.com/<parent-owner>/<repo>.git
-git ls-remote --heads upstream | head -3 # empty/error => wrong URL
+git ls-remote --heads upstream | head -3     # empty/error => wrong URL
 ```
 
 Note that `package.json` `repository.url` may point at the true upstream even when
@@ -223,7 +223,7 @@ grep -rn "<template-test-basename>" --include="*.json" --include="*.yml".
 Then run the exact CI command locally rather than pushing speculatively:
 
 ```bash
-node scripts/check/check-mutation-test-coverage.mjs --strict # -> ✓ No drift, exit 0
+node scripts/check/check-mutation-test-coverage.mjs --strict   # -> ✓ No drift, exit 0
 ```
 
 **Two traps while making that one-line edit:**
@@ -434,13 +434,13 @@ must be **split by file** across the PRs, never dropped whole into one:
 ```bash
 git checkout -q -B pr-a upstream/<branch>
 git cherry-pick <fix> <test>
-git checkout <mixed-commit> -- path/to/only-this-prs-file # not the whole commit
+git checkout <mixed-commit> -- path/to/only-this-prs-file    # not the whole commit
 ```
 
 Then verify no unrelated content leaked in:
 
 ```bash
-git diff --name-only upstream/<branch> pr-a | grep -cE "<other-feature-files>" # expect 0
+git diff --name-only upstream/<branch> pr-a | grep -cE "<other-feature-files>"   # expect 0
 ```
 
 ## Pushing PR branches: the `workflow` scope trap

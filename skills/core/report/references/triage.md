@@ -6,13 +6,13 @@ it.
 ## Incoming card shape
 
 ```
-title: Short description the reporter provided, or the auto-summarized one
-body: Markdown with:
+title:      Short description the reporter provided, or the auto-summarized one
+body:       Markdown with:
               - Reporter metadata (profile, platform, timestamp)
               - Context block (transcript excerpt if captured)
               - Reproduction info
-tenant: fleet-reports
-status: triage
+tenant:     fleet-reports
+status:     triage
 created-by: the reporting user's name or platform handle
 ```
 

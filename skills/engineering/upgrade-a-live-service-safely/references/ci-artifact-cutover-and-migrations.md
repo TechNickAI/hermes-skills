@@ -8,14 +8,14 @@ until cloud auto-reboot).
 ## The pipeline
 
 ```
-1. trigger CI workflow free arm64 runner, exact arch match, ~11 min, $0
-2. download + sha256 verify refuse on mismatch
-3. unpack to releases/<sha>/ verify native modules + any fork patches
+1. trigger CI workflow           free arm64 runner, exact arch match, ~11 min, $0
+2. download + sha256 verify      refuse on mismatch
+3. unpack to releases/<sha>/     verify native modules + any fork patches
 4. start on TEST PORT w/ DB COPY run the full gate; ABORT here on any failure
-5. snapshot the DB <-- the actual one-way door, see below
-6. ln -sfn + mv -Tf atomic symlink swap
-7. systemctl restart ~3s
-8. verify prod, same gate ANY failure -> auto-rollback
+5. snapshot the DB               <-- the actual one-way door, see below
+6. ln -sfn + mv -Tf              atomic symlink swap
+7. systemctl restart             ~3s
+8. verify prod, same gate        ANY failure -> auto-rollback
 9. prune to N releases
 ```
 
@@ -62,7 +62,7 @@ database** — often worse than the bug you were rolling back from.
      for attempt in $(seq 1 10); do
        if python3 - "$LIVE_DB" "$DEST" <<'PY'
    import sqlite3, sys
-   src = sqlite3.connect(sys.argv[1], timeout=60) # NOT ?mode=ro
+   src = sqlite3.connect(sys.argv[1], timeout=60)   # NOT ?mode=ro
    src.execute("PRAGMA query_only=ON")
    dst = sqlite3.connect(sys.argv[2])
    src.backup(dst); dst.close(); src.close()
@@ -137,8 +137,8 @@ died, and `grep -q "event:"` reported FAILED. The server log showed
 `disconnect: request_signal_aborted` — the server watching its _client_ hang up.
 
 ```
-streaming captured to a FILE: 8 SSE events, 1602 bytes <- release is fine
-same request | head -c 300: FAILED <- harness artifact
+streaming captured to a FILE:   8 SSE events, 1602 bytes   <- release is fine
+same request | head -c 300:     FAILED                     <- harness artifact
 ```
 
 Capture to a file and count. Never pipe a stream into a truncating reader —
@@ -147,7 +147,7 @@ Capture to a file and count. Never pipe a stream into a truncating reader —
 ```bash
 curl -sN... > "$OUT" 2>&1
 EV=$(grep -c '^event:' "$OUT" || true)
-[ "${EV:-0}" -ge 2 ] || FAIL=1 # >=2 proves progress, not just connection
+[ "${EV:-0}" -ge 2 ] || FAIL=1     # >=2 proves progress, not just connection
 ```
 
 **2. A result variable computed and never read.** `SMOKE_FAIL` was assigned in

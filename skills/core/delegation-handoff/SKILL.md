@@ -57,7 +57,7 @@ When a task says "finish X" or "do X properly", diff the artifact before believi
 ```bash
 # Cheapest possible premise check for "the skill already documents X"
 diff -q "$LIVE/SKILL.md" "$REPO/skills/<name>/SKILL.md"
-grep -n -iE 'term1|term2|term3' "$LIVE/SKILL.md" # empty output = the claim was false
+grep -n -iE 'term1|term2|term3' "$LIVE/SKILL.md"   # empty output = the claim was false
 ```
 
 When the premise turns out false, **say so plainly to the user** and reframe the task ("this is
@@ -155,9 +155,9 @@ Never trust the self-report about external side effects. Look at the artifacts:
 ```bash
 cd "$WORKDIR" || { echo "WORKDIR MISSING"; exit 1; }
 git branch --show-current
-git status --porcelain # ' M' = modified unstaged, '??' = new, never added
+git status --porcelain                     # ' M' = modified unstaged, '??' = new, never added
 git diff --stat
-git ls-files --others --exclude-standard # files the child created but never staged
+git ls-files --others --exclude-standard   # files the child created but never staged
 ```
 
 `??` on a file the child said it "added" means the file exists but was never committed.
@@ -166,9 +166,9 @@ git ls-files --others --exclude-standard # files the child created but never sta
 
 ```bash
 git add <paths>
-pre-commit run --all-files # formatting hooks may REWRITE files
-git status --porcelain # 'MM' / 'AM' = hook reformatted AFTER you staged
-git add -A <paths> # re-stage post-hook changes
+pre-commit run --all-files      # formatting hooks may REWRITE files
+git status --porcelain          # 'MM' / 'AM' = hook reformatted AFTER you staged
+git add -A <paths>              # re-stage post-hook changes
 git commit -F - <<'MSG'
 ...
 MSG

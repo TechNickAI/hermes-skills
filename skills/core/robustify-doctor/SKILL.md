@@ -72,8 +72,8 @@ Designate one agent per **machine** (not per owner) as the host reporter:
 
 ```bash
 mkdir -p "$HERMES_HOME/robustify"
-echo no > "$HERMES_HOME/robustify/host_reporter" # co-tenant: collect, don't alert
-echo yes > "$HERMES_HOME/robustify/host_reporter" # designated reporter
+echo no > "$HERMES_HOME/robustify/host_reporter"   # co-tenant: collect, don't alert
+echo yes > "$HERMES_HOME/robustify/host_reporter"  # designated reporter
 ```
 
 Every agent still runs the full collector — the host-level facts remain useful context
@@ -89,9 +89,9 @@ different boxes are not co-tenants — each is its own reporter.
 ## Running it
 
 ```bash
-python3 scripts/robustify_collect.py # ~1-2s, all collectors
-python3 scripts/robustify_collect.py --deep # force PRAGMA quick_check on every db
-python3 scripts/robustify_collect.py --show-host # real hostname instead of a hash
+python3 scripts/robustify_collect.py              # ~1-2s, all collectors
+python3 scripts/robustify_collect.py --deep       # force PRAGMA quick_check on every db
+python3 scripts/robustify_collect.py --show-host  # real hostname instead of a hash
 ```
 
 The hostname is hashed by default (`host-c3263a4b`) so reports can be pasted into

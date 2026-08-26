@@ -11,7 +11,7 @@ done from a shell:
 
 ```
 $ curl -H "x-api-key: $KEY" http://127.0.0.1:20128/api/settings/database
-{"error":{"code":"AUTH_001","message":"Authentication required"}} # 401
+{"error":{"code":"AUTH_001","message":"Authentication required"}}   # 401
 ```
 
 Dashboard/admin routes commonly authenticate with a **session cookie from a
@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
   try {
-    return NextResponse.json(getDatabaseSettings()); // <- the fixed code path
+    return NextResponse.json(getDatabaseSettings());   // <- the fixed code path
   } catch (error) {... 500... }
 }
 ```
@@ -38,8 +38,8 @@ check cannot answer the question" and use a different one.
 The next instinct is to grep the journal for the error the fix eliminates:
 
 ```
-dbstat errors since restart: 0
-dbstat errors in prior 2h: 0 <-- also zero!
+dbstat errors since restart:   0
+dbstat errors in prior 2h:     0     <-- also zero!
 ```
 
 **Zero-after is meaningless when before is also zero.** Nobody had loaded the
@@ -102,9 +102,9 @@ Use `grep -rqsF` (fixed-string) for any pattern containing regex metacharacters 
 Four independent facts, each catching something the others miss:
 
 ```bash
-readlink -f ~/src/App/current # symlink → new release
-systemctl --user show app -p MainPID --value # PID changed
-systemctl --user show app -p NRestarts --value # 0 = clean, not crash-looped
+readlink -f ~/src/App/current                              # symlink → new release
+systemctl --user show app -p MainPID --value               # PID changed
+systemctl --user show app -p NRestarts --value             # 0 = clean, not crash-looped
 curl -s.../health | python3 -c "import json,sys;d=json.load(sys.stdin);print(d['system']['uptime'])"
 ```
 
@@ -116,8 +116,8 @@ active".
 ## Read redirects before calling them failures
 
 ```
-/dashboard http=307 -> /login # NOT an error: auth redirect
-curl -L http=200, 629808 bytes, correct <title>, no error markers
+/dashboard  http=307 -> /login     # NOT an error: auth redirect
+curl -L     http=200, 629808 bytes, correct <title>, no error markers
 ```
 
 A 307/302 on an authenticated page is normal. Follow it with `-L` and assert on
@@ -129,8 +129,8 @@ Post-cutover checks legitimately reveal _other_ defects. Report them as separate
 findings with their confidence level, not as deploy failures:
 
 ```
-key_value.cacheSize = 65536 (persisted, 64 MB)
-PRAGMA cache_size = -16000 (live, 16 MB)
+key_value.cacheSize = 65536      (persisted, 64 MB)
+PRAGMA cache_size   = -16000     (live, 16 MB)
 ```
 
 That mismatch was the _next_ PR's bug, confirmed in production. But the pragma
@@ -145,7 +145,7 @@ unproven under load rather than claiming a win.
 ## Pitfall: `node -e` requiring a module resolves from CWD
 
 ```bash
-node -e "require('better-sqlite3')" # from $HOME → Cannot find module
+node -e "require('better-sqlite3')"          # from $HOME → Cannot find module
 cd "$HOME/src/App" && node -e "require(...)" # resolves
 ```
 

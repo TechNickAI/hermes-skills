@@ -69,11 +69,11 @@ Still true: never delete `-wal`/`-shm` while a process holds the DB.
 Timestamps tell you cause vs consequence. Sort the log and read forward:
 
 ```
-17:39 disk I/O error <- ENOSPC, the actual injury
-20:00 file is not a database <- self-heal reconnect begins
+17:39  disk I/O error                      <- ENOSPC, the actual injury
+20:00  file is not a database              <- self-heal reconnect begins
 20:15 FTS-corruption error... in-place FTS rebuild
 21:09 In-place FTS rebuild failed... needs full offline repair
-21:21 FTS indexes remain corrupt; disabled FTS sync, canonical writes retried
+21:21  FTS indexes remain corrupt; disabled FTS sync, canonical writes retried
 ```
 
 That last line is the system degrading _correctly_ — it detached FTS to protect
@@ -149,8 +149,8 @@ destroys the rebuild: every TEXT value comes back as `bytes` and SQLite stores
 it as **BLOB** in the destination. Measured consequence:
 
 ```
-SOURCE: typeof(source) = text → where source='telegram' → 326
-REBUILT: typeof(source) = blob → where source='telegram' → 0
+SOURCE:   typeof(source) = text   →  where source='telegram'  →  326
+REBUILT:  typeof(source) = blob   →  where source='telegram'  →    0
 ```
 
 All 453,355 messages were present, every byte intact, and the application would
@@ -171,8 +171,8 @@ src.text_factory = lambda b: b.decode("utf-8", errors="replace")
 Assert types in the verification battery, not just counts:
 
 ```sql
-select typeof(source), count(*) from sessions group by 1; -- must be 'text'
-select count(*) from sessions where source='telegram'; -- must be non-zero
+select typeof(source), count(*) from sessions group by 1;   -- must be 'text'
+select count(*) from sessions where source='telegram';      -- must be non-zero
 ```
 
 A rebuild verifier that only checks `integrity_check` + row counts will pass
@@ -218,17 +218,17 @@ def chunk_copy(table, chunk=500):
                 except Exception:
                     lost += 1
         d.commit()
-        cur = end + 1 # <-- ALWAYS advances
+        cur = end + 1          # <-- ALWAYS advances
     print("%-22s copied=%-8d unreadable=%-5d" % (table, ok, lost))
 ```
 
 Result on the worked case:
 
 ```
-sessions copied=4874 unreadable=0
-messages copied=469704 unreadable=66
-gateway_routing copied=736 unreadable=3
-system_prompts copied=973 unreadable=2
+sessions               copied=4874     unreadable=0
+messages               copied=469704   unreadable=66
+gateway_routing        copied=736      unreadable=3
+system_prompts         copied=973      unreadable=2
 ```
 
 ### 4. Rebuild FTS from the recovered base table
@@ -251,8 +251,8 @@ c.execute("select count(*) from messages_fts where messages_fts match 'kalshi'")
 `integrity_check` = `ok`, `foreign_key_check` empty, and **zero duplicates**:
 
 ```python
-c.execute("select count(*)-count(distinct id) from sessions").fetchone()[0] # 0
-c.execute("select count(*)-count(distinct id) from messages").fetchone()[0] # 0
+c.execute("select count(*)-count(distinct id) from sessions").fetchone()[0]  # 0
+c.execute("select count(*)-count(distinct id) from messages").fetchone()[0]  # 0
 ```
 
 ## Two bugs that silently corrupted the _rebuild_
@@ -267,8 +267,8 @@ using the default `text_factory` re-inserts every row under a TEXT key.
 Symptom is unmistakable once you look: counts land at exactly 2×.
 
 ```
-REBUILT sessions=9748/9748 messages=469704/469704 <- sessions doubled
-SNAP sessions=4875/4875
+REBUILT  sessions=9748/9748  messages=469704/469704   <- sessions doubled
+SNAP     sessions=4875/4875
 ```
 
 Note `count(*) == count(distinct id)` in the rebuilt file, so a
@@ -290,7 +290,7 @@ Diffing the actual id sets settled it in one query:
 
 ```
 rebuilt message ids: 453,355
-missing ids found: 0 (unreadable chunks: 0)
+missing ids found:   0   (unreadable chunks: 0)
 ```
 
 Every apparent gap was **above the snapshot's high-water mark** — rows written
@@ -333,8 +333,8 @@ there; the types are wrong. Every equality query the application runs then
 matches **zero rows**:
 
 ```
-SOURCE: typeof(source) = text -> where source='telegram' -> 326
-REBUILT: typeof(source) = blob -> where source='telegram' -> 0
+SOURCE:   typeof(source) = text   ->  where source='telegram'  ->  326
+REBUILT:  typeof(source) = blob   ->  where source='telegram'  ->    0
 ```
 
 Measured: 453,355 messages and 3,634 sessions all present, `integrity_check`
@@ -375,7 +375,7 @@ reported _1,344 new sessions out of 3,638_ — pure noise.
 Check the actual key shape before choosing a sync strategy:
 
 ```python
-[(r[1], r[5]) for r in src.execute("pragma table_info(sessions)")] # r[5] = pk
+[(r[1], r[5]) for r in src.execute("pragma table_info(sessions)")]  # r[5] = pk
 ```
 
 Incremental-copy only the integer-keyed tables; full re-sync the rest with
@@ -393,8 +393,8 @@ frozen.
 Detect it the same way:
 
 ```bash
-ps -o pid,etime,time,%cpu,stat,cmd -p <pid> # 08:06 / 99.9 / R
-stat -c "%n %s %y" rebuilt.db-journal # mtime not moving
+ps -o pid,etime,time,%cpu,stat,cmd -p <pid>   # 08:06 / 99.9 / R
+stat -c "%n %s %y" rebuilt.db-journal          # mtime not moving
 ```
 
 Fix is structural, not a better nudge: iterate a **bounded integer range** you
@@ -421,17 +421,17 @@ database. The copy was still in flight. The gateway opened a half-written file,
 failed, and **fell back to JSONL, running detached from the database**:
 
 ```
-16:17:05 Started hermes-gateway-<profile>.service
-16:17:06 WARNING gateway.run: SQLite session store not available: file is not a database
-16:18 <- cp actually finished here
+16:17:05  Started hermes-gateway-<profile>.service
+16:17:06  WARNING gateway.run: SQLite session store not available: file is not a database
+16:18     <- cp actually finished here
 ```
 
 Every obvious check reported green:
 
 ```
 service: active
-'not a database' errors since restart: 0 <- because it stopped trying
-integrity: ok <- the FILE was perfect
+'not a database' errors since restart: 0     <- because it stopped trying
+integrity: ok                                <- the FILE was perfect
 ```
 
 The database was genuinely fine. The process just was not using it. A
@@ -443,7 +443,7 @@ either way — "0 new messages" is indistinguishable from "detached".
 ```bash
 PID=$(pgrep -f "profile <p> gateway run" | head -1)
 sudo lsof -p "$PID" 2>/dev/null | grep "state.db"
-# empty => DETACHED, degraded fallback
+# empty  => DETACHED, degraded fallback
 # 9 fds incl. -wal and -shm => attached
 ```
 
@@ -477,7 +477,7 @@ credit a fix that did not land:
 
 ```bash
 journalctl --user -u <svc> --since "10 min ago" | grep "python\[$PID\]" \
-  | grep -cE "not a database|disk I/O|malformed" # want 0
+  | grep -cE "not a database|disk I/O|malformed"   # want 0
 ```
 
 ### Prove the repaired DB accepts a real commit

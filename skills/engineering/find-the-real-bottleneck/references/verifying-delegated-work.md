@@ -13,7 +13,7 @@ the artifacts.
 
 ```bash
 cd <project>
-git status --short # empty — but the dir wasn't a git repo
+git status --short                      # empty — but the dir wasn't a git repo
 find <project> -type f -mmin -30 \
   -not -path "*/node_modules/*" -not -path "*/.git/*"
 ```
@@ -49,9 +49,9 @@ An earlier delegation returned a tidy theory ("VACUUM runs in a loop, the file
 drops to 0 bytes"). Checking its evidence:
 
 ```bash
-sudo lsof <dbfile> # exactly ONE process, not a loop
-sqlite3 <dbfile> "PRAGMA auto_vacuum;" # 0 — disabled
-stat -c%s <dbfile> # size only ever grows
+sudo lsof <dbfile>              # exactly ONE process, not a loop
+sqlite3 <dbfile> "PRAGMA auto_vacuum;"   # 0 — disabled
+stat -c%s <dbfile>              # size only ever grows
 ```
 
 The theory was false; the "0 bytes" readings were `stat` racing a writer.

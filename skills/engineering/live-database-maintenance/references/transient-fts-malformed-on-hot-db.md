@@ -68,8 +68,8 @@ damage), so do not use the two agreeing/disagreeing as your signal here.
    a test of the index.
 
    ```
-   messages_fts MATCH ok hits=210919
-   messages_fts_trigram MATCH ok hits=137411
+   messages_fts          MATCH ok  hits=210919
+   messages_fts_trigram  MATCH ok  hits=137411
    ```
 
    🔴 Filtering candidates with `name.endswith("_fts")` **silently skips

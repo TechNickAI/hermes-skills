@@ -17,7 +17,7 @@ prune CLI has no `--limit`. It does have both time bounds, which is the better
 primitive anyway:
 
 ```
---older-than 40 --newer-than 70 # only sessions aged 40-70 days
+--older-than 40 --newer-than 70     # only sessions aged 40-70 days
 ```
 
 Walk the windows **oldest-first**, each its own subprocess and therefore its

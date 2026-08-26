@@ -29,13 +29,13 @@ unrelated subsystems.
 grep -rn "isStreamReadinessFailureErrorBody" --include=*.ts src/ open-sse/ | grep -v node_modules
 
 # 2. Every use of the VARIABLE the predicate populates — this is the step
-# people skip, and it's where the other consumers hide
+#    people skip, and it's where the other consumers hide
 grep -n "isStreamReadinessFailure" open-sse/services/combo.ts
-# 1511: const isStreamReadinessFailure = <- assignment
-# 1715: isStreamReadinessFailure, <- breaker call (the bug)
-# 1730: !isStreamReadinessFailure && <- transient retry
-# 2836: !isStreamReadinessFailure && <- semaphore cooldown
-# 2856: !isStreamReadinessFailure && <- second dispatcher's retry
+#   1511:  const isStreamReadinessFailure =     <- assignment
+#   1715:        isStreamReadinessFailure,      <- breaker call  (the bug)
+#   1730:      !isStreamReadinessFailure &&     <- transient retry
+#   2836:      !isStreamReadinessFailure &&     <- semaphore cooldown
+#   2856:      !isStreamReadinessFailure &&     <- second dispatcher's retry
 
 # 3. Read each site and decide, per site, whether it wants the old or new semantics
 ```
@@ -57,12 +57,12 @@ export function isStreamEarlyEofErrorBody(errorBody: unknown): boolean {... }
 
 export function shouldRecordProviderBreakerFailure(args: {
   isStreamReadinessFailure: boolean;
-  isStreamEarlyEof?: boolean; // <- optional: omitting it reproduces old behavior
-...
+  isStreamEarlyEof?: boolean;   // <- optional: omitting it reproduces old behavior
+  ...
 }): boolean {
   return (
     (!args.isStreamReadinessFailure || args.isStreamEarlyEof === true) &&
-... // every other AND-term still gates the result
+    ... // every other AND-term still gates the result
   );
 }
 ```

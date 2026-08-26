@@ -19,8 +19,8 @@ Same trap as "branching a fix off a version tag" in the parent skill. Both build
 in this audit reported `3.8.49` in `package.json`; they were 834 commits apart.
 
 ```bash
-ls -l <app>/current # symlink -> releases/standalone-<sha>
-cat <app>/.previous_release # standalone-<sha> (the build you came FROM)
+ls -l  <app>/current            # symlink -> releases/standalone-<sha>
+cat    <app>/.previous_release  # standalone-<sha>  (the build you came FROM)
 git rev-list --count <old>..<new>
 ```
 

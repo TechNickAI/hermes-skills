@@ -36,16 +36,16 @@ lsof -F pcfan /path/to/state.db
 pid is not the service's `MainPID` is the answer.
 
 ```
-pid=2788769 cmd=hermes fd=33 mode=u GATEWAY
-pid=2795631 cmd=hermes fd=6 mode=u *** NON-GATEWAY WRITER ***
+pid=2788769  cmd=hermes  fd=33  mode=u   GATEWAY
+pid=2795631  cmd=hermes  fd=6   mode=u   *** NON-GATEWAY WRITER ***
 ```
 
 Then read the parent chain — this is what names the mechanism:
 
 ```
-2788769 hermes gateway run --profile a trading agent <- the gateway
+2788769  hermes gateway run --profile a trading agent        <- the gateway
   └─ 2795602 bash -lic... for M in gemini grok... <- agent's terminal tool
-       └─ 2795631 hermes -z "Review PRODUCTION CODE..."
+       └─ 2795631  hermes -z "Review PRODUCTION CODE..."
 ```
 
 The gateway spawned a shell, which spawned a headless one-shot, which opened the
@@ -66,7 +66,7 @@ self._session_db.create_session(
     source=os.environ.get("HERMES_SESSION_SOURCE", "cli"),...)
 
 # hermes_state.py:2798
-self.db_path = db_path or _default_db_path() # -> the profile's state.db
+self.db_path = db_path or _default_db_path()   # -> the profile's state.db
 ```
 
 Corroborating evidence in the data itself: **15,090 messages with
@@ -102,7 +102,7 @@ the mechanism. Only one agent was spawning a headless one-shot against itself.
 The instinct is to give the one-shot its own throwaway store:
 
 ```bash
-HERMES_HOME=$(mktemp -d) hermes -z "..." --provider X -m Y -t '' # ← DOES NOT WORK
+HERMES_HOME=$(mktemp -d) hermes -z "..." --provider X -m Y -t ''   # ← DOES NOT WORK
 ```
 
 🔴 **Tested one occasion and it fails silently.** `HERMES_HOME` is not a
@@ -154,8 +154,8 @@ dedicated `-p reviewer` profile does move writes off the gateway, and a
 single reviewer tests clean:
 
 ```
-CONTROL: 15s, no reviewer caller state.db mtime changed on its own: False
-exit=0 stdout: PONG <- real model call, credentials work
+CONTROL: 15s, no reviewer     caller state.db mtime changed on its own: False
+exit=0   stdout: PONG                     <- real model call, credentials work
 reviewer process EVER held caller's state.db: False
 caller state.db size: 1889136640 -> 1889136640 (unchanged)
 ```
@@ -233,8 +233,8 @@ echo a path, and make lazy auto-init a hard error.
 **2. A trap cannot fire while bash blocks in a FOREGROUND child.** Measured:
 
 ```
-foreground `sleep 60` -> SIGTERM -> trap NEVER fired, scratch leaked
-`sleep 60 & wait $!` -> SIGTERM -> trap fired, scratch removed
+foreground `sleep 60`   -> SIGTERM -> trap NEVER fired, scratch leaked
+`sleep 60 & wait $!`    -> SIGTERM -> trap fired, scratch removed
 ```
 
 Background the child and `wait "$pid"`.

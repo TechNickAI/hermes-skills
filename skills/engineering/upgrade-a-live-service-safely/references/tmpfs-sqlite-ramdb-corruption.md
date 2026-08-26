@@ -12,12 +12,12 @@ right after the service restarted. The router keeps serving traffic.
 The SQLite store was moved to a tmpfs RAM disk (Aug 11) for I/O:
 
 ```text
-/mnt/the router-ramdb/ tmpfs mount (systemd mnt-the router\x2dramdb.mount)
+/mnt/the router-ramdb/            tmpfs mount (systemd mnt-the router\x2dramdb.mount)
   Options=size=1G,uid=1000,gid=1000,mode=0700
-  storage.sqlite LIVE DB
-  storage.sqlite-wal / -shm sidecars
-/home/ubuntu/.the router/storage.sqlite -> symlink to the RAM file
-/home/ubuntu/.the router/storage.sqlite.persist durable twin on EBS
+  storage.sqlite                 LIVE DB
+  storage.sqlite-wal / -shm      sidecars
+/home/ubuntu/.the router/storage.sqlite        -> symlink to the RAM file
+/home/ubuntu/.the router/storage.sqlite.persist  durable twin on EBS
 ```
 
 Durability scripts:
@@ -51,15 +51,15 @@ for label, path in (("RAM", "/mnt/the router-ramdb/storage.sqlite"),
     c = sqlite3.connect(f"file:{path}?mode=ro", uri=True); c.execute("pragma query_only=on")
     print(label, c.execute("select count(*) from combos").fetchone()[0],
                 c.execute("select count(*) from provider_connections").fetchone()[0])
-# RAM: ok, tables read
+# RAM:     ok, tables read
 # PERSIST: DatabaseError: database disk image is malformed
 ```
 
 Also check the mount itself (the "RAM is full → disk I/O error" variant):
 
 ```bash
-df -h /mnt/the router-ramdb; free -h # tmpfs capacity + RAM headroom
-mount | grep ramdb # Options=size=... (1G here, DB 421MB & growing)
+df -h /mnt/the router-ramdb; free -h          # tmpfs capacity + RAM headroom
+mount | grep ramdb                            # Options=size=... (1G here, DB 421MB & growing)
 ```
 
 ## Rules

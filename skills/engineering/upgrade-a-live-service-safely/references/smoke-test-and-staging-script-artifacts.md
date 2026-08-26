@@ -12,7 +12,7 @@ caused it.**
 The smoke test piped curl into `head -c 300` and reported:
 
 ```
-streaming FAILED
+streaming      FAILED
 ```
 
 The stream was fine. `head` closes the pipe after 300 bytes, curl dies of
@@ -23,9 +23,9 @@ up, i.e. the test killed its own producer.
 Proof, same build, same request, one minute apart:
 
 ```
-captured to a FILE: 1602 bytes, 8 SSE events
+captured to a FILE:         1602 bytes, 8 SSE events
                             message_start, content_block_start, ping, content_block_delta
-piped through head -c 300: FAILED <-- reproduces the smoke result
+piped through head -c 300:  FAILED   <-- reproduces the smoke result
 ```
 
 **Never terminate a stream you are measuring.** `head`, `read -n`, and an early
@@ -43,7 +43,7 @@ a 2-vCPU box. Direct checks immediately after:
 ```
 loopback:20128 http=200 8.271s <- the slow one
 loopback:20128 http=200 0.086s
-https://<router-host> http=200 0.035s
+https://<router-host>   http=200  0.035s
 ```
 
 The 8.3s first response is the real signal: **staging on a small box degrades

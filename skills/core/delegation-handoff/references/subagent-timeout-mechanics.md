@@ -67,7 +67,7 @@ for f in ~/.hermes/config.yaml ~/.hermes/profiles/*/config.yaml; do
   echo "$f -> $(grep -n 'child_timeout_seconds' "$f" || echo '<unset>')"
 done
 # 2. Back up, then edit BY ASSERTED LINE NUMBER (a key can recur under
-# different parent blocks; never blind string-replace)
+#    different parent blocks; never blind string-replace)
 # 3. Prove the parse and the resolved value, per profile:
 HERMES_HOME=~/.hermes/profiles/<p> venv/bin/python -c \
   "import sys; sys.path.insert(0,'.'); from tools.delegate_tool import _get_child_timeout; print(_get_child_timeout())"

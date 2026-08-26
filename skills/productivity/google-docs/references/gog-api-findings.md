@@ -3,7 +3,7 @@
 ## Local version: v0.9.0
 
 ```
-gog --version # Build: v0.9.0 (99d9575)
+gog --version  # Build: v0.9.0 (99d9575)
 ```
 
 Upstream (steipete/gogcli) is at v0.29+ with much richer Docs editing. The

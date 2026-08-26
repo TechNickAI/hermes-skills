@@ -92,7 +92,7 @@ override.
 
 ```
 ERROR slack_bolt.AsyncApp: Failed to connect (error: Session is closed); Retrying...
-.../slack_sdk/socket_mode/aiohttp/__init__.py, line 377, in connect
+  .../slack_sdk/socket_mode/aiohttp/__init__.py, line 377, in connect
 WARNING hermes_plugins.slack_platform.adapter: [Slack] Socket Mode unhealthy (transport disconnected); reconnecting
 ```
 
@@ -140,13 +140,13 @@ bug survived:
 
 ```bash
 awk '/^one occasion 10:(1[89]|[2-9][0-9])/' gateway.log | grep -c "Socket Mode unhealthy"
-# after restart: 0 (was flapping at 09:28, 09:52, 09:52 immediately prior)
+# after restart: 0   (was flapping at 09:28, 09:52, 09:52 immediately prior)
 ```
 
 Healthy startup on 0.19.0:
 
 ```
-✓ telegram connected (polling mode)
+✓ telegram connected                     (polling mode)
 [Slack] Authenticated as @<agent> in workspace <workspace>
 [Slack] Socket Mode connected (1 workspace(s))
 ✓ slack connected

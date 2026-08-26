@@ -43,8 +43,8 @@ systemctl --user daemon-reload
 systemctl --user mask "$U"
 
 # VERIFY — both, not either
-readlink -f ~/.config/systemd/user/"$U" # must be /dev/null
-systemctl --user start "$U"; echo "rc=$?" # must be rc=1, "Unit is masked"
+readlink -f ~/.config/systemd/user/"$U"      # must be /dev/null
+systemctl --user start "$U"; echo "rc=$?"    # must be rc=1, "Unit is masked"
 ```
 
 ## Enumerate EVERY scheduler, not the one you remember
@@ -108,7 +108,7 @@ directories you can think of — the list is always incomplete:
 
 ```python
 TOKEN = re.compile(r'\b(\d{8,10}):(AA[A-Za-z0-9_-]{33,})')
-KEYS = re.compile(r'\b(sk-ant-[A-Za-z0-9._-]{20,}|sk-[A-Za-z0-9._-]{20,}|xai-[...])')
+KEYS  = re.compile(r'\b(sk-ant-[A-Za-z0-9._-]{20,}|sk-[A-Za-z0-9._-]{20,}|xai-[...])')
 # walk /home/<user>, skip node_modules/.git/site-packages/__pycache__/venv,
 # copy each hit to <path>.preRevoke-<stamp>, then substitute.
 ```
@@ -212,7 +212,7 @@ then KILL:
 
 ```python
 import json, os, shutil
-p = os.path.expanduser("~/.h‍ermes/cron/jobs.json") # repeat per profile
+p = os.path.expanduser("~/.h‍ermes/cron/jobs.json")   # repeat per profile
 d = json.load(open(p)); j = d.get("jobs", d)
 jobs = list(j.values()) if isinstance(j, dict) else j
 shutil.copy2(p, p + ".preShutdown-<stamp>")
@@ -241,12 +241,12 @@ sockets. Check argv and `ss -tnp | grep pid=<pid>` before assuming.
 ## Report reboot survival, not "it's off"
 
 ```
-gateway units -> masked (explicit start refuses, rc=1)
-linger -> yes/no
-pm2 saved dump -> contains no agent entries
-crontab -> N entries, 0 with gateway-start verbs
-internal cron enabled -> 0 for every profile on the box
-live processes -> gateways / cron runners / spawned agent CLIs / workers
+gateway units          -> masked (explicit start refuses, rc=1)
+linger                 -> yes/no
+pm2 saved dump         -> contains no agent entries
+crontab                -> N entries, 0 with gateway-start verbs
+internal cron enabled  -> 0 for every profile on the box
+live processes         -> gateways / cron runners / spawned agent CLIs / workers
 ```
 
 ## ⚠️ Do not "repair" a host you are decommissioning

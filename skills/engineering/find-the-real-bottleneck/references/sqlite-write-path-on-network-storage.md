@@ -9,8 +9,8 @@ service was otherwise healthy. Everything below is measured, not inferred.
 **Raw fsync latency, EBS vs RAM:**
 
 ```
-EBS (/tmp) p50= 76.9ms p90=130.5ms (earlier sample: p50=32ms, max=126ms)
-tmpfs (/dev/shm) p50= 0.000ms p90= 0.000ms
+EBS (/tmp)     p50= 76.9ms  p90=130.5ms   (earlier sample: p50=32ms, max=126ms)
+tmpfs (/dev/shm) p50= 0.000ms  p90= 0.000ms
 ```
 
 EBS is network-attached. Local NVMe is ~0.1ms. This is a 100–700x gap and it is
@@ -19,9 +19,9 @@ the single largest term in the write path.
 **`synchronous` pragma, same schema, same rows:**
 
 ```
-synchronous=OFF 0.066 ms/insert
-synchronous=NORMAL 5.017 ms/insert <- the app's setting
-synchronous=FULL 14.548 ms/insert
+synchronous=OFF     0.066 ms/insert
+synchronous=NORMAL  5.017 ms/insert    <- the app's setting
+synchronous=FULL   14.548 ms/insert
 ```
 
 76x between OFF and NORMAL. The cost is the durability barrier, not CPU.
@@ -29,9 +29,9 @@ synchronous=FULL 14.548 ms/insert
 **Native lib does NOT touch the JS heap** (kills any "big table → GC" theory):
 
 ```
-heapUsed before=3.6MB after settings query=4.1MB
+heapUsed  before=3.6MB  after settings query=4.1MB
           after 20x COUNT on a 245k-row table=4.1MB
-external 1.5MB -> 1.5MB arrayBuffers 0.1MB -> 0.1MB
+external  1.5MB -> 1.5MB     arrayBuffers 0.1MB -> 0.1MB
 ```
 
 ## Why this stalls the whole service
@@ -62,12 +62,12 @@ bucket_, which is a meaningless number that looks like a plausible rate.
 
 ```
 WRONG (--statistics Average, period=300, read as a rate):
-  Write IOPS avg 22,000–28,000 max 31,839 -> "7–10x over the 3,000 cap!"
-  Write bytes avg 5.5 GB/s max 7.9 GB/s -> "44–63x over the 125 MB/s cap!"
+  Write IOPS  avg 22,000–28,000  max 31,839   -> "7–10x over the 3,000 cap!"
+  Write bytes avg 5.5 GB/s       max 7.9 GB/s -> "44–63x over the 125 MB/s cap!"
 
 RIGHT (--statistics Sum, then divide by period seconds):
-  Write IOPS ~365–470 peak of 3,000 provisioned = 14% NOT saturated
-  Write throughput ~110–120 MB/s of 125 provisioned = 94% SATURATED
+  Write IOPS       ~365–470 peak      of 3,000 provisioned =  14%   NOT saturated
+  Write throughput ~110–120 MB/s      of  125 provisioned  =  94%   SATURATED
 ```
 
 **Always use `--statistics Sum` and divide by the period.** The corrected picture
@@ -134,7 +134,7 @@ VOL=$(aws ec2 describe-volumes --filters \
   --query 'Volumes[0].[VolumeId,VolumeType,Size,Iops,Throughput]' \
   --output text --region ca-central-1)
 
-# NOTE: dimension syntax is Name=VolumeId,Value=<id> (Value, singular —
+# NOTE: dimension syntax is Name=VolumeId,Value=<id>  (Value, singular —
 # "Values" is valid for ec2 filters but INVALID for cloudwatch dimensions
 # and fails with a ParamValidation error).
 
@@ -145,7 +145,7 @@ aws cloudwatch get-metric-statistics --namespace AWS/EBS \
   --end-time $(date -u +%Y-%m-%dT%H:%M:%S) \
   --period 300 --statistics Sum --region ca-central-1 --output text \
   | grep DATAPOINTS | sort -k3 \
-  | awk '{printf " %s %7.1f IOPS\n", $3, $2/300}'
+  | awk '{printf "  %s  %7.1f IOPS\n", $3, $2/300}'
 
 # Throughput: Sum / period_seconds / 1MiB, shown as % of provisioned
 aws cloudwatch get-metric-statistics --namespace AWS/EBS \
@@ -154,7 +154,7 @@ aws cloudwatch get-metric-statistics --namespace AWS/EBS \
   --end-time $(date -u +%Y-%m-%dT%H:%M:%S) \
   --period 300 --statistics Sum --region ca-central-1 --output text \
   | grep DATAPOINTS | sort -k3 \
-  | awk '{mb=$2/300/1048576; printf " %s %6.1f MB/s %5.1f%%\n", $3, mb, mb/125*100}'
+  | awk '{mb=$2/300/1048576; printf "  %s  %6.1f MB/s  %5.1f%%\n", $3, mb, mb/125*100}'
 
 # Queue depth: sustained >1 means the volume gates the workload
 aws cloudwatch get-metric-statistics --namespace AWS/EBS \
@@ -167,9 +167,9 @@ aws cloudwatch get-metric-statistics --namespace AWS/EBS \
 **gp3 caps and pricing (verify current rates before quoting):**
 
 ```
-                 baseline (free) max price above baseline
-IOPS 3,000 16,000 ~$0.005/IOPS-month
-Throughput 125 MB/s 1,000 MB/s ~$0.040/MB-s-month
+                 baseline (free)   max        price above baseline
+IOPS             3,000             16,000     ~$0.005/IOPS-month
+Throughput       125 MB/s          1,000 MB/s ~$0.040/MB-s-month
 ```
 
 Worked example: 125 → 1,000 MB/s = +875 MB/s ≈ **+$35/month**, IOPS untouched.
@@ -183,12 +183,12 @@ Changed **exactly one variable** — `aws ec2 modify-volume --throughput 125 →
 (live, no downtime, no restart, applies while state shows `optimizing`):
 
 ```
-                        BASELINE AFTER-250 change
-dd sequential write 57.6 MB/s 162 MB/s 2.8x
-SQLITE_INSERT_MEDIAN 1.402 ms 0.475 ms 2.9x
-HTTP_MEDIAN 1.908 s 0.734 s 2.6x
-HTTP_P90 2.352 s 1.320 s 1.8x
-HTTP_MAX 3.541 s 1.526 s 2.3x
+                        BASELINE      AFTER-250     change
+dd sequential write      57.6 MB/s     162 MB/s     2.8x
+SQLITE_INSERT_MEDIAN      1.402 ms     0.475 ms     2.9x
+HTTP_MEDIAN               1.908 s      0.734 s      2.6x
+HTTP_P90                  2.352 s      1.320 s      1.8x
+HTTP_MAX                  3.541 s      1.526 s      2.3x
 ```
 
 The `dd` figure is the cleanest evidence the cap was the constraint: same
@@ -199,9 +199,9 @@ to the cap** — 250 MB/s bought 2.6x for $5; the 1,000 MB/s option was $35.
 **But note the bottleneck moved rather than vanished:**
 
 ```
-DISK_WRITE_MBPS=217 of 250 provisioned = 87% (immediately re-saturated)
-FSYNC_P50 1.034 → 1.959 ms
-FSYNC_P90 1.385 → 52.970 ms <- tail got WORSE
+DISK_WRITE_MBPS=217   of 250 provisioned = 87%   (immediately re-saturated)
+FSYNC_P50   1.034 → 1.959 ms
+FSYNC_P90   1.385 → 52.970 ms      <- tail got WORSE
 ```
 
 The service simply wrote faster into the new headroom. When a paid capacity bump
@@ -213,9 +213,9 @@ amplification bug — say so rather than proposing the next tier.
 Bumped again to 500 MB/s (+$15/mo over the original 125). Same `dd` probe:
 
 ```
-125 MB/s cap: 57.6 MB/s
-250 MB/s cap: 162 MB/s <- 2.8x, dashboard median 1.908s -> 0.734s
-500 MB/s cap: 322 MB/s <- 2.0x more, dashboard median ~0.26s
+125 MB/s cap:   57.6 MB/s
+250 MB/s cap:  162   MB/s     <- 2.8x, dashboard median 1.908s -> 0.734s
+500 MB/s cap:  322   MB/s     <- 2.0x more, dashboard median ~0.26s
 ```
 
 The step from 125→250 bought a larger _user-visible_ improvement than 250→500
@@ -238,10 +238,10 @@ whether a bigger cache helps, given the host had plenty of free RAM.
 **Writes — no usable effect** (3 trials, median, 150 inserts each):
 
 ```
-CURRENT cache16M mmap0 ckpt1000 0.523 ms
-cache256M mmap0 ckpt1000 2.031 ms
-cache256M mmap512M ckpt1000 1.478 ms
-cache256M mmap512M ckpt4000 0.652 ms
+CURRENT cache16M mmap0    ckpt1000    0.523 ms
+cache256M        mmap0    ckpt1000    2.031 ms
+cache256M        mmap512M ckpt1000    1.478 ms
+cache256M        mmap512M ckpt4000    0.652 ms
 ```
 
 All inside the EBS noise floor; the ordering is not real. Do not tune write path
@@ -250,9 +250,9 @@ with cache size.
 **Reads — real and repeatable** (3 trials, dashboard-style aggregates):
 
 ```
-cache16M mmap0 23.41 ms (22.9, 23.4, 24.1)
-cache256M mmap0 15.62 ms (15.4, 15.6, 16.4)
-cache256M mmap512M 15.62 ms (14.4, 15.6, 16.2)
+cache16M   mmap0      23.41 ms   (22.9, 23.4, 24.1)
+cache256M  mmap0      15.62 ms   (15.4, 15.6, 16.4)
+cache256M  mmap512M   15.62 ms   (14.4, 15.6, 16.2)
 ```
 
 **~33% faster reads from cache alone; `mmap_size` adds nothing on top.** Tight

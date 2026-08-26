@@ -11,7 +11,7 @@ deploy, and the `.gitignore` defect that made it recur.
 ## 1. `Restart=always` does NOT revive a client-requested stop
 
 ```
-ActiveState=failed Result=exit-code NRestarts=0 MainPID=0
+ActiveState=failed  Result=exit-code  NRestarts=0  MainPID=0
 ```
 
 `NRestarts=0` on a failed unit is the tell. systemd honored an explicit
@@ -130,9 +130,9 @@ this order:
 
 ```
 1. fetch + reset tree to the new SHA
-2. drain and pause the gateway <-- service goes down here
+2. drain and pause the gateway          <-- service goes down here
 3. install deps
-4. verify (money-path module imports) <-- FAILED
+4. verify (money-path module imports)   <-- FAILED
 5. (never reached) restart
 ```
 

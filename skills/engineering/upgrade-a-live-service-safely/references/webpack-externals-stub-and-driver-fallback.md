@@ -9,14 +9,14 @@ The app logs a module as missing while the module is demonstrably on disk:
 
 ```
 [DB] Sync driver 'better-sqlite3' failed to open, will try next driver: Cannot find module 'better-sqlite3'
-[DB] Sync driver 'node:sqlite' failed to open, will try next driver: Cannot find module 'node:sqlite'
+[DB] Sync driver 'node:sqlite'   failed to open, will try next driver: Cannot find module 'node:sqlite'
 [DB] Pre-initializing sql.js WASM (synchronous drivers unavailable)...
 ```
 
 Meanwhile, from the app's own working directory:
 
 ```bash
-cd <standalone> && node -e "console.log(require('better-sqlite3'))" # works fine
+cd <standalone> && node -e "console.log(require('better-sqlite3'))"   # works fine
 ```
 
 **A missing native module usually does not crash the service.** It falls through
@@ -72,7 +72,7 @@ marker string from the source (an error message, a comment):
 
 ```bash
 grep -rlF "Nenhum driver SQLite" --include=*.js.build
-#.build/next/server/chunks/12718.js, 1716.js, middleware.js
+# .build/next/server/chunks/12718.js, 1716.js, middleware.js
 ```
 
 **3. Read the call site and identify the require function.**
@@ -192,9 +192,9 @@ JS heap leak. Sample `/api/monitoring/health` (or `process.memoryUsage()`) every
 10s and compare the step size against `stat -c%s <dbfile>`:
 
 ```
-14:04:39 arrayBuffers= 498M dbfile=418M
-14:04:50 arrayBuffers= 884M dbfile=418M <- +386M
-14:05:30 arrayBuffers=1326M dbfile=418M <- +442M
+14:04:39  arrayBuffers= 498M   dbfile=418M
+14:04:50  arrayBuffers= 884M   dbfile=418M   <- +386M
+14:05:30  arrayBuffers=1326M   dbfile=418M   <- +442M
 ```
 
 A watchdog looking at RSS alone will call this "a C++ addon or streaming buffer

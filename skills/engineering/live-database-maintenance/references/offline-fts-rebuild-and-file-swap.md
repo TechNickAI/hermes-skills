@@ -18,10 +18,10 @@ is in the source data, not the index.
 Reading the full unsliced check confirmed it:
 
 ```
-Tree 3 page 1678 cell 399: Rowid 5015 out of order
-Tree 5 page 497514 cell 0: invalid page number 218103809
-Tree 5 page 582243 cell 248: 2nd reference to page 697450
-Tree 35 page 355281 cell 61: 2nd reference to page 595150
+Tree 3  page 1678   cell 399: Rowid 5015 out of order
+Tree 5  page 497514 cell 0:   invalid page number 218103809
+Tree 5  page 582243 cell 248: 2nd reference to page 697450
+Tree 35 page 355281 cell 61:  2nd reference to page 595150
 ```
 
 Pages referenced twice, an impossible page number, rowids out of order:
@@ -61,7 +61,7 @@ conn.execute("PRAGMA writable_schema=ON")
 conn.execute("DELETE FROM sqlite_master WHERE name LIKE 'messages_fts%'")
 conn.commit()
 conn.execute("PRAGMA writable_schema=OFF")
-conn.close() # reopen: the schema cache must be rebuilt from disk
+conn.close()          # reopen: the schema cache must be rebuilt from disk
 ```
 
 Then recreate from captured DDL. Capture that DDL **before** touching anything
@@ -96,14 +96,14 @@ column as BLOB** in the destination.
 The resulting file passes everything:
 
 ```
-integrity: ok orphan pages: 0 search: 100 hits
+integrity: ok        orphan pages: 0        search: 100 hits
 ```
 
 …and is useless:
 
 ```
-SOURCE: typeof(source)=text where source='telegram' -> 326
-REBUILT: typeof(source)=blob where source='telegram' -> 0
+SOURCE:   typeof(source)=text   where source='telegram'  ->  326
+REBUILT:  typeof(source)=blob   where source='telegram'  ->    0
 ```
 
 Every byte present, every application query matching nothing. The app reads the
@@ -279,8 +279,8 @@ report more rows than it can produce, because `count(*)` is answered from
 B-tree bookkeeping that the damage has falsified:
 
 ```
-live count(*): 455,522
-live fully enumerable: 455,487
+live count(*):            455,522
+live fully enumerable:    455,487
 phantom (counted, never readable): 1,937
 ```
 
@@ -334,10 +334,10 @@ the service on the corrupt file indefinitely — the gate defeats its own purpos
 Use a small bounded tolerance, and **print exactly what is being abandoned**:
 
 ```python
-tolerance = max(20, len(live_ids) // 20000) # ~0.005%
+tolerance = max(20, len(live_ids) // 20000)   # ~0.005%
 checks[label] = len(missing) <= tolerance
 if missing and len(missing) <= 10:
-    print(f" unrecoverable ids: {sorted(missing)}")
+    print(f"    unrecoverable ids: {sorted(missing)}")
 ```
 
 Final real loss here: **4 messages and 3 sessions**, all created inside the
@@ -363,7 +363,7 @@ def read_range(table, collist, key, lo, hi):
             (lo, hi)).fetchall(), 0
     except Exception:
         if hi - lo <= 1:
-            return [], 1 # one genuinely bad row
+            return [], 1                      # one genuinely bad row
         mid = (lo + hi) // 2
         a, ab = read_range(table, collist, key, lo, mid)
         b, bb = read_range(table, collist, key, mid, hi)
@@ -389,7 +389,7 @@ immediately before the rename rather than aborting the whole run:
 ```bash
 holders=$(lsof -t "$DB" 2>/dev/null | wc -l | tr -d ' ')
 if [ "$holders" != "0" ]; then
-  echo " holder reappeared after catch-up; clearing"
+  echo "  holder reappeared after catch-up; clearing"
   systemctl --user kill -s SIGKILL "$UNIT" 2>/dev/null || true
   for p in $(lsof -t "$DB" 2>/dev/null); do kill -9 "$p" 2>/dev/null || true; done
   sleep 3

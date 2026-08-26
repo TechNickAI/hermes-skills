@@ -54,7 +54,7 @@ Clear the field or type junk → `parseInt` returns `NaN` → `|| 16384` persist
 
 ```
 Error getting database settings: Error: no such table: dbstat
-  src/lib/db/stats.ts:54: SELECT SUM(pgsize) as size FROM dbstat WHERE name = ?
+  src/lib/db/stats.ts:54:  SELECT SUM(pgsize) as size FROM dbstat WHERE name = ?
 ```
 
 The whole page was dead, so the setting was unreachable via UI regardless.
@@ -69,8 +69,8 @@ Copy the DB, delete the key, and observe. The merge logic usually clones
 defaults and overlays stored keys, so absent ⇒ default:
 
 ```
-WITH key: key_value.cacheSize = 16384
-after DELETE: key_value.cacheSize = (ABSENT) -> getDatabaseSettings() = 65536
+WITH key:      key_value.cacheSize = 16384
+after DELETE:  key_value.cacheSize = (ABSENT)   -> getDatabaseSettings() = 65536
 ```
 
 But pair that with link 4: if boot hardcodes the default anyway, "unset" and
@@ -110,9 +110,9 @@ in production."_
 router:
 
 ```
-checkout HEAD: 6c26483d4 (package.json says 3.8.49)
-deployed symlink: current -> releases/standalone-<sha>
-health endpoint: "version":"3.8.50"
+checkout HEAD:     6c26483d4   (package.json says 3.8.49)
+deployed symlink:  current -> releases/standalone-<sha>
+health endpoint:   "version":"3.8.50"
 ```
 
 Three different answers. The one that matters is what the **running build** was
@@ -125,18 +125,18 @@ compiled from.
 curl -s "$BASE/api/monitoring/health" | grep -o '"version":"[^"]*"'
 
 # 2. what artifact is actually symlinked
-ls -la ~/src/App/current # -> releases/standalone-<sha>
-cat ~/src/App/releases/*/BUILD_SHA 2>/dev/null
+ls -la ~/src/App/current            # -> releases/standalone-<sha>
+cat  ~/src/App/releases/*/BUILD_SHA 2>/dev/null
 
 # 3. resolve that sha — it may not exist in the deploy checkout
 git cat-file -t 2fc1229 || { git fetch fork; git fetch upstream; }
 git log --oneline -1 2fc1229
-git branch -a --contains 2fc1229 # -> remotes/fork/release/v3.8.50
+git branch -a --contains 2fc1229    # -> remotes/fork/release/v3.8.50
 
 # 4. branch from the EXACT sha, then confirm
 git checkout -b feat/my-change 2fc1229fe
-git rev-parse --short HEAD # must equal the deployed sha
-grep -m1 '"version"' package.json # 3.8.50
+git rev-parse --short HEAD          # must equal the deployed sha
+grep -m1 '"version"' package.json   # 3.8.50
 ```
 
 **Pitfall:** the deployed sha may be absent from the production host's own
@@ -152,7 +152,7 @@ forge itself:
 gh repo view <owner>/<repo> --json parent,name,owner
 # -> "parent":{"owner":{"login":"diegosouzapw"},"name":"the router"}
 git remote add upstream https://github.com/diegosouzapw/the router.git
-git ls-remote --heads upstream | head # prove it resolves
+git ls-remote --heads upstream | head    # prove it resolves
 ```
 
 `package.json`'s `repository.url` is a second corroborating source. A wrong
@@ -176,14 +176,14 @@ A job created with a one-shot ISO schedule (`repeat: once`) that has already
 passed its fire time gets **deleted by `run` without executing**:
 
 ```
-execution_success: false # and the job vanished from jobs.json
+execution_success: false      # and the job vanished from jobs.json
 ```
 
 Recover the prompt (a subagent had saved it to `/tmp/...-prompt.txt`), then
 recreate with a real recurring cron expression before testing:
 
 ```
-schedule: "0 9 * * 0" repeat: forever
+schedule: "0 9 * * 0"    repeat: forever
 ```
 
 Then `run` executes properly (`execution_success: true`) and the job survives.

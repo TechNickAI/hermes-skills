@@ -46,8 +46,8 @@ This is the sharpest version of the above, because the backup _appears_ to
 contain everything important.
 
 ```
-provider_connections.access_token prefix="enc:v1:7c90a" len=3721
-provider_connections.access_token prefix="enc:v1:c8a8c" len=289
+provider_connections.access_token  prefix="enc:v1:7c90a"  len=3721
+provider_connections.access_token  prefix="enc:v1:c8a8c"  len=289
 ```
 
 `enc:v1:` — ciphertext. The decryption key (`STORAGE_ENCRYPTION_KEY`) lived only
@@ -91,7 +91,7 @@ drifting above the retention policy (12 present under a 7-daily/4-weekly policy)
 The backup step succeeding masked the retention step failing.
 
 ```bash
-ps -p <PID> >/dev/null 2>&1 || restic -r "$REPO" unlock # confirm dead FIRST
+ps -p <PID> >/dev/null 2>&1 || restic -r "$REPO" unlock   # confirm dead FIRST
 ```
 
 **Check the lock holder is actually gone before unlocking.** Blindly unlocking a
@@ -107,7 +107,7 @@ intact. Do the round trip and compare hashes:
 restic -r "$REPO" restore <snap> --target /tmp/restore-test --include /path/to/.env
 diff <(sha256sum < /path/to/.env) <(sha256sum < /tmp/restore-test/path/to/.env) \
   && echo "MATCH — byte-identical"
-grep -c '^STORAGE_ENCRYPTION_KEY=' /tmp/restore-test/path/to/.env # key survived
+grep -c '^STORAGE_ENCRYPTION_KEY=' /tmp/restore-test/path/to/.env   # key survived
 rm -rf /tmp/restore-test
 ```
 

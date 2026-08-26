@@ -21,7 +21,7 @@ serve?** Those are different questions and they had opposite answers here.
 ```
 tmpfs: 32,434 SQLite ops/sec
 EBS: 8,382 SQLite ops/sec <- 3.9x slower, and completely irrelevant
-demand: 0.83 writes/sec <- busiest minute in 24h
+demand:      0.83 writes/sec       <- busiest minute in 24h
 ```
 
 10,099x headroom on the _slow_ option. Report both numbers together or the
@@ -75,8 +75,8 @@ A ratio is not an impact. Divide the per-operation difference into the actual
 request latency:
 
 ```
-insert p95: tmpfs 0.024 ms vs EBS 0.057 ms -> +0.033 ms
-as a share of a 5,643 ms p50 request -> 0.0005%
+insert p95: tmpfs 0.024 ms  vs  EBS 0.057 ms   -> +0.033 ms
+as a share of a 5,643 ms p50 request           ->  0.0005%
 ```
 
 Also separate **in-request** cost from **background** cost. WAL checkpoints went

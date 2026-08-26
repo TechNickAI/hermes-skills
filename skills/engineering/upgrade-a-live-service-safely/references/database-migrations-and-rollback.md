@@ -11,7 +11,7 @@ nothing for the **database**. If the new build applies schema migrations on
 first boot, the moment it serves one request you have:
 
 ```
-old code + new schema = not the state you rolled back to
+old code  +  new schema  =  not the state you rolled back to
 ```
 
 Measured case: v3.8.49 applied **11 pending migrations (123→133)** on first boot
@@ -78,9 +78,9 @@ difference between an informed go-ahead and a surprise.
 ## Verify the destructive ones were survivable, after
 
 ```
-provider_connections: 14 rows ✅ intact
-api_keys: 12 ✅ intact
-breakers: all CLOSED ✅
+provider_connections: 14 rows   ✅ intact
+api_keys: 12                    ✅ intact
+breakers: all CLOSED            ✅
 ```
 
 A migration named `remove_unregistered_*` may well be correct and harmless —
@@ -89,10 +89,10 @@ but confirm it with a row count rather than assuming.
 ## Outcome when done right
 
 ```
-[19:27:01] live PID=3060 migrations=122
-[19:27:01] DB -> storage-pre-6c26483d4-...sqlite (309M)
+[19:27:01] live PID=3060  migrations=122
+[19:27:01] DB   -> storage-pre-6c26483d4-...sqlite (309M)
 [19:27:16] PID 3060 -> 53438
-[19:27:25] === DEPLOY VERIFIED === migrations now: 133
+[19:27:25] === DEPLOY VERIFIED ===  migrations now: 133
 ```
 
 ~15s downtime, 8/8 verification gates green, full restore path available.

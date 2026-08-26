@@ -73,7 +73,7 @@ This repo's review checks run on GitHub. Drive everything through the `gh` CLI.
 - Resolve owner/repo from the remote when you need it raw:
   ```bash
   REMOTE_URL=$(git remote get-url origin)
-  R=$(echo "$REMOTE_URL" | sed -E 's#.*github\.com[:/]##; s#\.git$##') # owner/repo
+  R=$(echo "$REMOTE_URL" | sed -E 's#.*github\.com[:/]##; s#\.git$##')   # owner/repo
   ```
 
 ## Workflow
@@ -319,7 +319,7 @@ Codex, Greptile). After a push, bots re-analyze:
 - Re-run the preflight (step 2) and check-status loop after each push.
 
 ```bash
-gh pr checks <N> --repo $R # one-shot status
+gh pr checks <N> --repo $R          # one-shot status
 # or watch until checks settle:
 gh pr checks <N> --repo $R --watch
 ```
@@ -347,8 +347,8 @@ When all bots have settled and no actionable feedback remains, report:
 
 ```
 ## Bot Feedback Addressed
-**PR:** #<N> — <title> (<url>)
-**Fixed:** <n> **Declined:** <n> (<incorrect> incorrect, <wontfix> wontfix)
+**PR:** #<N> — <title>   (<url>)
+**Fixed:** <n>    **Declined:** <n> (<incorrect> incorrect, <wontfix> wontfix)
 **Issues created:** <n>
 **Checks:** <pre-commit/Cursor/claude-review status>
 <one-line summary of key fixes and notable declines>

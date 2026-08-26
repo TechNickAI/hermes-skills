@@ -45,8 +45,8 @@ file is replaced:
 
 ```bash
 NP=$(systemctl --user show <unit> -p MainPID --value)
-ls -l /proc/$NP/exe # a "(deleted)" suffix == running a stale binary
-/proc/$NP/exe -c 'import sqlite3; print(sqlite3.sqlite_version)' # TRUE running version
+ls -l /proc/$NP/exe                  # a "(deleted)" suffix == running a stale binary
+/proc/$NP/exe -c 'import sqlite3; print(sqlite3.sqlite_version)'   # TRUE running version
 ```
 
 `(deleted)` is the highest-signal indicator available: it means the on-disk
@@ -57,7 +57,7 @@ binary was swapped out from under a live process.
 ```bash
 for p in $(pgrep -f "<service pattern>"); do
   BIN=$(lsof -p $p 2>/dev/null | awk '/txt/ && /python3.11/ {print $NF; exit}')
-  echo -n " PID $p uses $BIN -> "; "$BIN" -c 'import sqlite3; print(sqlite3.sqlite_version)'
+  echo -n "  PID $p uses $BIN -> "; "$BIN" -c 'import sqlite3; print(sqlite3.sqlite_version)'
 done
 ```
 
