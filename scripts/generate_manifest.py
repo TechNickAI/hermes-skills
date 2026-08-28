@@ -168,6 +168,7 @@ CLAUDE_COMPAT = {
     "google-slides": ("native", "Works in Claude once the gog CLI is authorized."),
     "imessage-bluebubbles": ("native", "Works in Claude on macOS once BlueBubbles is set up."),
     "vapi-calls": ("native", "Works in Claude once VAPI_API_KEY is available."),
+    "fieldy": ("native", "Stdlib-only REST client; works in Claude once FIELDY_API_KEY is available."),
     "deep-dive": (
         "degraded",
         "Full method in Claude Code using its own web, file, and subagent tools; "

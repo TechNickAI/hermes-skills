@@ -11,7 +11,7 @@
 #   use_when              the trigger conditions, for selective installation
 _generated_by: scripts/generate_manifest.py
 _do_not_edit: Regenerate with `python scripts/generate_manifest.py`; CI checks it.
-count: 35
+count: 36
 packs:
 - core
 - engineering
@@ -796,6 +796,32 @@ skills:
   - prompt-injection
   - productivity
   path: skills/productivity/email-steward
+- name: fieldy
+  pack: productivity
+  version: 1.0.0
+  scope: solo
+  summary: Use when reading conversations, transcripts, summaries, or action items captured by a Fieldy AI wearable note taker, or when the user mentions Fieldy, their wearable, or wants the record of something said in person rather than on a video call.
+  use_when: reading conversations, transcripts, summaries, or action items captured by a Fieldy AI wearable note taker, or when the user mentions Fieldy, their wearable, or wants the record of something said in person rather than on a video call.
+  requires:
+  - 'env: FIELDY_API_KEY (Fieldy app → Settings → Developer Settings)'
+  - Python 3.9+ (stdlib only, no third-party packages)
+  works_out_of_the_box: false
+  compatibility: Agent Skills standard. The bundled client is stdlib-only Python and needs no Hermes runtime; any agent that can run python3 and read an env var can use it.
+  claude_compat: native
+  claude_note: Stdlib-only REST client; works in Claude once FIELDY_API_KEY is available.
+  size:
+    files: 0
+    bytes_skill_md: 11985
+    bytes_total: 0
+    approx_tokens_skill_md: 2996
+    approx_tokens_total: 0
+  tags:
+  - fieldy
+  - wearable
+  - transcripts
+  - recorders
+  - integrations
+  path: skills/productivity/fieldy
 - name: google-docs
   pack: productivity
   version: 1.0.0

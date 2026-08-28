@@ -169,6 +169,7 @@ against reality before reporting. That discipline is baked into the skill.
 | `google-slides`        | Markdown to a real Slides deck, with a visual QA pass                                   | `gog` CLI authorized; pandoc                                                                     |
 | `imessage-bluebubbles` | Send, read, and search iMessage from an agent on macOS via the BlueBubbles bridge       | macOS + Messages.app; BlueBubbles server; Full Disk Access (granted by hand); python3 `requests` |
 | `vapi-calls`           | Place real outbound phone calls — reminders, confirmations, booking an appointment      | `VAPI_API_KEY`                                                                                   |
+| `fieldy`               | Read conversations, transcripts, and action items from a Fieldy AI wearable note taker  | `FIELDY_API_KEY`; Python 3.9+                                                                    |
 
 `skills/MANIFEST.yaml` is the machine-readable version of this table, generated
 from the skills themselves. CI asserts that every skill appears here and that
