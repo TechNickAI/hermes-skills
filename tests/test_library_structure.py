@@ -318,6 +318,7 @@ REQUIREMENT_KEYS = {
     "BlueBubbles server app (installed by scripts/setup-bluebubbles.sh)": "BlueBubbles",
     "Full Disk Access granted by hand (macOS permission prompts cannot be scripted)": "Full Disk Access",
     "python3 with the requests package": "requests",
+    "env: FIELDY_API_KEY (Fieldy app \u2192 Settings \u2192 Developer Settings)": "FIELDY_API_KEY",
 }
 
 

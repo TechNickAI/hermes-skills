@@ -431,6 +431,19 @@ differentiator — say so out loud), `unsupported` (never recommend it in Claude
 - **Size:** 13,873 B body, loaded when the skill triggers (~3,468 tokens); 42,438 B across 12 file(s) total
 - **Path:** `skills/productivity/email-steward`
 
+## fieldy
+
+- **Pack:** productivity
+- **Scope:** solo
+- **What it does:** Use when reading conversations, transcripts, summaries, or action items captured by a Fieldy AI wearable note taker, or when the user mentions Fieldy, their wearable, or wants the record of something said in person rather than on a video call.
+- **Use when:** reading conversations, transcripts, summaries, or action items captured by a Fieldy AI wearable note taker, or when the user mentions Fieldy, their wearable, or wants the record of something said in person rather than on a video call.
+- **Prerequisites:** env: FIELDY_API_KEY (Fieldy app → Settings → Developer Settings), Python 3.9+ (stdlib only, no third-party packages)
+- **Works without setup:** No
+- **Compatibility:** Agent Skills standard. The bundled client is stdlib-only Python and needs no Hermes runtime; any agent that can run python3 and read an env var can use it.
+- **Claude:** native — Stdlib-only REST client; works in Claude once FIELDY_API_KEY is available.
+- **Size:** 15,306 B body, loaded when the skill triggers (~3,826 tokens); 89,919 B across 3 file(s) total
+- **Path:** `skills/productivity/fieldy`
+
 ## google-docs
 
 - **Pack:** productivity
