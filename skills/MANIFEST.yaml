@@ -811,10 +811,10 @@ skills:
   claude_note: Stdlib-only REST client; works in Claude once FIELDY_API_KEY is available.
   size:
     files: 3
-    bytes_skill_md: 14761
-    bytes_total: 88464
-    approx_tokens_skill_md: 3690
-    approx_tokens_total: 22116
+    bytes_skill_md: 15306
+    bytes_total: 89919
+    approx_tokens_skill_md: 3826
+    approx_tokens_total: 22480
   tags:
   - fieldy
   - wearable

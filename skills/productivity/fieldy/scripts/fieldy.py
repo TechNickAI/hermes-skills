@@ -90,6 +90,19 @@ def find_key(env_file=None):
     )
 
 
+def clean_id(value, label="id"):
+    """Percent-encode a path segment so an id cannot rewrite the URL.
+
+    Ids are routinely interpolated from model output or from transcript text.
+    Unencoded, `x/../../user/me` traverses to a different endpoint (verified:
+    it returned the account profile instead of a conversation), and `?` or `#`
+    silently truncate or redirect the read to another record.
+    """
+    if not value or not value.strip():
+        sys.exit(f"{label} may not be empty.")
+    return urllib.parse.quote(value, safe="")
+
+
 def call(method, path, key, params=None, body=None, retries=3, verbose=False):
     method = method.upper()
     # The path is an API endpoint, never a URL and never a place to smuggle a
@@ -298,7 +311,8 @@ def cmd_conversations(args, key):
 
 
 def cmd_conversation(args, key):
-    conv = call("GET", "/conversations/" + args.id, key, verbose=args.verbose)
+    conv = call("GET", "/conversations/" + clean_id(args.id), key,
+                verbose=args.verbose)
     if conv is None:
         sys.exit(f"No conversation with id {args.id!r} (API returned null).")
     out(conv)
@@ -307,8 +321,10 @@ def cmd_conversation(args, key):
 def cmd_transcript(args, key):
     """Transcript segments, by conversation id or by time window."""
     if args.conversation_id:
-        conv = call("GET", "/conversations/" + args.conversation_id, key,
-                    verbose=args.verbose)
+        conv = call("GET",
+                    "/conversations/" + clean_id(args.conversation_id,
+                                                 "--conversation-id"),
+                    key, verbose=args.verbose)
         if conv is None:
             sys.exit(f"No conversation with id {args.conversation_id!r}.")
         require_started(conv, args.conversation_id)
@@ -369,7 +385,15 @@ def cmd_templates(args, key):
 
 
 def cmd_raw(args, key):
-    params = dict(p.split("=", 1) for p in args.param) if args.param else None
+    params = None
+    if args.param:
+        params = {}
+        for pair in args.param:
+            if "=" not in pair:
+                sys.exit("--param must be key=value (offending value withheld; "
+                         "it may contain a secret).")
+            k, v = pair.split("=", 1)
+            params[k] = v
     body = json.loads(args.body) if args.body else None
     if args.method.upper() != "GET" and not args.yes:
         sys.exit(f"{args.method.upper()} mutates the account. Re-run with --yes "

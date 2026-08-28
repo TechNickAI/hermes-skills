@@ -131,8 +131,11 @@ subcommand.
 `--limit` and `--page-size` exist only on `conversations` and `transcript`,
 which are the paginated commands, and must be placed **after** that subcommand.
 Passing them elsewhere is a hard argparse error rather than a silent no-op.
-Pagination is automatic: the client follows `nextCursor` until the range is
-exhausted and never requests a larger page than `--limit` needs. If it cannot
+Pagination is automatic **for `conversations` and `transcript`** — those are the
+only cursor-paginated endpoints. `tasks`, `speakers`, and `templates` return a
+single page and do not accept `--limit` or `--page-size`. Within the paginated
+commands the client follows `nextCursor` until the range is exhausted and never
+requests a larger page than `--limit` needs. If it cannot
 complete the walk — a repeated cursor, or the page cap — it **exits nonzero**
 rather than printing a plausible-looking partial list. Pass `--allow-partial` to
 accept a truncated result with a warning.
@@ -199,6 +202,10 @@ MCP only when the goal is Fieldy inside a chat client's connector UI.
   incomplete pagination walk exits nonzero unless `--allow-partial` is given.
   Relatedly, an empty page mid-range is a hole rather than the end — the walk
   follows a live cursor past it.
+- Ids are percent-encoded before they reach the URL. Unencoded, a conversation
+  id of `x/../../user/me` traverses to a **different endpoint** — verified: it
+  returned the account profile instead of a conversation. Ids get interpolated
+  from model output and transcript text routinely, so treat any id as untrusted.
 - The `raw` path argument must be a bare API path. `?`, `#`, `://`, and a
   leading `//` are rejected, and the rejection message deliberately does **not**
   echo the offending value, since the reason for rejecting it is that it may
