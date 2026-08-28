@@ -441,7 +441,7 @@ differentiator — say so out loud), `unsupported` (never recommend it in Claude
 - **Works without setup:** No
 - **Compatibility:** Agent Skills standard. The bundled client is stdlib-only Python and needs no Hermes runtime; any agent that can run python3 and read an env var can use it.
 - **Claude:** native — Stdlib-only REST client; works in Claude once FIELDY_API_KEY is available.
-- **Size:** 13,665 B body, loaded when the skill triggers (~3,416 tokens); 85,421 B across 3 file(s) total
+- **Size:** 14,761 B body, loaded when the skill triggers (~3,690 tokens); 88,464 B across 3 file(s) total
 - **Path:** `skills/productivity/fieldy`
 
 ## google-docs

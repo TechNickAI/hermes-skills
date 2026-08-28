@@ -132,8 +132,10 @@ subcommand.
 which are the paginated commands, and must be placed **after** that subcommand.
 Passing them elsewhere is a hard argparse error rather than a silent no-op.
 Pagination is automatic: the client follows `nextCursor` until the range is
-exhausted, refuses to loop on a repeated cursor, and never requests a larger
-page than `--limit` needs.
+exhausted and never requests a larger page than `--limit` needs. If it cannot
+complete the walk — a repeated cursor, or the page cap — it **exits nonzero**
+rather than printing a plausible-looking partial list. Pass `--allow-partial` to
+accept a truncated result with a warning.
 
 Mutating calls through `raw` require an explicit `--yes`.
 
@@ -191,6 +193,19 @@ MCP only when the goal is Fieldy inside a chat client's connector UI.
 - Transcripts are verbatim, including profanity, false starts, and whatever was
   said near the device by people who did not know it was recording. Treat the
   content as sensitive by default and do not echo more of it than the task needs.
+- **Partial results fail loudly.** A truncated list printed with a normal
+  `count` is the worst outcome this client can produce: an agent reads it as the
+  complete record of a week and reports that something was never discussed. Any
+  incomplete pagination walk exits nonzero unless `--allow-partial` is given.
+  Relatedly, an empty page mid-range is a hole rather than the end — the walk
+  follows a live cursor past it.
+- The `raw` path argument must be a bare API path. `?`, `#`, `://`, and a
+  leading `//` are rejected, and the rejection message deliberately does **not**
+  echo the offending value, since the reason for rejecting it is that it may
+  carry a secret. Query values go through `--param`.
+- Timestamps keep sub-second precision. Rounding `--start` down and `--end` up
+  to whole seconds silently widens or narrows the window at the boundary, which
+  changes which transcript segments come back.
 - `DELETE` and `PATCH` mutate the user's personal record, and `POST /sharables`
   mints a **publicly accessible link** to a private conversation. They are
   reachable only through `raw --method ... --yes`; there is no convenience

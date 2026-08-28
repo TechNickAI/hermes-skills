@@ -92,6 +92,18 @@ def find_key(env_file=None):
 
 def call(method, path, key, params=None, body=None, retries=3, verbose=False):
     method = method.upper()
+    # The path is an API endpoint, never a URL and never a place to smuggle a
+    # query string. Rejecting `?` here is what makes the "errors never echo the
+    # query string" guarantee true: `raw '/x?token=secret'` would otherwise be
+    # reproduced verbatim in the error message.
+    if not path.startswith("/") or path.startswith("//"):
+        sys.exit(f"path must be a single API path beginning with '/': {path!r}")
+    for bad in ("?", "#", "://"):
+        if bad in path:
+            # Do NOT echo the path: it is being rejected precisely because it
+            # may carry a secret in a query string.
+            sys.exit(f"path may not contain {bad!r} (offending value withheld). "
+                     "Pass query values with --param instead.")
     url = BASE + path
     if params:
         clean = {k: v for k, v in params.items() if v is not None}
@@ -146,7 +158,15 @@ def call(method, path, key, params=None, body=None, retries=3, verbose=False):
 
 
 def iso(dt):
-    return dt.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    """Serialize to the API's ISO 8601 UTC form, preserving sub-second detail.
+
+    Truncating to whole seconds broadens --start and narrows --end, which can
+    pull in or drop a boundary transcript segment.
+    """
+    dt = dt.astimezone(timezone.utc)
+    if dt.microsecond:
+        return dt.isoformat(timespec="milliseconds").replace("+00:00", "Z")
+    return dt.strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
 def parse_iso(value, label):
@@ -193,33 +213,47 @@ def window(args):
     return iso(start_dt), iso(end_dt)
 
 
-def paginate(path, key, params, page_size=50, max_items=None, verbose=False):
-    """Follow nextCursor to exhaustion, with loop and duplicate protection."""
+def paginate(path, key, params, page_size=50, max_items=None, verbose=False,
+             allow_partial=False):
+    """Follow nextCursor to exhaustion, with loop and duplicate protection.
+
+    Incomplete results EXIT NONZERO unless --allow-partial. Returning a
+    truncated list with a normal-looking count is the worst failure mode here:
+    an agent reads it as the complete record of a week and reports that
+    something was never discussed.
+    """
     items, cursor, seen = [], None, set()
     params = dict(params)
     # Do not request more per page than the caller will keep: a --limit 1 query
     # should not pull 50 conversations of private speech into an agent context.
     effective = page_size if max_items is None else min(page_size, max_items)
     params["pageSize"] = max(1, effective)
+    truncated = None
     for _ in range(MAX_PAGES):
         params["cursor"] = cursor
-        resp = call("GET", path, key, params=params, verbose=verbose)
-        batch = resp.get("items", [])
-        items.extend(batch)
+        resp = call("GET", path, key, params=params, verbose=verbose) or {}
+        items.extend(resp.get("items", []))
         if max_items is not None and len(items) >= max_items:
             break
         cursor = resp.get("nextCursor")
-        if not cursor or not batch:
+        # An empty page with a live cursor is a hole, not the end: following it
+        # is what keeps a mid-range empty batch from discarding later pages.
+        if not cursor:
             break
         if cursor in seen:
-            print(f"warning: API repeated pagination cursor; stopping after "
-                  f"{len(items)} items.", file=sys.stderr)
+            truncated = "the API repeated a pagination cursor"
             break
         seen.add(cursor)
-        time.sleep(0.3)  # documented budget is ~30 req/min; stay well under
+        time.sleep(2.0)  # documented budget is ~30 req/min
     else:
-        print(f"warning: hit the {MAX_PAGES}-page safety cap; results may be "
-              "incomplete. Narrow the time window.", file=sys.stderr)
+        truncated = f"hit the {MAX_PAGES}-page safety cap"
+
+    if truncated:
+        msg = (f"INCOMPLETE: {truncated} after {len(items)} items. "
+               "Results are partial; narrow the time window.")
+        if not allow_partial:
+            sys.exit(msg + " Re-run with --allow-partial to accept them.")
+        print("warning: " + msg, file=sys.stderr)
     return items[:max_items] if max_items is not None else items
 
 
@@ -249,7 +283,7 @@ def cmd_conversations(args, key):
         {"startTime": start, "endTime": end, "mode": args.mode,
          "recordingSource": args.source},
         page_size=min(args.page_size, 50), max_items=args.limit,
-        verbose=args.verbose,
+        verbose=args.verbose, allow_partial=args.allow_partial,
     )
     if args.text:
         for c in items:
@@ -290,7 +324,7 @@ def cmd_transcript(args, key):
         params["recordingSource"] = args.source
     items = paginate("/transcriptions", key, params,
                      page_size=min(args.page_size, 1000), max_items=args.limit,
-                     verbose=args.verbose)
+                     verbose=args.verbose, allow_partial=args.allow_partial)
     if args.text:
         for s in items:
             print(f"{s.get('timestamp')}  {s.get('speaker') or 'Unknown'}: "
@@ -373,6 +407,9 @@ def main():
                        help="max items to return")
     paged.add_argument("--page-size", type=positive_int,
                        default=argparse.SUPPRESS, help="items per API request")
+    paged.add_argument("--allow-partial", action="store_true",
+                       default=argparse.SUPPRESS,
+                       help="accept an incomplete result set instead of failing")
 
     p = argparse.ArgumentParser(description="Fieldy Public API client",
                                 parents=[common])
@@ -427,7 +464,7 @@ def main():
     # SUPPRESS leaves attributes absent; supply defaults once, centrally.
     for name, default in (("text", False), ("verbose", False),
                           ("env_file", None), ("limit", None),
-                          ("page_size", 50)):
+                          ("page_size", 50), ("allow_partial", False)):
         if not hasattr(args, name):
             setattr(args, name, default)
     args.fn(args, find_key(args.env_file))
