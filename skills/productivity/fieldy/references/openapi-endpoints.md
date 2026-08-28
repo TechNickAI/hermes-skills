@@ -10,17 +10,17 @@ Base: `https://api.fieldy.ai/api/public/v2`
 
 operationId: `conversations.delete`
 
-| param | in | required | schema |
-|---|---|---|---|
-| id | path | yes | string |
+| param | in   | required | schema |
+| ----- | ---- | -------- | ------ |
+| id    | path | yes      | string |
 
 Request body:
 
 ```json
 {
- "type": "object",
- "properties": {},
- "required": []
+  "type": "object",
+  "properties": {},
+  "required": []
 }
 ```
 
@@ -28,15 +28,13 @@ Request body:
 
 ```json
 {
- "type": "object",
- "properties": {
-  "success": {
-   "type": "boolean"
-  }
- },
- "required": [
-  "success"
- ]
+  "type": "object",
+  "properties": {
+    "success": {
+      "type": "boolean"
+    }
+  },
+  "required": ["success"]
 }
 ```
 
@@ -44,298 +42,287 @@ Request body:
 
 operationId: `conversations.get`
 
-| param | in | required | schema |
-|---|---|---|---|
-| id | path | yes | string |
+| param | in   | required | schema |
+| ----- | ---- | -------- | ------ |
+| id    | path | yes      | string |
 
 200 response schema:
 
 ```json
 {
- "anyOf": [
-  {
-   "type": "object",
-   "properties": {
-    "id": {
-     "type": "string"
-    },
-    "title": {
-     "anyOf": [
-      {
-       "type": "string"
-      },
-      {
-       "type": "null"
-      }
-     ]
-    },
-    "summary": {
-     "anyOf": [
-      {
-       "type": "string"
-      },
-      {
-       "type": "null"
-      }
-     ]
-    },
-    "content": {
-     "anyOf": [
-      {
-       "type": "string"
-      },
-      {
-       "type": "null"
-      }
-     ]
-    },
-    "startTime": {
-     "type": "string"
-    },
-    "endTime": {
-     "anyOf": [
-      {
-       "type": "string"
-      },
-      {
-       "type": "null"
-      }
-     ]
-    },
-    "type": {
-     "enum": [
-      "FULL",
-      "BRIEF"
-     ],
-     "type": "string"
-    },
-    "keywords": {
-     "type": "array",
-     "items": {
-      "type": "string"
-     }
-    },
-    "speakers": {
-     "type": "array",
-     "items": {
-      "type": "string"
-     }
-    },
-    "memorySpeakers": {
-     "type": "array",
-     "items": {
-      "type": "string"
-     },
-     "description": "DEPRECATED: use `speakers`. Kept for older client builds."
-    },
-    "quotes": {
-     "type": "array",
-     "items": {
+  "anyOf": [
+    {
       "type": "object",
       "properties": {
-       "text": {
-        "type": "string"
-       },
-       "context": {
-        "anyOf": [
-         {
+        "id": {
           "type": "string"
-         },
-         {
-          "type": "null"
-         }
-        ]
-       }
+        },
+        "title": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "summary": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "content": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "startTime": {
+          "type": "string"
+        },
+        "endTime": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "type": {
+          "enum": ["FULL", "BRIEF"],
+          "type": "string"
+        },
+        "keywords": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "speakers": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "memorySpeakers": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "DEPRECATED: use `speakers`. Kept for older client builds."
+        },
+        "quotes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "text": {
+                "type": "string"
+              },
+              "context": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": ["text", "context"]
+          }
+        },
+        "location": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "address": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "coordinates": {
+                  "type": "object",
+                  "properties": {
+                    "latitude": {
+                      "type": "number"
+                    },
+                    "longitude": {
+                      "type": "number"
+                    }
+                  },
+                  "required": ["latitude", "longitude"]
+                },
+                "country": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "placeId": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "zip": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "street": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "streetNumber": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "city": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": ["coordinates"]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "locationId": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "templateId": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "memoryTemplateId": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "DEPRECATED: use `templateId`. Kept for older client builds."
+        },
+        "recommendedTemplateIds": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "calendarEventId": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "updatedAt": {
+          "type": "string"
+        }
       },
       "required": [
-       "text",
-       "context"
+        "id",
+        "title",
+        "summary",
+        "content",
+        "startTime",
+        "endTime",
+        "type",
+        "keywords",
+        "speakers",
+        "memorySpeakers",
+        "quotes",
+        "location",
+        "locationId",
+        "templateId",
+        "memoryTemplateId",
+        "recommendedTemplateIds",
+        "calendarEventId",
+        "updatedAt"
       ]
-     }
     },
-    "location": {
-     "anyOf": [
-      {
-       "type": "object",
-       "properties": {
-        "address": {
-         "anyOf": [
-          {
-           "type": "string"
-          },
-          {
-           "type": "null"
-          }
-         ]
-        },
-        "coordinates": {
-         "type": "object",
-         "properties": {
-          "latitude": {
-           "type": "number"
-          },
-          "longitude": {
-           "type": "number"
-          }
-         },
-         "required": [
-          "latitude",
-          "longitude"
-         ]
-        },
-        "country": {
-         "anyOf": [
-          {
-           "type": "string"
-          },
-          {
-           "type": "null"
-          }
-         ]
-        },
-        "placeId": {
-         "anyOf": [
-          {
-           "type": "string"
-          },
-          {
-           "type": "null"
-          }
-         ]
-        },
-        "zip": {
-         "anyOf": [
-          {
-           "type": "string"
-          },
-          {
-           "type": "null"
-          }
-         ]
-        },
-        "street": {
-         "anyOf": [
-          {
-           "type": "string"
-          },
-          {
-           "type": "null"
-          }
-         ]
-        },
-        "streetNumber": {
-         "anyOf": [
-          {
-           "type": "string"
-          },
-          {
-           "type": "null"
-          }
-         ]
-        },
-        "city": {
-         "anyOf": [
-          {
-           "type": "string"
-          },
-          {
-           "type": "null"
-          }
-         ]
-        }
-       },
-       "required": [
-        "coordinates"
-       ]
-      },
-      {
-       "type": "null"
-      }
-     ]
-    },
-    "locationId": {
-     "anyOf": [
-      {
-       "type": "string"
-      },
-      {
-       "type": "null"
-      }
-     ]
-    },
-    "templateId": {
-     "anyOf": [
-      {
-       "type": "string"
-      },
-      {
-       "type": "null"
-      }
-     ]
-    },
-    "memoryTemplateId": {
-     "anyOf": [
-      {
-       "type": "string"
-      },
-      {
-       "type": "null"
-      }
-     ],
-     "description": "DEPRECATED: use `templateId`. Kept for older client builds."
-    },
-    "recommendedTemplateIds": {
-     "anyOf": [
-      {
-       "type": "array",
-       "items": {
-        "type": "string"
-       }
-      },
-      {
-       "type": "null"
-      }
-     ]
-    },
-    "calendarEventId": {
-     "anyOf": [
-      {
-       "type": "string"
-      },
-      {
-       "type": "null"
-      }
-     ]
-    },
-    "updatedAt": {
-     "type": "string"
+    {
+      "type": "null"
     }
-   },
-   "required": [
-    "id",
-    "title",
-    "summary",
-    "content",
-    "startTime",
-    "endTime",
-    "type",
-    "keywords",
-    "speakers",
-    "memorySpeakers",
-    "quotes",
-    "location",
-    "locationId",
-    "templateId",
-    "memoryTemplateId",
-    "recommendedTemplateIds",
-    "calendarEventId",
-    "updatedAt"
-   ]
-  },
-  {
-   "type": "null"
-  }
- ]
+  ]
 }
 ```
 
@@ -343,144 +330,136 @@ operationId: `conversations.get`
 
 operationId: `conversations.update`
 
-| param | in | required | schema |
-|---|---|---|---|
-| id | path | yes | string |
+| param | in   | required | schema |
+| ----- | ---- | -------- | ------ |
+| id    | path | yes      | string |
 
 Request body:
 
 ```json
 {
- "type": "object",
- "properties": {
-  "title": {
-   "type": "string",
-   "description": "Conversation title"
-  },
-  "summary": {
-   "type": "string",
-   "description": "AI-generated summary"
-  },
-  "content": {
-   "type": "string",
-   "description": "Full transcript content"
-  },
-  "templateId": {
-   "type": "string",
-   "description": "Memory template ID"
-  },
-  "endTime": {
-   "type": "string",
-   "description": "ISO 8601 end time"
-  },
-  "location": {
-   "type": "object",
-   "properties": {
-    "address": {
-     "anyOf": [
-      {
-       "type": "string"
-      },
-      {
-       "type": "null"
-      }
-     ]
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Conversation title"
     },
-    "coordinates": {
-     "type": "object",
-     "properties": {
-      "latitude": {
-       "type": "number"
-      },
-      "longitude": {
-       "type": "number"
-      }
-     },
-     "required": [
-      "latitude",
-      "longitude"
-     ]
+    "summary": {
+      "type": "string",
+      "description": "AI-generated summary"
     },
-    "country": {
-     "anyOf": [
-      {
-       "type": "string"
-      },
-      {
-       "type": "null"
-      }
-     ]
+    "content": {
+      "type": "string",
+      "description": "Full transcript content"
     },
-    "placeId": {
-     "anyOf": [
-      {
-       "type": "string"
-      },
-      {
-       "type": "null"
-      }
-     ]
+    "templateId": {
+      "type": "string",
+      "description": "Memory template ID"
     },
-    "zip": {
-     "anyOf": [
-      {
-       "type": "string"
-      },
-      {
-       "type": "null"
-      }
-     ]
+    "endTime": {
+      "type": "string",
+      "description": "ISO 8601 end time"
     },
-    "street": {
-     "anyOf": [
-      {
-       "type": "string"
+    "location": {
+      "type": "object",
+      "properties": {
+        "address": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "coordinates": {
+          "type": "object",
+          "properties": {
+            "latitude": {
+              "type": "number"
+            },
+            "longitude": {
+              "type": "number"
+            }
+          },
+          "required": ["latitude", "longitude"]
+        },
+        "country": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "placeId": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "zip": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "street": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "streetNumber": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "city": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
       },
-      {
-       "type": "null"
-      }
-     ]
+      "required": ["coordinates"],
+      "description": "Location where conversation took place"
     },
-    "streetNumber": {
-     "anyOf": [
-      {
-       "type": "string"
-      },
-      {
-       "type": "null"
-      }
-     ]
+    "type": {
+      "enum": ["FULL", "BRIEF"],
+      "type": "string",
+      "description": "Conversation type"
     },
-    "city": {
-     "anyOf": [
-      {
-       "type": "string"
-      },
-      {
-       "type": "null"
-      }
-     ]
+    "calendarEventId": {
+      "type": "string",
+      "description": "Associated calendar event ID"
     }
-   },
-   "required": [
-    "coordinates"
-   ],
-   "description": "Location where conversation took place"
   },
-  "type": {
-   "enum": [
-    "FULL",
-    "BRIEF"
-   ],
-   "type": "string",
-   "description": "Conversation type"
-  },
-  "calendarEventId": {
-   "type": "string",
-   "description": "Associated calendar event ID"
-  }
- },
- "required": []
+  "required": []
 }
 ```
 
@@ -488,302 +467,288 @@ Request body:
 
 ```json
 {
- "type": "object",
- "properties": {
-  "success": {
-   "type": "boolean"
-  },
-  "conversation": {
-   "anyOf": [
-    {
-     "type": "object",
-     "properties": {
-      "id": {
-       "type": "string"
-      },
-      "title": {
-       "anyOf": [
-        {
-         "type": "string"
-        },
-        {
-         "type": "null"
-        }
-       ]
-      },
-      "summary": {
-       "anyOf": [
-        {
-         "type": "string"
-        },
-        {
-         "type": "null"
-        }
-       ]
-      },
-      "content": {
-       "anyOf": [
-        {
-         "type": "string"
-        },
-        {
-         "type": "null"
-        }
-       ]
-      },
-      "startTime": {
-       "type": "string"
-      },
-      "endTime": {
-       "anyOf": [
-        {
-         "type": "string"
-        },
-        {
-         "type": "null"
-        }
-       ]
-      },
-      "type": {
-       "enum": [
-        "FULL",
-        "BRIEF"
-       ],
-       "type": "string"
-      },
-      "keywords": {
-       "type": "array",
-       "items": {
-        "type": "string"
-       }
-      },
-      "speakers": {
-       "type": "array",
-       "items": {
-        "type": "string"
-       }
-      },
-      "memorySpeakers": {
-       "type": "array",
-       "items": {
-        "type": "string"
-       },
-       "description": "DEPRECATED: use `speakers`. Kept for older client builds."
-      },
-      "quotes": {
-       "type": "array",
-       "items": {
-        "type": "object",
-        "properties": {
-         "text": {
-          "type": "string"
-         },
-         "context": {
-          "anyOf": [
-           {
-            "type": "string"
-           },
-           {
-            "type": "null"
-           }
-          ]
-         }
-        },
-        "required": [
-         "text",
-         "context"
-        ]
-       }
-      },
-      "location": {
-       "anyOf": [
-        {
-         "type": "object",
-         "properties": {
-          "address": {
-           "anyOf": [
-            {
-             "type": "string"
-            },
-            {
-             "type": "null"
-            }
-           ]
-          },
-          "coordinates": {
-           "type": "object",
-           "properties": {
-            "latitude": {
-             "type": "number"
-            },
-            "longitude": {
-             "type": "number"
-            }
-           },
-           "required": [
-            "latitude",
-            "longitude"
-           ]
-          },
-          "country": {
-           "anyOf": [
-            {
-             "type": "string"
-            },
-            {
-             "type": "null"
-            }
-           ]
-          },
-          "placeId": {
-           "anyOf": [
-            {
-             "type": "string"
-            },
-            {
-             "type": "null"
-            }
-           ]
-          },
-          "zip": {
-           "anyOf": [
-            {
-             "type": "string"
-            },
-            {
-             "type": "null"
-            }
-           ]
-          },
-          "street": {
-           "anyOf": [
-            {
-             "type": "string"
-            },
-            {
-             "type": "null"
-            }
-           ]
-          },
-          "streetNumber": {
-           "anyOf": [
-            {
-             "type": "string"
-            },
-            {
-             "type": "null"
-            }
-           ]
-          },
-          "city": {
-           "anyOf": [
-            {
-             "type": "string"
-            },
-            {
-             "type": "null"
-            }
-           ]
-          }
-         },
-         "required": [
-          "coordinates"
-         ]
-        },
-        {
-         "type": "null"
-        }
-       ]
-      },
-      "locationId": {
-       "anyOf": [
-        {
-         "type": "string"
-        },
-        {
-         "type": "null"
-        }
-       ]
-      },
-      "templateId": {
-       "anyOf": [
-        {
-         "type": "string"
-        },
-        {
-         "type": "null"
-        }
-       ]
-      },
-      "memoryTemplateId": {
-       "anyOf": [
-        {
-         "type": "string"
-        },
-        {
-         "type": "null"
-        }
-       ],
-       "description": "DEPRECATED: use `templateId`. Kept for older client builds."
-      },
-      "recommendedTemplateIds": {
-       "anyOf": [
-        {
-         "type": "array",
-         "items": {
-          "type": "string"
-         }
-        },
-        {
-         "type": "null"
-        }
-       ]
-      },
-      "calendarEventId": {
-       "anyOf": [
-        {
-         "type": "string"
-        },
-        {
-         "type": "null"
-        }
-       ]
-      },
-      "updatedAt": {
-       "type": "string"
-      }
-     },
-     "required": [
-      "id",
-      "title",
-      "summary",
-      "content",
-      "startTime",
-      "endTime",
-      "type",
-      "keywords",
-      "speakers",
-      "memorySpeakers",
-      "quotes",
-      "location",
-      "locationId",
-      "templateId",
-      "memoryTemplateId",
-      "recommendedTemplateIds",
-      "calendarEventId",
-      "updatedAt"
-     ]
+  "type": "object",
+  "properties": {
+    "success": {
+      "type": "boolean"
     },
-    {
-     "type": "null"
+    "conversation": {
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "title": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "summary": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "content": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "startTime": {
+              "type": "string"
+            },
+            "endTime": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "type": {
+              "enum": ["FULL", "BRIEF"],
+              "type": "string"
+            },
+            "keywords": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "speakers": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "memorySpeakers": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "DEPRECATED: use `speakers`. Kept for older client builds."
+            },
+            "quotes": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "text": {
+                    "type": "string"
+                  },
+                  "context": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": ["text", "context"]
+              }
+            },
+            "location": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "address": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "coordinates": {
+                      "type": "object",
+                      "properties": {
+                        "latitude": {
+                          "type": "number"
+                        },
+                        "longitude": {
+                          "type": "number"
+                        }
+                      },
+                      "required": ["latitude", "longitude"]
+                    },
+                    "country": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "placeId": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "zip": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "street": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "streetNumber": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "city": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": ["coordinates"]
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "locationId": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "templateId": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "memoryTemplateId": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "DEPRECATED: use `templateId`. Kept for older client builds."
+            },
+            "recommendedTemplateIds": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "calendarEventId": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "updatedAt": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "id",
+            "title",
+            "summary",
+            "content",
+            "startTime",
+            "endTime",
+            "type",
+            "keywords",
+            "speakers",
+            "memorySpeakers",
+            "quotes",
+            "location",
+            "locationId",
+            "templateId",
+            "memoryTemplateId",
+            "recommendedTemplateIds",
+            "calendarEventId",
+            "updatedAt"
+          ]
+        },
+        {
+          "type": "null"
+        }
+      ]
     }
-   ]
-  }
- },
- "required": [
-  "success",
-  "conversation"
- ]
+  },
+  "required": ["success", "conversation"]
 }
 ```
 
@@ -791,318 +756,304 @@ Request body:
 
 operationId: `conversations.list`
 
-| param | in | required | schema |
-|---|---|---|---|
-| startTime | query | yes | string |
-| endTime | query | yes | string |
-| mode | query | no | enum: starts-in-range/intersects-range, string, default=starts-in-range |
-| cursor | query | no | string |
-| pageSize | query | no | number, default=6, max=50, min=1 |
-| recordingSource | query | no | enum: wearable/phone/desktop, string |
+| param           | in    | required | schema                                                                  |
+| --------------- | ----- | -------- | ----------------------------------------------------------------------- |
+| startTime       | query | yes      | string                                                                  |
+| endTime         | query | yes      | string                                                                  |
+| mode            | query | no       | enum: starts-in-range/intersects-range, string, default=starts-in-range |
+| cursor          | query | no       | string                                                                  |
+| pageSize        | query | no       | number, default=6, max=50, min=1                                        |
+| recordingSource | query | no       | enum: wearable/phone/desktop, string                                    |
 
 200 response schema:
 
 ```json
 {
- "type": "object",
- "properties": {
-  "items": {
-   "type": "array",
-   "items": {
-    "type": "object",
-    "properties": {
-     "id": {
-      "type": "string"
-     },
-     "title": {
-      "anyOf": [
-       {
-        "type": "string"
-       },
-       {
-        "type": "null"
-       }
-      ]
-     },
-     "summary": {
-      "anyOf": [
-       {
-        "type": "string"
-       },
-       {
-        "type": "null"
-       }
-      ]
-     },
-     "content": {
-      "anyOf": [
-       {
-        "type": "string"
-       },
-       {
-        "type": "null"
-       }
-      ]
-     },
-     "startTime": {
-      "type": "string"
-     },
-     "endTime": {
-      "anyOf": [
-       {
-        "type": "string"
-       },
-       {
-        "type": "null"
-       }
-      ]
-     },
-     "type": {
-      "enum": [
-       "FULL",
-       "BRIEF"
-      ],
-      "type": "string"
-     },
-     "keywords": {
+  "type": "object",
+  "properties": {
+    "items": {
       "type": "array",
       "items": {
-       "type": "string"
-      }
-     },
-     "speakers": {
-      "type": "array",
-      "items": {
-       "type": "string"
-      }
-     },
-     "memorySpeakers": {
-      "type": "array",
-      "items": {
-       "type": "string"
-      },
-      "description": "DEPRECATED: use `speakers`. Kept for older client builds."
-     },
-     "quotes": {
-      "type": "array",
-      "items": {
-       "type": "object",
-       "properties": {
-        "text": {
-         "type": "string"
-        },
-        "context": {
-         "anyOf": [
-          {
-           "type": "string"
-          },
-          {
-           "type": "null"
-          }
-         ]
-        }
-       },
-       "required": [
-        "text",
-        "context"
-       ]
-      }
-     },
-     "location": {
-      "anyOf": [
-       {
         "type": "object",
         "properties": {
-         "address": {
-          "anyOf": [
-           {
+          "id": {
             "type": "string"
-           },
-           {
-            "type": "null"
-           }
-          ]
-         },
-         "coordinates": {
-          "type": "object",
-          "properties": {
-           "latitude": {
-            "type": "number"
-           },
-           "longitude": {
-            "type": "number"
-           }
           },
-          "required": [
-           "latitude",
-           "longitude"
-          ]
-         },
-         "country": {
-          "anyOf": [
-           {
+          "title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "summary": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "content": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "startTime": {
             "type": "string"
-           },
-           {
-            "type": "null"
-           }
-          ]
-         },
-         "placeId": {
-          "anyOf": [
-           {
+          },
+          "endTime": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "type": {
+            "enum": ["FULL", "BRIEF"],
             "type": "string"
-           },
-           {
-            "type": "null"
-           }
-          ]
-         },
-         "zip": {
-          "anyOf": [
-           {
+          },
+          "keywords": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "speakers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "memorySpeakers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "DEPRECATED: use `speakers`. Kept for older client builds."
+          },
+          "quotes": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "text": {
+                  "type": "string"
+                },
+                "context": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": ["text", "context"]
+            }
+          },
+          "location": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "address": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "coordinates": {
+                    "type": "object",
+                    "properties": {
+                      "latitude": {
+                        "type": "number"
+                      },
+                      "longitude": {
+                        "type": "number"
+                      }
+                    },
+                    "required": ["latitude", "longitude"]
+                  },
+                  "country": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "placeId": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "zip": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "street": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "streetNumber": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "city": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": ["coordinates"]
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "locationId": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "templateId": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "memoryTemplateId": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "DEPRECATED: use `templateId`. Kept for older client builds."
+          },
+          "recommendedTemplateIds": {
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "calendarEventId": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "updatedAt": {
             "type": "string"
-           },
-           {
-            "type": "null"
-           }
-          ]
-         },
-         "street": {
-          "anyOf": [
-           {
-            "type": "string"
-           },
-           {
-            "type": "null"
-           }
-          ]
-         },
-         "streetNumber": {
-          "anyOf": [
-           {
-            "type": "string"
-           },
-           {
-            "type": "null"
-           }
-          ]
-         },
-         "city": {
-          "anyOf": [
-           {
-            "type": "string"
-           },
-           {
-            "type": "null"
-           }
-          ]
-         }
+          }
         },
         "required": [
-         "coordinates"
+          "id",
+          "title",
+          "summary",
+          "content",
+          "startTime",
+          "endTime",
+          "type",
+          "keywords",
+          "speakers",
+          "memorySpeakers",
+          "quotes",
+          "location",
+          "locationId",
+          "templateId",
+          "memoryTemplateId",
+          "recommendedTemplateIds",
+          "calendarEventId",
+          "updatedAt"
         ]
-       },
-       {
-        "type": "null"
-       }
-      ]
-     },
-     "locationId": {
+      }
+    },
+    "nextCursor": {
       "anyOf": [
-       {
-        "type": "string"
-       },
-       {
-        "type": "null"
-       }
-      ]
-     },
-     "templateId": {
-      "anyOf": [
-       {
-        "type": "string"
-       },
-       {
-        "type": "null"
-       }
-      ]
-     },
-     "memoryTemplateId": {
-      "anyOf": [
-       {
-        "type": "string"
-       },
-       {
-        "type": "null"
-       }
-      ],
-      "description": "DEPRECATED: use `templateId`. Kept for older client builds."
-     },
-     "recommendedTemplateIds": {
-      "anyOf": [
-       {
-        "type": "array",
-        "items": {
-         "type": "string"
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
         }
-       },
-       {
-        "type": "null"
-       }
       ]
-     },
-     "calendarEventId": {
-      "anyOf": [
-       {
-        "type": "string"
-       },
-       {
-        "type": "null"
-       }
-      ]
-     },
-     "updatedAt": {
-      "type": "string"
-     }
-    },
-    "required": [
-     "id",
-     "title",
-     "summary",
-     "content",
-     "startTime",
-     "endTime",
-     "type",
-     "keywords",
-     "speakers",
-     "memorySpeakers",
-     "quotes",
-     "location",
-     "locationId",
-     "templateId",
-     "memoryTemplateId",
-     "recommendedTemplateIds",
-     "calendarEventId",
-     "updatedAt"
-    ]
-   }
-  },
-  "nextCursor": {
-   "anyOf": [
-    {
-     "type": "string"
-    },
-    {
-     "type": "null"
     }
-   ]
-  }
- },
- "required": [
-  "items",
-  "nextCursor"
- ]
+  },
+  "required": ["items", "nextCursor"]
 }
 ```
 
@@ -1114,24 +1065,22 @@ Request body:
 
 ```json
 {
- "type": "object",
- "properties": {
-  "startTime": {
-   "type": "string",
-   "description": "ISO 8601 start time of the conversation"
+  "type": "object",
+  "properties": {
+    "startTime": {
+      "type": "string",
+      "description": "ISO 8601 start time of the conversation"
+    },
+    "calendarEventId": {
+      "type": "string",
+      "description": "Associated calendar event ID"
+    },
+    "templateId": {
+      "type": "string",
+      "description": "Memory template to apply"
+    }
   },
-  "calendarEventId": {
-   "type": "string",
-   "description": "Associated calendar event ID"
-  },
-  "templateId": {
-   "type": "string",
-   "description": "Memory template to apply"
-  }
- },
- "required": [
-  "startTime"
- ]
+  "required": ["startTime"]
 }
 ```
 
@@ -1139,16 +1088,14 @@ Request body:
 
 ```json
 {
- "type": "object",
- "properties": {
-  "id": {
-   "type": "string",
-   "description": "Created conversation ID"
-  }
- },
- "required": [
-  "id"
- ]
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Created conversation ID"
+    }
+  },
+  "required": ["id"]
 }
 ```
 
@@ -1156,91 +1103,85 @@ Request body:
 
 operationId: `tasks.list`
 
-| param | in | required | schema |
-|---|---|---|---|
-| status | query | yes | enum: new/approved/completed/rejected/skipped/cancelled/expired, string |
+| param  | in    | required | schema                                                                  |
+| ------ | ----- | -------- | ----------------------------------------------------------------------- |
+| status | query | yes      | enum: new/approved/completed/rejected/skipped/cancelled/expired, string |
 
 200 response schema:
 
 ```json
 {
- "type": "object",
- "properties": {
-  "items": {
-   "type": "array",
-   "items": {
-    "type": "object",
-    "properties": {
-     "id": {
-      "type": "string"
-     },
-     "title": {
-      "type": "string"
-     },
-     "date": {
-      "anyOf": [
-       {
-        "type": "string"
-       },
-       {
-        "type": "null"
-       }
-      ]
-     },
-     "status": {
-      "enum": [
-       "new",
-       "approved",
-       "completed",
-       "rejected",
-       "skipped",
-       "cancelled",
-       "expired"
-      ],
-      "type": "string"
-     },
-     "memoryId": {
-      "anyOf": [
-       {
-        "type": "string"
-       },
-       {
-        "type": "null"
-       }
-      ]
-     },
-     "completionDate": {
-      "anyOf": [
-       {
-        "type": "string"
-       },
-       {
-        "type": "null"
-       }
-      ]
-     },
-     "cancellationDate": {
-      "anyOf": [
-       {
-        "type": "string"
-       },
-       {
-        "type": "null"
-       }
-      ]
-     }
-    },
-    "required": [
-     "id",
-     "title",
-     "status"
-    ]
-   }
-  }
- },
- "required": [
-  "items"
- ]
+  "type": "object",
+  "properties": {
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "date": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "status": {
+            "enum": [
+              "new",
+              "approved",
+              "completed",
+              "rejected",
+              "skipped",
+              "cancelled",
+              "expired"
+            ],
+            "type": "string"
+          },
+          "memoryId": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "completionDate": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "cancellationDate": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": ["id", "title", "status"]
+      }
+    }
+  },
+  "required": ["items"]
 }
 ```
 
@@ -1252,21 +1193,18 @@ Request body:
 
 ```json
 {
- "type": "object",
- "properties": {
-  "title": {
-   "type": "string",
-   "description": "Task title"
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Task title"
+    },
+    "date": {
+      "type": "string",
+      "description": "ISO 8601 due date"
+    }
   },
-  "date": {
-   "type": "string",
-   "description": "ISO 8601 due date"
-  }
- },
- "required": [
-  "title",
-  "date"
- ]
+  "required": ["title", "date"]
 }
 ```
 
@@ -1274,189 +1212,26 @@ Request body:
 
 ```json
 {
- "type": "object",
- "properties": {
-  "id": {
-   "type": "string"
-  },
-  "title": {
-   "type": "string"
-  },
-  "date": {
-   "anyOf": [
-    {
-     "type": "string"
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string"
     },
-    {
-     "type": "null"
-    }
-   ]
-  },
-  "status": {
-   "enum": [
-    "new",
-    "approved",
-    "completed",
-    "rejected",
-    "skipped",
-    "cancelled",
-    "expired"
-   ],
-   "type": "string"
-  },
-  "memoryId": {
-   "anyOf": [
-    {
-     "type": "string"
+    "title": {
+      "type": "string"
     },
-    {
-     "type": "null"
-    }
-   ]
-  },
-  "completionDate": {
-   "anyOf": [
-    {
-     "type": "string"
-    },
-    {
-     "type": "null"
-    }
-   ]
-  },
-  "cancellationDate": {
-   "anyOf": [
-    {
-     "type": "string"
-    },
-    {
-     "type": "null"
-    }
-   ]
-  }
- },
- "required": [
-  "id",
-  "title",
-  "status"
- ]
-}
-```
-
-## DELETE /tasks/{id}
-
-operationId: `tasks.delete`
-
-| param | in | required | schema |
-|---|---|---|---|
-| id | path | yes | string |
-
-Request body:
-
-```json
-{
- "type": "object",
- "properties": {},
- "required": []
-}
-```
-
-200 response schema:
-
-```json
-{
- "type": "object",
- "properties": {
-  "success": {
-   "type": "boolean"
-  }
- },
- "required": [
-  "success"
- ]
-}
-```
-
-## PATCH /tasks/{id}
-
-operationId: `tasks.update`
-
-| param | in | required | schema |
-|---|---|---|---|
-| id | path | yes | string |
-
-Request body:
-
-```json
-{
- "type": "object",
- "properties": {
-  "title": {
-   "type": "string",
-   "description": "Updated task title"
-  },
-  "date": {
-   "type": "string",
-   "description": "ISO 8601 due date"
-  },
-  "status": {
-   "enum": [
-    "new",
-    "approved",
-    "completed",
-    "rejected",
-    "skipped",
-    "cancelled",
-    "expired"
-   ],
-   "type": "string",
-   "description": "Updated status"
-  },
-  "completionDate": {
-   "type": "string",
-   "description": "ISO 8601 completion date"
-  },
-  "cancellationDate": {
-   "type": "string",
-   "description": "ISO 8601 cancellation date"
-  }
- },
- "required": []
-}
-```
-
-200 response schema:
-
-```json
-{
- "type": "object",
- "properties": {
-  "success": {
-   "type": "boolean"
-  },
-  "task": {
-   "anyOf": [
-    {
-     "type": "object",
-     "properties": {
-      "id": {
-       "type": "string"
-      },
-      "title": {
-       "type": "string"
-      },
-      "date": {
-       "anyOf": [
+    "date": {
+      "anyOf": [
         {
-         "type": "string"
+          "type": "string"
         },
         {
-         "type": "null"
+          "type": "null"
         }
-       ]
-      },
-      "status": {
-       "enum": [
+      ]
+    },
+    "status": {
+      "enum": [
         "new",
         "approved",
         "completed",
@@ -1464,56 +1239,206 @@ Request body:
         "skipped",
         "cancelled",
         "expired"
-       ],
-       "type": "string"
-      },
-      "memoryId": {
-       "anyOf": [
-        {
-         "type": "string"
-        },
-        {
-         "type": "null"
-        }
-       ]
-      },
-      "completionDate": {
-       "anyOf": [
-        {
-         "type": "string"
-        },
-        {
-         "type": "null"
-        }
-       ]
-      },
-      "cancellationDate": {
-       "anyOf": [
-        {
-         "type": "string"
-        },
-        {
-         "type": "null"
-        }
-       ]
-      }
-     },
-     "required": [
-      "id",
-      "title",
-      "status"
-     ]
+      ],
+      "type": "string"
     },
-    {
-     "type": "null"
+    "memoryId": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "completionDate": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "cancellationDate": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
     }
-   ]
-  }
- },
- "required": [
-  "success",
-  "task"
- ]
+  },
+  "required": ["id", "title", "status"]
+}
+```
+
+## DELETE /tasks/{id}
+
+operationId: `tasks.delete`
+
+| param | in   | required | schema |
+| ----- | ---- | -------- | ------ |
+| id    | path | yes      | string |
+
+Request body:
+
+```json
+{
+  "type": "object",
+  "properties": {},
+  "required": []
+}
+```
+
+200 response schema:
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "success": {
+      "type": "boolean"
+    }
+  },
+  "required": ["success"]
+}
+```
+
+## PATCH /tasks/{id}
+
+operationId: `tasks.update`
+
+| param | in   | required | schema |
+| ----- | ---- | -------- | ------ |
+| id    | path | yes      | string |
+
+Request body:
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Updated task title"
+    },
+    "date": {
+      "type": "string",
+      "description": "ISO 8601 due date"
+    },
+    "status": {
+      "enum": [
+        "new",
+        "approved",
+        "completed",
+        "rejected",
+        "skipped",
+        "cancelled",
+        "expired"
+      ],
+      "type": "string",
+      "description": "Updated status"
+    },
+    "completionDate": {
+      "type": "string",
+      "description": "ISO 8601 completion date"
+    },
+    "cancellationDate": {
+      "type": "string",
+      "description": "ISO 8601 cancellation date"
+    }
+  },
+  "required": []
+}
+```
+
+200 response schema:
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "success": {
+      "type": "boolean"
+    },
+    "task": {
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "title": {
+              "type": "string"
+            },
+            "date": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "status": {
+              "enum": [
+                "new",
+                "approved",
+                "completed",
+                "rejected",
+                "skipped",
+                "cancelled",
+                "expired"
+              ],
+              "type": "string"
+            },
+            "memoryId": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "completionDate": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "cancellationDate": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": ["id", "title", "status"]
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "required": ["success", "task"]
 }
 ```
 
@@ -1521,122 +1446,115 @@ Request body:
 
 operationId: `transcriptions.list`
 
-| param | in | required | schema |
-|---|---|---|---|
-| startTime | query | yes | string |
-| endTime | query | no | string |
-| conversationId | query | no | string |
-| recordingSource | query | no | enum: wearable/phone/desktop, string |
-| limit | query | no | number, max=2000, min=1 |
-| cursor | query | no | string |
-| pageSize | query | no | number, max=1000, min=1 |
-| order | query | no | enum: asc/desc, string, default=asc |
-| inclusive | query | no | string, default=True |
+| param           | in    | required | schema                               |
+| --------------- | ----- | -------- | ------------------------------------ |
+| startTime       | query | yes      | string                               |
+| endTime         | query | no       | string                               |
+| conversationId  | query | no       | string                               |
+| recordingSource | query | no       | enum: wearable/phone/desktop, string |
+| limit           | query | no       | number, max=2000, min=1              |
+| cursor          | query | no       | string                               |
+| pageSize        | query | no       | number, max=1000, min=1              |
+| order           | query | no       | enum: asc/desc, string, default=asc  |
+| inclusive       | query | no       | string, default=True                 |
 
 200 response schema:
 
 ```json
 {
- "type": "object",
- "properties": {
-  "items": {
-   "type": "array",
-   "items": {
-    "type": "object",
-    "properties": {
-     "id": {
-      "type": "string"
-     },
-     "text": {
-      "type": "string"
-     },
-     "timestamp": {
-      "type": "string"
-     },
-     "speaker": {
-      "type": "string"
-     },
-     "speakerProfileId": {
-      "anyOf": [
-       {
-        "type": "string"
-       },
-       {
-        "type": "null"
-       }
-      ]
-     },
-     "start": {
-      "type": "number"
-     },
-     "end": {
-      "type": "number"
-     },
-     "createdAt": {
-      "anyOf": [
-       {
-        "type": "string"
-       },
-       {
-        "type": "null"
-       }
-      ]
-     },
-     "source": {
-      "anyOf": [
-       {
-        "type": "string"
-       },
-       {
-        "type": "null"
-       }
-      ]
-     },
-     "recordingSource": {
-      "anyOf": [
-       {
-        "enum": [
-         "wearable",
-         "phone",
-         "desktop"
-        ],
-        "type": "string"
-       },
-       {
-        "type": "null"
-       }
-      ]
-     }
+  "type": "object",
+  "properties": {
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          },
+          "timestamp": {
+            "type": "string"
+          },
+          "speaker": {
+            "type": "string"
+          },
+          "speakerProfileId": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "start": {
+            "type": "number"
+          },
+          "end": {
+            "type": "number"
+          },
+          "createdAt": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "source": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "recordingSource": {
+            "anyOf": [
+              {
+                "enum": ["wearable", "phone", "desktop"],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "text",
+          "timestamp",
+          "speaker",
+          "speakerProfileId",
+          "start",
+          "end",
+          "createdAt",
+          "source",
+          "recordingSource"
+        ]
+      }
     },
-    "required": [
-     "id",
-     "text",
-     "timestamp",
-     "speaker",
-     "speakerProfileId",
-     "start",
-     "end",
-     "createdAt",
-     "source",
-     "recordingSource"
-    ]
-   }
-  },
-  "nextCursor": {
-   "anyOf": [
-    {
-     "type": "string"
-    },
-    {
-     "type": "null"
+    "nextCursor": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
     }
-   ]
-  }
- },
- "required": [
-  "items",
-  "nextCursor"
- ]
+  },
+  "required": ["items", "nextCursor"]
 }
 ```
 
@@ -1648,56 +1566,48 @@ operationId: `speakerProfiles.list`
 
 ```json
 {
- "type": "object",
- "properties": {
-  "items": {
-   "type": "array",
-   "items": {
-    "type": "object",
-    "properties": {
-     "id": {
-      "type": "string"
-     },
-     "name": {
-      "type": "string"
-     },
-     "color": {
-      "type": "string"
-     },
-     "createdAt": {
-      "anyOf": [
-       {
-        "type": "string"
-       },
-       {
-        "type": "null"
-       }
-      ]
-     },
-     "updatedAt": {
-      "anyOf": [
-       {
-        "type": "string"
-       },
-       {
-        "type": "null"
-       }
-      ]
-     }
-    },
-    "required": [
-     "id",
-     "name",
-     "color",
-     "createdAt",
-     "updatedAt"
-    ]
-   }
-  }
- },
- "required": [
-  "items"
- ]
+  "type": "object",
+  "properties": {
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "color": {
+            "type": "string"
+          },
+          "createdAt": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "updatedAt": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": ["id", "name", "color", "createdAt", "updatedAt"]
+      }
+    }
+  },
+  "required": ["items"]
 }
 ```
 
@@ -1709,21 +1619,18 @@ Request body:
 
 ```json
 {
- "type": "object",
- "properties": {
-  "name": {
-   "type": "string",
-   "description": "Speaker name"
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Speaker name"
+    },
+    "color": {
+      "type": "string",
+      "description": "Display color hex code"
+    }
   },
-  "color": {
-   "type": "string",
-   "description": "Display color hex code"
-  }
- },
- "required": [
-  "name",
-  "color"
- ]
+  "required": ["name", "color"]
 }
 ```
 
@@ -1731,15 +1638,13 @@ Request body:
 
 ```json
 {
- "type": "object",
- "properties": {
-  "id": {
-   "type": "string"
-  }
- },
- "required": [
-  "id"
- ]
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string"
+    }
+  },
+  "required": ["id"]
 }
 ```
 
@@ -1747,17 +1652,17 @@ Request body:
 
 operationId: `speakerProfiles.delete`
 
-| param | in | required | schema |
-|---|---|---|---|
-| id | path | yes | string |
+| param | in   | required | schema |
+| ----- | ---- | -------- | ------ |
+| id    | path | yes      | string |
 
 Request body:
 
 ```json
 {
- "type": "object",
- "properties": {},
- "required": []
+  "type": "object",
+  "properties": {},
+  "required": []
 }
 ```
 
@@ -1765,15 +1670,13 @@ Request body:
 
 ```json
 {
- "type": "object",
- "properties": {
-  "success": {
-   "type": "boolean"
-  }
- },
- "required": [
-  "success"
- ]
+  "type": "object",
+  "properties": {
+    "success": {
+      "type": "boolean"
+    }
+  },
+  "required": ["success"]
 }
 ```
 
@@ -1781,60 +1684,54 @@ Request body:
 
 operationId: `speakerProfiles.get`
 
-| param | in | required | schema |
-|---|---|---|---|
-| id | path | yes | string |
+| param | in   | required | schema |
+| ----- | ---- | -------- | ------ |
+| id    | path | yes      | string |
 
 200 response schema:
 
 ```json
 {
- "anyOf": [
-  {
-   "type": "object",
-   "properties": {
-    "id": {
-     "type": "string"
-    },
-    "name": {
-     "type": "string"
-    },
-    "color": {
-     "type": "string"
-    },
-    "createdAt": {
-     "anyOf": [
-      {
-       "type": "string"
+  "anyOf": [
+    {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "color": {
+          "type": "string"
+        },
+        "createdAt": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "updatedAt": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
       },
-      {
-       "type": "null"
-      }
-     ]
+      "required": ["id", "name", "color", "createdAt", "updatedAt"]
     },
-    "updatedAt": {
-     "anyOf": [
-      {
-       "type": "string"
-      },
-      {
-       "type": "null"
-      }
-     ]
+    {
+      "type": "null"
     }
-   },
-   "required": [
-    "id",
-    "name",
-    "color",
-    "createdAt",
-    "updatedAt"
-   ]
-  },
-  {
-   "type": "null"
-  }
- ]
+  ]
 }
 ```
 
@@ -1842,26 +1739,26 @@ operationId: `speakerProfiles.get`
 
 operationId: `speakerProfiles.update`
 
-| param | in | required | schema |
-|---|---|---|---|
-| id | path | yes | string |
+| param | in   | required | schema |
+| ----- | ---- | -------- | ------ |
+| id    | path | yes      | string |
 
 Request body:
 
 ```json
 {
- "type": "object",
- "properties": {
-  "name": {
-   "type": "string",
-   "description": "Updated name"
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Updated name"
+    },
+    "color": {
+      "type": "string",
+      "description": "Updated color hex code"
+    }
   },
-  "color": {
-   "type": "string",
-   "description": "Updated color hex code"
-  }
- },
- "required": []
+  "required": []
 }
 ```
 
@@ -1869,15 +1766,13 @@ Request body:
 
 ```json
 {
- "type": "object",
- "properties": {
-  "success": {
-   "type": "boolean"
-  }
- },
- "required": [
-  "success"
- ]
+  "type": "object",
+  "properties": {
+    "success": {
+      "type": "boolean"
+    }
+  },
+  "required": ["success"]
 }
 ```
 
@@ -1889,97 +1784,92 @@ operationId: `memoryTemplates.list`
 
 ```json
 {
- "type": "object",
- "properties": {
-  "items": {
-   "type": "array",
-   "items": {
-    "type": "object",
-    "properties": {
-     "id": {
-      "type": "string"
-     },
-     "title": {
-      "type": "string"
-     },
-     "prompt": {
-      "type": "string"
-     },
-     "description": {
-      "anyOf": [
-       {
-        "type": "string"
-       },
-       {
-        "type": "null"
-       }
-      ]
-     },
-     "emoji": {
-      "anyOf": [
-       {
-        "type": "string"
-       },
-       {
-        "type": "null"
-       }
-      ]
-     },
-     "sections": {
+  "type": "object",
+  "properties": {
+    "items": {
       "type": "array",
       "items": {
-       "type": "object",
-       "properties": {
-        "title": {
-         "type": "string"
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "prompt": {
+            "type": "string"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "emoji": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "sections": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "title": {
+                  "type": "string"
+                },
+                "prompt": {
+                  "type": "string"
+                }
+              },
+              "required": ["title", "prompt"]
+            }
+          },
+          "createdAt": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "updatedAt": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
         },
-        "prompt": {
-         "type": "string"
-        }
-       },
-       "required": [
-        "title",
-        "prompt"
-       ]
+        "required": [
+          "id",
+          "title",
+          "prompt",
+          "description",
+          "emoji",
+          "sections",
+          "createdAt",
+          "updatedAt"
+        ]
       }
-     },
-     "createdAt": {
-      "anyOf": [
-       {
-        "type": "string"
-       },
-       {
-        "type": "null"
-       }
-      ]
-     },
-     "updatedAt": {
-      "anyOf": [
-       {
-        "type": "string"
-       },
-       {
-        "type": "null"
-       }
-      ]
-     }
-    },
-    "required": [
-     "id",
-     "title",
-     "prompt",
-     "description",
-     "emoji",
-     "sections",
-     "createdAt",
-     "updatedAt"
-    ]
-   }
-  }
- },
- "required": [
-  "items"
- ]
+    }
+  },
+  "required": ["items"]
 }
 ```
 
@@ -1991,50 +1881,42 @@ Request body:
 
 ```json
 {
- "type": "object",
- "properties": {
-  "title": {
-   "type": "string",
-   "description": "Template title"
-  },
-  "prompt": {
-   "type": "string",
-   "description": "Main AI prompt for the template"
-  },
-  "description": {
-   "type": "string",
-   "description": "Human-readable description"
-  },
-  "emoji": {
-   "type": "string",
-   "description": "Emoji icon for the template"
-  },
-  "sections": {
-   "type": "array",
-   "items": {
-    "type": "object",
-    "properties": {
-     "title": {
-      "type": "string"
-     },
-     "prompt": {
-      "type": "string"
-     }
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Template title"
     },
-    "required": [
-     "title",
-     "prompt"
-    ]
-   },
-   "description": "Template sections"
-  }
- },
- "required": [
-  "title",
-  "prompt",
-  "emoji",
-  "sections"
- ]
+    "prompt": {
+      "type": "string",
+      "description": "Main AI prompt for the template"
+    },
+    "description": {
+      "type": "string",
+      "description": "Human-readable description"
+    },
+    "emoji": {
+      "type": "string",
+      "description": "Emoji icon for the template"
+    },
+    "sections": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "prompt": {
+            "type": "string"
+          }
+        },
+        "required": ["title", "prompt"]
+      },
+      "description": "Template sections"
+    }
+  },
+  "required": ["title", "prompt", "emoji", "sections"]
 }
 ```
 
@@ -2042,86 +1924,83 @@ Request body:
 
 ```json
 {
- "type": "object",
- "properties": {
-  "id": {
-   "type": "string"
-  },
-  "title": {
-   "type": "string"
-  },
-  "prompt": {
-   "type": "string"
-  },
-  "description": {
-   "anyOf": [
-    {
-     "type": "string"
-    },
-    {
-     "type": "null"
-    }
-   ]
-  },
-  "emoji": {
-   "anyOf": [
-    {
-     "type": "string"
-    },
-    {
-     "type": "null"
-    }
-   ]
-  },
-  "sections": {
-   "type": "array",
-   "items": {
-    "type": "object",
-    "properties": {
-     "title": {
+  "type": "object",
+  "properties": {
+    "id": {
       "type": "string"
-     },
-     "prompt": {
+    },
+    "title": {
       "type": "string"
-     }
     },
-    "required": [
-     "title",
-     "prompt"
-    ]
-   }
-  },
-  "createdAt": {
-   "anyOf": [
-    {
-     "type": "string"
+    "prompt": {
+      "type": "string"
     },
-    {
-     "type": "null"
+    "description": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "emoji": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "sections": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "prompt": {
+            "type": "string"
+          }
+        },
+        "required": ["title", "prompt"]
+      }
+    },
+    "createdAt": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "updatedAt": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
     }
-   ]
   },
-  "updatedAt": {
-   "anyOf": [
-    {
-     "type": "string"
-    },
-    {
-     "type": "null"
-    }
-   ]
-  }
- },
- "required": [
-  "id",
-  "title",
-  "prompt",
-  "description",
-  "emoji",
-  "sections",
-  "createdAt",
-  "updatedAt"
- ]
+  "required": [
+    "id",
+    "title",
+    "prompt",
+    "description",
+    "emoji",
+    "sections",
+    "createdAt",
+    "updatedAt"
+  ]
 }
 ```
 
@@ -2129,17 +2008,17 @@ Request body:
 
 operationId: `memoryTemplates.delete`
 
-| param | in | required | schema |
-|---|---|---|---|
-| id | path | yes | string |
+| param | in   | required | schema |
+| ----- | ---- | -------- | ------ |
+| id    | path | yes      | string |
 
 Request body:
 
 ```json
 {
- "type": "object",
- "properties": {},
- "required": []
+  "type": "object",
+  "properties": {},
+  "required": []
 }
 ```
 
@@ -2147,15 +2026,13 @@ Request body:
 
 ```json
 {
- "type": "object",
- "properties": {
-  "success": {
-   "type": "boolean"
-  }
- },
- "required": [
-  "success"
- ]
+  "type": "object",
+  "properties": {
+    "success": {
+      "type": "boolean"
+    }
+  },
+  "required": ["success"]
 }
 ```
 
@@ -2163,94 +2040,91 @@ Request body:
 
 operationId: `memoryTemplates.get`
 
-| param | in | required | schema |
-|---|---|---|---|
-| id | path | yes | string |
+| param | in   | required | schema |
+| ----- | ---- | -------- | ------ |
+| id    | path | yes      | string |
 
 200 response schema:
 
 ```json
 {
- "type": "object",
- "properties": {
-  "id": {
-   "type": "string"
-  },
-  "title": {
-   "type": "string"
-  },
-  "prompt": {
-   "type": "string"
-  },
-  "description": {
-   "anyOf": [
-    {
-     "type": "string"
-    },
-    {
-     "type": "null"
-    }
-   ]
-  },
-  "emoji": {
-   "anyOf": [
-    {
-     "type": "string"
-    },
-    {
-     "type": "null"
-    }
-   ]
-  },
-  "sections": {
-   "type": "array",
-   "items": {
-    "type": "object",
-    "properties": {
-     "title": {
+  "type": "object",
+  "properties": {
+    "id": {
       "type": "string"
-     },
-     "prompt": {
+    },
+    "title": {
       "type": "string"
-     }
     },
-    "required": [
-     "title",
-     "prompt"
-    ]
-   }
-  },
-  "createdAt": {
-   "anyOf": [
-    {
-     "type": "string"
+    "prompt": {
+      "type": "string"
     },
-    {
-     "type": "null"
+    "description": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "emoji": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "sections": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "prompt": {
+            "type": "string"
+          }
+        },
+        "required": ["title", "prompt"]
+      }
+    },
+    "createdAt": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "updatedAt": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
     }
-   ]
   },
-  "updatedAt": {
-   "anyOf": [
-    {
-     "type": "string"
-    },
-    {
-     "type": "null"
-    }
-   ]
-  }
- },
- "required": [
-  "id",
-  "title",
-  "prompt",
-  "description",
-  "emoji",
-  "sections",
-  "createdAt",
-  "updatedAt"
- ]
+  "required": [
+    "id",
+    "title",
+    "prompt",
+    "description",
+    "emoji",
+    "sections",
+    "createdAt",
+    "updatedAt"
+  ]
 }
 ```
 
@@ -2258,53 +2132,50 @@ operationId: `memoryTemplates.get`
 
 operationId: `memoryTemplates.update`
 
-| param | in | required | schema |
-|---|---|---|---|
-| id | path | yes | string |
+| param | in   | required | schema |
+| ----- | ---- | -------- | ------ |
+| id    | path | yes      | string |
 
 Request body:
 
 ```json
 {
- "type": "object",
- "properties": {
-  "title": {
-   "type": "string",
-   "description": "Updated title"
-  },
-  "prompt": {
-   "type": "string",
-   "description": "Updated AI prompt"
-  },
-  "description": {
-   "type": "string",
-   "description": "Updated description"
-  },
-  "emoji": {
-   "type": "string",
-   "description": "Updated emoji"
-  },
-  "sections": {
-   "type": "array",
-   "items": {
-    "type": "object",
-    "properties": {
-     "title": {
-      "type": "string"
-     },
-     "prompt": {
-      "type": "string"
-     }
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Updated title"
     },
-    "required": [
-     "title",
-     "prompt"
-    ]
-   },
-   "description": "Updated sections"
-  }
- },
- "required": []
+    "prompt": {
+      "type": "string",
+      "description": "Updated AI prompt"
+    },
+    "description": {
+      "type": "string",
+      "description": "Updated description"
+    },
+    "emoji": {
+      "type": "string",
+      "description": "Updated emoji"
+    },
+    "sections": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "prompt": {
+            "type": "string"
+          }
+        },
+        "required": ["title", "prompt"]
+      },
+      "description": "Updated sections"
+    }
+  },
+  "required": []
 }
 ```
 
@@ -2312,15 +2183,13 @@ Request body:
 
 ```json
 {
- "type": "object",
- "properties": {
-  "success": {
-   "type": "boolean"
-  }
- },
- "required": [
-  "success"
- ]
+  "type": "object",
+  "properties": {
+    "success": {
+      "type": "boolean"
+    }
+  },
+  "required": ["success"]
 }
 ```
 
@@ -2332,16 +2201,14 @@ operationId: `user.get`
 
 ```json
 {
- "type": "object",
- "properties": {
-  "email": {
-   "type": "string",
-   "description": "User email address"
-  }
- },
- "required": [
-  "email"
- ]
+  "type": "object",
+  "properties": {
+    "email": {
+      "type": "string",
+      "description": "User email address"
+    }
+  },
+  "required": ["email"]
 }
 ```
 
@@ -2349,58 +2216,50 @@ operationId: `user.get`
 
 operationId: `sharables.list`
 
-| param | in | required | schema |
-|---|---|---|---|
-| conversationId | query | yes | string |
+| param          | in    | required | schema |
+| -------------- | ----- | -------- | ------ |
+| conversationId | query | yes      | string |
 
 200 response schema:
 
 ```json
 {
- "type": "object",
- "properties": {
-  "items": {
-   "type": "array",
-   "items": {
-    "type": "object",
-    "properties": {
-     "id": {
-      "type": "string",
-      "description": "Sharable ID"
-     },
-     "sharedFields": {
+  "type": "object",
+  "properties": {
+    "items": {
       "type": "array",
       "items": {
-       "type": "string"
-      },
-      "description": "Fields included in the share"
-     },
-     "authorName": {
-      "type": "string",
-      "description": "Display name of the sharer"
-     },
-     "enabled": {
-      "type": "boolean",
-      "description": "Whether the share link is active"
-     },
-     "url": {
-      "type": "string",
-      "description": "Fully constructed sharable URL"
-     }
-    },
-    "required": [
-     "id",
-     "sharedFields",
-     "authorName",
-     "enabled",
-     "url"
-    ]
-   }
-  }
- },
- "required": [
-  "items"
- ]
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Sharable ID"
+          },
+          "sharedFields": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Fields included in the share"
+          },
+          "authorName": {
+            "type": "string",
+            "description": "Display name of the sharer"
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "Whether the share link is active"
+          },
+          "url": {
+            "type": "string",
+            "description": "Fully constructed sharable URL"
+          }
+        },
+        "required": ["id", "sharedFields", "authorName", "enabled", "url"]
+      }
+    }
+  },
+  "required": ["items"]
 }
 ```
 
@@ -2412,29 +2271,25 @@ Request body:
 
 ```json
 {
- "type": "object",
- "properties": {
-  "authorName": {
-   "type": "string",
-   "description": "Display name of the author"
+  "type": "object",
+  "properties": {
+    "authorName": {
+      "type": "string",
+      "description": "Display name of the author"
+    },
+    "sharedFields": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Fields from the memory to include in the share"
+    },
+    "targetDocId": {
+      "type": "string",
+      "description": "ID of the memory to share"
+    }
   },
-  "sharedFields": {
-   "type": "array",
-   "items": {
-    "type": "string"
-   },
-   "description": "Fields from the memory to include in the share"
-  },
-  "targetDocId": {
-   "type": "string",
-   "description": "ID of the memory to share"
-  }
- },
- "required": [
-  "authorName",
-  "sharedFields",
-  "targetDocId"
- ]
+  "required": ["authorName", "sharedFields", "targetDocId"]
 }
 ```
 
@@ -2442,21 +2297,18 @@ Request body:
 
 ```json
 {
- "type": "object",
- "properties": {
-  "id": {
-   "type": "string",
-   "description": "ID of the created sharable link"
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "ID of the created sharable link"
+    },
+    "url": {
+      "type": "string",
+      "description": "Fully constructed sharable URL"
+    }
   },
-  "url": {
-   "type": "string",
-   "description": "Fully constructed sharable URL"
-  }
- },
- "required": [
-  "id",
-  "url"
- ]
+  "required": ["id", "url"]
 }
 ```
 
@@ -2464,17 +2316,17 @@ Request body:
 
 operationId: `sharables.delete`
 
-| param | in | required | schema |
-|---|---|---|---|
-| id | path | yes | string |
+| param | in   | required | schema |
+| ----- | ---- | -------- | ------ |
+| id    | path | yes      | string |
 
 Request body:
 
 ```json
 {
- "type": "object",
- "properties": {},
- "required": []
+  "type": "object",
+  "properties": {},
+  "required": []
 }
 ```
 
@@ -2482,15 +2334,13 @@ Request body:
 
 ```json
 {
- "type": "object",
- "properties": {
-  "success": {
-   "type": "boolean"
-  }
- },
- "required": [
-  "success"
- ]
+  "type": "object",
+  "properties": {
+    "success": {
+      "type": "boolean"
+    }
+  },
+  "required": ["success"]
 }
 ```
 
@@ -2498,33 +2348,33 @@ Request body:
 
 operationId: `sharables.update`
 
-| param | in | required | schema |
-|---|---|---|---|
-| id | path | yes | string |
+| param | in   | required | schema |
+| ----- | ---- | -------- | ------ |
+| id    | path | yes      | string |
 
 Request body:
 
 ```json
 {
- "type": "object",
- "properties": {
-  "authorName": {
-   "type": "string",
-   "description": "Updated display name of the author"
+  "type": "object",
+  "properties": {
+    "authorName": {
+      "type": "string",
+      "description": "Updated display name of the author"
+    },
+    "sharedFields": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Updated fields from the memory to include in the share"
+    },
+    "enabled": {
+      "type": "boolean",
+      "description": "Whether the share link is active"
+    }
   },
-  "sharedFields": {
-   "type": "array",
-   "items": {
-    "type": "string"
-   },
-   "description": "Updated fields from the memory to include in the share"
-  },
-  "enabled": {
-   "type": "boolean",
-   "description": "Whether the share link is active"
-  }
- },
- "required": []
+  "required": []
 }
 ```
 
@@ -2532,39 +2382,33 @@ Request body:
 
 ```json
 {
- "type": "object",
- "properties": {
-  "id": {
-   "type": "string",
-   "description": "Sharable ID"
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Sharable ID"
+    },
+    "sharedFields": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Fields included in the share"
+    },
+    "authorName": {
+      "type": "string",
+      "description": "Display name of the sharer"
+    },
+    "enabled": {
+      "type": "boolean",
+      "description": "Whether the share link is active"
+    },
+    "url": {
+      "type": "string",
+      "description": "Fully constructed sharable URL"
+    }
   },
-  "sharedFields": {
-   "type": "array",
-   "items": {
-    "type": "string"
-   },
-   "description": "Fields included in the share"
-  },
-  "authorName": {
-   "type": "string",
-   "description": "Display name of the sharer"
-  },
-  "enabled": {
-   "type": "boolean",
-   "description": "Whether the share link is active"
-  },
-  "url": {
-   "type": "string",
-   "description": "Fully constructed sharable URL"
-  }
- },
- "required": [
-  "id",
-  "sharedFields",
-  "authorName",
-  "enabled",
-  "url"
- ]
+  "required": ["id", "sharedFields", "authorName", "enabled", "url"]
 }
 ```
 
@@ -2572,207 +2416,182 @@ Request body:
 
 operationId: `sharables.resolve`
 
-| param | in | required | schema |
-|---|---|---|---|
-| idOrUrl | query | yes | string |
+| param   | in    | required | schema |
+| ------- | ----- | -------- | ------ |
+| idOrUrl | query | yes      | string |
 
 200 response schema:
 
 ```json
 {
- "anyOf": [
-  {
-   "type": "object",
-   "properties": {
-    "found": {
-     "const": false
-    },
-    "error": {
-     "type": "string",
-     "description": "Machine-readable error code"
-    },
-    "hint": {
-     "type": "string",
-     "description": "Human-readable hint on how to proceed"
-    }
-   },
-   "required": [
-    "found",
-    "error",
-    "hint"
-   ]
-  },
-  {
-   "type": "object",
-   "properties": {
-    "found": {
-     "const": true
-    },
-    "share": {
-     "type": "object",
-     "properties": {
-      "id": {
-       "type": "string",
-       "description": "Sharable ID"
-      },
-      "url": {
-       "type": "string",
-       "description": "Fully constructed sharable URL"
-      },
-      "authorName": {
-       "type": "string",
-       "description": "Display name of the sharer"
-      },
-      "sharedFields": {
-       "type": "array",
-       "items": {
-        "type": "string"
-       },
-       "description": "Fields included in the share"
-      },
-      "target": {
-       "type": "object",
-       "properties": {
-        "title": {
-         "type": "string"
+  "anyOf": [
+    {
+      "type": "object",
+      "properties": {
+        "found": {
+          "const": false
         },
-        "startTime": {
-         "type": "string"
+        "error": {
+          "type": "string",
+          "description": "Machine-readable error code"
         },
-        "endTime": {
-         "type": "string"
-        },
-        "summary": {
-         "type": "string"
-        },
-        "content": {
-         "type": "string"
-        },
-        "keywords": {
-         "type": "array",
-         "items": {
-          "type": "string"
-         }
-        },
-        "location": {
-         "anyOf": [
-          {
-           "type": "object",
-           "properties": {
-            "address": {
-             "type": "string"
-            },
-            "coordinates": {
-             "type": "object",
-             "properties": {
-              "_latitude": {
-               "type": "number"
-              },
-              "_longitude": {
-               "type": "number"
-              }
-             },
-             "required": [
-              "_latitude",
-              "_longitude"
-             ]
-            },
-            "country": {
-             "type": "string"
-            },
-            "zip": {
-             "type": "string"
-            }
-           },
-           "required": [
-            "address",
-            "coordinates"
-           ],
-           "additionalProperties": {}
-          },
-          {
-           "type": "null"
-          }
-         ]
-        },
-        "quotes": {
-         "type": "array",
-         "items": {
-          "type": "object",
-          "properties": {
-           "text": {
-            "type": "string"
-           },
-           "context": {
-            "anyOf": [
-             {
-              "type": "string"
-             },
-             {
-              "type": "null"
-             }
-            ]
-           }
-          },
-          "required": [
-           "text",
-           "context"
-          ],
-          "additionalProperties": {}
-         }
-        },
-        "transcriptions": {
-         "type": "array",
-         "items": {
-          "type": "object",
-          "properties": {
-           "speaker": {
-            "type": "string"
-           },
-           "text": {
-            "type": "string"
-           },
-           "timestamp": {
-            "type": "string"
-           },
-           "created": {
-            "type": "string"
-           }
-          },
-          "required": [
-           "text"
-          ],
-          "additionalProperties": {}
-         }
+        "hint": {
+          "type": "string",
+          "description": "Human-readable hint on how to proceed"
         }
-       },
-       "additionalProperties": {},
-       "description": "The shared memory content, limited to sharedFields"
-      }
-     },
-     "required": [
-      "id",
-      "url",
-      "authorName",
-      "sharedFields",
-      "target"
-     ]
+      },
+      "required": ["found", "error", "hint"]
     },
-    "isOwn": {
-     "type": "boolean",
-     "description": "Whether the underlying memory belongs to the requesting user"
-    },
-    "conversationId": {
-     "type": "string",
-     "description": "Underlying conversation id \u2014 only present when isOwn"
+    {
+      "type": "object",
+      "properties": {
+        "found": {
+          "const": true
+        },
+        "share": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "Sharable ID"
+            },
+            "url": {
+              "type": "string",
+              "description": "Fully constructed sharable URL"
+            },
+            "authorName": {
+              "type": "string",
+              "description": "Display name of the sharer"
+            },
+            "sharedFields": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Fields included in the share"
+            },
+            "target": {
+              "type": "object",
+              "properties": {
+                "title": {
+                  "type": "string"
+                },
+                "startTime": {
+                  "type": "string"
+                },
+                "endTime": {
+                  "type": "string"
+                },
+                "summary": {
+                  "type": "string"
+                },
+                "content": {
+                  "type": "string"
+                },
+                "keywords": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "location": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "address": {
+                          "type": "string"
+                        },
+                        "coordinates": {
+                          "type": "object",
+                          "properties": {
+                            "_latitude": {
+                              "type": "number"
+                            },
+                            "_longitude": {
+                              "type": "number"
+                            }
+                          },
+                          "required": ["_latitude", "_longitude"]
+                        },
+                        "country": {
+                          "type": "string"
+                        },
+                        "zip": {
+                          "type": "string"
+                        }
+                      },
+                      "required": ["address", "coordinates"],
+                      "additionalProperties": {}
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "quotes": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "text": {
+                        "type": "string"
+                      },
+                      "context": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      }
+                    },
+                    "required": ["text", "context"],
+                    "additionalProperties": {}
+                  }
+                },
+                "transcriptions": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "speaker": {
+                        "type": "string"
+                      },
+                      "text": {
+                        "type": "string"
+                      },
+                      "timestamp": {
+                        "type": "string"
+                      },
+                      "created": {
+                        "type": "string"
+                      }
+                    },
+                    "required": ["text"],
+                    "additionalProperties": {}
+                  }
+                }
+              },
+              "additionalProperties": {},
+              "description": "The shared memory content, limited to sharedFields"
+            }
+          },
+          "required": ["id", "url", "authorName", "sharedFields", "target"]
+        },
+        "isOwn": {
+          "type": "boolean",
+          "description": "Whether the underlying memory belongs to the requesting user"
+        },
+        "conversationId": {
+          "type": "string",
+          "description": "Underlying conversation id \u2014 only present when isOwn"
+        }
+      },
+      "required": ["found", "share", "isOwn"]
     }
-   },
-   "required": [
-    "found",
-    "share",
-    "isOwn"
-   ]
-  }
- ]
+  ]
 }
 ```

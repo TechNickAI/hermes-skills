@@ -75,34 +75,34 @@ Verified against the live API and its published OpenAPI 3.1.1 spec.
 - Interactive docs: `https://api.fieldy.ai/docs` (Scalar). The raw OpenAPI JSON
   is **not** served at `/openapi.json`, `/docs/json`, or `/docs/openapi.json`
   (all 404). It is embedded in the docs HTML as `const scalarConfig = {...}`,
-  where the `content` key holds the whole spec as a JSON *string*. Extract with
+  where the `content` key holds the whole spec as a JSON _string_. Extract with
   `json.JSONDecoder().raw_decode` on the text after that assignment, then a
   second `json.loads` on `content`. A cached inventory of every endpoint,
   parameter, and response schema is in `references/openapi-endpoints.md`.
 
 ### Endpoints
 
-| Method | Path | Notes |
-|---|---|---|
-| GET | `/user/me` | returns `{email}` only — the cheapest auth probe |
-| GET | `/conversations` | `startTime`+`endTime` **required**, ISO 8601; `mode=starts-in-range\|intersects-range`, `pageSize` max **50** (default **6**), `cursor`, `recordingSource=wearable\|phone\|desktop` |
-| GET/PATCH/DELETE | `/conversations/{id}` | GET returns bare `null` for an unknown id, not a 404 |
-| POST | `/conversations` | create |
-| GET | `/transcriptions` | `startTime` required, `endTime` optional; `conversationId`, `recordingSource`, `order=asc\|desc`, `inclusive`, `pageSize` max **1000**, `limit` max 2000 |
-| GET/POST/PATCH/DELETE | `/tasks`, `/tasks/{id}` | GET **requires** `status` (new/approved/completed/rejected/skipped/cancelled/expired) |
-| GET/POST/PATCH/DELETE | `/speaker-profiles`, `/speaker-profiles/{id}` | |
-| GET/POST/PATCH/DELETE | `/memory-templates`, `/memory-templates/{id}` | prompt templates that shape summaries |
-| GET/POST/PATCH/DELETE | `/sharables`, `/sharables/{id}` | public share links; also `GET /sharables?conversationId=`, `GET /sharables/resolve?idOrUrl=` |
+| Method                | Path                                          | Notes                                                                                                                                                                               |
+| --------------------- | --------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET                   | `/user/me`                                    | returns `{email}` only — the cheapest auth probe                                                                                                                                    |
+| GET                   | `/conversations`                              | `startTime`+`endTime` **required**, ISO 8601; `mode=starts-in-range\|intersects-range`, `pageSize` max **50** (default **6**), `cursor`, `recordingSource=wearable\|phone\|desktop` |
+| GET/PATCH/DELETE      | `/conversations/{id}`                         | GET returns bare `null` for an unknown id, not a 404                                                                                                                                |
+| POST                  | `/conversations`                              | create                                                                                                                                                                              |
+| GET                   | `/transcriptions`                             | `startTime` required, `endTime` optional; `conversationId`, `recordingSource`, `order=asc\|desc`, `inclusive`, `pageSize` max **1000**, `limit` max 2000                            |
+| GET/POST/PATCH/DELETE | `/tasks`, `/tasks/{id}`                       | GET **requires** `status` (new/approved/completed/rejected/skipped/cancelled/expired)                                                                                               |
+| GET/POST/PATCH/DELETE | `/speaker-profiles`, `/speaker-profiles/{id}` |                                                                                                                                                                                     |
+| GET/POST/PATCH/DELETE | `/memory-templates`, `/memory-templates/{id}` | prompt templates that shape summaries                                                                                                                                               |
+| GET/POST/PATCH/DELETE | `/sharables`, `/sharables/{id}`               | public share links; also `GET /sharables?conversationId=`, `GET /sharables/resolve?idOrUrl=`                                                                                        |
 
 ### Response shapes
 
 - **Conversation**: `id, title, summary, content, startTime, endTime,
-  type(FULL|BRIEF), keywords[], speakers[], quotes[{text,context}],
-  location{address,coordinates,city,...}, locationId, templateId,
-  calendarEventId, updatedAt`. `memorySpeakers` and `memoryTemplateId` are
+type(FULL|BRIEF), keywords[], speakers[], quotes[{text,context}],
+location{address,coordinates,city,...}, locationId, templateId,
+calendarEventId, updatedAt`. `memorySpeakers` and `memoryTemplateId` are
   DEPRECATED aliases kept for old clients — use `speakers` and `templateId`.
 - **Transcription segment**: `id, text, timestamp, speaker, speakerProfileId,
-  start, end, createdAt, source, recordingSource`. `start`/`end` are seconds
+start, end, createdAt, source, recordingSource`. `start`/`end` are seconds
   offset within the recording; `timestamp` is the absolute time.
 - List responses are `{items: [...], nextCursor: string|null}`. Tasks return
   `{items}` with **no** cursor.
@@ -143,7 +143,7 @@ Mutating calls through `raw` require an explicit `--yes`.
    `keywords`, and `quotes`. There is no server-side search, so the filtering is
    yours to do.
 2. For each hit, `transcript --conversation-id <id> --text` to get the raw record.
-3. Only then summarize. If the user asked what was actually *said*, do not
+3. Only then summarize. If the user asked what was actually _said_, do not
    answer from `summary` alone — that field is model output about the
    conversation, while the transcript is the conversation. Quote the transcript.
 
@@ -181,7 +181,7 @@ MCP only when the goal is Fieldy inside a chat client's connector UI.
 - The device only captures while transcription is running. A gap in the data
   means it was not recording, not that the API lost anything.
 - Before any speaker profile exists, segments come back with `speaker:
-  "Unknown"` and the conversation's `speakers[]` is empty. Once a profile is
+"Unknown"` and the conversation's `speakers[]` is empty. Once a profile is
   created, segments label as `Speaker 1`, `Speaker 2`, and so on. These are
   positional labels, not identities — a fresh account's only profile was named
   `User`. Do not promise "who said what" beyond what the labels support.
@@ -206,7 +206,7 @@ MCP only when the goal is Fieldy inside a chat client's connector UI.
   bodies can quote transcript text. `--verbose` widens the echoed body; use it
   when debugging, not in normal operation.
 - A time window is anchored to `--end`, so `--end <date> --days 7` means the
-  seven days *before that date*. An earlier version anchored the lookback to
+  seven days _before that date_. An earlier version anchored the lookback to
   now, which silently produced `start > end` — the API answers an inverted
   window with zero rows, and an agent then reports "nothing was discussed" when
   the query was simply malformed. Inverted or unparseable windows now exit 1.
