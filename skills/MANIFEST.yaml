@@ -812,9 +812,9 @@ skills:
   size:
     files: 3
     bytes_skill_md: 13665
-    bytes_total: 84814
+    bytes_total: 85421
     approx_tokens_skill_md: 3416
-    approx_tokens_total: 21204
+    approx_tokens_total: 21355
   tags:
   - fieldy
   - wearable

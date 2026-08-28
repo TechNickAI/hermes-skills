@@ -150,12 +150,24 @@ def iso(dt):
 
 
 def parse_iso(value, label):
-    """Accept the ISO 8601 forms the API emits, including a trailing Z."""
+    """Accept the ISO 8601 forms the API emits, including a trailing Z.
+
+    A timezone-naive input is treated as UTC rather than rejected: the API speaks
+    only UTC, and `--start 2026-05-01T00:00:00` is an obvious intent. Returning a
+    naive datetime here would blow up on comparison with an aware one
+    (`TypeError: can't compare offset-naive and offset-aware datetimes`) and,
+    worse, a pair of naive inputs would silently be reinterpreted as local time
+    by `astimezone()` in `iso()` — shifting the window by the UTC offset and
+    quietly returning the wrong conversations.
+    """
     try:
-        return datetime.fromisoformat(value.replace("Z", "+00:00"))
+        dt = datetime.fromisoformat(value.replace("Z", "+00:00"))
     except (ValueError, AttributeError):
         sys.exit(f"{label} is not ISO 8601: {value!r} "
                  "(expected e.g. 2026-05-01T00:00:00Z)")
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=timezone.utc)
+    return dt
 
 
 def window(args):
