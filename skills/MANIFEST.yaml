@@ -646,10 +646,10 @@ skills:
   claude_note: The runner and its exit-code contract are portable Python; the cron wiring examples assume a scheduler that dispatches by file extension.
   size:
     files: 10
-    bytes_skill_md: 8847
-    bytes_total: 205032
-    approx_tokens_skill_md: 2212
-    approx_tokens_total: 51258
+    bytes_skill_md: 9071
+    bytes_total: 205256
+    approx_tokens_skill_md: 2268
+    approx_tokens_total: 51314
   tags:
   - cron
   - jobs

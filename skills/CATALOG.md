@@ -361,7 +361,7 @@ differentiator — say so out loud), `unsupported` (never recommend it in Claude
 - **Works without setup:** Yes, but read the Claude note before recommending it
 - **Compatibility:** Agent Skills standard
 - **Claude:** degraded — The runner and its exit-code contract are portable Python; the cron wiring examples assume a scheduler that dispatches by file extension.
-- **Size:** 8,847 B body, loaded when the skill triggers (~2,212 tokens); 205,032 B across 10 file(s) total
+- **Size:** 9,071 B body, loaded when the skill triggers (~2,268 tokens); 205,256 B across 10 file(s) total
 - **Path:** `skills/engineering/scheduled-job-runner`
 
 ## stop-the-noise
