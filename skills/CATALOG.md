@@ -355,13 +355,13 @@ differentiator — say so out loud), `unsupported` (never recommend it in Claude
 
 - **Pack:** engineering
 - **Scope:** solo
-- **What it does:** Use when a scheduled job silently does nothing, reports success after failing, or needs to move onto a common runner.
-- **Use when:** a scheduled job silently does nothing, reports success after failing, or needs to move onto a common runner. Ships a tested execution adapter that pins the interpreter, enforces timeouts, records every run with a real exit code, and locks its ledger.
+- **What it does:** Use when creating, migrating, debugging, or reviewing Hermes cron jobs.
+- **Use when:** creating, migrating, debugging, or reviewing Hermes cron jobs. Ships a tested execution adapter for interpreter resolution, overlap prevention, hard timeouts, quiet success, structured ledgers, bounded redacted logs, failure notification, run severity, and heartbeat reporting.
 - **Prerequisites:** None
 - **Works without setup:** Yes, but read the Claude note before recommending it
 - **Compatibility:** Agent Skills standard
 - **Claude:** degraded — The runner and its exit-code contract are portable Python; the cron wiring examples assume a scheduler that dispatches by file extension.
-- **Size:** 13,573 B body, loaded when the skill triggers (~3,393 tokens); 69,580 B across 2 file(s) total
+- **Size:** 9,071 B body, loaded when the skill triggers (~2,268 tokens); 205,256 B across 10 file(s) total
 - **Path:** `skills/engineering/scheduled-job-runner`
 
 ## stop-the-noise

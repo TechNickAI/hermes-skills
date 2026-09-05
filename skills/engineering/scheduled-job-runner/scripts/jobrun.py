@@ -1,13 +1,12 @@
 #!/usr/bin/env python3
-"""jobrun — the fleet's one scheduled-job execution adapter.
+"""jobrun — a scheduled-job execution adapter for Hermes cron.
 
-Design basis: projects/job-runner-design.md (measured audit + ecosystem research,
-). This is an EXECUTION ADAPTER, not a scheduler. Hermes cron stays the
-scheduler. jobrun owns the seven things every job re-implements badly today:
+This is an EXECUTION ADAPTER, not a scheduler. Hermes cron stays the scheduler.
+jobrun owns the seven concerns scheduled jobs otherwise re-implement inconsistently:
 
   1. interpreter/dependency resolution   (kills the .sh-wrapper hack)
   2. silence-on-success                  (kills hand-rolled `if RC -ne 0` blocks)
-  3. overlap prevention                  (flock; today only 3 of 201 scripts have it)
+  3. overlap prevention                  (flock)
   4. hard timeout + signal handling      (timeout distinguishable from failure)
   5. structured run ledger               (exit code, duration, outcome — cron's has none)
   6. bounded log capture                 (quiet-on-success != discard evidence)
@@ -78,7 +77,7 @@ def _install_signal_handlers() -> None:
                 "event": "job.finished", "state": "signal",
                 "signal": signal.Signals(signum).name,
                 "ts": _iso(_now()), "note": "runner terminated; child forwarded",
-            })
+            }, blocking=False)
         except Exception:
             pass
         sys.exit(EXIT_SIGNAL)
@@ -89,7 +88,7 @@ def _install_signal_handlers() -> None:
         except (ValueError, OSError):
             pass  # not in main thread / unsupported platform
 
-import tomllib  # stdlib since 3.11; fleet standard is 3.13
+import tomllib  # stdlib since 3.11; this runner requires 3.13+
 
 EXIT_OK = 0
 EXIT_CONFIG = 2
@@ -109,8 +108,12 @@ STATE_DIR = HERMES_HOME / "jobstate"
 LOG_DIR = STATE_DIR / "logs"
 LOCK_DIR = STATE_DIR / "locks"
 LEDGER = STATE_DIR / "runs.jsonl"
+# A SEPARATE lock file, deliberately NOT the ledger itself: the prune replaces
+# the ledger path, so locking the ledger inode lets an append and a prune
+# proceed on two different inodes and silently discard a finished run.
+LEDGER_LOCK = STATE_DIR / "runs.jsonl.lock"
 
-# Minimum Python for any job we run. Jobs inherit the agent venv (3.13.x fleet-wide)
+# Minimum Python for any job we run. Jobs inherit the agent venv (3.13+)
 # unless they declare their own via PEP 723, so this is an assertion that a job never
 # silently lands on an older interpreter (e.g. macOS /usr/bin/python3 = 3.9).
 MIN_PYTHON = (3, 13)
@@ -275,6 +278,66 @@ class ConfigError(Exception):
     pass
 
 
+# Success-looking audit lines must never eclipse a real failure elsewhere in
+# captured output. These markers deliberately describe generic process output.
+_SUCCESS_MARKERS = (
+    "completed successfully",
+    "finished successfully",
+    "succeeded",
+    "success:",
+    "status: ok",
+)
+_FAILURE_MARKERS = (
+    "traceback",
+    "failed (",
+    "failed:",
+    "failure:",
+    "error:",
+    "exception",
+    "could not",
+    "cannot",
+    "unable to",
+    "refused",
+    "timed out",
+)
+
+
+def _lines(text: str) -> list[str]:
+    """Return stripped, non-empty output lines."""
+    return [line.strip() for line in (text or "").splitlines() if line.strip()]
+
+
+def _is_success(line: str) -> bool:
+    """Return whether a line plainly describes successful work."""
+    low = line.lower()
+    return any(marker in low for marker in _SUCCESS_MARKERS)
+
+
+def _looks_like_failure(line: str) -> bool:
+    """Return whether a line describes failure rather than success."""
+    low = line.lower()
+    return not _is_success(line) and any(marker in low for marker in _FAILURE_MARKERS)
+
+
+def _failure_detail(out: str, err: str) -> str:
+    """Choose the line that best explains a failure for owner-facing text.
+
+    Prefer a failure-looking stdout line, then a failure-looking stderr line,
+    then any non-success stdout line, and finally the last stderr line. This
+    avoids presenting successful cleanup as the cause of a failed run while
+    retaining the previous stderr fallback.
+    """
+    out_lines, err_lines = _lines(out), _lines(err)
+    for pool in (out_lines, err_lines):
+        for line in pool:
+            if _looks_like_failure(line):
+                return line
+    for line in out_lines:
+        if not _is_success(line):
+            return line
+    return err_lines[-1] if err_lines else ""
+
+
 def find_uv() -> str | None:
     """Locate uv, checking PATH plus the well-known install dirs.
 
@@ -382,6 +445,18 @@ class Spec:
         "overlap", "owner", "env", "timezone", "notify_on_success", "retries",
         "retry_backoff", "args", "python", "auto_install_uv", "output_policy",
         "heartbeat_url", "critical", "notify_target", "notify_command",
+        # v2: declared effect class. The runner independently DETECTS from the
+        # script and refuses to run on a dangerous disagreement (declaring
+        # paper on a live script). Optional — omitted means "trust detection".
+        "money",
+        # v2: per-job translation of a script's OWN exit convention into the
+        # outcome ladder. Existing scripts predate the ladder and each invented
+        # their own codes ("0 healthy, 1 tripwire fired, 2 watchdog broken").
+        # Without this the runner can only read a non-zero code as "failed",
+        # which is how a fired tripwire — the script working exactly as
+        # designed — got reported as a failure alarm. Rewriting every script's
+        # exit codes would be a riskier change than describing them.
+        "exit_map",
     }
 
     def __init__(self, data: dict, path: Path | None = None):
@@ -450,6 +525,43 @@ class Spec:
         # It deliberately does NOT change execution: the runner must not
         # become a second, weaker authority over domain state.
         self.critical = bool(data.get("critical", False))
+        # v2: declared effect class ("live" | "paper" | "none"), or None to let
+        # the runner infer it from the script. Validated at classify time
+        # against what the script actually does.
+        self.money = data.get("money")
+        if self.money is not None and self.money not in ("live", "paper", "none"):
+            raise ConfigError(
+                f"{self.job_id}: money must be live|paper|none, "
+                f"got {self.money!r}"
+            )
+        # exit_map: {"1": "noteworthy", "2": "broken"} — the script's own
+        # convention, stated once, in the spec. Keys are exit codes (TOML keys
+        # are strings), values are ladder outcomes.
+        self.exit_map = {}
+        raw_map = data.get("exit_map") or {}
+        if not isinstance(raw_map, dict):
+            raise ConfigError(f"{self.job_id}: exit_map must be a table")
+        _ladder = {"healthy", "noteworthy", "degraded", "broken", "critical"}
+        for k, v in raw_map.items():
+            try:
+                code = int(k)
+            except (TypeError, ValueError):
+                raise ConfigError(
+                    f"{self.job_id}: exit_map key {k!r} is not an exit code"
+                ) from None
+            if v not in _ladder:
+                raise ConfigError(
+                    f"{self.job_id}: exit_map[{k}] = {v!r} is not one of "
+                    f"{sorted(_ladder)}"
+                )
+            if code == 0 and v != "healthy":
+                # Exit 0 means the process succeeded. Letting a spec relabel it
+                # as a failure would put the runner in disagreement with the
+                # operating system about whether the job worked.
+                raise ConfigError(
+                    f"{self.job_id}: exit_map cannot remap exit 0 (got {v!r})"
+                )
+            self.exit_map[code] = v
         # Where a FAILURE goes. Hermes cron drops the alert entirely when a job
         # is deliver=local (_resolve_delivery_targets returns [], and
         # _deliver_result returns None, which the scheduler cannot tell apart
@@ -469,7 +581,7 @@ class Spec:
                 raise ConfigError(f"{self.job_id}: {name} must be >= 0")
         # A critical job must state its own timeout. Inheriting the default
         # silently gives a money job a 900s ceiling it never asked for, which
-        # is longer than several real trading schedules.
+        # may be longer than the schedule interval.
         if self.critical and "timeout" not in data:
             raise ConfigError(
                 f"{self.job_id}: a critical job must declare an explicit "
@@ -484,10 +596,24 @@ class Spec:
 
     @classmethod
     def load(cls, name: str) -> "Spec":
+        # A bare job id must resolve to SPEC_DIR/<name>.toml. Treating it as a
+        # relative path first means any same-named FILE OR DIRECTORY in the
+        # current working directory shadows the real spec — and cron passes
+        # bare names with the profile dir as cwd, so a job id that happens to
+        # match a state directory fails with "Is a directory" and never runs.
+        # Found on a live profile: two watch jobs each had a state dir named
+        # exactly like their job id.
         p = Path(name)
-        if not p.exists():
-            p = SPEC_DIR / f"{name}.toml"
-        if not p.exists():
+        if p.suffix == ".toml" and p.is_file():
+            pass                       # explicit path to a spec file
+        else:
+            cand = SPEC_DIR / f"{name}.toml"
+            if cand.is_file():
+                p = cand
+            elif not p.is_file():
+                raise ConfigError(
+                    f"spec not found: {name} (looked in {SPEC_DIR})")
+        if not p.is_file():
             raise ConfigError(f"spec not found: {name} (looked in {SPEC_DIR})")
         try:
             data = tomllib.loads(p.read_text(encoding="utf-8"))
@@ -578,6 +704,15 @@ def preflight(spec: Spec, argv: list[str]) -> list[str]:
             problems.append(f"cannot create {d}: {exc}")
     if spec.timeout <= 0:
         problems.append("timeout must be > 0")
+    # EFFECT RECONCILIATION HAPPENS BEFORE THE CHILD RUNS. A spec that declares
+    # paper/none while its script carries live-effect markers is a
+    # CONFIGURATION ERROR, not something to discover from a failure card after
+    # the job has already run. Checking it only on the failure path meant a
+    # successful mismatched run was never checked at all.
+    try:
+        _v2_money(spec)
+    except Exception as exc:      # MoneyMismatch and anything it wraps
+        problems.append(str(exc))
     return problems
 
 
@@ -655,14 +790,36 @@ def build_env(spec: Spec, run_id: str | None = None) -> dict:
     return env
 
 
-def append_ledger(record: dict) -> None:
-    """Durable, queryable run history. Raw stdout grep is not a status API."""
+def append_ledger(record: dict, blocking: bool = True) -> None:
+    """Durable, queryable run history. Raw stdout grep is not a status API.
+
+    Holds LEDGER_LOCK, not a lock on the ledger itself: the prune REPLACES the
+    ledger path, so locking the ledger inode would let an append and a prune
+    proceed on two different inodes and silently discard this record.
+
+    `blocking=False` is for SIGNAL HANDLERS. flock is not reentrant across file
+    descriptors, so a signal arriving while prune_state holds the lock would
+    make the handler block on the same thread forever -- graceful shutdown
+    hangs until SIGKILL and the signal row is never written at all. A racy
+    append beats a hung runner and a missing record.
+    """
     try:
         STATE_DIR.mkdir(parents=True, exist_ok=True)
-        with open(LEDGER, "a", encoding="utf-8") as fh:
-            fcntl.flock(fh.fileno(), fcntl.LOCK_EX)
-            fh.write(json.dumps(record, ensure_ascii=False) + "\n")
-            fcntl.flock(fh.fileno(), fcntl.LOCK_UN)
+        with open(LEDGER_LOCK, "a+", encoding="utf-8") as lk:
+            flags = fcntl.LOCK_EX if blocking else fcntl.LOCK_EX | fcntl.LOCK_NB
+            try:
+                fcntl.flock(lk.fileno(), flags)
+                locked = True
+            except OSError:
+                if blocking:
+                    raise
+                locked = False  # prune holds it; write anyway rather than hang
+            try:
+                with open(LEDGER, "a", encoding="utf-8") as fh:
+                    fh.write(json.dumps(record, ensure_ascii=False) + "\n")
+            finally:
+                if locked:
+                    fcntl.flock(lk.fileno(), fcntl.LOCK_UN)
     except Exception:
         pass  # never let bookkeeping kill a job
 
@@ -744,7 +901,7 @@ def _execute(spec: Spec, argv: list[str], env: dict) -> tuple:
     Guarantees: the child is always reaped, output capture is bounded during
     execution, and an inability to kill the process group is reported as a
     wrapper_error rather than a retryable timeout (retrying while an escaped
-    child still runs is how you get two live copies of a trading job).
+    child still runs is how you get two live copies of a consequential job).
     """
     t0 = time.monotonic()
     proc = None
@@ -841,12 +998,24 @@ def prune_state() -> None:
                 except OSError:
                     pass
         if LEDGER.exists():
-            lines = LEDGER.read_text(encoding="utf-8", errors="replace").splitlines()
-            if len(lines) > LEDGER_MAX_LINES:
-                keep = lines[-LEDGER_MAX_LINES:]
-                tmp = LEDGER.with_suffix(".jsonl.tmp")
-                tmp.write_text("\n".join(keep) + "\n", encoding="utf-8")
-                tmp.replace(LEDGER)
+            # Take the SAME lock appends take, and hold it across the whole
+            # read/write/replace. Without it, an append completing between the
+            # snapshot and the replace is written to the old inode and then
+            # discarded with it -- a finished run vanishing from the only
+            # record that says it ran.
+            STATE_DIR.mkdir(parents=True, exist_ok=True)
+            with open(LEDGER_LOCK, "a+", encoding="utf-8") as lk:
+                fcntl.flock(lk.fileno(), fcntl.LOCK_EX)
+                try:
+                    lines = LEDGER.read_text(
+                        encoding="utf-8", errors="replace").splitlines()
+                    if len(lines) > LEDGER_MAX_LINES:
+                        keep = lines[-LEDGER_MAX_LINES:]
+                        tmp = LEDGER.with_suffix(".jsonl.tmp")
+                        tmp.write_text("\n".join(keep) + "\n", encoding="utf-8")
+                        tmp.replace(LEDGER)
+                finally:
+                    fcntl.flock(lk.fileno(), fcntl.LOCK_UN)
     except Exception:
         pass  # retention must never break a job
 
@@ -864,7 +1033,7 @@ def _read_ledger(limit: int = 0) -> list:
 
 
 def cmd_list() -> int:
-    """Day-2: what jobs exist on this host?"""
+    """Day-2: what jobs exist on this installation?"""
     if not SPEC_DIR.is_dir():
         print(f"no specs directory: {SPEC_DIR}")
         return EXIT_OK
@@ -1058,6 +1227,12 @@ def run(spec: Spec, dry_run: bool = False) -> int:
         err = _clamp(redact(err or ""))
         log_path = write_logs(spec.job_id, run_id, out, err)
 
+        # Classify before persisting the terminal row. Severity is part of the
+        # durable status API; adding it after append_ledger() only mutates an
+        # in-memory object and leaves every JSONL row without the key.
+        money = _v2_money(spec)
+        outcome = _v2_classify(spec, state, rc, raw_out, money)
+
         hb = "not_configured"
         if state == "success":
             hb = heartbeat(spec, "0", "", run_id)
@@ -1088,6 +1263,8 @@ def run(spec: Spec, dry_run: bool = False) -> int:
             "stderr_bytes": len(err),
             "log_path": log_path,
             "heartbeat": hb,
+            "severity": getattr(outcome, "severity", None),
+            "reason_code": getattr(outcome, "reason_code", None),
         })
         prune_state()
 
@@ -1102,6 +1279,13 @@ def run(spec: Spec, dry_run: bool = False) -> int:
         #        This is the fix for a noisy job: set it here, do not edit the
         #        script.
         if state == "success":
+            # Close any open condition for this job. THE BUG THIS FIXES:
+            # record_success() existed but was never called, so `consecutive`
+            # never reset. Two identical failures separated by a thousand
+            # healthy runs would satisfy the two-consecutive gate and dispatch
+            # a repair agent for a job that is fundamentally fine. The
+            # scheduled run IS the half-open probe; this is where it closes.
+            _v2_record_success(spec)
             if spec.output_policy == "silent" and not spec.notify_on_success:
                 return EXIT_OK
             if raw_out:
@@ -1112,6 +1296,18 @@ def run(spec: Spec, dry_run: bool = False) -> int:
                     sys.stdout.write("\n")
             return EXIT_OK
 
+        # ---- v2: classify the RUN, not the job. ----------------------------
+        # v1 rendered "🛑 CRITICAL — this job moves real money" from a hand-set
+        # boolean, so a 120s network timeout and a guard that genuinely stopped
+        # guarding looked identical. Severity now comes from the reconciled
+        # outcome; `critical = true` raises the CEILING a job may reach rather
+        # than the floor of every card it emits.
+        # Preflight already reconciled money and refused to run on a dangerous
+        # mismatch, so this cannot raise here.
+        # Dedup by CONDITION. A repeated identical alert is an unacknowledged
+        # alarm, not redundancy: collapse it into one card carrying a count.
+        incident = _v2_incident(spec, outcome, err or out, sha, log_path, money)
+
         # Failure: one concise, actionable incident card — not a stdout dump.
         head = {
             "child_failure": f"exited {rc}",
@@ -1119,28 +1315,60 @@ def run(spec: Spec, dry_run: bool = False) -> int:
             "signal": f"killed by {signame}",
             "wrapper_error": "runner error",
         }.get(state, state)
-        lines = [
-            (f"🛑 CRITICAL — {spec.job_id} {head}" if spec.critical
-             else f"⚠️ {spec.job_id} {head}"),
-            f"Host: {os.uname().nodename}  ·  Duration: {dur:.1f}s  ·  Attempts: {attempt}",
-        ]
-        if spec.critical:
-            # A money job that stopped working is not the same event as a
-            # report generator that stopped working. Say so in the first line.
-            lines.append("This job moves real money. Verify state before rerunning.")
-        # Reuse the SHA captured BEFORE launch, so the card and the ledger
-        # can never disagree about which commit produced this outcome.
-        if sha:
-            lines.append(f"Code: {sha}")
-        if spec.owner:
-            lines.append(f"Owner: {spec.owner}")
-        detail = (err.strip() or out.strip())
-        if detail:
-            lines.append(f"Error: {detail.splitlines()[-1][:300]}")
-        if log_path:
-            lines.append(f"Log: {log_path}")
-        lines.append(f"Run: {run_id[:8]}")
-        card = "\n".join(lines)
+        card = _v2_render(
+            outcome=outcome, spec=spec, money=money, head=head,
+            incident=incident, dur=dur, sha=sha, err=err, out=out,
+            log_path=log_path, run_id=run_id,
+        )
+
+        # A NOTEWORTHY outcome is not a failure. A script whose convention is
+        # "1 = tripwire fired" did its job when the tripwire fired: the content
+        # is the point, and the runner must deliver it as news rather than
+        # wrap it in a failure banner and hand the scheduler a non-zero code
+        # that becomes a second failure banner on top.
+        if getattr(outcome, "severity", "") == "noteworthy":
+            _v2_record_noteworthy(spec)
+            # Render this as NEWS, not as a defanged failure card. A tripwire
+            # report whose body is the point must not carry "Repair:" or
+            # "Error:" lines — those describe a broken job, and this job
+            # worked. The script's own stdout IS the message.
+            body = (out or "").strip() or (err or "").strip()
+            lines = [f"· {spec.job_id}"]
+            if body:
+                lines.append(body)
+            if spec.owner:
+                lines.append(f"Owner: {spec.owner}")
+            news = "\n".join(lines)
+            print(news)
+            notify_status = (notify_failure(spec, news)
+                             if spec.notify_target else "n/a")
+            append_ledger({
+                "event": "job.noteworthy",
+                "ts": _iso(_now()),
+                "job_id": spec.job_id,
+                "run_id": run_id,
+                "exit_code": rc,
+                "reason_code": getattr(outcome, "reason_code", None),
+                "notify_status": notify_status,
+            })
+            return EXIT_OK
+
+        # DEDUP ACTUALLY SUPPRESSES HERE. Counting occurrences without gating
+        # delivery just produced an annotated flood — the first cut printed and
+        # notified on every tick while displaying a growing occurrence count.
+        speak, why = should_speak(incident, getattr(outcome, "severity", ""))
+        if not speak:
+            # Silent repeat: the ledger and incidents.db already recorded it.
+            # One short line on stdout so a human reading logs by hand can see
+            # the run happened and was deliberately not delivered.
+            print(f"(suppressed: {why})")
+            return {
+                "child_failure": EXIT_CHILD,
+                "timeout": EXIT_TIMEOUT,
+                "signal": EXIT_SIGNAL,
+                "wrapper_error": EXIT_WRAPPER,
+            }.get(state, EXIT_WRAPPER)
+
         print(card)
 
         # Notify directly. The scheduler may never deliver this card at all
@@ -1148,6 +1376,12 @@ def run(spec: Spec, dry_run: bool = False) -> int:
         # the failure mode worth engineering against. Recorded in the ledger
         # so a broken notifier cannot itself become the silent failure.
         notify_status = notify_failure(spec, card)
+        # Without a direct target, stdout is the scheduler's delivery surface;
+        # emitting the card counts as this runner's announcement. With a direct
+        # target, only the sender's confirmed `sent` result closes the retry gate.
+        _v2_record_notification(
+            incident, notify_status if spec.notify_target else "sent"
+        )
         if spec.notify_target:
             append_ledger({
                 "event": "job.notified",
@@ -1171,6 +1405,312 @@ def run(spec: Spec, dry_run: bool = False) -> int:
         }.get(state, EXIT_WRAPPER)
 
 
+# ---------------------------------------------------------------------------
+# v2 severity + repair integration
+# ---------------------------------------------------------------------------
+# These import LAZILY and degrade to v1 behavior if the modules are missing.
+# A runner that refuses to run because its alerting sidecar is absent would be
+# a worse failure than the noise it was built to fix.
+_V2_SHADOW_DEFAULT = True   # repair dispatch is SHADOW until deliberately armed
+
+
+def _v2_mods():
+    """Return (severity, repair) modules, or (None, None) if unavailable."""
+    try:
+        sys.path.insert(0, str(Path(__file__).resolve().parent))
+        import jobrun_severity as sev
+        try:
+            import jobrun_repair as rep
+        except ImportError:
+            rep = None
+        return sev, rep
+    except ImportError:
+        return None, None
+
+
+def _v2_record_success(spec) -> None:
+    """
+    Close open conditions for a job that just ran clean.
+
+    Never raises into the run path: a bookkeeping failure must not fail a job
+    that actually worked.
+    """
+    _, rep = _v2_mods()
+    if rep is None:
+        return
+    try:
+        conn = rep.connect()
+        try:
+            rep.record_success(conn, job_id=spec.job_id)
+        finally:
+            conn.close()
+    except Exception:
+        pass
+
+
+def _v2_record_noteworthy(spec) -> None:
+    """Close open conditions after a noteworthy but successful run.
+
+    Bookkeeping never raises into the run path. Older repair sidecars without
+    ``record_noteworthy`` fall back to the identical success transition.
+    """
+    _, rep = _v2_mods()
+    if rep is None:
+        return
+    try:
+        conn = rep.connect()
+        try:
+            record = getattr(rep, "record_noteworthy", rep.record_success)
+            record(conn, job_id=spec.job_id)
+        finally:
+            conn.close()
+    except Exception:
+        pass
+
+
+def _resolved_script_path(spec) -> Path | None:
+    """
+    The path the runner will ACTUALLY execute.
+
+    Money detection must read the same bytes that run. Resolving it separately
+    (e.g. against ``cwd``) means a relative script with a cwd set gets scanned
+    at the wrong path, silently classifying a live-money job as `none` and
+    making it eligible for automatic repair.
+    """
+    if not spec.script:
+        return None
+    p = Path(spec.script)
+    if p.is_absolute():
+        return p if p.is_file() else None
+    for base in (HERMES_HOME / "scripts", HERMES_HOME,
+                 Path(spec.cwd) if spec.cwd else None):
+        if base is None:
+            continue
+        cand = base / spec.script
+        if cand.is_file():
+            return cand
+    return None
+
+
+def _v2_money(spec) -> str:
+    """
+    Reconcile the spec's DECLARED money class with what the script DOES.
+
+    A guard job once shipped "🛑 CRITICAL — this job moves real money" on a
+    paper desk because one hand-set boolean decided it. Declaring paper on a
+    live script RAISES MoneyMismatch; the caller must treat that as a
+    configuration error and refuse to run, not discover it after the fact.
+    """
+    sev, _ = _v2_mods()
+    if sev is None:
+        return "none"
+    text = ""
+    p = _resolved_script_path(spec)
+    if p is not None:
+        try:
+            text = p.read_text(errors="replace")
+        except OSError:
+            text = ""
+    detected = sev.detect_money(text, HERMES_HOME)
+    # Propagates MoneyMismatch. Callers decide; this function does not guess.
+    return sev.reconcile_money(getattr(spec, "money", None), detected)
+
+
+def _v2_classify(spec, state, rc, raw_out, money="none"):
+    """Classify this RUN. Falls back to a v1-shaped verdict if v2 is absent.
+
+    ``money`` is passed in rather than recomputed: preflight has already
+    reconciled it, and re-deriving it here would read the script a second time
+    and could disagree with the value the run was authorized under.
+    """
+    sev, _ = _v2_mods()
+    if sev is None:
+        class _Fallback:
+            severity = ("healthy" if state == "success" else
+                        "critical" if spec.critical else "degraded")
+            reason_code = state
+            summary = None
+            clamped_from = None
+            metadata_missing = True
+            notes: list = []
+        return _Fallback()
+    try:
+        return sev.classify(
+            state=state, exit_code=rc, stdout=raw_out or "",
+            money=money, allow_critical=bool(spec.critical),
+            strict_domain_codes=False,   # legacy scripts still use 3-9
+            # Free text from the child is untrusted: run it through the same
+            # redaction as stdout/stderr before it can reach a card or a chat.
+            sanitize=redact,
+            exit_map=spec.exit_map,
+        )
+    except Exception as exc:
+        print(f"(severity classification failed: {exc})", file=sys.stderr)
+        class _Err:
+            severity = "degraded"
+            reason_code = state
+            summary = None
+            clamped_from = None
+            metadata_missing = True
+            notes: list = []
+        return _Err()
+
+
+def _v2_incident(spec, outcome, error_text, sha, log_path, money="none"):
+    """
+    Record the condition and decide about repair. Returns a dict or None.
+
+    NEVER raises into the run path: an alerting sidecar must not be able to
+    fail a job that otherwise worked.
+    """
+    sev, rep = _v2_mods()
+    if sev is None or rep is None:
+        return None
+    try:
+        host = os.uname().nodename
+        fp = sev.fingerprint(
+            host=host, job_id=spec.job_id, reason_code=outcome.reason_code,
+            error_text=error_text or "", deployed_sha=sha,
+        )
+        conn = rep.connect()
+        try:
+            return rep.handle_failure(
+                conn, fingerprint=fp, job_id=spec.job_id, host=host,
+                reason_code=outcome.reason_code, severity=outcome.severity,
+                money=money, error_text=error_text or "",
+                deployed_sha=sha, script_path=str(spec.script or ""),
+                log_path=log_path or "",
+                dry_run=_repair_shadow_mode(),
+            )
+        finally:
+            conn.close()
+    except Exception as exc:
+        print(f"(incident tracking failed: {exc})", file=sys.stderr)
+        return None
+
+
+def _repair_shadow_mode() -> bool:
+    """
+    Shadow unless explicitly armed, per profile.
+
+    Armed by creating `$HERMES_HOME/jobstate/repair_armed`. A FILE rather than a
+    config key on purpose: it is trivially auditable, trivially revocable, and
+    per-profile, so arming a low-risk profile cannot silently arm a money profile.
+    """
+    if not _V2_SHADOW_DEFAULT:
+        return False
+    return not (HERMES_HOME / "jobstate" / "repair_armed").exists()
+
+
+def _v2_record_notification(incident, status: str) -> None:
+    """Feed direct-notifier truth back into the incident delivery gate."""
+    if not incident or not incident.get("fingerprint"):
+        return
+    _, rep = _v2_mods()
+    if rep is None:
+        return
+    try:
+        conn = rep.connect()
+        try:
+            rep.record_notification(
+                conn,
+                fingerprint=incident["fingerprint"],
+                status=status,
+                escalation=incident.get("escalation"),
+            )
+        finally:
+            conn.close()
+    except Exception as exc:
+        # Notification bookkeeping cannot change the child outcome. Fail open
+        # on speaking instead: the missing state makes the next repeat eligible.
+        print(f"(notification tracking failed: {exc})", file=sys.stderr)
+
+
+def _v2_render(*, outcome, spec, money, head, incident, dur, sha, err, out,
+               log_path, run_id):
+    """Render the incident card from the RUN's severity."""
+    sev, _ = _v2_mods()
+    occ = (incident or {}).get("occurrence_count", 1)
+    note = (incident or {}).get("note")
+    if sev is not None:
+        try:
+            card = sev.render_card(
+                outcome=outcome, job_id=spec.job_id, host=os.uname().nodename,
+                money=money, occurrence_count=occ,
+                first_seen_at=None, duration_s=dur, deployed_sha=sha,
+                owner=spec.owner, log_path=log_path, run_id=run_id,
+                repair_note=note,
+            )
+            # Keep the RAW termination detail ("exited 7", "timed out after
+            # 60s", "killed by SIGKILL"). The severity line says how bad it is;
+            # this says what physically happened, and dropping it cost a real
+            # debugging signal the v1 card had. Found by the pre-existing
+            # contract tests, which is exactly what they are for.
+            if head:
+                card = card.replace(
+                    f"— {spec.job_id}", f"— {spec.job_id} ({head})", 1
+                ) if f"— {spec.job_id}" in card else f"{card}\nDetail: {head}"
+            detail = _failure_detail(out, err)
+            if detail and not outcome.summary:
+                card += f"\nError: {detail[:300]}"
+            return card
+        except Exception:
+            pass
+    glyph = "🛑" if getattr(outcome, "severity", "") == "critical" else "⚠️"
+    lines = [f"{glyph} {spec.job_id} {head}",
+             f"Host: {os.uname().nodename}  ·  Duration: {dur:.1f}s"]
+    if sha:
+        lines.append(f"Code: {sha}")
+    if log_path:
+        lines.append(f"Log: {log_path}")
+    lines.append(f"Run: {run_id[:8]}")
+    return "\n".join(lines)
+
+
+def should_speak(incident, severity: str) -> tuple[bool, str]:
+    """
+    Decide whether THIS occurrence of a condition gets a fresh notification.
+
+    THE BUG THIS FIXES: v2's first cut recorded an occurrence count and then
+    printed and notified on every single tick anyway. A job repeating one
+    condition N times still produced N notifications — the exact flood the
+    dedup was built to stop. Counting is not suppressing.
+
+    Speak on:
+      * the FIRST occurrence of a condition (someone must be told),
+      * escalation milestones (1h, 4h, 24h) so an unacknowledged alarm gets
+        louder over time rather than repeating at full volume,
+      * a quarantine decision (a job being stopped is news),
+      * CRITICAL at the first occurrence and escalation milestones, like every
+        other open condition. Top severity changes the card and the escalation
+        path; it does not turn a high-cadence job into an identical-page flood.
+
+    Stay silent on every other repeat: the ledger and incidents.db still record
+    it, and `jobrun_repair.py --status` shows the running count.
+    """
+    if not incident:
+        return True, "no incident state (fail open)"
+    if incident.get("occurrence_count", 1) <= 1:
+        return True, "first occurrence"
+    if incident.get("notify_status") != "sent":
+        status = incident.get("notify_status") or "unconfirmed"
+        return True, f"previous notification was not sent ({status})"
+    if incident.get("escalation"):
+        return True, f"escalation milestone: {incident['escalation']}"
+    q = incident.get("quarantine")
+    if q and q.get("applied"):
+        return True, "quarantine applied"
+    if incident.get("dispatched") and not incident.get("shadow"):
+        # A REAL repair attempt is news. A shadow-mode rehearsal is not — it
+        # changed nothing, and letting it speak would put a second card on
+        # occurrence 2 of every condition, which is most of the flood back.
+        return True, "repair dispatched"
+    return False, (
+        f"duplicate of an open condition "
+        f"(occurrence {incident.get('occurrence_count')})"
+    )
+
+
 def selftest() -> int:
     """Exercise every terminal state for real. No mocks, no fabricated results."""
     import tempfile
@@ -1178,14 +1718,29 @@ def selftest() -> int:
     tmp = Path(tempfile.mkdtemp(prefix="jobrun-selftest-"))
     results = []
 
-    # Self-test fixtures deliberately fail. Keep them out of the real ledger
-    # and log dir, or `--failures` reports test noise as production incidents.
-    global STATE_DIR, LOG_DIR, LOCK_DIR, LEDGER
-    _saved_dirs = (STATE_DIR, LOG_DIR, LOCK_DIR, LEDGER)
+    # Self-test fixtures deliberately fail. Keep them out of all real profile
+    # state, including the incident database loaded by the v2 sidecar.
+    global HERMES_HOME, SPEC_DIR, STATE_DIR, LOG_DIR, LOCK_DIR, LEDGER, LEDGER_LOCK
+    _saved_dirs = (HERMES_HOME, SPEC_DIR, STATE_DIR, LOG_DIR, LOCK_DIR,
+                   LEDGER, LEDGER_LOCK)
+    _saved_home_env = os.environ.get("HERMES_HOME")
+    _saved_incident_env = os.environ.get("JOBRUN_INCIDENT_DB")
+    HERMES_HOME = tmp
+    SPEC_DIR = tmp / "jobs.d"
     STATE_DIR = tmp / "state"
     LOG_DIR = STATE_DIR / "logs"
     LOCK_DIR = STATE_DIR / "locks"
     LEDGER = STATE_DIR / "runs.jsonl"
+    # Redirect the lock too, or self-test appends serialize against the real
+    # profile's lock file and the isolation is only partial.
+    LEDGER_LOCK = STATE_DIR / "runs.jsonl.lock"
+    os.environ["HERMES_HOME"] = str(tmp)
+    os.environ["JOBRUN_INCIDENT_DB"] = str(STATE_DIR / "incidents.db")
+    # Self-test output is copied into public bug reports and PRs. Keep it
+    # deterministic and free of the operator's machine name.
+    _saved_uname = os.uname
+    _uname_type = type(os.uname())
+    os.uname = lambda: _uname_type(("Darwin", "test-host", "", "", ""))
     for _d in (STATE_DIR, LOG_DIR, LOCK_DIR):
         _d.mkdir(parents=True, exist_ok=True)
 
@@ -1261,7 +1816,7 @@ def selftest() -> int:
         finally:
             os.environ["PATH"] = _saved
     else:
-        print("  SKIP  uv-found-without-PATH: uv not installed on this host")
+        print("  SKIP  uv-found-without-PATH: uv not installed on this installation")
 
     # uv argv shape: --python floor present, script last before args
     if find_uv():
@@ -1337,7 +1892,17 @@ def selftest() -> int:
     check("ledger-recorded", n >= 6, True)
 
     shutil.rmtree(tmp, ignore_errors=True)
-    STATE_DIR, LOG_DIR, LOCK_DIR, LEDGER = _saved_dirs
+    (HERMES_HOME, SPEC_DIR, STATE_DIR, LOG_DIR, LOCK_DIR,
+     LEDGER, LEDGER_LOCK) = _saved_dirs
+    if _saved_home_env is None:
+        os.environ.pop("HERMES_HOME", None)
+    else:
+        os.environ["HERMES_HOME"] = _saved_home_env
+    if _saved_incident_env is None:
+        os.environ.pop("JOBRUN_INCIDENT_DB", None)
+    else:
+        os.environ["JOBRUN_INCIDENT_DB"] = _saved_incident_env
+    os.uname = _saved_uname
     failed = [r for r in results if not r[3]]
     print(f"\n{len(results) - len(failed)}/{len(results)} passed")
     return 1 if failed else 0
@@ -1349,8 +1914,8 @@ def main() -> int:
     ap.add_argument("--dry-run", action="store_true", help="validate only")
     ap.add_argument("--selftest", action="store_true", help="exercise terminal states")
     ap.add_argument("--bootstrap", action="store_true",
-                    help="install uv + verify python floor on this host")
-    ap.add_argument("--list", action="store_true", help="list jobs on this host")
+                    help="install uv + verify python floor on this installation")
+    ap.add_argument("--list", action="store_true", help="list jobs on this installation")
     ap.add_argument("--status", metavar="JOB_ID", help="recent runs for one job")
     ap.add_argument("--failures", nargs="?", const=24, type=int, metavar="HOURS",
                     help="failed runs in the last N hours (default 24)")
