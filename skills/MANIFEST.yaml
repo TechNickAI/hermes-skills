@@ -635,21 +635,21 @@ skills:
   path: skills/engineering/pr-review-sweep
 - name: scheduled-job-runner
   pack: engineering
-  version: 1.0.0
+  version: 2.0.0
   scope: solo
-  summary: Use when a scheduled job silently does nothing, reports success after failing, or needs to move onto a common runner.
-  use_when: a scheduled job silently does nothing, reports success after failing, or needs to move onto a common runner. Ships a tested execution adapter that pins the interpreter, enforces timeouts, records every run with a real exit code, and locks its ledger.
+  summary: Use when creating, migrating, debugging, or reviewing Hermes cron jobs.
+  use_when: creating, migrating, debugging, or reviewing Hermes cron jobs. Ships a tested execution adapter for interpreter resolution, overlap prevention, hard timeouts, quiet success, structured ledgers, bounded redacted logs, failure notification, run severity, and heartbeat reporting.
   requires: []
   works_out_of_the_box: true
   compatibility: Agent Skills standard
   claude_compat: degraded
   claude_note: The runner and its exit-code contract are portable Python; the cron wiring examples assume a scheduler that dispatches by file extension.
   size:
-    files: 2
-    bytes_skill_md: 13573
-    bytes_total: 69580
-    approx_tokens_skill_md: 3393
-    approx_tokens_total: 17395
+    files: 10
+    bytes_skill_md: 8847
+    bytes_total: 205032
+    approx_tokens_skill_md: 2212
+    approx_tokens_total: 51258
   tags:
   - cron
   - jobs
@@ -657,7 +657,6 @@ skills:
   - uv
   - pep723
   - alerting
-  - fleet
   path: skills/engineering/scheduled-job-runner
 - name: stop-the-noise
   pack: engineering

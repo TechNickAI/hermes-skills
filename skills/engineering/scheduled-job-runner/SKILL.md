@@ -1,316 +1,248 @@
 ---
 name: scheduled-job-runner
 description: >
-  Use when a scheduled job silently does nothing, reports success after failing, or
-  needs to move onto a common runner. Ships a tested execution adapter that pins the
-  interpreter, enforces timeouts, records every run with a real exit code, and locks
-  its ledger. Prevents the failure where cron picks an interpreter by file extension
-  and the job dies on a missing import nobody sees.
-version: 1.0.0
+  Use when creating, migrating, debugging, or reviewing Hermes cron jobs. Ships a
+  tested execution adapter for interpreter resolution, overlap prevention, hard
+  timeouts, quiet success, structured ledgers, bounded redacted logs, failure
+  notification, run severity, and heartbeat reporting.
+version: 2.0.0
 author: Hermes Agent
 license: MIT
+platforms: [macos, linux]
 metadata:
   hermes:
-    tags: [cron, jobs, reliability, uv, pep723, alerting, fleet]
-
-    # referenced but not shipped here (another source):
-    #   stop-the-noise
+    tags: [cron, jobs, reliability, uv, pep723, alerting]
+    related_skills: []
 ---
 
 # Scheduled Job Runner
 
-## When to use
-
-Creating, fixing, migrating, or reviewing ANY scheduled job on the fleet — Hermes cron
-`script:` jobs, `no_agent` watchdogs, shell wrappers around Python, or a job that is
-noisy, silently failing, delivering nowhere, overlapping itself, or missing
-dependencies. Trigger phrases: "this job is noisy", "the cron failed silently", "job
-output went to the wrong place", "wrap this script for cron", "why did this job not
-run", "add a scheduled job", "should this use uv".
-
 ## Overview
 
-One execution adapter for every scheduled job. Hermes cron remains the **scheduler**;
-`jobrun.py` is the **runner** the job's `script:` field points at. It exists because
-scheduled jobs tend to each re-implement the same handful of concerns, badly and
-inconsistently, once a setup grows past a few of them.
+Hermes cron remains the **scheduler**. `jobrun.py` is the execution adapter used
+by each cron entry. Centralizing execution prevents every scheduled script from
+reimplementing interpreter selection, overlap locks, timeout handling, output
+policy, logging, and alerting differently.
 
-**Do not build another scheduler.** Do not adopt `cronic` — it exits 0 after a child
-failure, which blinds the Hermes failure alert.
+The canonical implementation ships here:
 
-### Install the runner first
+- `scripts/jobrun.py` — execution adapter and CLI
+- `scripts/jobrun_severity.py` — per-run outcome classification
+- `scripts/jobrun_repair.py` — incident/dedup state and optional repair dispatch
+- `scripts/generate_launcher.py` — filename-only cron launcher generator
+- `tests/jobrun_*_checks.py` — standalone regression checks
 
-The runner ships with this skill at `scripts/jobrun.py`. Nothing installs it for
-you -- copy it to where your scheduler will find it, then prove it works before
-wiring a single job to it:
+Do not create another scheduler. Do not wrap jobs with tools that convert a child
+failure into exit 0.
+
+## When to Use
+
+Use this skill when:
+
+- adding or migrating a Hermes cron job;
+- a job runs under the wrong Python or misses dependencies;
+- success should be silent but failure must remain visible;
+- overlapping or overlong runs are possible;
+- an operator needs a durable run ledger rather than raw-output inference;
+- a job appears successful while its output contains a real failure;
+- a scheduler accepts only a script filename, not a command plus arguments.
+
+## Install and Verify
+
+Copy all three runtime modules together; `jobrun.py` loads its sidecars lazily
+from the same directory.
 
 ```bash
 mkdir -p "$HERMES_HOME/scripts"
-cp scripts/jobrun.py "$HERMES_HOME/scripts/jobrun.py"
+cp scripts/jobrun.py scripts/jobrun_severity.py scripts/jobrun_repair.py \
+  "$HERMES_HOME/scripts/"
 chmod +x "$HERMES_HOME/scripts/jobrun.py"
-
-python3 "$HERMES_HOME/scripts/jobrun.py" --selftest   # 26 checks, real processes
+python3 "$HERMES_HOME/scripts/jobrun.py" --selftest
 ```
 
-The self-test spawns real processes and asserts real exit codes; it is the gate,
-not a smoke test. Every command below assumes the absolute path
-`$HERMES_HOME/scripts/jobrun.py` -- a bare `jobrun.py` only works if that
-directory is on `PATH`.
+The self-test starts real child processes and exits non-zero on any failed check.
 
-## The seven responsibilities jobrun owns
+## Job Specification
 
-Each was previously hand-rolled per script:
+Specs live under `$HERMES_HOME/jobs.d/`:
 
-1. **Interpreter/dependency resolution** — kills the `.sh` wrapper hack
-2. **Silence-on-success** — kills hand-rolled `if [ $RC -ne 0 ]` blocks
-3. **Overlap prevention** — flock; hand-rolled in only a tiny minority of scripts
-4. **Hard timeout + signal handling** — timeout distinguishable from failure
-5. **Structured run ledger** — exit code, duration, outcome
-6. **Bounded log capture + secret redaction** — quiet ≠ discard evidence
-7. **Heartbeat / dead-man's-switch** — the only thing catching "never ran"
-
-## Quick start
-
-```bash
-# once per host: install uv, verify the Python floor, create state dirs
-jobrun.py --bootstrap
-
-cat > $HERMES_HOME/jobs.d/my-job.toml <<'EOF'
-job_id        = "my-job"
-script        = "my_script.py"   # relative to $HERMES_HOME/scripts/
-runtime       = "auto"           # auto | uv | python | bash
+```toml
+job_id        = "daily-report"
+script        = "daily_report.py"
+runtime       = "auto"           # auto | uv | python | bash | command
 timeout       = 300
 overlap       = "skip"           # skip | allow | queue
-output_policy = "passthrough"    # passthrough | silent
+output_policy = "silent"         # passthrough | silent
 args          = ["--mode", "daily"]
 owner         = "platform-team"
-EOF
-
-jobrun.py --spec my-job --dry-run    # validate, run nothing
 ```
 
-Then point the cron job's `script:` at `jobrun.py --spec my-job`.
-
-Verify the runner itself: `jobrun.py --selftest` (26 checks, real processes, non-zero
-exit on any failure).
-
-## Day-2 operations
+Validate without executing:
 
 ```bash
-jobrun.py --list             # every job on this host + its last outcome
-jobrun.py --status my-job    # recent runs, exit codes, durations, log path
-jobrun.py --failures 24      # failures in the last N hours; SILENT when clean
-jobrun.py --bootstrap        # install/verify uv + python floor
+"$HERMES_HOME/scripts/jobrun.py" --spec daily-report --dry-run
 ```
 
-`--failures` prints nothing when nothing is wrong, so it is safe to schedule as its own
-job.
+A bare spec name always resolves through `$HERMES_HOME/jobs.d/`; a same-named
+working-directory file or directory cannot shadow it.
 
-## Passing arguments
+## Generated Launchers Must Pin the Profile
 
-Arguments live in the spec, not in a hand-written wrapper that hardcodes them into an
-`exec` line:
+Some Hermes cron configurations accept a script filename but cannot express
+`jobrun.py --spec daily-report`. Generate a tiny launcher instead of resolving
+`HERMES_HOME` dynamically:
+
+```bash
+python3 scripts/generate_launcher.py \
+  --job-id daily-report \
+  --profile-home /path/to/profile \
+  --jobrun /path/to/profile/scripts/jobrun.py \
+  --output /path/to/profile/scripts/run-daily-report.py
+```
+
+The generated script assigns `os.environ["HERMES_HOME"]` before executing
+`jobrun.py`. This is required when the scheduler process belongs to another
+profile; otherwise a bare spec name can resolve against the wrong `jobs.d`.
+
+## Responsibilities
+
+1. **Interpreter and dependency resolution** — including locked PEP 723 scripts
+   via `uv run --locked --script`.
+2. **Silence on success** — `output_policy = "silent"` suppresses routine output
+   without suppressing failure cards.
+3. **Overlap prevention** — advisory `flock` with skip, allow, or queue policy.
+4. **Hard timeout and signal handling** — child process groups are terminated and
+   reaped; timeouts and signals remain distinct outcomes.
+5. **Structured JSONL run ledger** — each terminal row includes severity before
+   it is persisted.
+6. **Bounded, redacted logs** — capture is byte-bounded while the child runs.
+7. **Heartbeat reporting** — best-effort start and terminal pings never alter the
+   child outcome.
+
+Bookkeeping must never kill a job. Ledger, notifier, heartbeat, and incident-state
+failures are swallowed or reported without changing the terminal exit code.
+
+## Terminal Exit Codes
+
+Never collapse terminal states into exit 1.
+
+| State | Exit | Meaning |
+| --- | ---: | --- |
+| `success` | 0 | Child completed successfully |
+| `skipped_overlap` | 0 | Existing run still holds the job lock |
+| `config_error` | 2 | Runner could not start the child |
+| `child_failure` | 3 | Child exited non-zero |
+| `timeout` | 4 | Deadline expired |
+| `signal` | 5 | Runner received a signal |
+| `wrapper_error` | 6 | Execution adapter failed |
+
+## Severity and Noteworthy Runs
+
+The child exit code establishes the severity floor. A final structured result
+line may raise that severity but never lower a non-zero exit or override timeout,
+signal, launch, or wrapper failures.
+
+A spec can translate a child-specific exit convention:
 
 ```toml
-args = ["--symbol", "<SYMBOL>", "--lookback", "30"]
+[exit_map]
+10 = "noteworthy"
+20 = "degraded"
+30 = "broken"
 ```
 
-They are appended to argv for every runtime (`python`, `uv`, `bash`, `command`). Two
-schedules of the same script with different arguments are two specs, not two copies of
-the script.
+`noteworthy` means the job worked and found something worth reporting. It exits
+0 from the wrapper, records a `job.noteworthy` event, and closes prior failure
+conditions rather than leaving a stale incident open.
 
-## Controlling noise
+Failure detail selection scans both stdout and stderr for a failure-looking line.
+A later successful cleanup line cannot replace the actual error in the incident
+card.
 
-`output_policy` decides what a SUCCESSFUL run sends to the human:
+## Ledger Concurrency Invariants
 
-- `passthrough` (default) — stdout byte-for-byte verbatim. Preserves the scheduler's
-  delivery contract and any trailing control payload such as `{"wakeAgent": false}`.
-- `silent` — never speak on success, whatever the job printed. **This is the fix for a
-  noisy job: set it in the spec, do not edit the script.** Failures still report.
+The append and prune paths share a separate `runs.jsonl.lock` file. They never
+lock the ledger inode itself because pruning replaces the ledger path; inode
+locking would allow an append to land on the old file and disappear.
 
-Failures always deliver an incident card regardless of policy.
+Signal handlers call `append_ledger(..., blocking=False)`. `flock` is not
+reentrant across file descriptors, so a blocking lock from a signal handler can
+deadlock when the interrupted code already holds the prune lock.
 
-## Money jobs: `critical = true`
+The persisted `job.finished` row includes `severity` and `reason_code`. Compute
+both before calling `append_ledger`; adding them afterward does not update JSONL.
 
-For a job that moves real money, set `critical` in the spec:
+## Output and Notifications
+
+- `passthrough` preserves successful stdout byte-for-byte, including a trailing
+  control payload.
+- `silent` suppresses routine successful output.
+- Failures always render an incident card.
+- Optional `notify_target` sends the card directly with `hermes send --to`.
+- `_v2_record_notification` records delivery truth so a failed notifier leaves
+  the condition eligible to speak again.
+
+Use placeholders in public examples:
 
 ```toml
-critical = true
-timeout  = 600     # REQUIRED for critical jobs, and shorter than the interval
+notify_target = "<provider>:<destination>"
 ```
 
-What it changes:
+## Day-2 Commands
 
-- The failure card leads with `🛑 CRITICAL` and says the job moves real money, so it
-  does not read like a failed report generator.
-- `--failures` lists critical failures FIRST and counts them in the header.
-- The spec is REJECTED unless it declares its OWN timeout. A critical job must not
-  inherit the default, because a job that can outrun its own schedule needs a stated
-  ceiling.
-
-What it deliberately does NOT change: execution. The runner never gates on domain state.
-A kill-switch belongs at the single choke point every action funnels through, not in a
-wrapper that would become a second, weaker authority.
-
-## Failure notification: `notify_target`
-
-Hermes cron does NOT reliably deliver a failure alert. When a job is configured
-`deliver: local`, the scheduler builds the alert and then discards it:
-`_resolve_delivery_targets()` returns `[]` and `_deliver_result()` returns `None` —
-which is indistinguishable from a successful send. That is fine for a digest and
-dangerous for a job that guards something.
-
-The runner already knows the job failed, so it notifies directly:
-
-```toml
-notify_target = "telegram:-100123:456"   # any `hermes send --to` target
+```bash
+jobrun.py --list
+jobrun.py --status daily-report
+jobrun.py --failures 24
+jobrun.py --bootstrap
 ```
 
-- Sends ONLY on failure. Quiet success is still the point.
-- Never changes the exit code. A broken notifier must not fail a passing job.
-- Records `job.notified` with a `notify_status` in the ledger, and prints
-  `(notification <status>)` when the alert did not go out — a notifier that fails
-  silently just recreates the bug it was added to fix.
-- Resolves the CLI explicitly rather than trusting `PATH`, because cron has no login
-  shell.
+The status API is `$HERMES_HOME/jobstate/runs.jsonl`. Do not infer health by
+grepping raw job output.
 
-`notify_command` overrides the sender; it exists so the path can be tested without
-sending real messages.
+## Python Dependencies
 
-## Nested wrappers and `deployed_sha`
-
-Some jobs already run their own domain recorder (business counters, application-specific
-state). Two ledgers for one run is fine; two IDENTITIES is not, because failures then
-double-count. jobrun exports its identity to the child:
-
-| variable          | meaning                                  |
-| ----------------- | ---------------------------------------- |
-| `JOBRUN_RUN_ID`   | adopt this instead of inventing a run id |
-| `JOBRUN_JOB_ID`   | the spec's job_id                        |
-| `JOBRUN_CRITICAL` | `1` when the job is critical             |
-
-Every ledger row also records `deployed_sha` — the short git SHA of the tree the job ran
-from (via `cwd`). Without it, run history and a deploy-drift watchdog can disagree about
-what actually ran.
-
-## Terminal states — never collapse into exit 1
-
-| state             | exit | meaning                                     |
-| ----------------- | ---- | ------------------------------------------- |
-| `success`         | 0    | job completed                               |
-| `skipped_overlap` | 0    | previous run still going; **not** a failure |
-| `config_error`    | 2    | runner could not START the job              |
-| `child_failure`   | 3    | the job itself exited non-zero              |
-| `timeout`         | 4    | exceeded its deadline                       |
-| `signal`          | 5    | killed by a signal                          |
-| `wrapper_error`   | 6    | the runner itself broke                     |
-
-`config_error` vs `child_failure` matters most to a human: "your job is broken" and "I
-could not start your job" are different pages. 126/127/128+ are deliberately avoided
-(shell-reserved).
-
-## Python dependencies: locked PEP 723 + uv
-
-A scheduled Python script declares its own dependencies inline and locks them. It never
-relies on whatever happens to be in the agent's venv.
+A Python job can declare and lock dependencies inline:
 
 ```python
 # /// script
 # requires-python = ">=3.13"
-# dependencies = ["yfinance"]
+# dependencies = ["httpx"]
 # ///
 ```
 
 ```bash
-uv lock --script my_script.py     # creates my_script.py.lock — COMMIT IT
+uv lock --script daily_report.py
 ```
 
-`runtime = "auto"` detects the PEP 723 block and runs `uv run --locked --script`. No
-block → agent venv; `.sh`/`.bash` → bash.
+Commit the generated lock. A PEP 723 header does nothing unless the script is
+actually routed through `uv`; the adapter detects the block and uses the locked
+runtime.
 
-**Why:** the Hermes runner executes non-`.sh` scripts with `sys.executable` (the agent
-venv). A script needing a package that venv lacks fails with `ModuleNotFoundError` —
-exactly why people write a `.sh` wrapper that execs a different interpreter. Declare the
-dep instead.
+## Common Pitfalls
 
-### Pitfalls
+1. **Installing only `jobrun.py`.** Copy the severity and repair sidecars too.
+2. **Generating an unpinned launcher.** It may use the scheduler's profile and
+   resolve the wrong spec.
+3. **Using the default timeout accidentally.** Make it shorter than the schedule
+   interval, especially for consequential jobs.
+4. **Locking `runs.jsonl` directly.** Prune replaces that inode; use the stable
+   sidecar lock.
+5. **Blocking in a signal handler.** Use the non-blocking append path.
+6. **Computing severity after append.** The persisted row will silently omit it.
+7. **Treating missing telemetry as zero.** Unknown is not a measured zero.
+8. **Letting bookkeeping exceptions escape.** Observability must not change a
+   job's outcome.
 
-- **A PEP 723 header alone does nothing.** It is a comment to the stock runner.
-  Verified: the same script resolved requests 2.33.0 via the agent venv vs 2.34.2 via
-  its own lock. Route through jobrun or the pin is fiction.
-- **Always `--locked`.** Without it uv may silently rewrite the lock at 3am. jobrun adds
-  it automatically when a `.lock` exists.
-- **`--offline` only after prewarming** that exact script/lock/python/host combo.
-  Default online mode can revalidate index metadata and fail mid-outage.
-- **Do not stack many cold uv starts on one minute.** Concurrent cold environment
-  creation contends badly. Stagger schedules.
-- **uv must exist on the host.** Check `command -v uv` before migrating.
-- **macOS `/usr/bin/python3` cannot be upgraded** — Apple-owned, SIP-protected, restored
-  by OS updates. Never "fix" a dep problem by pointing at it.
-- **Preserve the wake gate.** If a job emits a final `{"wakeAgent": false}` line, stdout
-  must pass through byte-for-byte. jobrun does; verify after any change to delivery
-  formatting.
+## Verification Checklist
 
-## What a job may send a human
-
-Governing test: **does this change what the human would do?** If not, stay silent.
-
-- **Never notify on routine success.** Success goes to the ledger, not the chat.
-- Alert on **symptoms** (missing data, stale output, deadline breach), not internal
-  causes (one retry, a CPU spike, a transient exception).
-- A single transient failure **retries silently**; page on exhausted retries.
-- "Ran and found nothing" must be provable: record `outcome=no_change` and
-  `records_examined`. **Missing telemetry is UNKNOWN/MISSED, never zero.**
-- **Dedup by condition, not execution:** `dedup_key = host/job_id/failure_class`. Keep
-  `occurrence_count` + `first_seen_at`; update ONE incident rather than reposting. A
-  repeated identical alert is an UNACKNOWLEDGED ALARM — attach a count and escalate on
-  age; never delete the newest copy.
-- Failure message = **incident card**, not a stdout dump: severity + job + condition,
-  impact, evidence (never an invented root cause), attempts and duration, the exact next
-  safe action, owner, occurrence count, log path, run id.
-
-## Heartbeat / dead-man's-switch
-
-A wrapper can only report after it starts. It can never report that it **never started**
-— host down, gateway dead, scheduler stalled, job deleted. Only an external
-schedule-aware receiver catches that.
-
-Model: `SCHEDULED -> STARTED -> SUCCEEDED | FAILED | TIMED_OUT | MISSED`, stable
-`run_id`, `scheduled_at` recorded separately from `started_at`. jobrun sends `/start`
-before work and exactly one terminal ping after (healthchecks.io wire format: `/start`,
-`/<exit-code>`, `/fail`, `?rid=`).
-
-Set grace = normal runtime + realistic jitter, not an arbitrary delay.
-
-**The heartbeat must never change the job's outcome.** 5s timeout, exceptions swallowed,
-delivery status recorded. A monitor being down must not take the job down.
-
-## Reading the ledger
-
-`$HERMES_HOME/jobstate/runs.jsonl` — one JSON object per terminal event with `job_id`,
-`run_id`, `state`, `exit_code`, `duration_ms`, `attempt`, `argv`, `runtime`, timestamps,
-`log_path`, `heartbeat`.
-
-```bash
-python3 -c "
-import json,collections,os
-p=os.path.expandvars('\$HERMES_HOME/jobstate/runs.jsonl')
-rows=[json.loads(l) for l in open(p)][-200:]
-c=collections.Counter((r['job_id'],r['state']) for r in rows)
-for (j,s),n in c.most_common(): print(f'{n:4d}  {j}  {s}')"
-```
-
-This is the status API. **Never grep raw stdout for status.**
-
-## Verification checklist
-
-- [ ] `jobrun.py --selftest` passes
-- [ ] `--dry-run` shows the expected `argv` — confirm the interpreter is the one you
-      intended; this is the whole point
-- [ ] Job runs clean and **silent** on the success path
-- [ ] Failure path exercised on purpose; message is an incident card
-- [ ] If it declares deps: `.lock` exists and is committed
-- [ ] Overlap policy deliberate, not the default by accident
-- [ ] Timeout shorter than the schedule interval
-- [ ] If the job's success is self-evidencing (writes a file/row), its FAILURE path is
-      the only path that ever delivers — test that path explicitly
+- [ ] `python3 scripts/jobrun.py --selftest` passes.
+- [ ] Every `tests/jobrun_*_checks.py` script passes.
+- [ ] `--dry-run` reports the expected interpreter, argv, and profile spec.
+- [ ] Success is silent when configured and failure remains visible.
+- [ ] Terminal states retain their distinct exit codes.
+- [ ] A persisted terminal row contains `severity` and `reason_code`.
+- [ ] Concurrent append/prune checks lose no rows.
+- [ ] Generated launchers pin `os.environ["HERMES_HOME"]`.
+- [ ] No private hostnames, paths, IDs, or domain-specific integrations appear in
+  committed files.
