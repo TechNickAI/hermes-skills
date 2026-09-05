@@ -255,6 +255,17 @@ reviewer_home() {
 # One reviewer, one private home, torn down immediately after.
 # -t '' keeps it text-in/text-out: a headless reviewer that tries to call a
 # tool hangs forever waiting for an approval nobody can give.
+# PROVIDER IS AUTO-PINNED. A BARE `-m <alias>` IS A TRAP: Hermes resolves a bare
+# model name against its NATIVE providers before any configured router, so an
+# alias that also exists as a built-in vendor name silently leaves the router
+# and fails with a credential error for an account nobody has:
+#     -m grok                            -> "No xAI OAuth credentials stored."
+#     --provider custom:<router> -m grok -> OK
+# The error names a vendor, so it reads like a model outage: the seat gets
+# written off as "that model is down" instead of "I addressed it wrong", and a
+# fan-out silently collapses its model-family diversity while the report still
+# claims it. So reviewer_run reads the seeded home's configured model.provider
+# and pins it unless the caller passed --provider explicitly.
 reviewer_run() {
   local prompt="$1"; shift
   local home rc=0
@@ -262,8 +273,29 @@ reviewer_run() {
   [ -n "$home" ] && [ -d "$home" ] || {
     echo "reviewer_run: no isolated home; refusing" >&2; return 1; }
 
+  # Pin the provider only when the caller named a model: Hermes rejects
+  # --provider without --model ("--provider requires --model"), so pinning a
+  # bare call would break the default-model path that already works.
+  local pin=""
+  case " $* " in
+    *" --provider "*) : ;;
+    *" -m "*|*" --model "*)
+      local prov
+      prov="$(HERMES_HOME="$home" hermes config get model.provider 2>/dev/null \
+              | tr -d '[:space:]')"
+      case "$prov" in
+        ""|*"notset"*|*"not set"*) : ;;
+        *) pin="$prov" ;;
+      esac
+      ;;
+  esac
+
   # Constraint 3: background + wait so traps can fire.
-  HERMES_HOME="$home" hermes -z "$prompt" -t '' "$@" &
+  if [ -n "$pin" ]; then
+    HERMES_HOME="$home" hermes -z "$prompt" -t '' --provider "$pin" "$@" &
+  else
+    HERMES_HOME="$home" hermes -z "$prompt" -t '' "$@" &
+  fi
   local pid=$!
   _REVIEWER_LIVE_PIDS="$_REVIEWER_LIVE_PIDS $pid"
   wait "$pid" || rc=$?
