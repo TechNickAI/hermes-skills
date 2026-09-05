@@ -126,15 +126,15 @@ failures are swallowed or reported without changing the terminal exit code.
 
 Never collapse terminal states into exit 1.
 
-| State | Exit | Meaning |
-| --- | ---: | --- |
-| `success` | 0 | Child completed successfully |
-| `skipped_overlap` | 0 | Existing run still holds the job lock |
-| `config_error` | 2 | Runner could not start the child |
-| `child_failure` | 3 | Child exited non-zero |
-| `timeout` | 4 | Deadline expired |
-| `signal` | 5 | Runner received a signal |
-| `wrapper_error` | 6 | Execution adapter failed |
+| State             | Exit | Meaning                               |
+| ----------------- | ---: | ------------------------------------- |
+| `success`         |    0 | Child completed successfully          |
+| `skipped_overlap` |    0 | Existing run still holds the job lock |
+| `config_error`    |    2 | Runner could not start the child      |
+| `child_failure`   |    3 | Child exited non-zero                 |
+| `timeout`         |    4 | Deadline expired                      |
+| `signal`          |    5 | Runner received a signal              |
+| `wrapper_error`   |    6 | Execution adapter failed              |
 
 ## Severity and Noteworthy Runs
 
@@ -245,4 +245,4 @@ runtime.
 - [ ] Concurrent append/prune checks lose no rows.
 - [ ] Generated launchers pin `os.environ["HERMES_HOME"]`.
 - [ ] No private hostnames, paths, IDs, or domain-specific integrations appear in
-  committed files.
+      committed files.
