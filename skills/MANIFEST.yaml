@@ -283,9 +283,9 @@ skills:
   size:
     files: 18
     bytes_skill_md: 54440
-    bytes_total: 152364
+    bytes_total: 152779
     approx_tokens_skill_md: 13610
-    approx_tokens_total: 38091
+    approx_tokens_total: 38195
   tags:
   - review
   - quality

@@ -276,19 +276,26 @@ reviewer_run() {
   # Pin the provider only when the caller named a model: Hermes rejects
   # --provider without --model ("--provider requires --model"), so pinning a
   # bare call would break the default-model path that already works.
-  local pin=""
-  case " $* " in
-    *" --provider "*) : ;;
-    *" -m "*|*" --model "*)
-      local prov
-      prov="$(HERMES_HOME="$home" hermes config get model.provider 2>/dev/null \
-              | tr -d '[:space:]')"
-      case "$prov" in
-        ""|*"notset"*|*"not set"*) : ;;
-        *) pin="$prov" ;;
-      esac
-      ;;
-  esac
+  # Inspect arguments INDIVIDUALLY: argparse accepts the equals form
+  # (--model=grok, --provider=custom:x) as well as space-separated, and a
+  # whole-string glob silently misses it -- leaving exactly the unpinned bare
+  # alias this function exists to prevent.
+  local pin="" has_model=0 has_provider=0 arg
+  for arg in "$@"; do
+    case "$arg" in
+      --provider|--provider=*) has_provider=1 ;;
+      -m|--model|--model=*|-m=*) has_model=1 ;;
+    esac
+  done
+  if [ "$has_provider" -eq 0 ] && [ "$has_model" -eq 1 ]; then
+    local prov
+    prov="$(HERMES_HOME="$home" hermes config get model.provider 2>/dev/null \
+            | tr -d '[:space:]')"
+    case "$prov" in
+      ""|*"notset"*|*"not set"*) : ;;
+      *) pin="$prov" ;;
+    esac
+  fi
 
   # Constraint 3: background + wait so traps can fire.
   if [ -n "$pin" ]; then
