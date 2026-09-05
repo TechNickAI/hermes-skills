@@ -167,7 +167,7 @@ differentiator — say so out loud), `unsupported` (never recommend it in Claude
 - **Works without setup:** Yes, but read the Claude note before recommending it
 - **Compatibility:** Portable review method. Native multi-model orchestration examples are Hermes-specific; Claude can run the method with Claude subagents but loses model-family diversity.
 - **Claude:** degraded — The review method transfers, but cross-model-family diversity needs Hermes; in Claude it becomes Claude reviewing Claude.
-- **Size:** 54,440 B body, loaded when the skill triggers (~13,610 tokens); 150,895 B across 18 file(s) total
+- **Size:** 54,440 B body, loaded when the skill triggers (~13,610 tokens); 152,779 B across 18 file(s) total
 - **Path:** `skills/core/multi-review`
 
 ## project-steward
