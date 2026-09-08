@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import sqlite3
 import sys
 from pathlib import Path
 
@@ -421,12 +422,32 @@ def _pad_to(root, category, name, target_chars, **kw):
     return p
 
 
-def test_skill_at_write_cap_is_an_error(tmp_path):
-    _pad_to(tmp_path, "cat", "fat", audit.WRITE_CAP_CHARS + 500)
+def _set_exact_size(path: Path, target_chars: int) -> None:
+    text = path.read_text()
+    assert len(text) <= target_chars
+    path.write_text(text + ("x" * (target_chars - len(text))))
+
+
+def test_skill_exactly_at_write_cap_is_valid(tmp_path):
+    p = write_skill(tmp_path, "cat", "exactly-at-cap")
+    _set_exact_size(p, audit.WRITE_CAP_CHARS)
+    f = audit.check_mechanical(audit.collect([("profile", tmp_path)]))
+    assert not checks(f, "budget.write_cap_exceeded"), \
+        "the runtime rejects only content strictly greater than 100k chars"
+
+
+def test_skill_over_write_cap_is_an_error_but_shrink_is_valid(tmp_path):
+    p = write_skill(tmp_path, "cat", "fat")
+    _set_exact_size(p, audit.WRITE_CAP_CHARS + 1)
     f = audit.check_mechanical(audit.collect([("profile", tmp_path)]))
     hits = checks(f, "budget.write_cap_exceeded", "error")
-    assert hits, "a SKILL.md at or over the write cap must be an ERROR - every patch to it is refused"
-    assert hits[0].evidence["chars"] >= audit.WRITE_CAP_CHARS
+    assert hits and hits[0].evidence["over_by"] == 1
+    assert "every patch" not in hits[0].message.lower(), \
+        "over-cap content can still be replaced by a shrink-to-under patch"
+
+    p.write_text(p.read_text()[: audit.WRITE_CAP_CHARS - 1])
+    repaired = audit.check_mechanical(audit.collect([("profile", tmp_path)]))
+    assert not checks(repaired, "budget.write_cap_exceeded")
 
 
 def test_skill_below_cap_is_silent(tmp_path):
@@ -489,17 +510,56 @@ def test_prompt_limit_is_not_a_second_hardcoded_copy():
 # ------------------------------------------------------------- index budget
 
 
-def test_index_budget_counts_truncated_not_authored_length(tmp_path):
-    """Descriptions are truncated BEFORE entering the prompt.
+class StubAdapter:
+    def __init__(self, live, err=None):
+        self._live = set(live)
+        self._err = err
 
-    Reporting the authored total as per-turn cost invents a saving that does
-    not exist. The rendered figure must not scale with the authored one.
-    """
+    def live_index(self):
+        return self._live, self._err
+
+
+def test_index_budget_counts_actual_resolved_enabled_selection(tmp_path):
+    write_skill(tmp_path, "cat", "enabled")
+    write_skill(tmp_path, "cat", "disabled-or-filtered")
+    write_skill(tmp_path, "cat", "shadowed-file-row")
+    skills = audit.collect([("profile", tmp_path)])
+    f, skipped = audit.check_index_budget(skills, StubAdapter({"enabled"}))
+    assert not skipped
+    assert f[0].evidence["live_skills"] == 1
+    assert f[0].evidence["names"] == ["enabled"]
+
+
+def test_index_budget_degrades_when_runtime_selection_unavailable(tmp_path):
+    write_skill(tmp_path, "cat", "maybe-live")
+    f, skipped = audit.check_index_budget(
+        audit.collect([("profile", tmp_path)]), StubAdapter(set(), "probe failed"))
+    assert f == []
+    assert skipped == ["selection-index budget: probe failed"]
+
+
+def test_index_budget_is_measurement_not_arbitrary_health_ceiling(tmp_path):
+    long_desc = "Use when the widget jams. " + ("padding text " * 30)
+    for i in range(400):
+        write_skill(tmp_path, "cat", f"skill-{i}", description=long_desc)
+    live = {f"skill-{i}" for i in range(400)}
+    f, _ = audit.check_index_budget(audit.collect([("profile", tmp_path)]), StubAdapter(live))
+    assert f[0].severity == "info"
+    assert "budget_chars" not in f[0].evidence
+    assert f[0].evidence["rendered_chars"] > 20_000
+
+
+def test_index_budget_counts_truncated_not_authored_length(tmp_path):
+    """Descriptions are truncated before entering the prompt."""
+
+    # Reporting the authored total as per-turn cost invents a saving that does
+    # not exist. The rendered figure must not scale with the authored one.
     long_desc = "Use when the widget jams. " + ("padding text " * 200)
     for i in range(5):
         write_skill(tmp_path, "cat", f"skill-{i}", description=long_desc)
     skills = audit.collect([("profile", tmp_path)])
-    f = audit.check_index_budget(skills)
+    f, skipped = audit.check_index_budget(skills, StubAdapter({f"skill-{i}" for i in range(5)}))
+    assert not skipped
     assert f, "the index budget must always be reported"
     e = f[0].evidence
     assert e["authored_desc_chars"] > 10_000, "fixture should have long authored descriptions"
@@ -508,70 +568,142 @@ def test_index_budget_counts_truncated_not_authored_length(tmp_path):
     assert e["descriptions_truncated"] == 5
 
 
-def test_index_budget_warns_only_when_over_budget(tmp_path):
+def test_index_budget_reports_small_selection_without_warning(tmp_path):
     write_skill(tmp_path, "cat", "only-one")
-    f = audit.check_index_budget(audit.collect([("profile", tmp_path)]))
-    assert f and f[0].severity == "info", \
-        "NEGATIVE CONTROL: a tiny library must not warn about index size"
+    f, _ = audit.check_index_budget(
+        audit.collect([("profile", tmp_path)]), StubAdapter({"only-one"}))
+    assert f and f[0].severity == "info"
 
 
-def test_index_budget_ignores_archived(tmp_path):
+def test_index_budget_uses_resolved_selection_not_archives(tmp_path):
     write_skill(tmp_path, ".archive/20260101", "gone")
     write_skill(tmp_path, "cat", "here")
-    f = audit.check_index_budget(audit.collect([("profile", tmp_path)]))
-    assert f[0].evidence["live_skills"] == 1, "archived skills are not in the index"
+    f, _ = audit.check_index_budget(
+        audit.collect([("profile", tmp_path)]), StubAdapter({"here"}))
+    assert f[0].evidence["live_skills"] == 1
 
 
 # ----------------------------------------------------------- growth snapshot
 
 
-def test_stuck_at_cap_detected_across_runs(tmp_path):
-    """The signal a single run cannot see."""
-    p = _pad_to(tmp_path, "cat", "pinned", audit.WRITE_CAP_CHARS + 100)
+def test_unchanged_large_skill_is_not_claimed_to_have_refused_writes(tmp_path):
+    _pad_to(tmp_path, "cat", "stable", int(audit.WRITE_CAP_CHARS * 0.95))
     snap = tmp_path / "snap.json"
     skills = audit.collect([("profile", tmp_path)])
-    first, state = audit.check_growth(skills, str(snap))
-    assert not first, "the first run has no history and must not claim a trend"
-    snap.write_text(json.dumps(state))
+    first, state, degraded = audit.check_growth(skills, str(snap))
+    assert not first and not degraded
+    audit.write_snapshot(str(snap), state)
 
-    second, _ = audit.check_growth(audit.collect([("profile", tmp_path)]), str(snap))
-    assert checks(second, "budget.stuck_at_cap", "error"), \
-        "unchanged size while pinned at the cap is evidence writes are being refused"
-    assert p.exists()
-
-
-def test_growing_skill_near_cap_is_not_reported_stuck(tmp_path):
-    _pad_to(tmp_path, "cat", "growing", int(audit.WRITE_CAP_CHARS * 0.93))
-    snap = tmp_path / "snap.json"
-    _, state = audit.check_growth(audit.collect([("profile", tmp_path)]), str(snap))
-    # Simulate the previous run seeing a materially smaller file.
-    snap.write_text(json.dumps({"skills": {k: v - 5_000 for k, v in state["skills"].items()}}))
-    f, _ = audit.check_growth(audit.collect([("profile", tmp_path)]), str(snap))
-    assert not checks(f, "budget.stuck_at_cap"), \
-        "NEGATIVE CONTROL: a skill that is still growing is not stuck"
+    second, _, degraded = audit.check_growth(
+        audit.collect([("profile", tmp_path)]), str(snap))
+    assert not checks(second, "budget.stuck_at_cap")
+    assert not degraded
 
 
-def test_small_skill_unchanged_is_not_stuck(tmp_path):
-    _pad_to(tmp_path, "cat", "stable", 3_000)
-    snap = tmp_path / "snap.json"
-    _, state = audit.check_growth(audit.collect([("profile", tmp_path)]), str(snap))
-    snap.write_text(json.dumps(state))
-    f, _ = audit.check_growth(audit.collect([("profile", tmp_path)]), str(snap))
-    assert not checks(f, "budget.stuck_at_cap"), \
-        "NEGATIVE CONTROL: most skills are stable and small; that is health, not a fault"
-
-
-def test_corrupt_snapshot_does_not_crash_the_audit(tmp_path):
+def test_corrupt_json_snapshot_is_explicitly_degraded(tmp_path):
     _pad_to(tmp_path, "cat", "any", 3_000)
     snap = tmp_path / "snap.json"
     snap.write_text("{ this is not json")
-    f, state = audit.check_growth(audit.collect([("profile", tmp_path)]), str(snap))
-    assert f == [] and "skills" in state, \
-        "a corrupt snapshot must degrade to no-trend, never take the audit down"
+    f, state, degraded = audit.check_growth(
+        audit.collect([("profile", tmp_path)]), str(snap))
+    assert f == [] and "skills" in state
+    assert degraded and "snapshot read failed" in degraded[0]
+
+
+def test_sqlite_snapshot_round_trip(tmp_path):
+    _pad_to(tmp_path, "cat", "any", 3_000)
+    snap = tmp_path / "snap.sqlite"
+    skills = audit.collect([("profile", tmp_path)])
+    _, state, degraded = audit.check_growth(skills, str(snap))
+    assert not degraded
+    assert audit.write_snapshot(str(snap), state) is None
+    _, _, degraded = audit.check_growth(skills, str(snap))
+    assert not degraded
+    with sqlite3.connect(snap) as db:
+        assert db.execute("select count(*) from skill_sizes").fetchone()[0] == 1
+
+
+def test_corrupt_sqlite_snapshot_is_explicitly_degraded(tmp_path):
+    _pad_to(tmp_path, "cat", "any", 3_000)
+    snap = tmp_path / "snap.sqlite"
+    snap.write_bytes(b"not a sqlite database")
+    _, _, degraded = audit.check_growth(
+        audit.collect([("profile", tmp_path)]), str(snap))
+    assert degraded and "snapshot read failed" in degraded[0]
 
 
 def test_missing_snapshot_is_a_clean_first_run(tmp_path):
     _pad_to(tmp_path, "cat", "any", 3_000)
-    f, state = audit.check_growth(audit.collect([("profile", tmp_path)]),
-                                  str(tmp_path / "does-not-exist.json"))
-    assert f == [] and state["skills"]
+    f, state, degraded = audit.check_growth(
+        audit.collect([("profile", tmp_path)]), str(tmp_path / "does-not-exist.json"))
+    assert f == [] and state["skills"] and not degraded
+
+
+def test_live_index_probe_uses_absolute_runtime_path(tmp_path, monkeypatch):
+    profile = tmp_path / "profile"
+    profile.mkdir()
+    runtime = tmp_path / ".hermes" / "hermes-agent"
+    py = runtime / "venv" / "bin" / "python"
+    py.parent.mkdir(parents=True)
+    py.write_text("")
+    monkeypatch.setattr(audit.Path, "home", classmethod(lambda cls: tmp_path))
+    captured = {}
+
+    def fake_run(argv, **kwargs):
+        captured["code"] = argv[2]
+        return type("Result", (), {"returncode": 0, "stdout": "cat\n", "stderr": ""})()
+
+    monkeypatch.setattr(audit.subprocess, "run", fake_run)
+    live, err = audit.HermesAdapter(profile).live_index()
+    assert live == {"cat"} and err is None
+    assert str(runtime) in captured["code"]
+    assert "expanduser('~/.hermes" not in captured["code"]
+
+
+# ------------------------------------------------ supporting files and links
+
+
+def _supporting_findings(root):
+    return audit.check_supporting_files(audit.collect([("profile", root)]))
+
+
+def test_supporting_file_exactly_at_both_limits_is_valid(tmp_path):
+    skill = write_skill(tmp_path, "cat", "bounded")
+    support = skill.parent / "references" / "large.md"
+    support.parent.mkdir()
+    support.write_text("é" * audit.SUPPORTING_MAX_CHARS)
+    assert len(support.read_bytes()) <= audit.SUPPORTING_MAX_BYTES
+    assert not checks(_supporting_findings(tmp_path), "budget.supporting_file_exceeded")
+
+
+def test_supporting_file_over_character_cap_is_error(tmp_path):
+    skill = write_skill(tmp_path, "cat", "too-many-chars")
+    support = skill.parent / "references" / "large.md"
+    support.parent.mkdir()
+    support.write_text("x" * (audit.SUPPORTING_MAX_CHARS + 1))
+    hits = checks(_supporting_findings(tmp_path), "budget.supporting_file_exceeded", "error")
+    assert hits and hits[0].evidence["chars"] == audit.SUPPORTING_MAX_CHARS + 1
+
+
+def test_supporting_file_over_byte_cap_is_error(tmp_path):
+    skill = write_skill(tmp_path, "cat", "too-many-bytes")
+    support = skill.parent / "references" / "large.md"
+    support.parent.mkdir()
+    support.write_text("🙂" * 270_000)
+    hits = checks(_supporting_findings(tmp_path), "budget.supporting_file_exceeded", "error")
+    assert hits and hits[0].evidence["bytes"] > audit.SUPPORTING_MAX_BYTES
+
+
+def test_markdown_links_ignore_code_fences_but_check_prose(tmp_path):
+    skill = write_skill(
+        tmp_path, "cat", "links", body=(
+            "# Body\n\n[missing](references/nope.md)\n\n"
+            "```markdown\n[example](references/example-only.md)\n```\n"))
+    findings = audit.check_markdown_links(audit.collect([("profile", tmp_path)]))
+    hits = checks(findings, "links.markdown_target_resolves", "warn")
+    assert [h.evidence["target"] for h in hits] == ["references/nope.md"]
+    (skill.parent / "references").mkdir()
+    (skill.parent / "references" / "nope.md").write_text("ok")
+    assert not checks(
+        audit.check_markdown_links(audit.collect([("profile", tmp_path)])),
+        "links.markdown_target_resolves")
