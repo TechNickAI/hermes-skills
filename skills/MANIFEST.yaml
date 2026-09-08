@@ -434,9 +434,9 @@ skills:
   size:
     files: 6
     bytes_skill_md: 17414
-    bytes_total: 133334
+    bytes_total: 136949
     approx_tokens_skill_md: 4354
-    approx_tokens_total: 33334
+    approx_tokens_total: 34237
   tags:
   - skills
   - audit
