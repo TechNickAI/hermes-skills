@@ -9,7 +9,7 @@ description: >
   YAML frontmatter, dangling references, role misfit, and duplicates. Runs as the agent
   so it can inspect its own live skill index rather than guessing from a directory
   listing. Report-only unless a human approves each change.
-version: 1.0.0
+version: 1.1.0
 author: Hermes Agent
 license: MIT
 metadata:
@@ -107,6 +107,43 @@ live-index agreement.
 
 On a non-Hermes runtime, pass `--skills-dir` instead; runtime-specific checks
 report as skipped rather than silently vanishing.
+
+Pass `--snapshot <path>` to persist sizes between runs. Scheduled runs should
+always pass it — see "Runtime budgets" below for why a single run is blind to
+the most important case.
+
+#### Runtime budgets — the limits that fail silently
+
+Two limits are enforced by the runtime and neither announces itself:
+
+| limit                          | enforced at                                      | what it does when crossed                     |
+| ------------------------------ | ------------------------------------------------ | --------------------------------------------- |
+| `MAX_SKILL_CONTENT_CHARS`      | `skill_manager_tool._validate_content_size()`     | **refuses every patch** to that SKILL.md      |
+| `SKILL_PROMPT_DESC_LIMIT`      | `skill_utils.extract_skill_description()`         | truncates the description before selection    |
+
+`audit.py` imports both constants from the installed runtime rather than
+restating them. **Never hardcode a second copy.** The collector previously
+carried its own `DESC_MAX = 1024` while the runtime truncated at 60, so every
+over-long description passed clean for months — a limit stated twice is a limit
+that will drift.
+
+The write cap is the more damaging of the two, because a frozen skill cannot
+record the next lesson it learns and nothing surfaces the refusal. The tell is
+distributional, not individual: **a library piles up JUST BELOW the cap**,
+because writes past it fail while writes below it succeed. A cluster at
+99,8xx–99,9xx is not coincidence, it is the shape of the wall. That is why
+`budget.write_cap_approaching` fires at 90% and why `--snapshot` matters — a
+skill unchanged across runs while pinned near the cap is one whose writes are
+being refused, and no single run can distinguish that from a skill that is
+merely large.
+
+**Do not report the authored description total as a context saving.** The
+runtime truncates each description before it enters the prompt, so the
+per-turn cost is already the truncated figure; the authored total is not being
+paid and cannot be recovered. Trimming descriptions improves **selection** —
+everything past the limit is routing information the model never reads. Say it
+that way. `budget.selection_index` reports both numbers and labels which one is
+per-turn precisely so this confusion cannot survive contact with the output.
 
 **Do not pass raw linter severities to a human.** Third-party tooling assumes a
 flat `skills/<name>/` layout; on a nested `skills/<category>/<name>/` tree it
@@ -256,6 +293,16 @@ skill.
 7. **Silent success indistinguishable from a crash.** Always emit the heartbeat.
 8. **Renaming without sweeping references.** A dangling `related_skills:`
    pointer is the same silent failure this skill exists to catch.
+9. **Auditing style limits while ignoring enforced ones.** Line counts and
+   prose quality are advisory; the write cap and the prompt truncation change
+   behaviour. An audit that measures body lines but not SKILL.md characters
+   will report a healthy library whose largest skills accept no further edits.
+10. **Restating a runtime limit as a local constant.** Import it. A hardcoded
+    ceiling 17x the real one passed every over-long description for months.
+11. **Selling a description trim as a token saving.** The runtime already
+    truncates; the saving does not exist. The payoff is selection quality.
+12. **Running a scheduled audit without `--snapshot`.** Stuck-at-the-cap is
+    only visible across runs, and it is the finding that matters most.
 
 ## Verification checklist
 
