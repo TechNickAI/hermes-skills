@@ -258,6 +258,27 @@ def test_pii_scanner_boundaries(text, flagged, tmp_path):
     assert bool(hits) == flagged, f"{text!r}: expected flagged={flagged}, got {hits}"
 
 
+def test_catalog_helpers_keep_trigger_and_behavior_distinct():
+    sys.path.insert(0, str(ROOT / "scripts"))
+    try:
+        import importlib
+
+        generator = importlib.import_module("generate_manifest")
+        importlib.reload(generator)
+    finally:
+        sys.path.pop(0)
+    description = (
+        "Use when auditing a skill library for broken routing. "
+        "Audits the resolved enabled index and reports reversible fixes."
+    )
+    assert generator.use_when(description) == (
+        "auditing a skill library for broken routing."
+    )
+    assert generator.first_sentence(description) == (
+        "Audits the resolved enabled index and reports reversible fixes."
+    )
+
+
 # ---------------------------------------------------------------------------
 # README catalog
 # ---------------------------------------------------------------------------

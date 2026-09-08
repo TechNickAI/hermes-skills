@@ -6,8 +6,10 @@ never as passing.
 
 ## Live index — ask the runtime, never infer from disk
 
-The single most important check. A config parse tells you what _should_ load; only
-the runtime tells you what _did_.
+The single most important check. A config parse or directory walk tells you what
+_should_ load; only the resolved command index tells you what _did_. The auditor
+executes this through the installed runtime interpreter with `HERMES_HOME` set
+to the target profile:
 
 ```python
 import os, sys
@@ -20,8 +22,12 @@ Run it with `HERMES_HOME=<profile-dir>` set, using the runtime's own interpreter
 (`~/.hermes/hermes-agent/venv/bin/python`). The system Python is a different
 version and will not import the agent package.
 
-`get_skill_commands()` returns a **dict**; each value carries `skill_md_path`,
-which is how you prove _which copy_ won a name collision.
+`get_skill_commands()` returns a **dict**; its keys are the actual resolved,
+enabled selection after discovery, precedence, disabled entries, and runtime
+conditions. Budget this set only—never every `SKILL.md` found on disk. Each value
+carries `skill_md_path`, which proves _which copy_ won a name collision. If the
+probe fails, report the budget/index check as unchecked; a file-list fallback is
+not equivalent evidence.
 
 **Verify both directions.** Every enabled skill present, every disabled skill
 absent. A one-directional check passes vacuously.
@@ -47,6 +53,9 @@ absent. A one-directional check passes vacuously.
 - Two directories declaring the same `name:` can resolve to **neither**, and the
   skill vanishes with no error. `.archive/` dirs are the usual culprit because
   they keep a full SKILL.md with the original name.
+- Archive directories are excluded by exact runtime semantics: any path segment
+  whose name is `.archive` or starts with `.archive-`. Do not broaden this to a
+  substring test that would hide unrelated live directories.
 - Duplicate `name:` values can make **both** copies disappear. Sweep `.archive/`
   for collisions.
 

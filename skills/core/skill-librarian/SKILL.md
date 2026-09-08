@@ -1,15 +1,11 @@
 ---
 name: skill-librarian
 description: >
-  Use when an agent's skill library needs auditing, cleaning, or triage - "audit my
-  skills", "are my skills healthy", "find duplicate skills", "why didn't it use that
-  skill", "clean up my skills", "which skills should this agent have", or after an
-  upgrade adds new skills. Finds broken skills that silently vanished from the index,
-  near-identical descriptions that make the agent pick wrong (skill shadowing), stale
-  YAML frontmatter, dangling references, role misfit, and duplicates. Runs as the agent
-  so it can inspect its own live skill index rather than guessing from a directory
-  listing. Report-only unless a human approves each change.
-version: 1.1.0
+  Use when auditing an agent's skill library for broken runtime selection,
+  ambiguous triggers, invalid metadata, oversized files, dangling links, role
+  misfit, or duplicate skills. Audits the resolved enabled index and keeps all
+  changes report-only until explicitly approved.
+version: 1.2.0
 author: Hermes Agent
 license: MIT
 metadata:
@@ -100,50 +96,50 @@ Then continue into the audit.
 python scripts/audit.py --profile <profile-dir> --json
 ```
 
-The script **collects facts and draws no conclusions**. It reports frontmatter
-health, name/dir mismatches, collisions classified by severity, description
-similarity, name near-collisions, dangling references, deny rules, and
-live-index agreement.
+The script collects deterministic evidence: frontmatter health, name/dir
+mismatches, collisions classified by severity, description similarity, name
+near-collisions, local Markdown targets (excluding code-fence examples), dual
+character/byte caps for supporting files, deny rules, live-index agreement, and
+the size of the runtime's resolved enabled selection.
 
 On a non-Hermes runtime, pass `--skills-dir` instead; runtime-specific checks
 report as skipped rather than silently vanishing.
 
-Pass `--snapshot <path>` to persist sizes between runs. Scheduled runs should
-always pass it — see "Runtime budgets" below for why a single run is blind to
-the most important case.
+Pass `--snapshot <path>` to persist sizes between runs. JSON/Markdown state
+files and SQLite databases are supported. A missing snapshot is a normal first
+run; a corrupt or unwritable snapshot is explicit degraded coverage, never a
+silent reset.
 
-#### Runtime budgets — the limits that fail silently
+#### Runtime budgets — enforced boundaries, measured accurately
 
-Two limits are enforced by the runtime and neither announces itself:
+The runtime enforces these boundaries:
 
-| limit                     | enforced at                                   | what it does when crossed                  |
-| ------------------------- | --------------------------------------------- | ------------------------------------------ |
-| `MAX_SKILL_CONTENT_CHARS` | `skill_manager_tool._validate_content_size()` | **refuses every patch** to that SKILL.md   |
-| `SKILL_PROMPT_DESC_LIMIT` | `skill_utils.extract_skill_description()`     | truncates the description before selection |
+| limit                           | enforced at                                   | exact semantics                                                                                                                                        |
+| ------------------------------- | --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `MAX_SKILL_CONTENT_CHARS`       | `skill_manager_tool._validate_content_size()` | candidate `SKILL.md` content is rejected only when **strictly greater than** the cap; replacing or patching an over-cap file to below the cap is valid |
+| supporting-file character limit | `skill_manager_tool._validate_file_content()` | candidate text must be at most 100,000 characters                                                                                                      |
+| `MAX_FILE_SIZE_BYTES`           | `skill_manager_tool._validate_file_content()` | candidate supporting file must also be at most 1 MiB                                                                                                   |
+| `SKILL_PROMPT_DESC_LIMIT`       | `skill_utils.extract_skill_description()`     | each description is truncated before selection                                                                                                         |
 
-`audit.py` imports both constants from the installed runtime rather than
-restating them. **Never hardcode a second copy.** The collector previously
-carried its own `DESC_MAX = 1024` while the runtime truncated at 60, so every
-over-long description passed clean for months — a limit stated twice is a limit
-that will drift.
+`audit.py` imports the limits from the installed runtime when possible. If that
+probe fails, it uses documented fallback values and reports the fallback as
+degraded so a caller cannot mistake it for runtime verification.
 
-The write cap is the more damaging of the two, because a frozen skill cannot
-record the next lesson it learns and nothing surfaces the refusal. The tell is
-distributional, not individual: **a library piles up JUST BELOW the cap**,
-because writes past it fail while writes below it succeed. A cluster at
-99,8xx–99,9xx is not coincidence, it is the shape of the wall. That is why
-`budget.write_cap_approaching` fires at 90% and why `--snapshot` matters — a
-skill unchanged across runs while pinned near the cap is one whose writes are
-being refused, and no single run can distinguish that from a skill that is
-merely large.
+`budget.write_cap_approaching` fires at 90% as a planning warning. An unchanged
+large file is **not** evidence that writes were refused: without a failed-write
+receipt it is equally consistent with no attempted write. `audit.py` therefore
+reports measured size, not an invented write failure.
+
+`budget.selection_index` measures only the runtime's resolved enabled selection,
+not every row found on disk. It is informational and has no arbitrary "healthy"
+ceiling. If runtime selection cannot be resolved, the check is explicitly
+unchecked rather than replaced with a directory approximation.
 
 **Do not report the authored description total as a context saving.** The
 runtime truncates each description before it enters the prompt, so the
 per-turn cost is already the truncated figure; the authored total is not being
 paid and cannot be recovered. Trimming descriptions improves **selection** —
-everything past the limit is routing information the model never reads. Say it
-that way. `budget.selection_index` reports both numbers and labels which one is
-per-turn precisely so this confusion cannot survive contact with the output.
+everything past the limit is routing information the model never reads.
 
 **Do not pass raw linter severities to a human.** Third-party tooling assumes a
 flat `skills/<name>/` layout; on a nested `skills/<category>/<name>/` tree it
@@ -301,8 +297,21 @@ skill.
     ceiling 17x the real one passed every over-long description for months.
 11. **Selling a description trim as a token saving.** The runtime already
     truncates; the saving does not exist. The payoff is selection quality.
-12. **Running a scheduled audit without `--snapshot`.** Stuck-at-the-cap is
-    only visible across runs, and it is the finding that matters most.
+12. **Treating an unchanged large file as a failed-write receipt.** Size
+    stability proves only stability. Require an actual refusal before naming the
+    cause.
+13. **Letting scheduled runs repeat unchanged defects.** Notify only on a new,
+    materially changed, or coverage-blocking condition; keep the heartbeat even
+    when the human-facing report is silent.
+14. **Trusting the budget label instead of its evidence.** Confirm the runtime
+    source, candidate character/byte count, and resolved enabled selection.
+
+## Scheduled audit template
+
+Use [`templates/weekly-cron-prompt.md`](templates/weekly-cron-prompt.md). It is
+report-only, stores its baseline in SQLite, suppresses unchanged repeated
+notifications, treats missing runtime/snapshot evidence as degraded, and
+requires receipts before claiming that a remediation occurred.
 
 ## Verification checklist
 

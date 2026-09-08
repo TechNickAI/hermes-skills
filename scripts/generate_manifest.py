@@ -72,21 +72,29 @@ def parse_frontmatter(text: str) -> tuple[dict, str]:
 
 
 def first_sentence(description: str) -> str:
-    """Condense a multi-line description to one scannable sentence."""
+    """Return a concise behavior summary, not a raw trigger-clause truncation."""
     flat = " ".join(description.split())
-    match = re.match(r"(.+?[.!?])(?:\s|$)", flat)
-    return (match.group(1) if match else flat).strip()
+    # Descriptions intentionally lead with the trigger for runtime routing. A
+    # repository catalog needs the behavior instead, or every row starts with
+    # near-identical "Use when..." prose. Prefer the next complete sentence.
+    sentences = [s.strip() for s in re.findall(r"[^.!?]+[.!?](?:\s|$)|[^.!?]+$", flat)
+                 if s.strip()]
+    if sentences and re.match(r"^Use (?:when|this when|for)\b", sentences[0], re.I):
+        if len(sentences) > 1:
+            return sentences[1]
+        trigger = re.sub(r"^Use (?:when|this when|for)\s*", "", sentences[0], flags=re.I)
+        return f"Handles {trigger[0].lower() + trigger[1:]}" if trigger else sentences[0]
+    return sentences[0] if sentences else flat
 
 
 def use_when(description: str) -> str:
-    """Pull the trigger conditions out of a description.
+    """Pull only the trigger sentence out of a description.
 
-    Skill descriptions in this repo follow a 'Use when X, or when Y' convention. That
-    clause is the single most useful thing for an agent deciding whether to install a
-    skill, so it is promoted to its own field rather than buried mid-paragraph.
+    A raw remainder can swallow the behavior sentence and merely duplicate the
+    summary. Keep this field focused on the routing condition an installer needs.
     """
     flat = " ".join(description.split())
-    match = re.search(r"\bUse (?:when|this when|for)\b(.+)", flat, re.I)
+    match = re.match(r"Use (?:when|this when|for)\s+(.+?[.!?])(?:\s|$)", flat, re.I)
     if not match:
         return ""
     clause = match.group(1).strip()
