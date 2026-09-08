@@ -197,7 +197,7 @@ skills:
   pack: core
   version: 2.1.0
   scope: solo
-  summary: Use when turning recurring requests, repeated corrections, and workflows that worked into new skills or targeted updates to existing ones.
+  summary: Handles turning recurring requests, repeated corrections, and workflows that worked into new skills or targeted updates to existing ones.
   use_when: turning recurring requests, repeated corrections, and workflows that worked into new skills or targeted updates to existing ones.
   requires:
   - Read access to the target agent's HERMES_HOME

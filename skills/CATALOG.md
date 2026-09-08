@@ -118,7 +118,7 @@ differentiator — say so out loud), `unsupported` (never recommend it in Claude
 
 - **Pack:** core
 - **Scope:** solo
-- **What it does:** Use when turning recurring requests, repeated corrections, and workflows that worked into new skills or targeted updates to existing ones.
+- **What it does:** Handles turning recurring requests, repeated corrections, and workflows that worked into new skills or targeted updates to existing ones.
 - **Use when:** turning recurring requests, repeated corrections, and workflows that worked into new skills or targeted updates to existing ones.
 - **Prerequisites:** Read access to the target agent's HERMES_HOME
 - **Works without setup:** No, but read the Claude note before recommending it
