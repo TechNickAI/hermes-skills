@@ -124,7 +124,7 @@ differentiator — say so out loud), `unsupported` (never recommend it in Claude
 - **Works without setup:** No, but read the Claude note before recommending it
 - **Compatibility:** Agent Skills standard
 - **Claude:** degraded — The harvest procedure transfers, but both instruments read a Hermes state.db and skills directory, so the per-turn join and library audit have no data source in Claude.
-- **Size:** 8,516 B body, loaded when the skill triggers (~2,129 tokens); 39,391 B across 4 file(s) total
+- **Size:** 8,516 B body, loaded when the skill triggers (~2,129 tokens); 41,181 B across 4 file(s) total
 - **Path:** `skills/core/learn-from-conversations`
 
 ## memory-cleanup

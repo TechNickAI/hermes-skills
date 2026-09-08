@@ -195,7 +195,7 @@ skills:
   path: skills/core/keep-going
 - name: learn-from-conversations
   pack: core
-  version: 2.1.0
+  version: 2.2.0
   scope: solo
   summary: Handles turning recurring requests, repeated corrections, and workflows that worked into new skills or targeted updates to existing ones.
   use_when: turning recurring requests, repeated corrections, and workflows that worked into new skills or targeted updates to existing ones.
@@ -208,9 +208,9 @@ skills:
   size:
     files: 4
     bytes_skill_md: 8516
-    bytes_total: 39391
+    bytes_total: 41181
     approx_tokens_skill_md: 2129
-    approx_tokens_total: 9848
+    approx_tokens_total: 10295
   tags:
   - skills
   - harvesting

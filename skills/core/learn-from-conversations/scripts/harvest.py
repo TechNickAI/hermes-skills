@@ -206,26 +206,44 @@ def analyse(loads, corr_rows, sizes):
     # PRECEDENCE MATTERS: only count a skill if it was chosen BEFORE the
     # correction. A skill loaded in response to the complaint is not a cause of
     # it, and counting it inverts the causal arrow.
-    first_corr = {}
+    # One permanent cutoff at the FIRST correction throws away every later turn
+    # of a long session. Measured on one real profile: 34 skill-load events
+    # across 9 sessions were discarded, in sessions that had already been
+    # counted as corrected — so the loads vanished while the correction stayed.
+    # Segment instead: each correction opens a window back to the previous
+    # correction, and a skill is credited if it was chosen inside that window.
+    by_session = {}
     for sid, _mid, ts in corr_rows:
-        if sid not in first_corr or ts < first_corr[sid]:
-            first_corr[sid] = ts
+        by_session.setdefault(sid, []).append(ts)
+    for sid in by_session:
+        by_session[sid].sort()
 
     # The baseline MUST be computed over the same population the per-skill rates
     # are computed over, or every lift is silently wrong. Restricting per-skill
-    # counts to pre-correction loads while leaving the baseline over all sessions
-    # made every lift < 1.00x on a real profile — arithmetically impossible for a
-    # weighted average, which is the tell that the denominators disagreed.
+    # counts while leaving the baseline over all sessions made every lift <
+    # 1.00x on a real profile — arithmetically impossible for a weighted
+    # average, which is the tell that the denominators disagreed.
     sess_with = {}
     eligible = set()
     for sid, events in loads.items():
-        cutoff = first_corr.get(sid)
-        pre = [(ts, name) for ts, name in events
-               if cutoff is None or ts < cutoff]
-        if not pre:
+        stamps = by_session.get(sid)
+        if not stamps:
+            # No correction in this session: every chosen skill counts, and the
+            # session is a clean negative for the baseline.
+            if not events:
+                continue
+            eligible.add(sid)
+            for _ts, name in events:
+                sess_with.setdefault(name, set()).add(sid)
+            continue
+        # Credit a skill if it was chosen before ANY correction in the session,
+        # not only the first. Precedence still holds per window: a skill loaded
+        # in response to a complaint is never credited for that complaint.
+        counted = {name for ts, name in events if ts < stamps[-1]}
+        if not counted:
             continue
         eligible.add(sid)
-        for _ts, name in pre:
+        for name in counted:
             sess_with.setdefault(name, set()).add(sid)
 
     if not eligible:

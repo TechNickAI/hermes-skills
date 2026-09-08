@@ -58,7 +58,11 @@ def is_excluded(path, base):
 def collect(skills_dir):
     skills, excluded = {}, []
     for root, dirs, files in os.walk(skills_dir):
-        dirs[:] = [d for d in dirs if d not in EXCLUDED_DIRS]
+        # Do NOT prune excluded dirs out of `dirs` here. Pruning stops os.walk
+        # from ever descending, so the is_excluded() branch below can never fire
+        # and `excluded` always reports 0 — hiding the archived copies you need
+        # when investigating a ghost telemetry record or a skill that vanished.
+        # Measured on one real profile: 18 archived SKILL.md files, reported 0.
         if "SKILL.md" not in files:
             continue
         path = os.path.join(root, "SKILL.md")
@@ -174,9 +178,13 @@ def main():
     # A skill preloaded by an enabled cron job is IN USE regardless of counters.
     never = sorted(n for n in skills
                    if used.get(n, 0) == 0 and n not in cron_skills)
-    # Chosen ~0 but used a lot = forced-only: it is injected, never routed to.
-    forced_only = sorted(
-        ((used.get(n, 0) - viewed.get(n, 0), n) for n in skills
+    # (use - view) is the count of EXCESS forced loads, not evidence that
+    # routing never chose the skill. A skill at use=2173 / view=635 has a
+    # difference of 1538 and was still model-chosen 635 times; labelling it
+    # "never routed to" is simply false. Report the magnitude of forced loading,
+    # and flag the never-routed case separately by its view count.
+    forced_loads = sorted(
+        ((used.get(n, 0) - viewed.get(n, 0), n, viewed.get(n, 0)) for n in skills
          if used.get(n, 0) - viewed.get(n, 0) > 50),
         reverse=True)
     ghosts = sorted(k for k in used if k not in skills)
@@ -199,7 +207,7 @@ def main():
         "name_mismatch": [n for n, s in skills.items() if s["name_mismatch"]],
         "no_description": [n for n, s in skills.items() if s["no_desc"]],
         "never_used": never,
-        "forced_only": forced_only,
+        "forced_loads": forced_loads,
         "ghost_usage_records": ghosts,
         "usage_error": usage_err,
         "categories": dict(Counter(s["category"] for s in skills.values())),
@@ -239,10 +247,11 @@ def main():
         print(f"[TELEMETRY] {usage_err}")
     print(f"[USAGE] never used: {len(r['never_used'])} "
           f"(CANDIDATE signal only — safety/recovery skills are 0-load BY DESIGN)")
-    print(f"[USAGE] FORCED-only (use-view >50 — injected by cron/slash, NOT "
-          f"model-chosen): {len(r['forced_only'])}")
-    for n_forced, n in r["forced_only"][:8]:
-        print(f"    {n_forced:6d} forced  {n}")
+    print(f"[USAGE] heavily FORCED (use-view >50 — cron/slash injection above "
+          f"model-chosen loads): {len(r['forced_loads'])}")
+    for n_forced, n, n_viewed in r["forced_loads"][:8]:
+        label = "never routed to" if n_viewed == 0 else f"{n_viewed} chosen"
+        print(f"    {n_forced:6d} forced  {n}  ({label})")
     print(f"[USAGE] ghost records (telemetry without a skill on disk): "
           f"{len(r['ghost_usage_records'])}")
     print()

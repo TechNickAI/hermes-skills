@@ -1,6 +1,6 @@
 ---
 name: learn-from-conversations
-version: 2.1.0
+version: 2.2.0
 description: >
   Use when turning recurring requests, repeated corrections, and workflows that
   worked into new skills or targeted updates to existing ones.
