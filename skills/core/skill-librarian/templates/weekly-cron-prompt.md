@@ -15,7 +15,7 @@ Weekly skill-library health check for this agent's own profile.
    - unchanged size is not evidence that writes were refused without a failed-write receipt;
    - `budget.selection_index` is informational and covers the resolved enabled selection only; it has no arbitrary health ceiling;
    - description truncation affects routing, but authored text beyond the runtime limit is not paid per turn;
-   - supporting files must satisfy both the 100,000-character and 1 MiB byte limits.
+   - supporting text files must satisfy the 100,000-character limit, and every support asset must satisfy the 1 MiB byte limit; packaged PDF/XSD assets are byte-measured rather than decoded and treated as `write_file` text.
 5. If the snapshot or live-runtime probe is corrupt/unavailable, report the affected checks as degraded or unchecked. Never turn missing evidence into a confident recommendation.
 6. Compare actionable findings with the previous report. Notify the owner only for a new or materially changed verified defect, a previously reported defect that has materially worsened, or explicit degraded coverage that blocks a required check. Do not repeatedly alert on an unchanged known defect. Emit a machine-readable heartbeat even when no human notification is needed.
 7. Any report must include evidence, the consequence, and a proposed reversible next step. Do not claim a change was applied or verified without an actual write/verification receipt. If nothing is actionable, emit `[SILENT]` for the human-facing notification.

@@ -227,6 +227,17 @@ def _runtime_limits() -> tuple[int, int, int, int, str]:
 # a near-cap cluster or unchanged size is not evidence that any write failed.
 WRITE_WARN_CHARS = int(WRITE_CAP_CHARS * 0.90)
 
+# ``skill_manage.write_file`` accepts supporting files as TEXT, and the current
+# runtime applies character + byte caps to that mutation path. An on-disk audit
+# should not fabricate a text-write violation for support assets that are installed
+# by package copy and not editable through ``write_file`` (PDF templates and XSD
+# schemas were the observed false positives). The universal one-MiB byte guard still
+# applies. Unknown extensions intentionally default to text-managed so new source
+# formats cannot silently evade the tighter cap.
+NON_TEXT_SUPPORTING_SUFFIXES = {
+    ".pdf", ".xsd",
+}
+
 # The runtime rejects only candidate content strictly greater than the cap.
 # A replacement/patch that shrinks over-cap content below the limit is valid;
 # therefore report the state, not the false claim that every write is refused.
@@ -374,7 +385,12 @@ def _skill_dir(skill: Skill) -> Path:
 
 
 def check_supporting_files(skills: list[Skill]) -> list[Finding]:
-    """Enforce the runtime's character and byte caps on support files."""
+    """Enforce support-file limits using the runtime's actual write semantics.
+
+    ``skill_manage.write_file`` accepts text, so its character cap is meaningful
+    for files that mutation API can represent. Packaged PDF/XSD assets are not
+    ``write_file`` text; they still receive the universal one-MiB byte check.
+    """
     out: list[Finding] = []
     seen: set[Path] = set()
     for skill in skills:
@@ -395,18 +411,28 @@ def check_supporting_files(skills: list[Skill]) -> list[Finding]:
                     out.append(Finding("supporting_file.read", "error", str(exc),
                                        skill.name, str(path)))
                     continue
-                chars = len(raw.decode("utf-8", errors="replace"))
                 byte_count = len(raw)
-                if chars > SUPPORTING_MAX_CHARS or byte_count > SUPPORTING_MAX_BYTES:
+                suffix = path.suffix.lower()
+                # Unknown extensions default to text so a newly introduced source
+                # format cannot silently evade the tighter write_file character cap.
+                text_managed = suffix not in NON_TEXT_SUPPORTING_SUFFIXES
+                chars = (len(raw.decode("utf-8", errors="replace"))
+                         if text_managed else None)
+                char_exceeded = bool(
+                    text_managed and chars is not None and chars > SUPPORTING_MAX_CHARS)
+                if char_exceeded or byte_count > SUPPORTING_MAX_BYTES:
+                    measured = (f"{chars:,} chars / {byte_count:,} bytes"
+                                if text_managed else f"{byte_count:,} bytes")
+                    limits = (f"{SUPPORTING_MAX_CHARS:,} chars and "
+                              if text_managed else "") + f"{SUPPORTING_MAX_BYTES:,} bytes"
                     out.append(Finding(
                         "budget.supporting_file_exceeded", "error",
-                        f"supporting file is {chars:,} chars / {byte_count:,} bytes; "
-                        f"limits are {SUPPORTING_MAX_CHARS:,} chars and "
-                        f"{SUPPORTING_MAX_BYTES:,} bytes",
+                        f"supporting file is {measured}; limits are {limits}",
                         skill.name, str(path),
                         {"chars": chars, "bytes": byte_count,
-                         "char_cap": SUPPORTING_MAX_CHARS,
+                         "char_cap": SUPPORTING_MAX_CHARS if text_managed else None,
                          "byte_cap": SUPPORTING_MAX_BYTES,
+                         "text_managed": text_managed,
                          "limit_source": LIMIT_SOURCE}))
     return out
 
@@ -662,19 +688,26 @@ class HermesAdapter:
         return names
 
     def live_index(self) -> tuple[set, str | None]:
-        """Ask the runtime what it ACTUALLY loaded. Never infer from disk."""
+        """Ask the skills-list runtime what it ACTUALLY offers. Never infer from disk.
+
+        ``get_skill_commands`` is only the slash-command projection; it deliberately
+        drops skills such as ``plan``/``review`` when their slugs collide with core
+        commands. They remain fully available to ``skills_list``/``skill_view`` and
+        therefore must be present in the health comparison.
+        """
         agent = Path.home() / ".hermes/hermes-agent"
         py = agent / "venv/bin/python"
         if not py.is_file():
             return set(), "hermes venv not found"
-        # The runtime API is the source of truth. Import its checkout through an
-        # absolute path; do not use `~`, which could resolve under a rewritten
-        # HOME in profile-aware shells.
+        # The same API that serves the agent-facing skills index is the source of
+        # truth. Import its checkout through an absolute path; do not use `~`,
+        # which could resolve under a rewritten HOME in profile-aware shells.
         code = (
-            "import sys;"
+            "import json,sys;"
             f"sys.path.insert(0,{str(agent)!r});"
-            "from agent.skill_commands import get_skill_commands;"
-            "print('\\n'.join(k.lstrip('/') for k in get_skill_commands()))"
+            "from tools.skills_tool import skills_list;"
+            "d=json.loads(skills_list());"
+            "print('\\n'.join(x['name'] for x in d.get('skills',[])))"
         )
         try:
             r = subprocess.run([str(py), "-c", code], capture_output=True, text=True,

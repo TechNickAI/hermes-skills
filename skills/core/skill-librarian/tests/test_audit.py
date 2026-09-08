@@ -639,7 +639,12 @@ def test_missing_snapshot_is_a_clean_first_run(tmp_path):
     assert f == [] and state["skills"] and not degraded
 
 
-def test_live_index_probe_uses_absolute_runtime_path(tmp_path, monkeypatch):
+def test_live_index_probe_uses_skills_list_and_absolute_runtime_path(tmp_path, monkeypatch):
+    """The live index is not the slash-command map.
+
+    Core command collisions intentionally hide ``plan``/``review`` from
+    get_skill_commands(), while skills_list()/skill_view still offer them.
+    """
     profile = tmp_path / "profile"
     profile.mkdir()
     runtime = tmp_path / ".hermes" / "hermes-agent"
@@ -651,12 +656,14 @@ def test_live_index_probe_uses_absolute_runtime_path(tmp_path, monkeypatch):
 
     def fake_run(argv, **kwargs):
         captured["code"] = argv[2]
-        return type("Result", (), {"returncode": 0, "stdout": "cat\n", "stderr": ""})()
+        return type("Result", (), {"returncode": 0, "stdout": "plan\nreview\n", "stderr": ""})()
 
     monkeypatch.setattr(audit.subprocess, "run", fake_run)
     live, err = audit.HermesAdapter(profile).live_index()
-    assert live == {"cat"} and err is None
+    assert live == {"plan", "review"} and err is None
     assert str(runtime) in captured["code"]
+    assert "from tools.skills_tool import skills_list" in captured["code"]
+    assert "get_skill_commands" not in captured["code"]
     assert "expanduser('~/.hermes" not in captured["code"]
 
 
@@ -692,6 +699,27 @@ def test_supporting_file_over_byte_cap_is_error(tmp_path):
     support.write_text("🙂" * 270_000)
     hits = checks(_supporting_findings(tmp_path), "budget.supporting_file_exceeded", "error")
     assert hits and hits[0].evidence["bytes"] > audit.SUPPORTING_MAX_BYTES
+    assert hits[0].evidence["text_managed"] is True
+
+
+def test_binary_and_schema_assets_ignore_text_cap_but_keep_byte_cap(tmp_path):
+    """PDF templates and XSD support assets are not skill_manage text writes."""
+    skill = write_skill(tmp_path, "cat", "assets")
+    templates = skill.parent / "templates"
+    schemas = skill.parent / "scripts" / "office" / "schemas"
+    templates.mkdir()
+    schemas.mkdir(parents=True)
+    (templates / "paper.pdf").write_bytes(b"%PDF-1.7\n" + b"x" * audit.SUPPORTING_MAX_CHARS)
+    (schemas / "sml.xsd").write_text("x" * (audit.SUPPORTING_MAX_CHARS + 1))
+    assert not checks(_supporting_findings(tmp_path), "budget.supporting_file_exceeded"), \
+        "sub-one-MiB PDF/XSD payloads must not be measured as skill_manage text"
+
+    (templates / "huge.pdf").write_bytes(b"x" * (audit.SUPPORTING_MAX_BYTES + 1))
+    hits = checks(_supporting_findings(tmp_path), "budget.supporting_file_exceeded", "error")
+    assert len(hits) == 1
+    assert hits[0].path.endswith("huge.pdf")
+    assert hits[0].evidence["chars"] is None
+    assert hits[0].evidence["text_managed"] is False
 
 
 def test_markdown_links_ignore_code_fences_but_check_prose(tmp_path):
