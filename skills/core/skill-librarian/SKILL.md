@@ -116,10 +116,10 @@ the most important case.
 
 Two limits are enforced by the runtime and neither announces itself:
 
-| limit                          | enforced at                                      | what it does when crossed                     |
-| ------------------------------ | ------------------------------------------------ | --------------------------------------------- |
-| `MAX_SKILL_CONTENT_CHARS`      | `skill_manager_tool._validate_content_size()`     | **refuses every patch** to that SKILL.md      |
-| `SKILL_PROMPT_DESC_LIMIT`      | `skill_utils.extract_skill_description()`         | truncates the description before selection    |
+| limit                     | enforced at                                   | what it does when crossed                  |
+| ------------------------- | --------------------------------------------- | ------------------------------------------ |
+| `MAX_SKILL_CONTENT_CHARS` | `skill_manager_tool._validate_content_size()` | **refuses every patch** to that SKILL.md   |
+| `SKILL_PROMPT_DESC_LIMIT` | `skill_utils.extract_skill_description()`     | truncates the description before selection |
 
 `audit.py` imports both constants from the installed runtime rather than
 restating them. **Never hardcode a second copy.** The collector previously

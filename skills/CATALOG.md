@@ -253,7 +253,7 @@ differentiator — say so out loud), `unsupported` (never recommend it in Claude
 - **Works without setup:** Yes, but read the Claude note before recommending it
 - **Compatibility:** Agent Skills standard
 - **Claude:** degraded — Audits Hermes skill layout; the method transfers, the paths do not.
-- **Size:** 13,065 B body, loaded when the skill triggers (~3,266 tokens); 91,517 B across 5 file(s) total
+- **Size:** 16,119 B body, loaded when the skill triggers (~4,030 tokens); 114,037 B across 5 file(s) total
 - **Path:** `skills/core/skill-librarian`
 
 ## trust-framework
