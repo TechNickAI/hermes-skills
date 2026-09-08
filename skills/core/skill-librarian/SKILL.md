@@ -115,12 +115,12 @@ silent reset.
 
 The runtime enforces these boundaries:
 
-| limit                           | enforced at                                   | exact semantics                                                                                                                                        |
-| ------------------------------- | --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `MAX_SKILL_CONTENT_CHARS`       | `skill_manager_tool._validate_content_size()` | candidate `SKILL.md` content is rejected only when **strictly greater than** the cap; replacing or patching an over-cap file to below the cap is valid |
-| supporting-file character limit | `skill_manager_tool._write_supporting()` → `_validate_content_size()` | text supplied through `skill_manage.write_file` must be at most 100,000 characters; hand-placed PDF/XSD package assets are not character-measured |
-| `MAX_SKILL_FILE_BYTES`          | `skill_manager_tool._write_supporting()`                     | every supporting asset audited on disk must be at most 1 MiB                                                                                            |
-| `SKILL_PROMPT_DESC_LIMIT`       | `skill_utils.extract_skill_description()`     | each description is truncated before selection                                                                                                         |
+| limit                           | enforced at                                                           | exact semantics                                                                                                                                        |
+| ------------------------------- | --------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `MAX_SKILL_CONTENT_CHARS`       | `skill_manager_tool._validate_content_size()`                         | candidate `SKILL.md` content is rejected only when **strictly greater than** the cap; replacing or patching an over-cap file to below the cap is valid |
+| supporting-file character limit | `skill_manager_tool._write_supporting()` → `_validate_content_size()` | text supplied through `skill_manage.write_file` must be at most 100,000 characters; hand-placed PDF/XSD package assets are not character-measured      |
+| `MAX_SKILL_FILE_BYTES`          | `skill_manager_tool._write_supporting()`                              | every supporting asset audited on disk must be at most 1 MiB                                                                                           |
+| `SKILL_PROMPT_DESC_LIMIT`       | `skill_utils.extract_skill_description()`                             | each description is truncated before selection                                                                                                         |
 
 `audit.py` imports the limits from the installed runtime when possible. If that
 probe fails, it uses documented fallback values and reports the fallback as
