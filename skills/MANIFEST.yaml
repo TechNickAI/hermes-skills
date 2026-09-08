@@ -433,10 +433,10 @@ skills:
   claude_note: Audits Hermes skill layout; the method transfers, the paths do not.
   size:
     files: 6
-    bytes_skill_md: 17226
-    bytes_total: 129519
-    approx_tokens_skill_md: 4306
-    approx_tokens_total: 32380
+    bytes_skill_md: 17414
+    bytes_total: 133334
+    approx_tokens_skill_md: 4354
+    approx_tokens_total: 33334
   tags:
   - skills
   - audit

@@ -77,7 +77,7 @@ installed, and falls back to built-in checks when it is not.
 - `related_skills:` targets resolve
 - local Markdown links resolve, excluding examples inside fenced code
 - `SKILL.md` candidate character cap uses strict `>` semantics
-- supporting files satisfy both 100,000-character and 1 MiB byte caps
+- supporting text files satisfy the 100,000-character cap, and every support asset satisfies the 1 MiB byte cap
 - trailing newline and field order
 - **duplicate `name` across every root** the agent can see
 - **duplicate or near-identical `description`** across every root

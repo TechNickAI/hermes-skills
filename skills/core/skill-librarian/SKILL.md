@@ -98,8 +98,9 @@ python scripts/audit.py --profile <profile-dir> --json
 
 The script collects deterministic evidence: frontmatter health, name/dir
 mismatches, collisions classified by severity, description similarity, name
-near-collisions, local Markdown targets (excluding code-fence examples), dual
-character/byte caps for supporting files, deny rules, live-index agreement, and
+near-collisions, local Markdown targets (excluding code-fence examples), character
+caps for text-managed supporting files plus byte caps for every support asset,
+deny rules, live-index agreement, and
 the size of the runtime's resolved enabled selection.
 
 On a non-Hermes runtime, pass `--skills-dir` instead; runtime-specific checks
@@ -114,12 +115,12 @@ silent reset.
 
 The runtime enforces these boundaries:
 
-| limit                           | enforced at                                   | exact semantics                                                                                                                                        |
-| ------------------------------- | --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `MAX_SKILL_CONTENT_CHARS`       | `skill_manager_tool._validate_content_size()` | candidate `SKILL.md` content is rejected only when **strictly greater than** the cap; replacing or patching an over-cap file to below the cap is valid |
-| supporting-file character limit | `skill_manager_tool._validate_file_content()` | candidate text must be at most 100,000 characters                                                                                                      |
-| `MAX_FILE_SIZE_BYTES`           | `skill_manager_tool._validate_file_content()` | candidate supporting file must also be at most 1 MiB                                                                                                   |
-| `SKILL_PROMPT_DESC_LIMIT`       | `skill_utils.extract_skill_description()`     | each description is truncated before selection                                                                                                         |
+| limit                           | enforced at                                                           | exact semantics                                                                                                                                        |
+| ------------------------------- | --------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `MAX_SKILL_CONTENT_CHARS`       | `skill_manager_tool._validate_content_size()`                         | candidate `SKILL.md` content is rejected only when **strictly greater than** the cap; replacing or patching an over-cap file to below the cap is valid |
+| supporting-file character limit | `skill_manager_tool._write_supporting()` → `_validate_content_size()` | text supplied through `skill_manage.write_file` must be at most 100,000 characters; hand-placed PDF/XSD package assets are not character-measured      |
+| `MAX_SKILL_FILE_BYTES`          | `skill_manager_tool._write_supporting()`                              | every supporting asset audited on disk must be at most 1 MiB                                                                                           |
+| `SKILL_PROMPT_DESC_LIMIT`       | `skill_utils.extract_skill_description()`                             | each description is truncated before selection                                                                                                         |
 
 `audit.py` imports the limits from the installed runtime when possible. If that
 probe fails, it uses documented fallback values and reports the fallback as
