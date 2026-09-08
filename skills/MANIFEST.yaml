@@ -422,7 +422,7 @@ skills:
   path: skills/core/robustify-doctor
 - name: skill-librarian
   pack: core
-  version: 1.0.0
+  version: 1.1.0
   scope: solo
   summary: Use when an agent's skill library needs auditing, cleaning, or triage - "audit my skills", "are my skills healthy", "find duplicate skills", "why didn't it use that skill", "clean up my skills", "which skills should this agent have", or after an upgrade adds new skills.
   use_when: an agent's skill library needs auditing, cleaning, or triage - "audit my skills", "are my skills healthy", "find duplicate skills", "why didn't it use that skill", "clean up my skills", "which skills should this agent have", or after an upgrade adds new skills.
@@ -433,10 +433,10 @@ skills:
   claude_note: Audits Hermes skill layout; the method transfers, the paths do not.
   size:
     files: 5
-    bytes_skill_md: 13065
-    bytes_total: 91517
-    approx_tokens_skill_md: 3266
-    approx_tokens_total: 22879
+    bytes_skill_md: 16119
+    bytes_total: 114037
+    approx_tokens_skill_md: 4030
+    approx_tokens_total: 28509
   tags:
   - skills
   - audit

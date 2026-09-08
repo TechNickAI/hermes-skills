@@ -97,6 +97,8 @@ class Skill:
     description: str
     version: str | None
     body_lines: int
+    total_chars: int = 0      # WHOLE SKILL.md, the unit the write cap measures
+    desc_chars: int = 0
     platforms: list = field(default_factory=list)
     environments: list = field(default_factory=list)
     name_declared: bool = True
@@ -162,6 +164,8 @@ def collect(roots: list[tuple[str, Path]]) -> list[Skill]:
                 description=str(fm.get("description") or "").strip(),
                 version=str(ver) if ver is not None else None,
                 body_lines=len(body.splitlines()),
+                total_chars=len(text),
+                desc_chars=len(str(fm.get("description") or "").strip()),
                 platforms=list(plats or []),
                 environments=list(envs or []),
                 name_declared=bool(declared),
@@ -175,7 +179,56 @@ def collect(roots: list[tuple[str, Path]]) -> list[Skill]:
 # layer 1 -- mechanical
 # --------------------------------------------------------------------------
 
-DESC_MIN, DESC_MAX, BODY_MAX = 40, 1024, 500
+DESC_MIN, BODY_MAX = 40, 500
+
+# --------------------------------------------------------------------------
+# Runtime budgets. These are NOT style preferences -- each one is a hard limit
+# enforced somewhere in the runtime, and crossing it changes behaviour silently.
+#
+# Resolved from the live runtime when importable, so this never drifts from the
+# constant that actually enforces the rule. The literals are last-resort
+# fallbacks for a non-Hermes tree, and are reported as such.
+# --------------------------------------------------------------------------
+
+
+def _runtime_limits() -> tuple[int, int, str]:
+    """(write_cap_chars, prompt_desc_chars, source).
+
+    Read the constants from the installed runtime rather than restating them.
+    A second copy of a limit is a limit that will drift: this collector's old
+    hardcoded description ceiling was 1024 while the runtime truncated at 60,
+    so every over-long description passed clean for months.
+    """
+    agent_root = Path.home() / ".hermes" / "hermes-agent"
+    if not (agent_root / "agent" / "skill_utils.py").is_file():
+        return 100_000, 60, "fallback-literal"
+    added = str(agent_root) not in sys.path
+    if added:
+        sys.path.insert(0, str(agent_root))
+    try:
+        from agent.skill_utils import SKILL_PROMPT_DESC_LIMIT
+        from tools.skill_manager_tool import MAX_SKILL_CONTENT_CHARS
+
+        return int(MAX_SKILL_CONTENT_CHARS), int(SKILL_PROMPT_DESC_LIMIT), "runtime"
+    except Exception:
+        return 100_000, 60, "fallback-literal"
+    finally:
+        if added and str(agent_root) in sys.path:
+            sys.path.remove(str(agent_root))
+
+
+WRITE_CAP_CHARS, PROMPT_DESC_CHARS, LIMIT_SOURCE = _runtime_limits()
+
+# Warn before the wall, not at it. A skill inside this band still accepts
+# writes but has no room left for the next real lesson, and the observed
+# failure mode is a library that piles up AT the cap because every attempt to
+# grow past it is refused -- so the cluster below the wall IS the signal.
+WRITE_WARN_CHARS = int(WRITE_CAP_CHARS * 0.90)
+
+# Ceiling for the whole rendered selection index, in characters. The index is
+# rebuilt into every system prompt on every turn, so this is the one budget
+# paid per-request rather than per-invocation.
+INDEX_BUDGET_CHARS = 20_000
 
 
 def check_mechanical(skills: list[Skill]) -> list[Finding]:
@@ -196,9 +249,20 @@ def check_mechanical(skills: list[Skill]) -> list[Finding]:
                 f.append(Finding("description.too_short", "warn",
                                  f"description {n} chars (<{DESC_MIN}) - unlikely to "
                                  "state a trigger", s.name, s.path))
-            if n > DESC_MAX:
-                f.append(Finding("description.too_long", "warn",
-                                 f"description {n} chars (>{DESC_MAX})", s.name, s.path))
+            if n > PROMPT_DESC_CHARS:
+                # Not a style rule. `extract_skill_description()` truncates at
+                # PROMPT_DESC_CHARS - 3 + "..." before the description ever
+                # reaches the model, so every character past that point is
+                # invisible to selection. A 1,000-char description does not
+                # help the agent choose; it just never gets read.
+                f.append(Finding("description.exceeds_prompt_limit", "warn",
+                                 f"description {n} chars; the selection index shows "
+                                 f"only the first {PROMPT_DESC_CHARS - 3} + '...', so "
+                                 f"{n - (PROMPT_DESC_CHARS - 3)} chars never influence "
+                                 "selection", s.name, s.path,
+                                 {"chars": n, "visible": PROMPT_DESC_CHARS - 3,
+                                  "visible_text": s.description[:PROMPT_DESC_CHARS - 3],
+                                  "lost_text": s.description[PROMPT_DESC_CHARS - 3:][:300]}))
             # trigger-lens: does it say WHEN, or only WHAT?
             # `\bwhen\b` does NOT match "whenever" -- the word boundary blocks it,
             # so "Use whenever X happens" was reported as having no trigger.
@@ -230,7 +294,68 @@ def check_mechanical(skills: list[Skill]) -> list[Finding]:
             f.append(Finding("body.too_long", "warn",
                              f"body {s.body_lines} lines (>{BODY_MAX}) - consider "
                              "splitting into references/", s.name, s.path))
+        # The write cap is measured against the WHOLE SKILL.md, frontmatter
+        # included -- the same string `_validate_content_size()` measures.
+        # Severity is `error` on purpose: a frozen skill cannot record the next
+        # lesson it learns, and the failure is invisible because the refusal is
+        # returned to whichever agent tried to patch it and nowhere else.
+        if not s.archived and s.total_chars >= WRITE_CAP_CHARS:
+            f.append(Finding("budget.write_cap_exceeded", "error",
+                             f"SKILL.md is {s.total_chars:,} chars, at or over the "
+                             f"{WRITE_CAP_CHARS:,} write cap - FROZEN, every patch "
+                             "to this skill is refused", s.name, s.path,
+                             {"chars": s.total_chars, "cap": WRITE_CAP_CHARS,
+                              "over_by": s.total_chars - WRITE_CAP_CHARS,
+                              "limit_source": LIMIT_SOURCE}))
+        elif not s.archived and s.total_chars >= WRITE_WARN_CHARS:
+            f.append(Finding("budget.write_cap_approaching", "warn",
+                             f"SKILL.md is {s.total_chars:,} chars, "
+                             f"{WRITE_CAP_CHARS - s.total_chars:,} short of the "
+                             f"{WRITE_CAP_CHARS:,} write cap - move detail into "
+                             "references/ before it freezes", s.name, s.path,
+                             {"chars": s.total_chars, "cap": WRITE_CAP_CHARS,
+                              "headroom": WRITE_CAP_CHARS - s.total_chars,
+                              "limit_source": LIMIT_SOURCE}))
     return f
+
+
+def check_index_budget(skills: list[Skill]) -> list[Finding]:
+    """Size the selection index the way the runtime actually renders it.
+
+    Two different numbers get confused here, and confusing them produces a
+    fake saving. The AUTHORED descriptions can total tens of thousands of
+    characters, but `extract_skill_description()` truncates each one before it
+    is written into the system prompt, so the rendered cost is much smaller and
+    trimming descriptions does NOT recover the difference. Report both, and
+    make clear which one is paid per turn.
+    """
+    live = [s for s in skills if not s.archived and s.root in ("profile", "extra")]
+    if not live:
+        return []
+    # Mirror the runtime: name + truncated description, one line per skill.
+    rendered = sum(len(s.name) + min(s.desc_chars, PROMPT_DESC_CHARS) + 8
+                   for s in live)
+    authored = sum(s.desc_chars for s in live)
+    truncated = [s for s in live if s.desc_chars > PROMPT_DESC_CHARS]
+    sev = "warn" if rendered > INDEX_BUDGET_CHARS else "info"
+    return [Finding(
+        "budget.selection_index", sev,
+        f"selection index renders ~{rendered:,} chars (~{rendered // 4:,} tokens) "
+        f"for {len(live)} live skills, paid on every turn"
+        + (f" - over the {INDEX_BUDGET_CHARS:,} char budget" if sev == "warn" else ""),
+        None, None,
+        {"live_skills": len(live), "rendered_chars": rendered,
+         "rendered_tokens_approx": rendered // 4,
+         "authored_desc_chars": authored,
+         "budget_chars": INDEX_BUDGET_CHARS,
+         "descriptions_truncated": len(truncated),
+         # Stated explicitly so nobody reports the authored total as a
+         # recoverable context saving. It is not: the runtime already
+         # truncates, so shortening descriptions improves SELECTION, not cost.
+         "note": "authored_desc_chars is NOT paid per turn; the runtime "
+                 "truncates each description to the prompt limit first",
+         "largest": sorted(((s.name, s.desc_chars) for s in truncated),
+                           key=lambda x: -x[1])[:10]})]
 
 
 def check_related(skills: list[Skill]) -> list[Finding]:
@@ -610,6 +735,50 @@ def check_runtime(skills: list[Skill], ad: HermesAdapter) -> tuple[list[Finding]
 # --------------------------------------------------------------------------
 
 
+def check_growth(skills: list[Skill], snapshot_path: str) -> tuple[list[Finding], dict]:
+    """Compare sizes against the previous run and return (findings, new_state).
+
+    A single run cannot distinguish "large" from "STUCK". A skill pinned within
+    a few hundred characters of the cap across successive weeks is one whose
+    writes are being refused, and that is a different and worse condition than
+    a skill that merely happens to be big. Only a snapshot can tell them apart.
+
+    Failing to read a snapshot is never fatal -- a first run has none, and a
+    corrupt one must not take the audit down with it.
+    """
+    prev: dict = {}
+    p = Path(os.path.expanduser(snapshot_path))
+    if p.is_file():
+        try:
+            prev = json.loads(p.read_text()).get("skills", {})
+        except (OSError, ValueError):
+            prev = {}
+
+    findings: list[Finding] = []
+    state = {s.path: s.total_chars for s in skills if not s.archived}
+    for s in skills:
+        if s.archived or s.path not in prev:
+            continue
+        before = prev[s.path]
+        # Only meaningful near the wall: everywhere else, unchanged is normal.
+        if s.total_chars >= WRITE_WARN_CHARS and abs(s.total_chars - before) < 200:
+            findings.append(Finding(
+                "budget.stuck_at_cap", "error",
+                f"SKILL.md has not moved ({before:,} -> {s.total_chars:,} chars) "
+                f"while sitting within {WRITE_CAP_CHARS - s.total_chars:,} of the "
+                "write cap - consistent with writes being silently refused",
+                s.name, s.path,
+                {"previous_chars": before, "chars": s.total_chars,
+                 "cap": WRITE_CAP_CHARS}))
+    return findings, {"generated": _now(), "skills": state}
+
+
+def _now() -> str:
+    from datetime import datetime, timezone
+
+    return datetime.now(timezone.utc).isoformat(timespec="seconds")
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description="skill-librarian evidence collector")
     ap.add_argument("--profile", help="agent profile dir (e.g. ~/.hermes/profiles/<agent>)")
@@ -617,6 +786,10 @@ def main() -> int:
                     help="extra SKILL.md tree to scan (repeatable, runtime-agnostic)")
     ap.add_argument("--json", action="store_true", help="machine-readable output")
     ap.add_argument("--desc-threshold", type=float, default=0.80)
+    ap.add_argument("--snapshot", metavar="PATH",
+                    help="JSON file of previous sizes; compare against it and "
+                         "rewrite it. Being STUCK at the write cap across runs "
+                         "is the signal a single run cannot see.")
     args = ap.parse_args()
 
     roots: list[tuple[str, Path]] = []
@@ -636,6 +809,7 @@ def main() -> int:
     skills = collect(roots)
     findings: list[Finding] = []
     findings += check_mechanical(skills)
+    findings += check_index_budget(skills)
     findings += check_related(skills)
     findings += check_collisions(skills)
     findings += check_desc_similarity(skills, args.desc_threshold)
@@ -648,6 +822,25 @@ def main() -> int:
         skipped += sk
     else:
         skipped.append("runtime checks: not a Hermes profile")
+
+    if args.snapshot:
+        gf, state = check_growth(skills, args.snapshot)
+        findings += gf
+        try:
+            sp = Path(os.path.expanduser(args.snapshot))
+            sp.parent.mkdir(parents=True, exist_ok=True)
+            sp.write_text(json.dumps(state, indent=1))
+        except OSError as exc:
+            # A snapshot we cannot persist means the NEXT run is blind. Say so
+            # rather than letting trend detection quietly stop working.
+            skipped.append(f"snapshot write failed ({exc}) - trend detection "
+                           "will not work on the next run")
+
+    if LIMIT_SOURCE != "runtime":
+        skipped.append(
+            "budget limits: could not import the runtime constants, using "
+            f"literals ({WRITE_CAP_CHARS:,} chars / {PROMPT_DESC_CHARS} desc) - "
+            "verify these still match the installed runtime")
 
     errors = [f for f in findings if f.severity == "error"]
     warns = [f for f in findings if f.severity == "warn"]
@@ -666,6 +859,20 @@ def main() -> int:
         print(f"skill-librarian — {len(skills)} SKILL.md scanned "
               f"({sum(1 for s in skills if s.archived)} archived)")
         print(f"errors={len(errors)}  warnings={len(warns)}")
+        idx = next((f for f in findings if f.check == "budget.selection_index"), None)
+        if idx:
+            e = idx.evidence
+            print(f"selection index: ~{e['rendered_chars']:,} chars "
+                  f"(~{e['rendered_tokens_approx']:,} tokens) per turn, budget "
+                  f"{e['budget_chars']:,}; {e['descriptions_truncated']} of "
+                  f"{e['live_skills']} descriptions truncated before the model sees them")
+        frozen = [f for f in findings if f.check == "budget.write_cap_exceeded"]
+        near = [f for f in findings if f.check == "budget.write_cap_approaching"]
+        if frozen or near:
+            print(f"\nwrite cap {WRITE_CAP_CHARS:,} chars (source: {LIMIT_SOURCE})")
+            for f in sorted(frozen + near, key=lambda x: -x.evidence["chars"]):
+                tag = "FROZEN " if f.check.endswith("exceeded") else "near   "
+                print(f"   {tag} {f.evidence['chars']:>8,}  {f.skill}")
         if skipped:
             print("\ndegraded: these checks could not run")
             for s in skipped:
