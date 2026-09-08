@@ -671,7 +671,33 @@ class HermesAdapter:
                 raw = json.loads(raw)
             except Exception:
                 raw = [x.strip() for x in raw.split(",") if x.strip()]
-        return set(raw), None
+        # Mirror the runtime's own subtraction. Some skills cannot be disabled
+        # at all: `get_disabled_skill_names()` returns `disabled -
+        # ESSENTIAL_SKILLS`, so listing one in config is a silent no-op and the
+        # skill stays live BY DESIGN. Reading the raw config instead of the
+        # effective set reports that intended behaviour as a leak -- measured
+        # as a false `index.disabled_but_live` error for `hermes-agent`, whose
+        # own config entry the runtime deliberately ignores.
+        return set(raw) - self._essential_skills(), None
+
+    def _essential_skills(self) -> set:
+        """Names the runtime refuses to disable. Resolved from the runtime when
+        importable so this never drifts from the frozenset that enforces it."""
+        agent_root = Path.home() / ".hermes" / "hermes-agent"
+        if not (agent_root / "agent" / "skill_utils.py").is_file():
+            return set()
+        added = str(agent_root) not in sys.path
+        if added:
+            sys.path.insert(0, str(agent_root))
+        try:
+            from agent.skill_utils import ESSENTIAL_SKILLS
+
+            return set(ESSENTIAL_SKILLS)
+        except Exception:
+            return set()
+        finally:
+            if added and str(agent_root) in sys.path:
+                sys.path.remove(str(agent_root))
 
     def installable_names(self) -> set:
         """Every tree the runtime could install from.

@@ -735,3 +735,52 @@ def test_markdown_links_ignore_code_fences_but_check_prose(tmp_path):
     assert not checks(
         audit.check_markdown_links(audit.collect([("profile", tmp_path)])),
         "links.markdown_target_resolves")
+
+
+# --------------------------------------------- essential skills are not leaks
+
+
+def test_essential_skill_in_disabled_list_is_not_reported_as_a_leak(tmp_path, monkeypatch):
+    """A skill the runtime REFUSES to disable is not a leak when it stays live.
+
+    `get_disabled_skill_names()` returns `disabled - ESSENTIAL_SKILLS`, so
+    listing an essential skill in config.yaml is a documented no-op. Reading
+    the raw config instead of the effective set turns that intended behaviour
+    into an `index.disabled_but_live` ERROR -- measured on a real profile,
+    where `hermes-agent` was listed, correctly ignored, and reported as broken.
+    """
+    profile = tmp_path / "profile"
+    (profile / "skills").mkdir(parents=True)
+    (profile / "config.yaml").write_text(
+        "skills:\n  disabled:\n    - hermes-agent\n    - some-other-skill\n")
+    ad = audit.HermesAdapter(profile)
+    monkeypatch.setattr(ad, "_essential_skills", lambda: {"hermes-agent"})
+    disabled, err = ad.disabled()
+    assert err is None
+    assert "hermes-agent" not in disabled, (
+        "an essential skill must be subtracted exactly as the runtime subtracts it")
+    assert "some-other-skill" in disabled, (
+        "NEGATIVE CONTROL: a genuinely disableable name must still be reported")
+
+
+def test_non_essential_disabled_names_survive(tmp_path, monkeypatch):
+    """NEGATIVE CONTROL: the subtraction must not swallow the whole list."""
+    profile = tmp_path / "profile"
+    (profile / "skills").mkdir(parents=True)
+    (profile / "config.yaml").write_text("skills:\n  disabled:\n    - alpha\n    - beta\n")
+    ad = audit.HermesAdapter(profile)
+    monkeypatch.setattr(ad, "_essential_skills", lambda: set())
+    disabled, err = ad.disabled()
+    assert disabled == {"alpha", "beta"} and err is None
+
+
+def test_essential_lookup_degrades_to_empty_off_runtime(tmp_path):
+    """Off a Hermes runtime there is nothing to subtract, and that must not
+    crash or silently empty the disabled set."""
+    profile = tmp_path / "profile"
+    (profile / "skills").mkdir(parents=True)
+    (profile / "config.yaml").write_text("skills:\n  disabled:\n    - gamma\n")
+    ad = audit.HermesAdapter(profile)
+    assert isinstance(ad._essential_skills(), set)
+    disabled, err = ad.disabled()
+    assert "gamma" in disabled and err is None
