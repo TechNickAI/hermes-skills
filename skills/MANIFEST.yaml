@@ -11,7 +11,7 @@
 #   use_when              the trigger conditions, for selective installation
 _generated_by: scripts/generate_manifest.py
 _do_not_edit: Regenerate with `python scripts/generate_manifest.py`; CI checks it.
-count: 36
+count: 37
 packs:
 - core
 - engineering
@@ -193,6 +193,30 @@ skills:
   - anti-premature-stop
   - nudge
   path: skills/core/keep-going
+- name: learn-from-conversations
+  pack: core
+  version: 2.2.0
+  scope: solo
+  summary: Handles turning recurring requests, repeated corrections, and workflows that worked into new skills or targeted updates to existing ones.
+  use_when: turning recurring requests, repeated corrections, and workflows that worked into new skills or targeted updates to existing ones.
+  requires:
+  - Read access to the target agent's HERMES_HOME
+  works_out_of_the_box: false
+  compatibility: Agent Skills standard
+  claude_compat: degraded
+  claude_note: The harvest procedure transfers, but both instruments read a Hermes state.db and skills directory, so the per-turn join and library audit have no data source in Claude.
+  size:
+    files: 4
+    bytes_skill_md: 8516
+    bytes_total: 41181
+    approx_tokens_skill_md: 2129
+    approx_tokens_total: 10295
+  tags:
+  - skills
+  - harvesting
+  - memory
+  - self-improvement
+  path: skills/core/learn-from-conversations
 - name: memory-cleanup
   pack: core
   version: 0.1.1

@@ -155,6 +155,12 @@ CLAUDE_COMPAT = {
     "email-steward": ("unsupported", "Depends on Hermes cron and delegation toolsets."),
     "project-steward": ("unsupported", "Drives a Hermes living board and cron cadence."),
     "skill-librarian": ("degraded", "Audits Hermes skill layout; the method transfers, the paths do not."),
+    "learn-from-conversations": (
+        "degraded",
+        "The harvest procedure transfers, but both instruments read a Hermes "
+        "state.db and skills directory, so the per-turn join and library audit "
+        "have no data source in Claude.",
+    ),
     # Portable method, Hermes-specific mechanism for its headline feature.
     "multi-review": (
         "degraded",

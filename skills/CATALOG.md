@@ -114,6 +114,19 @@ differentiator — say so out loud), `unsupported` (never recommend it in Claude
 - **Size:** 3,453 B body, loaded when the skill triggers (~863 tokens); 3,453 B across 1 file(s) total
 - **Path:** `skills/core/keep-going`
 
+## learn-from-conversations
+
+- **Pack:** core
+- **Scope:** solo
+- **What it does:** Handles turning recurring requests, repeated corrections, and workflows that worked into new skills or targeted updates to existing ones.
+- **Use when:** turning recurring requests, repeated corrections, and workflows that worked into new skills or targeted updates to existing ones.
+- **Prerequisites:** Read access to the target agent's HERMES_HOME
+- **Works without setup:** No, but read the Claude note before recommending it
+- **Compatibility:** Agent Skills standard
+- **Claude:** degraded — The harvest procedure transfers, but both instruments read a Hermes state.db and skills directory, so the per-turn join and library audit have no data source in Claude.
+- **Size:** 8,516 B body, loaded when the skill triggers (~2,129 tokens); 41,181 B across 4 file(s) total
+- **Path:** `skills/core/learn-from-conversations`
+
 ## memory-cleanup
 
 > **Not for Claude.** Cleans Hermes MEMORY.md / USER.md / SOUL.md files, which do not exist in Claude.
