@@ -8,6 +8,8 @@ import json
 import multiprocessing as mp
 import os
 import tempfile
+from contextlib import redirect_stdout
+from io import StringIO
 from pathlib import Path
 
 SCRIPTS = Path(__file__).resolve().parent.parent / "scripts"
@@ -19,6 +21,14 @@ def _load(module_name: str):
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     return module
+
+
+def raises(fn, exc_type):
+    try:
+        fn()
+    except exc_type:
+        return True
+    return False
 
 
 def _append_worker(ledger: str, lock: str, start, count: int) -> None:
@@ -98,6 +108,106 @@ def main() -> int:
         check("persisted terminal row carries severity", finished.get("severity") == "noteworthy")
         check("persisted terminal row carries reason", bool(finished.get("reason_code")))
         check("noteworthy event is recorded", any(row.get("event") == "job.noteworthy" for row in rows))
+        profiled = jobrun.Spec({
+            "job_id": "profiled", "command": "true", "profile": "worker"
+        })
+        check("spec accepts an explicit Hermes profile", profiled.profile == "worker")
+        captured = StringIO()
+        with redirect_stdout(captured):
+            check("profiled dry-run exits cleanly", jobrun.run(profiled, dry_run=True) == 0)
+        dry_run_lines = [line for line in captured.getvalue().splitlines() if line.strip()]
+        dry_run = json.loads("\n".join(dry_run_lines[:-1]))
+        check("dry-run exposes the selected profile", dry_run["profile"] == "worker")
+        check("spec rejects an invalid Hermes profile", raises(
+            lambda: jobrun.Spec({
+                "job_id": "bad-profile", "command": "true", "profile": "../other"
+            }), jobrun.ConfigError
+        ))
+        check("command-only live-money mismatch is rejected", raises(
+            lambda: jobrun._v2_money(jobrun.Spec({
+                "job_id": "live-command",
+                "command": "python -c \"create_order('ABC')\"",
+                "money": "paper",
+            })),
+            jobrun._v2_mods()[0].MoneyMismatch,
+        ))
+
+        degraded = root / "degraded.py"
+        degraded.write_text(
+            "print('@@JOBRUN_RESULT@@ {\"schema\":\"jobrun.result/v1\",'"
+            "'\"outcome\":\"degraded\",\"reason_code\":\"health_bad\"}')\n"
+        )
+        degraded_spec = jobrun.Spec(
+            {
+                "job_id": "degraded-sentinel",
+                "script": str(degraded),
+                "runtime": "python",
+                "output_policy": "silent",
+            }
+        )
+        captured = StringIO()
+        with redirect_stdout(captured):
+            degraded_rc = jobrun.run(degraded_spec)
+        check("zero-exit degraded sentinel fails the run", degraded_rc != jobrun.EXIT_OK)
+        check("zero-exit degraded sentinel remains visible", bool(captured.getvalue().strip()))
+        conn = jobrun._v2_mods()[1].connect()
+        try:
+            incidents = conn.execute(
+                "SELECT COUNT(*) AS count FROM incidents WHERE job_id='degraded-sentinel'"
+            ).fetchone()["count"]
+        finally:
+            conn.close()
+        check("zero-exit degraded sentinel opens an incident", incidents == 1)
+
+        failure = root / "failure.py"
+        failure.write_text("import sys; print('ERROR: boom'); sys.exit(7)\n")
+        failure_spec = jobrun.Spec(
+            {"job_id": "duplicate", "script": str(failure), "runtime": "python"}
+        )
+        jobrun._V2_SHADOW_DEFAULT = True
+        os.environ.pop("JOBRUN_REPAIR_ENABLED", None)
+        (root / "jobstate").mkdir(exist_ok=True)
+        (root / "jobstate" / "repair_armed").unlink(missing_ok=True)
+        failure_spec.notify_target = "test-target"
+        outputs = []
+        return_codes = []
+        jobrun.notify_failure = lambda spec, card: "sent"
+        # A real repair dispatch is intentionally news on occurrence two. The
+        # following identical occurrence is the first one dedup may suppress.
+        for attempt in range(3):
+            captured = StringIO()
+            with redirect_stdout(captured):
+                return_codes.append(jobrun.run(failure_spec))
+            outputs.append(captured.getvalue())
+            if attempt == 0:
+                conn = jobrun._v2_mods()[1].connect()
+                try:
+                    conn.execute(
+                        "UPDATE incidents SET notify_status='sent' "
+                        "WHERE job_id='duplicate'"
+                    )
+                    conn.commit()
+                finally:
+                    conn.close()
+        # Model the scheduler confirming the delivery of the repair update too;
+        # the next identical occurrence must then be fully suppressed.
+        conn = jobrun._v2_mods()[1].connect()
+        try:
+            conn.execute(
+                "UPDATE incidents SET notify_status='sent' WHERE job_id='duplicate'"
+            )
+            conn.commit()
+        finally:
+            conn.close()
+        jobrun.should_speak = lambda incident, severity: (False, "duplicate")
+        captured = StringIO()
+        with redirect_stdout(captured):
+            suppressed_rc = jobrun.run(failure_spec)
+        outputs.append(captured.getvalue())
+        return_codes.append(suppressed_rc)
+        check("first duplicate failure is visible", bool(outputs[0].strip()))
+        check("suppressed duplicate emits no stdout", outputs[-1] == "")
+        check("suppressed duplicate exits cleanly", return_codes[-1] == jobrun.EXIT_OK)
 
     with tempfile.TemporaryDirectory(prefix="jobrun-concurrency-") as raw:
         root = Path(raw)

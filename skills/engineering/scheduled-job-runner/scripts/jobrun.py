@@ -445,6 +445,9 @@ class Spec:
         "overlap", "owner", "env", "timezone", "notify_on_success", "retries",
         "retry_backoff", "args", "python", "auto_install_uv", "output_policy",
         "heartbeat_url", "critical", "notify_target", "notify_command",
+        # Hermes profile used when the repair sidecar dispatches an agent or
+        # pauses the scheduler job during quarantine.
+        "profile",
         # v2: declared effect class. The runner independently DETECTS from the
         # script and refuses to run on a dangerous disagreement (declaring
         # paper on a live script). Optional — omitted means "trust detection".
@@ -495,6 +498,13 @@ class Spec:
         if self.overlap not in ("skip", "allow", "queue"):
             raise ConfigError(f"{self.job_id}: overlap must be skip|allow|queue")
         self.owner = data.get("owner")
+        self.profile = str(
+            data.get("profile") or os.environ.get("HERMES_PROFILE") or "default"
+        )
+        if not re.fullmatch(r"[A-Za-z0-9._-]+", self.profile):
+            raise ConfigError(
+                f"{self.job_id}: profile {self.profile!r} must match [A-Za-z0-9._-]+"
+            )
         self.heartbeat_url = data.get("heartbeat_url")
         self.env = dict(data.get("env") or {})
         # LANG is defaulted because the cron subprocess env has none, and a job
@@ -1182,6 +1192,7 @@ def run(spec: Spec, dry_run: bool = False) -> int:
     if dry_run:
         print(json.dumps({
             "job_id": spec.job_id, "argv": argv, "cwd": spec.cwd,
+            "profile": spec.profile,
             "timeout": spec.timeout, "overlap": spec.overlap,
             "runtime": spec.runtime, "heartbeat": bool(spec.heartbeat_url),
             "preflight": "ok",
@@ -1231,7 +1242,16 @@ def run(spec: Spec, dry_run: bool = False) -> int:
         # durable status API; adding it after append_ledger() only mutates an
         # in-memory object and leaves every JSONL row without the key.
         money = _v2_money(spec)
-        outcome = _v2_classify(spec, state, rc, raw_out, money)
+        transport_state = state
+        outcome = _v2_classify(spec, transport_state, rc, raw_out, money)
+        sev_mod, _ = _v2_mods()
+        if sev_mod is not None and outcome.severity not in (
+            sev_mod.HEALTHY, sev_mod.NOTEWORTHY
+        ):
+            # A structured result describes the domain outcome. Treat a
+            # degraded/broken/critical sentinel as a failure even if the
+            # subprocess used exit zero to report it.
+            state = "child_failure"
 
         hb = "not_configured"
         if state == "success":
@@ -1314,7 +1334,7 @@ def run(spec: Spec, dry_run: bool = False) -> int:
             "timeout": f"timed out after {spec.timeout}s",
             "signal": f"killed by {signame}",
             "wrapper_error": "runner error",
-        }.get(state, state)
+        }.get(transport_state, transport_state)
         card = _v2_render(
             outcome=outcome, spec=spec, money=money, head=head,
             incident=incident, dur=dur, sha=sha, err=err, out=out,
@@ -1359,15 +1379,9 @@ def run(spec: Spec, dry_run: bool = False) -> int:
         speak, why = should_speak(incident, getattr(outcome, "severity", ""))
         if not speak:
             # Silent repeat: the ledger and incidents.db already recorded it.
-            # One short line on stdout so a human reading logs by hand can see
-            # the run happened and was deliberately not delivered.
-            print(f"(suppressed: {why})")
-            return {
-                "child_failure": EXIT_CHILD,
-                "timeout": EXIT_TIMEOUT,
-                "signal": EXIT_SIGNAL,
-                "wrapper_error": EXIT_WRAPPER,
-            }.get(state, EXIT_WRAPPER)
+            # Return success so Hermes cron does not synthesize and deliver a
+            # second failure surface after this condition was deduplicated.
+            return EXIT_OK
 
         print(card)
 
@@ -1402,7 +1416,7 @@ def run(spec: Spec, dry_run: bool = False) -> int:
             "timeout": EXIT_TIMEOUT,
             "signal": EXIT_SIGNAL,
             "wrapper_error": EXIT_WRAPPER,
-        }.get(state, EXIT_WRAPPER)
+        }.get(transport_state, EXIT_WRAPPER)
 
 
 # ---------------------------------------------------------------------------
@@ -1511,6 +1525,12 @@ def _v2_money(spec) -> str:
             text = p.read_text(errors="replace")
         except OSError:
             text = ""
+    # Command-only specs have no script bytes to inspect. Include the actual
+    # executable text and arguments so obvious trading commands cannot bypass
+    # the independent money detector.
+    command_parts = [str(getattr(spec, "command", "") or "")]
+    command_parts.extend(str(arg) for arg in getattr(spec, "args", []))
+    text = "\n".join([text, *command_parts])
     detected = sev.detect_money(text, HERMES_HOME)
     # Propagates MoneyMismatch. Callers decide; this function does not guess.
     return sev.reconcile_money(getattr(spec, "money", None), detected)
@@ -1579,7 +1599,7 @@ def _v2_incident(spec, outcome, error_text, sha, log_path, money="none"):
                 reason_code=outcome.reason_code, severity=outcome.severity,
                 money=money, error_text=error_text or "",
                 deployed_sha=sha, script_path=str(spec.script or ""),
-                log_path=log_path or "",
+                log_path=log_path or "", profile=spec.profile,
                 dry_run=_repair_shadow_mode(),
             )
         finally:

@@ -590,6 +590,58 @@ def _hermes_cli() -> str:
     return shutil.which("hermes") or "hermes"
 
 
+def claim_dispatch(
+    conn: sqlite3.Connection, row: sqlite3.Row, *, error_text: str = ""
+) -> tuple[bool, str, sqlite3.Row]:
+    """Atomically recheck every repair budget and reserve this dispatch."""
+    try:
+        try:
+            conn.execute("BEGIN IMMEDIATE")
+        except sqlite3.OperationalError as exc:
+            if "within a transaction" not in str(exc):
+                raise
+            conn.commit()
+            conn.execute("BEGIN IMMEDIATE")
+        current = conn.execute(
+            "SELECT * FROM incidents WHERE fingerprint=?", (row["fingerprint"],)
+        ).fetchone()
+        if current is None:
+            conn.rollback()
+            return False, "incident disappeared before dispatch", row
+        decision = decide(conn, current, error_text=error_text)
+        if not decision.dispatch:
+            conn.rollback()
+            return False, decision.reason, current
+
+        now = _now()
+        now_iso = _iso(now)
+        attempts = current["repair_attempts"] + 1
+        conn.execute(
+            "INSERT INTO dispatches (fingerprint, job_id, started_at) VALUES (?,?,?)",
+            (current["fingerprint"], current["job_id"], now_iso),
+        )
+        conn.execute(
+            "UPDATE incidents SET phase='repairing', repair_attempts=?, "
+            "last_attempt_at=?, next_attempt_at=?, lease_until=? WHERE fingerprint=?",
+            (
+                attempts,
+                now_iso,
+                _iso(now + backoff_delay(attempts)),
+                _iso(now + timedelta(minutes=ATTEMPT_MAX_MINUTES)),
+                current["fingerprint"],
+            ),
+        )
+        conn.commit()
+        claimed = conn.execute(
+            "SELECT * FROM incidents WHERE fingerprint=?", (row["fingerprint"],)
+        ).fetchone()
+        return True, "claimed", claimed
+    except BaseException:
+        if conn.in_transaction:
+            conn.rollback()
+        raise
+
+
 def dispatch(
     conn: sqlite3.Connection,
     row: sqlite3.Row,
@@ -602,36 +654,35 @@ def dispatch(
     dry_run: bool = False,
 ) -> tuple[str, str]:
     """
-    Send exactly one repair agent at this condition.
+    Send exactly one already-claimed repair agent at this condition.
 
-    Returns (outcome, detail). Records the dispatch BEFORE launching so a crash
-    mid-flight still consumes its budget slot — failing closed, because the
-    alternative is an unbounded retry loop, which is the exact thing the configured policy requires
-    to prevent.
+    ``claim_dispatch`` records the dispatch and consumes every budget slot in an
+    IMMEDIATE transaction before this function launches anything. A crash
+    mid-flight therefore still fails closed instead of creating an unbounded
+    retry loop.
 
     The one-shot agent runs via ``hermes -z``, which does not touch the cron
     schedule at all. That matters: creating a cron job to fix a cron job is how
     you get a repair loop that outlives the bug.
     """
+    if conn.execute(
+        "SELECT id FROM dispatches WHERE fingerprint=? AND finished_at IS NULL "
+        "ORDER BY id DESC LIMIT 1",
+        (row["fingerprint"],),
+    ).fetchone() is None:
+        reserved, reason, row = claim_dispatch(conn, row, error_text=error_text)
+        if not reserved:
+            return "not_dispatched", reason
+
     now = _iso(_now())
-    cur = conn.execute(
-        "INSERT INTO dispatches (fingerprint, job_id, started_at) VALUES (?,?,?)",
-        (row["fingerprint"], row["job_id"], now),
-    )
-    disp_id = cur.lastrowid
-    attempts = row["repair_attempts"] + 1
-    conn.execute(
-        "UPDATE incidents SET phase='repairing', repair_attempts=?, "
-        "last_attempt_at=?, next_attempt_at=?, lease_until=? WHERE fingerprint=?",
-        (
-            attempts,
-            now,
-            _iso(_now() + backoff_delay(attempts)),
-            _iso(_now() + timedelta(minutes=ATTEMPT_MAX_MINUTES)),
-            row["fingerprint"],
-        ),
-    )
-    conn.commit()
+    pending = conn.execute(
+        "SELECT id FROM dispatches WHERE fingerprint=? AND finished_at IS NULL "
+        "ORDER BY id DESC LIMIT 1",
+        (row["fingerprint"],),
+    ).fetchone()
+    if pending is None:
+        raise RuntimeError("claimed dispatch reservation is missing")
+    disp_id = pending["id"]
 
     prompt = build_prompt(
         row, spec_path=spec_path, script_path=script_path, log_path=log_path, error_text=error_text
@@ -798,7 +849,9 @@ def record_notification(
     ).fetchone()
 
 
-def _pause_scheduled_job(job_id: str, reason: str) -> tuple[bool, str]:
+def _pause_scheduled_job(
+    job_id: str, reason: str, profile="default"
+) -> tuple[bool, str]:
     """
     Actually stop the scheduled job via the CLI. Returns (stopped, detail).
 
@@ -817,7 +870,7 @@ def _pause_scheduled_job(job_id: str, reason: str) -> tuple[bool, str]:
         return False, "hermes CLI not found; cannot pause"
     try:
         proc = subprocess.run(
-            [cli, "cronjob", "pause", job_id, "--reason", reason],
+            [cli, "-p", profile, "cronjob", "pause", job_id, "--reason", reason],
             capture_output=True,
             text=True,
             timeout=60,
@@ -829,7 +882,9 @@ def _pause_scheduled_job(job_id: str, reason: str) -> tuple[bool, str]:
         return False, str(exc)[:200]
 
 
-def quarantine(conn: sqlite3.Connection, row: sqlite3.Row) -> tuple[bool, str]:
+def quarantine(
+    conn: sqlite3.Connection, row: sqlite3.Row, profile="default"
+) -> tuple[bool, str]:
     """
     FAIL-VISIBLE quarantine. Stop the work, never the alarm.
 
@@ -856,6 +911,7 @@ def quarantine(conn: sqlite3.Connection, row: sqlite3.Row) -> tuple[bool, str]:
         row["job_id"],
         f"auto-quarantined after {QUARANTINE_AFTER_HOURS}h unacknowledged, "
         f"{row['occurrence_count']} occurrences",
+        profile=profile,
     )
     if not stopped:
         # Do NOT claim a pause that did not happen, and do NOT mark the phase
@@ -864,7 +920,7 @@ def quarantine(conn: sqlite3.Connection, row: sqlite3.Row) -> tuple[bool, str]:
         return False, (
             f"QUARANTINE FAILED for {row['job_id']}: {detail}. The job is STILL "
             f"RUNNING and still failing ({row['occurrence_count']} occurrences). "
-            f"Pause it by hand: hermes cronjob pause {row['job_id']}"
+            f"Pause it by hand: hermes -p {profile} cronjob pause {row['job_id']}"
         )
 
     conn.execute(
@@ -876,7 +932,7 @@ def quarantine(conn: sqlite3.Connection, row: sqlite3.Row) -> tuple[bool, str]:
         f"{row['job_id']} PAUSED after {QUARANTINE_AFTER_HOURS}h unacknowledged "
         f"({row['occurrence_count']} occurrences). The incident stays OPEN and "
         f"will remind daily until acknowledged. Resume with: "
-        f"hermes cronjob resume {row['job_id']}"
+        f"hermes -p {profile} cronjob resume {row['job_id']}"
     )
 
 
@@ -932,6 +988,11 @@ def handle_failure(
         "quarantine": None,
     }
     if decision.dispatch:
+        claimed, claim_reason, row = claim_dispatch(conn, row, error_text=error_text)
+        if not claimed:
+            result["decision"] = claim_reason
+            result["note"] = f"no repair — {claim_reason}"
+            return result
         outcome, detail = dispatch(
             conn,
             row,
@@ -948,7 +1009,7 @@ def handle_failure(
 
     if result["escalation"] == "quarantine":
         row = conn.execute("SELECT * FROM incidents WHERE fingerprint=?", (fingerprint,)).fetchone()
-        did, msg = quarantine(conn, row)
+        did, msg = quarantine(conn, row, profile=profile or "default")
         result["quarantine"] = {"applied": did, "message": msg}
 
     # The milestone is consumed only after `_v2_record_notification` confirms

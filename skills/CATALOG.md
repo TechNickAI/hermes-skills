@@ -40,8 +40,8 @@ differentiator — say so out loud), `unsupported` (never recommend it in Claude
 
 - **Pack:** core
 - **Scope:** solo
-- **What it does:** Use when data will drive a decision: is it profitable, did X cause Y, which cohort wins.
-- **Use when:** data will drive a decision: is it profitable, did X cause Y, which cohort wins. Load BEFORE reporting any number, rate, P&L, backtest result, metrics review, cost model, funnel, or A/B outcome.
+- **What it does:** Load BEFORE reporting any number, rate, P&L, backtest result, metrics review, cost model, funnel, or A/B outcome.
+- **Use when:** data will drive a decision: is it profitable, did X cause Y, which cohort wins.
 - **Prerequisites:** None
 - **Works without setup:** Yes
 - **Compatibility:** Agent Skills standard
@@ -53,7 +53,7 @@ differentiator — say so out loud), `unsupported` (never recommend it in Claude
 
 - **Pack:** core
 - **Scope:** solo
-- **What it does:** Use when told "do a deep dive", "go figure this out", or "don't reinvent the wheel" - researches a question across every relevant source and returns a decision.
+- **What it does:** Also fires on "see what everyone else is doing", "use all the skills you have", "what's the best way to X", "should we build this or buy it", "is this possible", "what is everyone doing about X", "research this properly", and any consequential question handed over for a researched answer rather than a quick one.
 - **Use when:** told "do a deep dive", "go figure this out", or "don't reinvent the wheel" - researches a question across every relevant source and returns a decision.
 - **Prerequisites:** None
 - **Works without setup:** Yes, but read the Claude note before recommending it
@@ -66,8 +66,8 @@ differentiator — say so out loud), `unsupported` (never recommend it in Claude
 
 - **Pack:** core
 - **Scope:** solo
-- **What it does:** Use when handing work to a background agent or subprocess, or when one comes back reporting success.
-- **Use when:** handing work to a background agent or subprocess, or when one comes back reporting success. Covers verifying the premise before dispatch, writing a brief the worker can finish inside its budget, and checking the artifact yourself afterward.
+- **What it does:** Covers verifying the premise before dispatch, writing a brief the worker can finish inside its budget, and checking the artifact yourself afterward.
+- **Use when:** handing work to a background agent or subprocess, or when one comes back reporting success.
 - **Prerequisites:** None
 - **Works without setup:** Yes, but read the Claude note before recommending it
 - **Compatibility:** Agent Skills standard
@@ -92,7 +92,7 @@ differentiator — say so out loud), `unsupported` (never recommend it in Claude
 
 - **Pack:** core
 - **Scope:** solo
-- **What it does:** Use when a health check, audit, or monitor says something is BROKEN, before repeating that to anyone.
+- **What it does:** Re-runs the check from the same context the failure came from and separates real failure from unknown, since a timeout, an HTTP 000, or a permission error means the test could not answer — not that the thing is down.
 - **Use when:** a health check, audit, or monitor says something is BROKEN, before repeating that to anyone.
 - **Prerequisites:** None
 - **Works without setup:** Yes
@@ -105,7 +105,7 @@ differentiator — say so out loud), `unsupported` (never recommend it in Claude
 
 - **Pack:** core
 - **Scope:** solo
-- **What it does:** Use when the user says "/keep_going", "keep going", or "continue" after the agent has stopped short — asked "which option?", narrated a plan instead of executing it, or claimed a blocker that is not real — while the user has already given clear direction.
+- **What it does:** ", narrated a plan instead of executing it, or claimed a blocker that is not real — while the user has already given clear direction.
 - **Use when:** the user says "/keep_going", "keep going", or "continue" after the agent has stopped short — asked "which option?", narrated a plan instead of executing it, or claimed a blocker that is not real — while the user has already given clear direction.
 - **Prerequisites:** None
 - **Works without setup:** Yes
@@ -114,13 +114,26 @@ differentiator — say so out loud), `unsupported` (never recommend it in Claude
 - **Size:** 3,453 B body, loaded when the skill triggers (~863 tokens); 3,453 B across 1 file(s) total
 - **Path:** `skills/core/keep-going`
 
+## learn-from-conversations
+
+- **Pack:** core
+- **Scope:** solo
+- **What it does:** Handles turning recurring requests, repeated corrections, and workflows that worked into new skills or targeted updates to existing ones.
+- **Use when:** turning recurring requests, repeated corrections, and workflows that worked into new skills or targeted updates to existing ones.
+- **Prerequisites:** Read access to the target agent's HERMES_HOME
+- **Works without setup:** No, but read the Claude note before recommending it
+- **Compatibility:** Agent Skills standard
+- **Claude:** degraded — The harvest procedure transfers, but both instruments read a Hermes state.db and skills directory, so the per-turn join and library audit have no data source in Claude.
+- **Size:** 8,516 B body, loaded when the skill triggers (~2,129 tokens); 41,181 B across 4 file(s) total
+- **Path:** `skills/core/learn-from-conversations`
+
 ## memory-cleanup
 
 > **Not for Claude.** Cleans Hermes MEMORY.md / USER.md / SOUL.md files, which do not exist in Claude.
 
 - **Pack:** core
 - **Scope:** solo
-- **What it does:** Use when a Hermes MEMORY.md or USER.md file is too large, bloated, stale, or over the recommended cap and you need to reduce prompt footprint without losing important facts.
+- **What it does:** md file is too large, bloated, stale, or over the recommended cap and you need to reduce prompt footprint without losing important facts.
 - **Use when:** a Hermes MEMORY.md or USER.md file is too large, bloated, stale, or over the recommended cap and you need to reduce prompt footprint without losing important facts.
 - **Prerequisites:** None
 - **Works without setup:** Yes in Hermes (not available in Claude)
@@ -135,7 +148,7 @@ differentiator — say so out loud), `unsupported` (never recommend it in Claude
 
 - **Pack:** core
 - **Scope:** solo
-- **What it does:** Use when you have a HARD, open-ended, high-stakes problem worth throwing multiple AI models at and pulling the best solution out — architecture decisions, strategy design, thorny debugging, research synthesis, "what am I missing", tool/system design.
+- **What it does:** This is the SOLVE counterpart to multi-review (which critiques an existing artifact).
 - **Use when:** you have a HARD, open-ended, high-stakes problem worth throwing multiple AI models at and pulling the best solution out — architecture decisions, strategy design, thorny debugging, research synthesis, "what am I missing", tool/system design.
 - **Prerequisites:** None
 - **Works without setup:** Yes in Hermes (not available in Claude)
@@ -148,7 +161,7 @@ differentiator — say so out loud), `unsupported` (never recommend it in Claude
 
 - **Pack:** core
 - **Scope:** solo
-- **What it does:** Use when the user wants to know what real people are actually saying about a topic right now, not the SEO/editorial version.
+- **What it does:** Pulls recent posts and engagement from Reddit, X, YouTube, Hacker News, Polymarket, GitHub, and the web, ranks by engagement and recency with a deterministic scorer, and writes one synthesized brief.
 - **Use when:** the user wants to know what real people are actually saying about a topic right now, not the SEO/editorial version.
 - **Prerequisites:** None
 - **Works without setup:** Yes
@@ -161,13 +174,13 @@ differentiator — say so out loud), `unsupported` (never recommend it in Claude
 
 - **Pack:** core
 - **Scope:** solo
-- **What it does:** Use when reviewing almost any meaningful artifact, decision, action, plan, code change, prompt, skill, research summary, outbound message, or public-facing content.
+- **What it does:** Runs a small panel of diverse review lenses across model families when available, synthesizes findings into fix/ask/defer/wontfix decisions, and iterates until the result is ready.
 - **Use when:** reviewing almost any meaningful artifact, decision, action, plan, code change, prompt, skill, research summary, outbound message, or public-facing content.
 - **Prerequisites:** None
 - **Works without setup:** Yes, but read the Claude note before recommending it
 - **Compatibility:** Portable review method. Native multi-model orchestration examples are Hermes-specific; Claude can run the method with Claude subagents but loses model-family diversity.
 - **Claude:** degraded — The review method transfers, but cross-model-family diversity needs Hermes; in Claude it becomes Claude reviewing Claude.
-- **Size:** 54,440 B body, loaded when the skill triggers (~13,610 tokens); 150,895 B across 18 file(s) total
+- **Size:** 54,440 B body, loaded when the skill triggers (~13,610 tokens); 152,779 B across 18 file(s) total
 - **Path:** `skills/core/multi-review`
 
 ## project-steward
@@ -177,7 +190,7 @@ differentiator — say so out loud), `unsupported` (never recommend it in Claude
 - **Pack:** core
 - **Scope:** solo
 - **What it does:** Run a portfolio of long-running projects as a chief of staff rather than a task runner.
-- **Use when:** you have several open-ended efforts that each need periodic attention, when scheduled agent runs are producing activity without progress, when a notification channel has become an unreadable wall of updates, or when you want an agent to direct specialist agents instead of doing their work.
+- **Use when:** Run a portfolio of long-running projects as a chief of staff rather than a task runner.
 - **Prerequisites:** env: TELEGRAM_BOT_TOKEN (for the living board)
 - **Works without setup:** No in Hermes (not available in Claude)
 - **Compatibility:** Agent Skills standard
@@ -189,8 +202,8 @@ differentiator — say so out loud), `unsupported` (never recommend it in Claude
 
 - **Pack:** core
 - **Scope:** solo
-- **What it does:** Use when about to tell someone a config change will (or will not) do what they want — hide a UI element, disable a provider, silence a channel, pin a new model version.
-- **Use when:** about to tell someone a config change will (or will not) do what they want — hide a UI element, disable a provider, silence a channel, pin a new model version. Copies the config to a throwaway profile, changes one setting, re-runs the real code path, and reads the actual output.
+- **What it does:** Copies the config to a throwaway profile, changes one setting, re-runs the real code path, and reads the actual output.
+- **Use when:** about to tell someone a config change will (or will not) do what they want — hide a UI element, disable a provider, silence a channel, pin a new model version.
 - **Prerequisites:** None
 - **Works without setup:** Yes
 - **Compatibility:** Agent Skills standard
@@ -205,7 +218,7 @@ differentiator — say so out loud), `unsupported` (never recommend it in Claude
 - **Pack:** core
 - **Scope:** solo
 - **What it does:** Restore context from prior sessions, memories, and transcripts.
-- **Use when:** a bare-pronoun follow-up like "ship it", "do it", or "send that" likely points at a prior-session artifact. Designed to never dead-end — if one source has nothing, keep searching others until you have a useful picture.
+- **Use when:** Restore context from prior sessions, memories, and transcripts.
 - **Prerequisites:** None
 - **Works without setup:** Yes in Hermes (not available in Claude)
 - **Compatibility:** Hermes-specific session and memory stores.
@@ -234,7 +247,7 @@ differentiator — say so out loud), `unsupported` (never recommend it in Claude
 
 - **Pack:** core
 - **Scope:** solo
-- **What it does:** Use when you need to know whether a Hermes agent is actually healthy — during a scheduled health check, after an outage or reboot, when someone asks "is X working?", or when an agent has gone quiet.
+- **What it does:** ", or when an agent has gone quiet.
 - **Use when:** you need to know whether a Hermes agent is actually healthy — during a scheduled health check, after an outage or reboot, when someone asks "is X working?", or when an agent has gone quiet.
 - **Prerequisites:** Python 3.9+ (stdlib only, no third-party packages), Read access to the target agent's HERMES_HOME
 - **Works without setup:** No in Hermes (not available in Claude)
@@ -247,13 +260,13 @@ differentiator — say so out loud), `unsupported` (never recommend it in Claude
 
 - **Pack:** core
 - **Scope:** solo
-- **What it does:** Use when an agent's skill library needs auditing, cleaning, or triage - "audit my skills", "are my skills healthy", "find duplicate skills", "why didn't it use that skill", "clean up my skills", "which skills should this agent have", or after an upgrade adds new skills.
-- **Use when:** an agent's skill library needs auditing, cleaning, or triage - "audit my skills", "are my skills healthy", "find duplicate skills", "why didn't it use that skill", "clean up my skills", "which skills should this agent have", or after an upgrade adds new skills.
+- **What it does:** Audits the resolved enabled index and keeps all changes report-only until explicitly approved.
+- **Use when:** auditing an agent's skill library for broken runtime selection, ambiguous triggers, invalid metadata, oversized files, dangling links, role misfit, or duplicate skills.
 - **Prerequisites:** None
 - **Works without setup:** Yes, but read the Claude note before recommending it
 - **Compatibility:** Agent Skills standard
 - **Claude:** degraded — Audits Hermes skill layout; the method transfers, the paths do not.
-- **Size:** 13,065 B body, loaded when the skill triggers (~3,266 tokens); 91,517 B across 5 file(s) total
+- **Size:** 17,414 B body, loaded when the skill triggers (~4,354 tokens); 136,949 B across 6 file(s) total
 - **Path:** `skills/core/skill-librarian`
 
 ## trust-framework
@@ -273,7 +286,7 @@ differentiator — say so out loud), `unsupported` (never recommend it in Claude
 
 - **Pack:** engineering
 - **Scope:** solo
-- **What it does:** Use when a pull request has feedback from code-review bots (Cursor Bugbot, Codex, Claude Code Review, Greptile, CodeRabbit) or humans and you need to triage it, fix what is valid, push back on what is wrong, react and reply to every comment, and drive the PR to a clean, mergeable state.
+- **What it does:** Trigger phrases: "address the PR comments", "handle the bot feedback", "get the review comments addressed".
 - **Use when:** a pull request has feedback from code-review bots (Cursor Bugbot, Codex, Claude Code Review, Greptile, CodeRabbit) or humans and you need to triage it, fix what is valid, push back on what is wrong, react and reply to every comment, and drive the PR to a clean, mergeable state.
 - **Prerequisites:** gh CLI, authenticated
 - **Works without setup:** No
@@ -286,7 +299,7 @@ differentiator — say so out loud), `unsupported` (never recommend it in Claude
 
 - **Pack:** engineering
 - **Scope:** solo
-- **What it does:** Use when a fast hosted-render path is needed to turn D2, Mermaid, Graphviz, or Chart.js text into an inline-ready PNG for chat (Telegram, Discord, Slack) or a saved image.
+- **What it does:** js text into an inline-ready PNG for chat (Telegram, Discord, Slack) or a saved image.
 - **Use when:** a fast hosted-render path is needed to turn D2, Mermaid, Graphviz, or Chart.js text into an inline-ready PNG for chat (Telegram, Discord, Slack) or a saved image.
 - **Prerequisites:** chromium binary on PATH (or CHROMIUM_BIN) for local rasterize, network access to a Kroki host (KROKI_BASE) and QuickChart (QUICKCHART_BASE)
 - **Works without setup:** No
@@ -299,7 +312,7 @@ differentiator — say so out loud), `unsupported` (never recommend it in Claude
 
 - **Pack:** engineering
 - **Scope:** solo
-- **What it does:** Use when something in a multi-layer stack is slow, memory-hungry, or expensive and you need to prove WHERE the cost actually originates before recommending a fix — a slow dashboard fronting a busy proxy, a request path spanning client → gateway → router → upstream API, a process whose RSS keeps climbing, a spend spike whose obvious explanation doesn't survive arithmetic.
+- **What it does:** Enforces measuring each arrow in a causal chain rather than asserting a plausible mechanism, gives cheap discriminating tests (CPU-vs-wall, component-in-isolation, do-nothing probe, bypass test, sample-over-time), separates a failing subsystem that is the CAUSE from a downstream SYMPTOM, and refuses to call a fault "flake" before counting recurrence and comparing sibling hosts by version.
 - **Use when:** something in a multi-layer stack is slow, memory-hungry, or expensive and you need to prove WHERE the cost actually originates before recommending a fix — a slow dashboard fronting a busy proxy, a request path spanning client → gateway → router → upstream API, a process whose RSS keeps climbing, a…
 - **Prerequisites:** None
 - **Works without setup:** Yes
@@ -312,7 +325,7 @@ differentiator — say so out loud), `unsupported` (never recommend it in Claude
 
 - **Pack:** engineering
 - **Scope:** solo
-- **What it does:** Use when cleaning up, compacting, backing up, or restoring a SQLite database that a running service still holds open, or when one reports "database disk image is malformed".
+- **What it does:** Covers measuring compaction cost before taking a lock, distinguishing a torn copy from real corruption, locating which table is damaged, and designing a retention policy.
 - **Use when:** cleaning up, compacting, backing up, or restoring a SQLite database that a running service still holds open, or when one reports "database disk image is malformed".
 - **Prerequisites:** None
 - **Works without setup:** Yes
@@ -327,7 +340,7 @@ differentiator — say so out loud), `unsupported` (never recommend it in Claude
 
 - **Pack:** engineering
 - **Scope:** fleet
-- **What it does:** Use when adding, removing, password-protecting, or troubleshooting a mini-app served by the hermes-config mini-app router (Caddy + PM2 + auth sidecar + Tailscale Serve/Funnel) on a fleet machine.
+- **What it does:** Covers install, the Caddy route pattern, the auth sidecar conventions, exposing apps publicly via Funnel, Hermes dashboards behind a password, and the recurring pitfalls (Tailscale "serve reset" wars, the PM2 $HOME trap, funnel-eligible ports, strip-prefix requirements).
 - **Use when:** adding, removing, password-protecting, or troubleshooting a mini-app served by the hermes-config mini-app router (Caddy + PM2 + auth sidecar + Tailscale Serve/Funnel) on a fleet machine.
 - **Prerequisites:** host services: Caddy + PM2, Tailscale Serve/Funnel
 - **Works without setup:** No in Hermes (not available in Claude)
@@ -355,21 +368,21 @@ differentiator — say so out loud), `unsupported` (never recommend it in Claude
 
 - **Pack:** engineering
 - **Scope:** solo
-- **What it does:** Use when creating, migrating, debugging, or reviewing Hermes cron jobs.
-- **Use when:** creating, migrating, debugging, or reviewing Hermes cron jobs. Ships a tested execution adapter for interpreter resolution, overlap prevention, hard timeouts, quiet success, structured ledgers, bounded redacted logs, failure notification, run severity, and heartbeat reporting.
+- **What it does:** Ships a tested execution adapter for interpreter resolution, overlap prevention, hard timeouts, quiet success, structured ledgers, bounded redacted logs, failure notification, run severity, and heartbeat reporting.
+- **Use when:** creating, migrating, debugging, or reviewing Hermes cron jobs.
 - **Prerequisites:** None
 - **Works without setup:** Yes, but read the Claude note before recommending it
 - **Compatibility:** Agent Skills standard
 - **Claude:** degraded — The runner and its exit-code contract are portable Python; the cron wiring examples assume a scheduler that dispatches by file extension.
-- **Size:** 9,071 B body, loaded when the skill triggers (~2,268 tokens); 205,256 B across 10 file(s) total
+- **Size:** 9,071 B body, loaded when the skill triggers (~2,268 tokens); 215,635 B across 10 file(s) total
 - **Path:** `skills/engineering/scheduled-job-runner`
 
 ## stop-the-noise
 
 - **Pack:** engineering
 - **Scope:** solo
-- **What it does:** Use when something is sending repeated, unwanted, or unread messages — a scheduled job that reports every run, a webhook firing once per event, progress commentary nobody asked for.
-- **Use when:** something is sending repeated, unwanted, or unread messages — a scheduled job that reports every run, a webhook firing once per event, progress commentary nobody asked for. Finds which source is actually producing the messages and silences it without muting real alerts.
+- **What it does:** Finds which source is actually producing the messages and silences it without muting real alerts.
+- **Use when:** something is sending repeated, unwanted, or unread messages — a scheduled job that reports every run, a webhook firing once per event, progress commentary nobody asked for.
 - **Prerequisites:** None
 - **Works without setup:** Yes, but read the Claude note before recommending it
 - **Compatibility:** Agent Skills standard
@@ -381,7 +394,7 @@ differentiator — say so out loud), `unsupported` (never recommend it in Claude
 
 - **Pack:** engineering
 - **Scope:** solo
-- **What it does:** Use when upgrading, rebuilding, or redeploying a service that is CURRENTLY SERVING production traffic — an LLM router, API gateway, web app, or any long-running daemon on a host you reach over SSH.
+- **What it does:** Covers the build-in-place trap (build tooling that deletes the running service's working directory), CPU saturation starving both the service and sshd, detaching builds so an SSH pipe drop can't kill them mid-write, the release-dir + symlink swap pattern that makes rollback atomic, out-of-band health probing when you can no longer reach the box, and cloud-level reboot recovery.
 - **Use when:** upgrading, rebuilding, or redeploying a service that is CURRENTLY SERVING production traffic — an LLM router, API gateway, web app, or any long-running daemon on a host you reach over SSH.
 - **Prerequisites:** None
 - **Works without setup:** Yes
@@ -394,8 +407,8 @@ differentiator — say so out loud), `unsupported` (never recommend it in Claude
 
 - **Pack:** engineering
 - **Scope:** solo
-- **What it does:** Use when evaluating a new vendor, tool, or platform, or when someone proposes replacing one you already run.
-- **Use when:** evaluating a new vendor, tool, or platform, or when someone proposes replacing one you already run. Tries to falsify the claimed advantage first — verify the capability exists on your actual plan, measure it on the real path, and price the switching cost — before designing any migration.
+- **What it does:** Tries to falsify the claimed advantage first — verify the capability exists on your actual plan, measure it on the real path, and price the switching cost — before designing any migration.
+- **Use when:** evaluating a new vendor, tool, or platform, or when someone proposes replacing one you already run.
 - **Prerequisites:** None
 - **Works without setup:** Yes
 - **Compatibility:** Agent Skills standard
@@ -407,8 +420,8 @@ differentiator — say so out loud), `unsupported` (never recommend it in Claude
 
 - **Pack:** engineering
 - **Scope:** solo
-- **What it does:** Use when writing a plan, status report, incident summary, or recommendation for someone who does not work in the system being described.
-- **Use when:** writing a plan, status report, incident summary, or recommendation for someone who does not work in the system being described. Leads with what changed for them, keeps the technical detail underneath, and gives them at most one real decision to make.
+- **What it does:** Leads with what changed for them, keeps the technical detail underneath, and gives them at most one real decision to make.
+- **Use when:** writing a plan, status report, incident summary, or recommendation for someone who does not work in the system being described.
 - **Prerequisites:** None
 - **Works without setup:** Yes
 - **Compatibility:** Agent Skills standard
@@ -422,7 +435,7 @@ differentiator — say so out loud), `unsupported` (never recommend it in Claude
 
 - **Pack:** productivity
 - **Scope:** solo
-- **What it does:** Use when triaging one or more email inboxes on a schedule, removing obvious debris, quarantining promotional mail, and surfacing only messages that need the user's attention.
+- **What it does:** Provides a Hermes-native workflow using cron, per-message sub-agent isolation, deterministic header heuristics, account adapters, visible Markdown state, reversible actions, and silent no-op runs.
 - **Use when:** triaging one or more email inboxes on a schedule, removing obvious debris, quarantining promotional mail, and surfacing only messages that need the user's attention.
 - **Prerequisites:** email CLI: gog or himalaya, Hermes cron + delegation toolsets enabled
 - **Works without setup:** No in Hermes (not available in Claude)
@@ -435,7 +448,7 @@ differentiator — say so out loud), `unsupported` (never recommend it in Claude
 
 - **Pack:** productivity
 - **Scope:** solo
-- **What it does:** Use when reading conversations, transcripts, summaries, or action items captured by a Fieldy AI wearable note taker, or when the user mentions Fieldy, their wearable, or wants the record of something said in person rather than on a video call.
+- **What it does:** Covers API key setup, the time-window query model, pagination, and the async-processing and speaker-labelling gotchas that make naive reads report incomplete data.
 - **Use when:** reading conversations, transcripts, summaries, or action items captured by a Fieldy AI wearable note taker, or when the user mentions Fieldy, their wearable, or wants the record of something said in person rather than on a video call.
 - **Prerequisites:** env: FIELDY_API_KEY (Fieldy app → Settings → Developer Settings), Python 3.9+ (stdlib only, no third-party packages)
 - **Works without setup:** No
@@ -448,7 +461,7 @@ differentiator — say so out loud), `unsupported` (never recommend it in Claude
 
 - **Pack:** productivity
 - **Scope:** solo
-- **What it does:** Use when creating, importing, formatting, editing, exporting, or quality-checking Google Docs from agent-generated markdown or local files.
+- **What it does:** Handles creating, importing, formatting, editing, exporting, or quality-checking Google Docs from agent-generated markdown or local files.
 - **Use when:** creating, importing, formatting, editing, exporting, or quality-checking Google Docs from agent-generated markdown or local files.
 - **Prerequisites:** gog CLI, authorized via `gog auth login`
 - **Works without setup:** No
@@ -461,7 +474,7 @@ differentiator — say so out loud), `unsupported` (never recommend it in Claude
 
 - **Pack:** productivity
 - **Scope:** solo
-- **What it does:** Use when creating, populating, formatting, importing, exporting, or quality-checking Google Sheets from CSV, JSON arrays, or computed tabular data.
+- **What it does:** Handles creating, populating, formatting, importing, exporting, or quality-checking Google Sheets from CSV, JSON arrays, or computed tabular data.
 - **Use when:** creating, populating, formatting, importing, exporting, or quality-checking Google Sheets from CSV, JSON arrays, or computed tabular data.
 - **Prerequisites:** gog CLI, authorized for Google Sheets and Drive, python3, pdftoppm (poppler-utils), for multipage visual QA rasterization, uv, to run the XLSX verification snippets, openpyxl, via `uv run --with openpyxl` (not a standing install)
 - **Works without setup:** No
@@ -474,7 +487,7 @@ differentiator — say so out loud), `unsupported` (never recommend it in Claude
 
 - **Pack:** productivity
 - **Scope:** solo
-- **What it does:** Use when creating, importing, exporting, or quality-checking Google Slides decks via markdown-to-PPTX conversion and Drive import.
+- **What it does:** Handles creating, importing, exporting, or quality-checking Google Slides decks via markdown-to-PPTX conversion and Drive import.
 - **Use when:** creating, importing, exporting, or quality-checking Google Slides decks via markdown-to-PPTX conversion and Drive import.
 - **Prerequisites:** gog CLI, authorized via `gog auth login`, pandoc (for markdown conversion)
 - **Works without setup:** No
@@ -487,7 +500,7 @@ differentiator — say so out loud), `unsupported` (never recommend it in Claude
 
 - **Pack:** productivity
 - **Scope:** solo
-- **What it does:** Use when sending, reading, or searching iMessages from an agent on macOS, or when setting up, hardening, or debugging the BlueBubbles iMessage bridge.
+- **What it does:** db/imsg approach breaks with permissionDenied, "authorization denied (code 23)", or hangs with no output after a macOS or Python upgrade.
 - **Use when:** sending, reading, or searching iMessages from an agent on macOS, or when setting up, hardening, or debugging the BlueBubbles iMessage bridge.
 - **Prerequisites:** macOS with Messages.app signed into iMessage, BlueBubbles server app (installed by scripts/setup-bluebubbles.sh), Full Disk Access granted by hand (macOS permission prompts cannot be scripted), python3 with the requests package
 - **Works without setup:** No
@@ -501,7 +514,7 @@ differentiator — say so out loud), `unsupported` (never recommend it in Claude
 - **Pack:** productivity
 - **Scope:** solo
 - **What it does:** Place and manage real outbound phone calls through the Vapi voice AI platform.
-- **Use when:** an agent needs to reach a human by phone — a reminder, a confirmation, a question for a business, an appointment booking, or any errand that a voice conversation handles better than a message. Covers first-time setup, per-call configuration, live call control, and reading the result afterward.
+- **Use when:** Place and manage real outbound phone calls through the Vapi voice AI platform.
 - **Prerequisites:** env: VAPI_API_KEY (Vapi dashboard → API Keys, private key)
 - **Works without setup:** No
 - **Compatibility:** Agent Skills standard

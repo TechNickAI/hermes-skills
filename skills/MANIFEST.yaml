@@ -11,7 +11,7 @@
 #   use_when              the trigger conditions, for selective installation
 _generated_by: scripts/generate_manifest.py
 _do_not_edit: Regenerate with `python scripts/generate_manifest.py`; CI checks it.
-count: 36
+count: 37
 packs:
 - core
 - engineering
@@ -49,8 +49,8 @@ skills:
   pack: core
   version: 2.0.0
   scope: solo
-  summary: 'Use when data will drive a decision: is it profitable, did X cause Y, which cohort wins.'
-  use_when: 'data will drive a decision: is it profitable, did X cause Y, which cohort wins. Load BEFORE reporting any number, rate, P&L, backtest result, metrics review, cost model, funnel, or A/B outcome.'
+  summary: Load BEFORE reporting any number, rate, P&L, backtest result, metrics review, cost model, funnel, or A/B outcome.
+  use_when: 'data will drive a decision: is it profitable, did X cause Y, which cohort wins.'
   requires: []
   works_out_of_the_box: true
   compatibility: Agent Skills standard
@@ -74,7 +74,7 @@ skills:
   pack: core
   version: 1.1.0
   scope: solo
-  summary: Use when told "do a deep dive", "go figure this out", or "don't reinvent the wheel" - researches a question across every relevant source and returns a decision.
+  summary: Also fires on "see what everyone else is doing", "use all the skills you have", "what's the best way to X", "should we build this or buy it", "is this possible", "what is everyone doing about X", "research this properly", and any consequential question handed over for a researched answer rather than a quick one.
   use_when: told "do a deep dive", "go figure this out", or "don't reinvent the wheel" - researches a question across every relevant source and returns a decision.
   requires: []
   works_out_of_the_box: true
@@ -100,8 +100,8 @@ skills:
   pack: core
   version: 1.0.0
   scope: solo
-  summary: Use when handing work to a background agent or subprocess, or when one comes back reporting success.
-  use_when: handing work to a background agent or subprocess, or when one comes back reporting success. Covers verifying the premise before dispatch, writing a brief the worker can finish inside its budget, and checking the artifact yourself afterward.
+  summary: Covers verifying the premise before dispatch, writing a brief the worker can finish inside its budget, and checking the artifact yourself afterward.
+  use_when: handing work to a background agent or subprocess, or when one comes back reporting success.
   requires: []
   works_out_of_the_box: true
   compatibility: Agent Skills standard
@@ -149,7 +149,7 @@ skills:
   pack: core
   version: 1.0.0
   scope: solo
-  summary: Use when a health check, audit, or monitor says something is BROKEN, before repeating that to anyone.
+  summary: Re-runs the check from the same context the failure came from and separates real failure from unknown, since a timeout, an HTTP 000, or a permission error means the test could not answer — not that the thing is down.
   use_when: a health check, audit, or monitor says something is BROKEN, before repeating that to anyone.
   requires: []
   works_out_of_the_box: true
@@ -173,7 +173,7 @@ skills:
   pack: core
   version: 1.1.0
   scope: solo
-  summary: Use when the user says "/keep_going", "keep going", or "continue" after the agent has stopped short — asked "which option?", narrated a plan instead of executing it, or claimed a blocker that is not real — while the user has already given clear direction.
+  summary: '", narrated a plan instead of executing it, or claimed a blocker that is not real — while the user has already given clear direction.'
   use_when: the user says "/keep_going", "keep going", or "continue" after the agent has stopped short — asked "which option?", narrated a plan instead of executing it, or claimed a blocker that is not real — while the user has already given clear direction.
   requires: []
   works_out_of_the_box: true
@@ -193,11 +193,35 @@ skills:
   - anti-premature-stop
   - nudge
   path: skills/core/keep-going
+- name: learn-from-conversations
+  pack: core
+  version: 2.2.0
+  scope: solo
+  summary: Handles turning recurring requests, repeated corrections, and workflows that worked into new skills or targeted updates to existing ones.
+  use_when: turning recurring requests, repeated corrections, and workflows that worked into new skills or targeted updates to existing ones.
+  requires:
+  - Read access to the target agent's HERMES_HOME
+  works_out_of_the_box: false
+  compatibility: Agent Skills standard
+  claude_compat: degraded
+  claude_note: The harvest procedure transfers, but both instruments read a Hermes state.db and skills directory, so the per-turn join and library audit have no data source in Claude.
+  size:
+    files: 4
+    bytes_skill_md: 8516
+    bytes_total: 41181
+    approx_tokens_skill_md: 2129
+    approx_tokens_total: 10295
+  tags:
+  - skills
+  - harvesting
+  - memory
+  - self-improvement
+  path: skills/core/learn-from-conversations
 - name: memory-cleanup
   pack: core
   version: 0.1.1
   scope: solo
-  summary: Use when a Hermes MEMORY.md or USER.md file is too large, bloated, stale, or over the recommended cap and you need to reduce prompt footprint without losing important facts.
+  summary: md file is too large, bloated, stale, or over the recommended cap and you need to reduce prompt footprint without losing important facts.
   use_when: a Hermes MEMORY.md or USER.md file is too large, bloated, stale, or over the recommended cap and you need to reduce prompt footprint without losing important facts.
   requires: []
   works_out_of_the_box: true
@@ -221,7 +245,7 @@ skills:
   pack: core
   version: 2.0.1
   scope: solo
-  summary: Use when you have a HARD, open-ended, high-stakes problem worth throwing multiple AI models at and pulling the best solution out — architecture decisions, strategy design, thorny debugging, research synthesis, "what am I missing", tool/system design.
+  summary: This is the SOLVE counterpart to multi-review (which critiques an existing artifact).
   use_when: you have a HARD, open-ended, high-stakes problem worth throwing multiple AI models at and pulling the best solution out — architecture decisions, strategy design, thorny debugging, research synthesis, "what am I missing", tool/system design.
   requires: []
   works_out_of_the_box: true
@@ -245,7 +269,7 @@ skills:
   pack: core
   version: 1.0.0
   scope: solo
-  summary: Use when the user wants to know what real people are actually saying about a topic right now, not the SEO/editorial version.
+  summary: Pulls recent posts and engagement from Reddit, X, YouTube, Hacker News, Polymarket, GitHub, and the web, ranks by engagement and recency with a deterministic scorer, and writes one synthesized brief.
   use_when: the user wants to know what real people are actually saying about a topic right now, not the SEO/editorial version.
   requires: []
   works_out_of_the_box: true
@@ -273,7 +297,7 @@ skills:
   pack: core
   version: 1.6.0
   scope: solo
-  summary: Use when reviewing almost any meaningful artifact, decision, action, plan, code change, prompt, skill, research summary, outbound message, or public-facing content.
+  summary: Runs a small panel of diverse review lenses across model families when available, synthesizes findings into fix/ask/defer/wontfix decisions, and iterates until the result is ready.
   use_when: reviewing almost any meaningful artifact, decision, action, plan, code change, prompt, skill, research summary, outbound message, or public-facing content.
   requires: []
   works_out_of_the_box: true
@@ -283,9 +307,9 @@ skills:
   size:
     files: 18
     bytes_skill_md: 54440
-    bytes_total: 150895
+    bytes_total: 152779
     approx_tokens_skill_md: 13610
-    approx_tokens_total: 37724
+    approx_tokens_total: 38195
   tags:
   - review
   - quality
@@ -298,7 +322,7 @@ skills:
   version: 1.1.0
   scope: solo
   summary: Run a portfolio of long-running projects as a chief of staff rather than a task runner.
-  use_when: you have several open-ended efforts that each need periodic attention, when scheduled agent runs are producing activity without progress, when a notification channel has become an unreadable wall of updates, or when you want an agent to direct specialist agents instead of doing their work.
+  use_when: ''
   requires:
   - 'env: TELEGRAM_BOT_TOKEN (for the living board)'
   works_out_of_the_box: false
@@ -323,8 +347,8 @@ skills:
   pack: core
   version: 1.1.0
   scope: solo
-  summary: Use when about to tell someone a config change will (or will not) do what they want — hide a UI element, disable a provider, silence a channel, pin a new model version.
-  use_when: about to tell someone a config change will (or will not) do what they want — hide a UI element, disable a provider, silence a channel, pin a new model version. Copies the config to a throwaway profile, changes one setting, re-runs the real code path, and reads the actual output.
+  summary: Copies the config to a throwaway profile, changes one setting, re-runs the real code path, and reads the actual output.
+  use_when: about to tell someone a config change will (or will not) do what they want — hide a UI element, disable a provider, silence a channel, pin a new model version.
   requires: []
   works_out_of_the_box: true
   compatibility: Agent Skills standard
@@ -348,7 +372,7 @@ skills:
   version: 0.3.1
   scope: solo
   summary: Restore context from prior sessions, memories, and transcripts.
-  use_when: a bare-pronoun follow-up like "ship it", "do it", or "send that" likely points at a prior-session artifact. Designed to never dead-end — if one source has nothing, keep searching others until you have a useful picture.
+  use_when: ''
   requires: []
   works_out_of_the_box: true
   compatibility: Hermes-specific session and memory stores.
@@ -397,7 +421,7 @@ skills:
   pack: core
   version: 0.1.1
   scope: solo
-  summary: Use when you need to know whether a Hermes agent is actually healthy — during a scheduled health check, after an outage or reboot, when someone asks "is X working?", or when an agent has gone quiet.
+  summary: '", or when an agent has gone quiet.'
   use_when: you need to know whether a Hermes agent is actually healthy — during a scheduled health check, after an outage or reboot, when someone asks "is X working?", or when an agent has gone quiet.
   requires:
   - Python 3.9+ (stdlib only, no third-party packages)
@@ -422,21 +446,21 @@ skills:
   path: skills/core/robustify-doctor
 - name: skill-librarian
   pack: core
-  version: 1.0.0
+  version: 1.2.0
   scope: solo
-  summary: Use when an agent's skill library needs auditing, cleaning, or triage - "audit my skills", "are my skills healthy", "find duplicate skills", "why didn't it use that skill", "clean up my skills", "which skills should this agent have", or after an upgrade adds new skills.
-  use_when: an agent's skill library needs auditing, cleaning, or triage - "audit my skills", "are my skills healthy", "find duplicate skills", "why didn't it use that skill", "clean up my skills", "which skills should this agent have", or after an upgrade adds new skills.
+  summary: Audits the resolved enabled index and keeps all changes report-only until explicitly approved.
+  use_when: auditing an agent's skill library for broken runtime selection, ambiguous triggers, invalid metadata, oversized files, dangling links, role misfit, or duplicate skills.
   requires: []
   works_out_of_the_box: true
   compatibility: Agent Skills standard
   claude_compat: degraded
   claude_note: Audits Hermes skill layout; the method transfers, the paths do not.
   size:
-    files: 5
-    bytes_skill_md: 13065
-    bytes_total: 91517
-    approx_tokens_skill_md: 3266
-    approx_tokens_total: 22879
+    files: 6
+    bytes_skill_md: 17414
+    bytes_total: 136949
+    approx_tokens_skill_md: 4354
+    approx_tokens_total: 34237
   tags:
   - skills
   - audit
@@ -475,7 +499,7 @@ skills:
   pack: engineering
   version: 1.0.0
   scope: solo
-  summary: Use when a pull request has feedback from code-review bots (Cursor Bugbot, Codex, Claude Code Review, Greptile, CodeRabbit) or humans and you need to triage it, fix what is valid, push back on what is wrong, react and reply to every comment, and drive the PR to a clean, mergeable state.
+  summary: 'Trigger phrases: "address the PR comments", "handle the bot feedback", "get the review comments addressed".'
   use_when: a pull request has feedback from code-review bots (Cursor Bugbot, Codex, Claude Code Review, Greptile, CodeRabbit) or humans and you need to triage it, fix what is valid, push back on what is wrong, react and reply to every comment, and drive the PR to a clean, mergeable state.
   requires:
   - gh CLI, authenticated
@@ -501,7 +525,7 @@ skills:
   pack: engineering
   version: 1.1.0
   scope: solo
-  summary: Use when a fast hosted-render path is needed to turn D2, Mermaid, Graphviz, or Chart.js text into an inline-ready PNG for chat (Telegram, Discord, Slack) or a saved image.
+  summary: js text into an inline-ready PNG for chat (Telegram, Discord, Slack) or a saved image.
   use_when: a fast hosted-render path is needed to turn D2, Mermaid, Graphviz, or Chart.js text into an inline-ready PNG for chat (Telegram, Discord, Slack) or a saved image.
   requires:
   - chromium binary on PATH (or CHROMIUM_BIN) for local rasterize
@@ -530,7 +554,7 @@ skills:
   pack: engineering
   version: 1.0.0
   scope: solo
-  summary: Use when something in a multi-layer stack is slow, memory-hungry, or expensive and you need to prove WHERE the cost actually originates before recommending a fix — a slow dashboard fronting a busy proxy, a request path spanning client → gateway → router → upstream API, a process whose RSS keeps climbing, a spend spike whose obvious explanation doesn't survive arithmetic.
+  summary: Enforces measuring each arrow in a causal chain rather than asserting a plausible mechanism, gives cheap discriminating tests (CPU-vs-wall, component-in-isolation, do-nothing probe, bypass test, sample-over-time), separates a failing subsystem that is the CAUSE from a downstream SYMPTOM, and refuses to call a fault "flake" before counting recurrence and comparing sibling hosts by version.
   use_when: something in a multi-layer stack is slow, memory-hungry, or expensive and you need to prove WHERE the cost actually originates before recommending a fix — a slow dashboard fronting a busy proxy, a request path spanning client → gateway → router → upstream API, a process whose RSS keeps climbing, a…
   requires: []
   works_out_of_the_box: true
@@ -556,7 +580,7 @@ skills:
   pack: engineering
   version: 1.5.0
   scope: solo
-  summary: Use when cleaning up, compacting, backing up, or restoring a SQLite database that a running service still holds open, or when one reports "database disk image is malformed".
+  summary: Covers measuring compaction cost before taking a lock, distinguishing a torn copy from real corruption, locating which table is damaged, and designing a retention policy.
   use_when: cleaning up, compacting, backing up, or restoring a SQLite database that a running service still holds open, or when one reports "database disk image is malformed".
   requires: []
   works_out_of_the_box: true
@@ -582,7 +606,7 @@ skills:
   pack: engineering
   version: 0.5.0
   scope: fleet
-  summary: Use when adding, removing, password-protecting, or troubleshooting a mini-app served by the hermes-config mini-app router (Caddy + PM2 + auth sidecar + Tailscale Serve/Funnel) on a fleet machine.
+  summary: Covers install, the Caddy route pattern, the auth sidecar conventions, exposing apps publicly via Funnel, Hermes dashboards behind a password, and the recurring pitfalls (Tailscale "serve reset" wars, the PM2 $HOME trap, funnel-eligible ports, strip-prefix requirements).
   use_when: adding, removing, password-protecting, or troubleshooting a mini-app served by the hermes-config mini-app router (Caddy + PM2 + auth sidecar + Tailscale Serve/Funnel) on a fleet machine.
   requires:
   - 'host services: Caddy + PM2'
@@ -637,8 +661,8 @@ skills:
   pack: engineering
   version: 2.0.0
   scope: solo
-  summary: Use when creating, migrating, debugging, or reviewing Hermes cron jobs.
-  use_when: creating, migrating, debugging, or reviewing Hermes cron jobs. Ships a tested execution adapter for interpreter resolution, overlap prevention, hard timeouts, quiet success, structured ledgers, bounded redacted logs, failure notification, run severity, and heartbeat reporting.
+  summary: Ships a tested execution adapter for interpreter resolution, overlap prevention, hard timeouts, quiet success, structured ledgers, bounded redacted logs, failure notification, run severity, and heartbeat reporting.
+  use_when: creating, migrating, debugging, or reviewing Hermes cron jobs.
   requires: []
   works_out_of_the_box: true
   compatibility: Agent Skills standard
@@ -647,9 +671,9 @@ skills:
   size:
     files: 10
     bytes_skill_md: 9071
-    bytes_total: 205256
+    bytes_total: 215635
     approx_tokens_skill_md: 2268
-    approx_tokens_total: 51314
+    approx_tokens_total: 53909
   tags:
   - cron
   - jobs
@@ -662,8 +686,8 @@ skills:
   pack: engineering
   version: 1.0.0
   scope: solo
-  summary: Use when something is sending repeated, unwanted, or unread messages — a scheduled job that reports every run, a webhook firing once per event, progress commentary nobody asked for.
-  use_when: something is sending repeated, unwanted, or unread messages — a scheduled job that reports every run, a webhook firing once per event, progress commentary nobody asked for. Finds which source is actually producing the messages and silences it without muting real alerts.
+  summary: Finds which source is actually producing the messages and silences it without muting real alerts.
+  use_when: something is sending repeated, unwanted, or unread messages — a scheduled job that reports every run, a webhook firing once per event, progress commentary nobody asked for.
   requires: []
   works_out_of_the_box: true
   compatibility: Agent Skills standard
@@ -694,7 +718,7 @@ skills:
   pack: engineering
   version: 1.3.0
   scope: solo
-  summary: Use when upgrading, rebuilding, or redeploying a service that is CURRENTLY SERVING production traffic — an LLM router, API gateway, web app, or any long-running daemon on a host you reach over SSH.
+  summary: Covers the build-in-place trap (build tooling that deletes the running service's working directory), CPU saturation starving both the service and sshd, detaching builds so an SSH pipe drop can't kill them mid-write, the release-dir + symlink swap pattern that makes rollback atomic, out-of-band health probing when you can no longer reach the box, and cloud-level reboot recovery.
   use_when: upgrading, rebuilding, or redeploying a service that is CURRENTLY SERVING production traffic — an LLM router, API gateway, web app, or any long-running daemon on a host you reach over SSH.
   requires: []
   works_out_of_the_box: true
@@ -721,8 +745,8 @@ skills:
   pack: engineering
   version: 1.0.0
   scope: solo
-  summary: Use when evaluating a new vendor, tool, or platform, or when someone proposes replacing one you already run.
-  use_when: evaluating a new vendor, tool, or platform, or when someone proposes replacing one you already run. Tries to falsify the claimed advantage first — verify the capability exists on your actual plan, measure it on the real path, and price the switching cost — before designing any migration.
+  summary: Tries to falsify the claimed advantage first — verify the capability exists on your actual plan, measure it on the real path, and price the switching cost — before designing any migration.
+  use_when: evaluating a new vendor, tool, or platform, or when someone proposes replacing one you already run.
   requires: []
   works_out_of_the_box: true
   compatibility: Agent Skills standard
@@ -746,8 +770,8 @@ skills:
   pack: engineering
   version: 1.0.0
   scope: solo
-  summary: Use when writing a plan, status report, incident summary, or recommendation for someone who does not work in the system being described.
-  use_when: writing a plan, status report, incident summary, or recommendation for someone who does not work in the system being described. Leads with what changed for them, keeps the technical detail underneath, and gives them at most one real decision to make.
+  summary: Leads with what changed for them, keeps the technical detail underneath, and gives them at most one real decision to make.
+  use_when: writing a plan, status report, incident summary, or recommendation for someone who does not work in the system being described.
   requires: []
   works_out_of_the_box: true
   compatibility: Agent Skills standard
@@ -771,7 +795,7 @@ skills:
   pack: productivity
   version: 1.0.0
   scope: solo
-  summary: Use when triaging one or more email inboxes on a schedule, removing obvious debris, quarantining promotional mail, and surfacing only messages that need the user's attention.
+  summary: Provides a Hermes-native workflow using cron, per-message sub-agent isolation, deterministic header heuristics, account adapters, visible Markdown state, reversible actions, and silent no-op runs.
   use_when: triaging one or more email inboxes on a schedule, removing obvious debris, quarantining promotional mail, and surfacing only messages that need the user's attention.
   requires:
   - 'email CLI: gog or himalaya'
@@ -799,7 +823,7 @@ skills:
   pack: productivity
   version: 1.0.0
   scope: solo
-  summary: Use when reading conversations, transcripts, summaries, or action items captured by a Fieldy AI wearable note taker, or when the user mentions Fieldy, their wearable, or wants the record of something said in person rather than on a video call.
+  summary: Covers API key setup, the time-window query model, pagination, and the async-processing and speaker-labelling gotchas that make naive reads report incomplete data.
   use_when: reading conversations, transcripts, summaries, or action items captured by a Fieldy AI wearable note taker, or when the user mentions Fieldy, their wearable, or wants the record of something said in person rather than on a video call.
   requires:
   - 'env: FIELDY_API_KEY (Fieldy app → Settings → Developer Settings)'
@@ -825,7 +849,7 @@ skills:
   pack: productivity
   version: 1.0.0
   scope: solo
-  summary: Use when creating, importing, formatting, editing, exporting, or quality-checking Google Docs from agent-generated markdown or local files.
+  summary: Handles creating, importing, formatting, editing, exporting, or quality-checking Google Docs from agent-generated markdown or local files.
   use_when: creating, importing, formatting, editing, exporting, or quality-checking Google Docs from agent-generated markdown or local files.
   requires:
   - gog CLI, authorized via `gog auth login`
@@ -851,7 +875,7 @@ skills:
   pack: productivity
   version: 1.1.0
   scope: solo
-  summary: Use when creating, populating, formatting, importing, exporting, or quality-checking Google Sheets from CSV, JSON arrays, or computed tabular data.
+  summary: Handles creating, populating, formatting, importing, exporting, or quality-checking Google Sheets from CSV, JSON arrays, or computed tabular data.
   use_when: creating, populating, formatting, importing, exporting, or quality-checking Google Sheets from CSV, JSON arrays, or computed tabular data.
   requires:
   - gog CLI, authorized for Google Sheets and Drive
@@ -881,7 +905,7 @@ skills:
   pack: productivity
   version: 1.1.0
   scope: solo
-  summary: Use when creating, importing, exporting, or quality-checking Google Slides decks via markdown-to-PPTX conversion and Drive import.
+  summary: Handles creating, importing, exporting, or quality-checking Google Slides decks via markdown-to-PPTX conversion and Drive import.
   use_when: creating, importing, exporting, or quality-checking Google Slides decks via markdown-to-PPTX conversion and Drive import.
   requires:
   - gog CLI, authorized via `gog auth login`
@@ -909,7 +933,7 @@ skills:
   pack: productivity
   version: 1.0.0
   scope: solo
-  summary: Use when sending, reading, or searching iMessages from an agent on macOS, or when setting up, hardening, or debugging the BlueBubbles iMessage bridge.
+  summary: db/imsg approach breaks with permissionDenied, "authorization denied (code 23)", or hangs with no output after a macOS or Python upgrade.
   use_when: sending, reading, or searching iMessages from an agent on macOS, or when setting up, hardening, or debugging the BlueBubbles iMessage bridge.
   requires:
   - macOS with Messages.app signed into iMessage
@@ -939,7 +963,7 @@ skills:
   version: 1.0.0
   scope: solo
   summary: Place and manage real outbound phone calls through the Vapi voice AI platform.
-  use_when: an agent needs to reach a human by phone — a reminder, a confirmation, a question for a business, an appointment booking, or any errand that a voice conversation handles better than a message. Covers first-time setup, per-call configuration, live call control, and reading the result afterward.
+  use_when: ''
   requires:
   - 'env: VAPI_API_KEY (Vapi dashboard → API Keys, private key)'
   works_out_of_the_box: false

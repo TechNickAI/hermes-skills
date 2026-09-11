@@ -157,7 +157,7 @@ check("after 10 days unacknowledged, escalation is due",
 # Stub the real pause: no scheduler exists in this sandbox, and quarantine()
 # now refuses to claim a stop it could not perform.
 _real_pause = R._pause_scheduled_job
-R._pause_scheduled_job = lambda job_id, reason: (True, "stubbed")
+R._pause_scheduled_job = lambda job_id, reason, profile="default": (True, "stubbed")
 did, msg = R.quarantine(conn, row)
 R._pause_scheduled_job = _real_pause
 check("non-critical job is quarantined, not left spinning", did, msg[:60])

@@ -10,8 +10,10 @@ failing for hours.
 Run: python3 jobrun_repair_checks.py
 """
 
+import sqlite3
 import sys
 import tempfile
+import threading
 from datetime import timedelta
 from pathlib import Path
 
@@ -237,7 +239,7 @@ row = fail_once(conn, fp="okfp", job="reportgen", money=MONEY_NONE)
 # pause really happened. Stubbing keeps the check about policy rather than
 # about whether a CLI exists in the sandbox.
 _real_pause = R._pause_scheduled_job
-R._pause_scheduled_job = lambda job_id, reason: (True, "stubbed")
+R._pause_scheduled_job = lambda job_id, reason, profile="default": (True, "stubbed")
 did, msg = R.quarantine(conn, row)
 check("a report generator CAN be quarantined", did)
 check("quarantine message says it stays visible",
@@ -248,7 +250,7 @@ check("quarantined incident is NOT closed", row["phase"] == "quarantined")
 # The honest-failure path: if the scheduler cannot actually be stopped, we must
 # NOT claim it was, and must NOT mark the phase quarantined (which would
 # suppress repair decisions for a job still running at full cadence).
-R._pause_scheduled_job = lambda job_id, reason: (False, "no scheduler here")
+R._pause_scheduled_job = lambda job_id, reason, profile="default": (False, "no scheduler here")
 conn2 = fresh()
 row2 = fail_once(conn2, fp="failpause", job="stubborn", money=MONEY_NONE)
 did2, msg2 = R.quarantine(conn2, row2)
@@ -260,6 +262,71 @@ row2 = conn2.execute(
 check("failed pause does NOT mark the phase quarantined",
       row2["phase"] != "quarantined", row2["phase"])
 R._pause_scheduled_job = _real_pause
+
+print("\n== Profile routing reaches dispatch and quarantine CLIs ==")
+conn = fresh()
+for _ in range(3):
+    row = fail_once(conn, fp="profilefp", job="profilejob", err="TypeError")
+seen = []
+
+
+class _Proc:
+    returncode = 0
+    stdout = "ok"
+    stderr = ""
+
+
+_real_run = R.subprocess.run
+_real_which = R.shutil.which
+R.subprocess.run = lambda argv, **kwargs: (seen.append(argv) or _Proc())
+R.shutil.which = lambda name: "/usr/bin/hermes"
+R.dispatch(conn, row, error_text="TypeError", profile="worker", dry_run=False)
+check("repair dispatch selects the spec profile", seen[-1][1:3] == ["-p", "worker"], seen[-1])
+R._pause_scheduled_job("profilejob", "test", profile="worker")
+check("quarantine pause selects the spec profile", seen[-1][1:3] == ["-p", "worker"], seen[-1])
+R.subprocess.run = _real_run
+R.shutil.which = _real_which
+
+print("\n== Atomic claim closes the decide/dispatch race ==")
+tmp = Path(tempfile.mkdtemp(prefix="jobrun-claim-"))
+db = tmp / "incidents.db"
+setup = R.connect(db)
+row = fail_once(setup, fp="claim-fp", job="claim-job")
+row = fail_once(setup, fp="claim-fp", job="claim-job")
+setup.close()
+barrier = threading.Barrier(2)
+claims = []
+claim_errors = []
+
+
+def claim_worker():
+    conn = R.connect(db)
+    try:
+        stale = conn.execute(
+            "SELECT * FROM incidents WHERE fingerprint='claim-fp'"
+        ).fetchone()
+        barrier.wait()
+        claims.append(R.claim_dispatch(conn, stale, error_text="TypeError: boom")[0])
+    except (sqlite3.Error, threading.BrokenBarrierError) as exc:
+        claim_errors.append(str(exc))
+    finally:
+        conn.close()
+
+
+threads = [threading.Thread(target=claim_worker) for _ in range(2)]
+for thread in threads:
+    thread.start()
+for thread in threads:
+    thread.join()
+verify = R.connect(db)
+check("concurrent claim workers finish cleanly", not claim_errors, str(claim_errors))
+check("exactly one concurrent claimant wins", claims.count(True) == 1, str(claims))
+check(
+    "one atomic claim consumes one dispatch slot",
+    verify.execute("SELECT COUNT(*) c FROM dispatches").fetchone()["c"] == 1,
+)
+verify.close()
+
 
 print("\n== Dispatch bookkeeping ==")
 conn = fresh()
