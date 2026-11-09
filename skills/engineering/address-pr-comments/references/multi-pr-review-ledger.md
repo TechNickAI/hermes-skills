@@ -1,10 +1,10 @@
 # Multi-PR review-comment ledger
 
-Use this when addressing bot/human comments across more than one PR or worktree in a single run. Keep it as scratch notes in the session (or a temporary file) and update it immediately after each commit/push.
+Use this when addressing bot/human comments across more than one PR or checkout in a single run. Keep it as scratch notes in the session (or a temporary file) and update it immediately after each commit/push.
 
 ## Ledger template
 
-| PR  | Title     | Head branch | Worktree | Comment IDs / paths | Fix commit(s)     | Pushed ref verified       | Verification             |
+| PR  | Title     | Head branch | Checkout | Comment IDs / paths | Fix commit(s)     | Pushed ref verified       | Verification             |
 | --- | --------- | ----------- | -------- | ------------------- | ----------------- | ------------------------- | ------------------------ |
 | #N  | `<title>` | `<branch>`  | `<path>` | `<id>: path:line`   | `<sha> <subject>` | `HEAD == origin/<branch>` | `<command>` → `<result>` |
 
@@ -13,10 +13,10 @@ Use this when addressing bot/human comments across more than one PR or worktree 
 For each PR branch:
 
 ```bash
-git -C <worktree> status --short --branch
-git -C <worktree> rev-parse HEAD
-git -C <worktree> rev-parse origin/<head-branch>
-git -C <worktree> show --stat --oneline --no-renames HEAD
+git -C <checkout> status --short --branch
+git -C <checkout> rev-parse HEAD
+git -C <checkout> rev-parse origin/<head-branch>
+git -C <checkout> show --stat --oneline --no-renames HEAD
 ```
 
 Also record the exact quality gates that passed, not just "tests passed":
@@ -35,7 +35,7 @@ their fixes, the orchestrator MUST merge main into each branch before checking
 CI:
 
 ```bash
-cd <worktree>
+cd <checkout>
 git fetch origin main
 git checkout <pr-branch>
 git merge origin/main --no-edit
@@ -50,8 +50,8 @@ git push origin <pr-branch>
 shared test file) when multiple PRs each added new test functions. The conflict
 is just both sides adding different functions at the same location — keep both.
 
-**Subagent-created worktrees**: subagents may create their own worktrees at
-unexpected paths (e.g. `~/src/fiddler-pr33`). Find them with `git worktree list`
+**Subagent-created checkouts**: subagents may create their own checkouts at
+unexpected paths (e.g. `~/src/fiddler-pr33`). Find them with `git checkout list`
 and use those for follow-up operations rather than creating new ones.
 
 **`gh pr merge --squash` is silent on success** — always verify:
@@ -78,7 +78,7 @@ gh pr view <n> --json state --jq '.state'  # verify "MERGED"
 
 - Reporting from memory after several context compactions and losing the exact commit SHA.
 - Pushing a local batch branch while the PR head branch remains unchanged.
-- Mixing verification results between worktrees that share the same repo but not the same branch.
+- Mixing verification results between checkouts that share the same repo but not the same branch.
 - Forgetting that a PR can be a review-sweep PR itself and receive new review comments on the review-fix code.
 - Forgetting to merge main into each branch after a pre-commit `--all-files` fix landed on main — branches diverged from main will fail CI on unrelated files.
-- Not finding subagent-created worktrees (they may be at unexpected paths — always `git worktree list` to find them).
+- Not finding subagent-created checkouts (they may be at unexpected paths — always `git checkout list` to find them).

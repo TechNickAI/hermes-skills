@@ -497,10 +497,10 @@ skills:
   path: skills/core/trust-framework
 - name: address-pr-comments
   pack: engineering
-  version: 1.0.0
+  version: 2.0.0
   scope: solo
-  summary: 'Trigger phrases: "address the PR comments", "handle the bot feedback", "get the review comments addressed".'
-  use_when: a pull request has feedback from code-review bots (Cursor Bugbot, Codex, Claude Code Review, Greptile, CodeRabbit) or humans and you need to triage it, fix what is valid, push back on what is wrong, react and reply to every comment, and drive the PR to a clean, mergeable state.
+  summary: Fixes the real defects the PR introduced, declines the rest with a one-line reason, answers every bot comment, and drives the PR to a converged, mergeable state.
+  use_when: a pull request has review comments from bots (Cursor Bugbot, Codex, Claude Code Review, Gemini Code Assist, Greptile, CodeRabbit) or humans to triage and resolve.
   requires:
   - gh CLI, authenticated
   works_out_of_the_box: false
@@ -508,11 +508,11 @@ skills:
   claude_compat: native
   claude_note: Works in Claude Code with an authenticated gh CLI.
   size:
-    files: 10
-    bytes_skill_md: 19743
-    bytes_total: 63412
-    approx_tokens_skill_md: 4936
-    approx_tokens_total: 15853
+    files: 11
+    bytes_skill_md: 22349
+    bytes_total: 70201
+    approx_tokens_skill_md: 5587
+    approx_tokens_total: 17550
   tags:
   - github
   - code-review
