@@ -286,13 +286,13 @@ differentiator — say so out loud), `unsupported` (never recommend it in Claude
 
 - **Pack:** engineering
 - **Scope:** solo
-- **What it does:** Trigger phrases: "address the PR comments", "handle the bot feedback", "get the review comments addressed".
-- **Use when:** a pull request has feedback from code-review bots (Cursor Bugbot, Codex, Claude Code Review, Greptile, CodeRabbit) or humans and you need to triage it, fix what is valid, push back on what is wrong, react and reply to every comment, and drive the PR to a clean, mergeable state.
+- **What it does:** Fixes the real defects the PR introduced, declines the rest with a one-line reason, answers every bot comment, and drives the PR to a converged, mergeable state.
+- **Use when:** a pull request has review comments from bots (Cursor Bugbot, Codex, Claude Code Review, Gemini Code Assist, Greptile, CodeRabbit) or humans to triage and resolve.
 - **Prerequisites:** gh CLI, authenticated
 - **Works without setup:** No
 - **Compatibility:** Agent Skills standard
 - **Claude:** native — Works in Claude Code with an authenticated gh CLI.
-- **Size:** 19,743 B body, loaded when the skill triggers (~4,936 tokens); 63,412 B across 10 file(s) total
+- **Size:** 22,656 B body, loaded when the skill triggers (~5,664 tokens); 70,679 B across 11 file(s) total
 - **Path:** `skills/engineering/address-pr-comments`
 
 ## diagram-rendering
