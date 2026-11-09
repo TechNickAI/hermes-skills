@@ -51,8 +51,9 @@ shared test file) when multiple PRs each added new test functions. The conflict
 is just both sides adding different functions at the same location — keep both.
 
 **Subagent-created checkouts**: subagents may create their own checkouts at
-unexpected paths (e.g. `~/src/fiddler-pr33`). Find them with `git checkout list`
-and use those for follow-up operations rather than creating new ones.
+unexpected paths (e.g. `~/src/<repo>-pr33`). Record every clone path in the ledger;
+for linked worktrees, `git worktree list` finds them. Use those for follow-up
+operations rather than creating new ones.
 
 **`gh pr merge --squash` is silent on success** — always verify:
 
@@ -81,4 +82,5 @@ gh pr view <n> --json state --jq '.state'  # verify "MERGED"
 - Mixing verification results between checkouts that share the same repo but not the same branch.
 - Forgetting that a PR can be a review-sweep PR itself and receive new review comments on the review-fix code.
 - Forgetting to merge main into each branch after a pre-commit `--all-files` fix landed on main — branches diverged from main will fail CI on unrelated files.
-- Not finding subagent-created checkouts (they may be at unexpected paths — always `git checkout list` to find them).
+- Not finding subagent-created checkouts (they may be at unexpected paths — read the ledger's clone paths, or `git worktree list`
+  for linked worktrees).

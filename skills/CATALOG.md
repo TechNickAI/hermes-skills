@@ -292,7 +292,7 @@ differentiator — say so out loud), `unsupported` (never recommend it in Claude
 - **Works without setup:** No
 - **Compatibility:** Agent Skills standard
 - **Claude:** native — Works in Claude Code with an authenticated gh CLI.
-- **Size:** 22,349 B body, loaded when the skill triggers (~5,587 tokens); 70,201 B across 11 file(s) total
+- **Size:** 22,349 B body, loaded when the skill triggers (~5,587 tokens); 70,291 B across 11 file(s) total
 - **Path:** `skills/engineering/address-pr-comments`
 
 ## diagram-rendering
