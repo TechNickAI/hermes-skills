@@ -25,10 +25,12 @@ import subprocess
 from pathlib import Path
 
 # --- config knobs (env overrides keep cron prompts authoritative) ---
-ORGS = [x for x in os.environ.get("ORGS", "carmentacollective,TechNickAI").split(",") if x]
+ORGS = [x for x in os.environ.get("ORGS", "").split(",") if x]
+if not ORGS:
+    raise SystemExit("triage_scan: set ORGS to a comma-separated list of GitHub orgs/users to scan")
 LOOKBACK_DAYS = int(os.environ.get("LOOKBACK_DAYS", "7"))
 SEARCH_LIMIT = int(os.environ.get("SEARCH_LIMIT", "200"))
-EXCLUDE = {x for x in os.environ.get("EXCLUDE_REPOS", "TechNickAI/openclaw-config").split(",") if x}
+EXCLUDE = {x for x in os.environ.get("EXCLUDE_REPOS", "").split(",") if x}
 OUTPUT_PATH = Path(os.environ.get("PR_SWEEP_SCAN", "/tmp/pr_review_sweep_scan.json"))
 # --------------------------------------------------------------------------
 

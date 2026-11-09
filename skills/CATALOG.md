@@ -139,7 +139,7 @@ differentiator — say so out loud), `unsupported` (never recommend it in Claude
 - **Works without setup:** Yes in Hermes (not available in Claude)
 - **Compatibility:** Hermes-specific memory-file layout and conventions.
 - **Claude:** unsupported — Cleans Hermes MEMORY.md / USER.md / SOUL.md files, which do not exist in Claude.
-- **Size:** 17,524 B body, loaded when the skill triggers (~4,381 tokens); 50,530 B across 8 file(s) total
+- **Size:** 17,524 B body, loaded when the skill triggers (~4,381 tokens); 50,534 B across 8 file(s) total
 - **Path:** `skills/core/memory-cleanup`
 
 ## moa-solve
@@ -154,7 +154,7 @@ differentiator — say so out loud), `unsupported` (never recommend it in Claude
 - **Works without setup:** Yes in Hermes (not available in Claude)
 - **Compatibility:** Hermes-specific; requires the native MoA runtime.
 - **Claude:** unsupported — Requires the native Hermes MoA fan-out runtime.
-- **Size:** 19,679 B body, loaded when the skill triggers (~4,920 tokens); 41,132 B across 5 file(s) total
+- **Size:** 19,679 B body, loaded when the skill triggers (~4,920 tokens); 41,136 B across 5 file(s) total
 - **Path:** `skills/core/moa-solve`
 
 ## mob-check
@@ -180,7 +180,7 @@ differentiator — say so out loud), `unsupported` (never recommend it in Claude
 - **Works without setup:** Yes, but read the Claude note before recommending it
 - **Compatibility:** Portable review method. Native multi-model orchestration examples are Hermes-specific; Claude can run the method with Claude subagents but loses model-family diversity.
 - **Claude:** degraded — The review method transfers, but cross-model-family diversity needs Hermes; in Claude it becomes Claude reviewing Claude.
-- **Size:** 54,440 B body, loaded when the skill triggers (~13,610 tokens); 152,779 B across 18 file(s) total
+- **Size:** 54,440 B body, loaded when the skill triggers (~13,610 tokens); 152,771 B across 18 file(s) total
 - **Path:** `skills/core/multi-review`
 
 ## project-steward
@@ -223,7 +223,7 @@ differentiator — say so out loud), `unsupported` (never recommend it in Claude
 - **Works without setup:** Yes in Hermes (not available in Claude)
 - **Compatibility:** Hermes-specific session and memory stores.
 - **Claude:** unsupported — Reads Hermes session and memory stores, which Claude does not have.
-- **Size:** 11,028 B body, loaded when the skill triggers (~2,757 tokens); 20,674 B across 4 file(s) total
+- **Size:** 11,028 B body, loaded when the skill triggers (~2,757 tokens); 20,690 B across 4 file(s) total
 - **Path:** `skills/core/recall`
 
 ## report
@@ -346,7 +346,7 @@ differentiator — say so out loud), `unsupported` (never recommend it in Claude
 - **Works without setup:** No in Hermes (not available in Claude)
 - **Compatibility:** Agent Skills standard
 - **Claude:** unsupported — Operates Hermes-config mini-app host services.
-- **Size:** 45,642 B body, loaded when the skill triggers (~11,410 tokens); 87,298 B across 12 file(s) total
+- **Size:** 45,642 B body, loaded when the skill triggers (~11,410 tokens); 87,292 B across 12 file(s) total
 - **Path:** `skills/engineering/mini-app`
 
 ## pr-review-sweep
@@ -361,7 +361,7 @@ differentiator — say so out loud), `unsupported` (never recommend it in Claude
 - **Works without setup:** No in Hermes (not available in Claude)
 - **Compatibility:** Agent Skills standard
 - **Claude:** unsupported — Depends on the Hermes delegation toolset.
-- **Size:** 8,107 B body, loaded when the skill triggers (~2,027 tokens); 53,009 B across 11 file(s) total
+- **Size:** 8,107 B body, loaded when the skill triggers (~2,027 tokens); 52,840 B across 11 file(s) total
 - **Path:** `skills/engineering/pr-review-sweep`
 
 ## scheduled-job-runner
@@ -441,7 +441,7 @@ differentiator — say so out loud), `unsupported` (never recommend it in Claude
 - **Works without setup:** No in Hermes (not available in Claude)
 - **Compatibility:** Agent Skills standard
 - **Claude:** unsupported — Depends on Hermes cron and delegation toolsets.
-- **Size:** 13,873 B body, loaded when the skill triggers (~3,468 tokens); 42,438 B across 12 file(s) total
+- **Size:** 13,873 B body, loaded when the skill triggers (~3,468 tokens); 33,664 B across 8 file(s) total
 - **Path:** `skills/productivity/email-steward`
 
 ## fieldy
@@ -467,7 +467,7 @@ differentiator — say so out loud), `unsupported` (never recommend it in Claude
 - **Works without setup:** No
 - **Compatibility:** Agent Skills standard
 - **Claude:** native — Works in Claude once the gog CLI is authorized.
-- **Size:** 10,577 B body, loaded when the skill triggers (~2,644 tokens); 35,683 B across 5 file(s) total
+- **Size:** 10,577 B body, loaded when the skill triggers (~2,644 tokens); 35,689 B across 5 file(s) total
 - **Path:** `skills/productivity/google-docs`
 
 ## google-sheets

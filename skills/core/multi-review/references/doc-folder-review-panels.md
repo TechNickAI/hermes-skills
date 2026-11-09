@@ -1,6 +1,6 @@
 # Reviewing a documentation/spec FOLDER with a multi-model panel
 
-Proven one occasion on Fiddler's knowledge/ folder (~40 files, ~9,000 lines,
+Proven on one project's knowledge/ folder (~40 files, ~9,000 lines,
 5 reviewers × 5 model families). The SKILL.md covers single artifacts; a
 folder needs brief construction. This is the recipe.
 

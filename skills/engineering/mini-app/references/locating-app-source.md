@@ -9,10 +9,10 @@ the one in the screenshot is frequently NOT the one you've been editing.
 
 Asked to "fix the column labels" on a screenshot showing `mentionsterminal.com/n`
 with a "Word Matrix" / "Live Market Comparison" card. The assumption was that this
-was the on-box `hangl-dashboard` (the internal Kalshi dashboard behind the Caddy
+was the on-box `internal-dashboard` (an internal dashboard behind the Caddy
 auth gate). It was not. mentionsterminal.com is a **separate, externally hosted
 app** whose source is not on the box and not in the user's GitHub orgs. Editing
-hangl-dashboard would have "fixed" the wrong app.
+internal-dashboard would have "fixed" the wrong app.
 
 ## Trace procedure (do this BEFORE writing code)
 
@@ -21,7 +21,7 @@ hangl-dashboard would have "fixed" the wrong app.
 
    ```bash
    grep -rl --exclude-dir=node_modules --exclude-dir=.git \
-     -i "Word Matrix\|Live Market Comparison\|Paste Kalshi NFL" /home/ubuntu/src /home/ubuntu/apps
+     -i "Word Matrix\|Live Market Comparison\|Paste Market Data" /home/ubuntu/src /home/ubuntu/apps
    ```
 
    No hits = the code isn't on this machine.
