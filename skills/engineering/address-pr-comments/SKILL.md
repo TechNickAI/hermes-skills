@@ -130,9 +130,9 @@ gh api repos/$R/pulls/<N>/reviews --paginate \
 ```
 
 Run the same three queries with `select(($BOT) | not)` for human feedback, and read
-`reviewDecision` from step 1. Exclude your own login (`gh api user --jq .login`): when
-you post through the user's account, your replies and the review records they create
-show up as "human" and look like unanswered requests.
+`reviewDecision` from step 1. If you post through the user's own account, your replies
+appear in the human results too. Skip only the comments you posted this session (keep
+their ids); anything else from that account is the user's own feedback, so read it.
 
 - **A 503 or error is never "no comments."** Retry, or fall back to GraphQL
   `reviewThreads` (`references/github-degraded-api-and-merge-verification.md`).
@@ -147,7 +147,8 @@ show up as "human" and look like unanswered requests.
   finding from round one stays open under a later "no issues found."
 - Your own threaded reply can create a `COMMENTED` review record; check the author
   before treating a new review id as findings.
-- A bot comment that already has a reply from you and a reaction is closed; skip it.
+- A bot comment is closed only when you (or the PR author) replied with its outcome and
+  reacted. A reply from the bot itself or another reviewer doesn't close it.
 
 ### 3. Separate stale findings from live ones
 

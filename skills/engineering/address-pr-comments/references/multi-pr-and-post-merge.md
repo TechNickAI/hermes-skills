@@ -30,9 +30,10 @@ When the batch is large enough to delegate:
 
 ## Comments that land after merge
 
-The PR can't take a push. Find the unanswered ones: top-level bot comments whose `id`
-no other comment's `in_reply_to_id` points at (top-level comments omit the field, so
-read it defensively). Then:
+The PR can't take a push. Find the unanswered ones: top-level bot comments with no
+reply from the PR author or from you (read `in_reply_to_id` defensively, since
+top-level comments omit it). A threaded reply from the bot itself or another reviewer
+doesn't answer a finding. Then:
 
 1. Branch a follow-up from the current base branch, fix, test, and open a PR.
 2. Merge it only if merging was authorized for this work.
