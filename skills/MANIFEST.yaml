@@ -510,7 +510,7 @@ skills:
   size:
     files: 7
     bytes_skill_md: 22656
-    bytes_total: 45689
+    bytes_total: 45688
     approx_tokens_skill_md: 5664
     approx_tokens_total: 11422
   tags:
