@@ -130,7 +130,9 @@ gh api repos/$R/pulls/<N>/reviews --paginate \
 ```
 
 Run the same three queries with `select(($BOT) | not)` for human feedback, and read
-`reviewDecision` from step 1.
+`reviewDecision` from step 1. Exclude your own login (`gh api user --jq .login`): when
+you post through the user's account, your replies and the review records they create
+show up as "human" and look like unanswered requests.
 
 - **A 503 or error is never "no comments."** Retry, or fall back to GraphQL
   `reviewThreads` (`references/github-degraded-api-and-merge-verification.md`).

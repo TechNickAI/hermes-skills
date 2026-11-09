@@ -509,10 +509,10 @@ skills:
   claude_note: Works in Claude Code with an authenticated gh CLI.
   size:
     files: 11
-    bytes_skill_md: 22349
-    bytes_total: 70291
-    approx_tokens_skill_md: 5587
-    approx_tokens_total: 17573
+    bytes_skill_md: 22545
+    bytes_total: 70487
+    approx_tokens_skill_md: 5636
+    approx_tokens_total: 17622
   tags:
   - github
   - code-review
