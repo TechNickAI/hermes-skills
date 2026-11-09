@@ -130,7 +130,7 @@ This is a **genuine trading-logic design decision**, not a clear bug. The PR's i
 only highest-price covers will fill at the target price, so lower-priced ones shouldn't
 count. The bot's concern: this could cause unnecessary cancel+re-place churn.
 
-Resolution: replied explaining the design rationale, flagged as intentional, let Nick
+Resolution: replied explaining the design rationale, flagged as intentional, let the owner
 override if he disagrees. This is the right call for money-path design questions
 where the bot doesn't have enough context to judge the trading strategy.
 
