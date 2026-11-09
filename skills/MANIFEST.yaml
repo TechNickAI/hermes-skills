@@ -497,7 +497,7 @@ skills:
   path: skills/core/trust-framework
 - name: address-pr-comments
   pack: engineering
-  version: 2.0.2
+  version: 2.0.3
   scope: solo
   summary: Fixes the real defects the PR introduced, declines the rest with a one-line reason, answers every bot comment, and drives the PR to a converged, mergeable state.
   use_when: a pull request has review comments from bots (Cursor Bugbot, Codex, Claude Code Review, Gemini Code Assist, Greptile, CodeRabbit) or humans to triage and resolve.
@@ -510,9 +510,9 @@ skills:
   size:
     files: 7
     bytes_skill_md: 22656
-    bytes_total: 45528
+    bytes_total: 46017
     approx_tokens_skill_md: 5664
-    approx_tokens_total: 11382
+    approx_tokens_total: 11504
   tags:
   - github
   - code-review
