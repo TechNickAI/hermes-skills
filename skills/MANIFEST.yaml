@@ -510,9 +510,9 @@ skills:
   size:
     files: 7
     bytes_skill_md: 22656
-    bytes_total: 45688
+    bytes_total: 46017
     approx_tokens_skill_md: 5664
-    approx_tokens_total: 11422
+    approx_tokens_total: 11504
   tags:
   - github
   - code-review

@@ -48,8 +48,9 @@ query($owner: String!, $name: String!, $n: Int!, $endCursor: String) {
 EOF
 
 gh api graphql --paginate -f query="$(< /tmp/prthreads.graphql)" \
-  -F owner=<owner> -F name=<repo> -F n=<pr_number> \
-  | jq -s '[.[].data.repository.pullRequest.reviewThreads.nodes[]]
+  -F owner=<owner> -F name=<repo> -F n=<pr_number> > /tmp/prthreads.json \
+  || { echo "FETCH FAILED: thread counts UNKNOWN, not zero"; exit 1; }
+jq -s '[.[].data.repository.pullRequest.reviewThreads.nodes[]]
     | "threads=\(length) unresolved=\(map(select(.isResolved|not))|length)",
       (.[] | select(.comments.totalCount > (.comments.nodes|length))
         | "TRUNCATED thread \(.comments.nodes[0].databaseId): read it on the web"),
@@ -61,10 +62,12 @@ gh api graphql --paginate -f query="$(< /tmp/prthreads.graphql)" \
         replies: (.comments.totalCount-1),
         reactions: (.comments.nodes[0].reactions.nodes|length),
         body:.comments.nodes[0].body[0:400]
-      })'
+      })' /tmp/prthreads.json
 ```
 
-`--paginate` follows `$endCursor` across every thread page and `jq -s` joins the
+Fetch to a file first and check `gh`'s exit status: piped straight into `jq -s`, a
+failed or half-finished fetch prints `threads=0 unresolved=0` and exits 0, which is
+the false all-clear this fallback exists to prevent. `--paginate` follows `$endCursor` across every thread page and `jq -s` joins the
 pages (works on any `gh`; `--slurp` needs a recent one), so the counts cover the whole PR. A thread longer than 100 comments prints
 `TRUNCATED`; read that one on the web rather than trusting the partial replies.
 
