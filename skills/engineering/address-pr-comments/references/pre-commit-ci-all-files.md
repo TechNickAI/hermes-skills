@@ -32,11 +32,15 @@ diff (50+ files) of unrelated formatting churn.
    fails the same hooks with the same errors, those failures are pre-existing.
    ```bash
    # Subshell: SKILL.md uses $BASE for the base branch name; don't clobber it.
+   # Check out what the fetch just returned (FETCH_HEAD): a local base branch
+   # may be missing or stale, and single-branch clones get no origin/<base>.
    (
+     b="${BASE:-main}"
+     git fetch -q origin "$b" || exit 1
      tmp=$(mktemp -d)
-     git clone -q --branch "${BASE:-main}" "$(git rev-parse --show-toplevel)" "$tmp/base"
-     cd "$tmp/base" && pre-commit run --all-files 2>&1 | grep -E "Passed|Failed"
-     rm -rf "$tmp"
+     git worktree add -q --detach "$tmp/base" FETCH_HEAD || exit 1
+     (cd "$tmp/base" && pre-commit run --all-files 2>&1 | grep -E "Passed|Failed")
+     git worktree remove --force "$tmp/base"; rm -rf "$tmp"
    )
    ```
 3. **Commit all auto-fixes anyway**: because CI runs `--all-files`, you must
