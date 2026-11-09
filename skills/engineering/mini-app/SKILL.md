@@ -7,7 +7,7 @@ description: >
   sidecar conventions, exposing apps publicly via Funnel, Hermes dashboards behind a
   password, and the recurring pitfalls (Tailscale "serve reset" wars, the PM2 $HOME
   trap, funnel-eligible ports, strip-prefix requirements).
-version: 0.5.0
+version: 0.5.1
 license: MIT
 metadata:
   hermes:

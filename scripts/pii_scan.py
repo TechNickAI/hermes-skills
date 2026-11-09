@@ -11,7 +11,20 @@ import pathlib
 import re
 import sys
 
-PEOPLE = r"\bjulianna\b|\bthomasowen\b|\bcathy\b|\bkenny\b|\bnick sullivan\b"
+# First names alone count: "Nick" passed the scan for months because only the
+# full name was listed. `TechNickAI` (the GitHub org, public) is not matched by
+# the word boundary. Account handles are names too.
+PEOPLE = (r"\bjulianna\b|\bthomasowen\b|\bcathy\b|\bkenny\b|\bnick sullivan\b"
+          r"|\bnick(?:'s)?\b|\bjbudding\b|\bjuliannascruggs\b")
+# Private org and repository names. Public org TechNickAI is fine; these name
+# private codebases and, paired with PR numbers, their history.
+PRIVATE_REPOS = (r"\bcarmentacollective\b|\bantevorta\b|\bhangl(?:-dashboard)?\b"
+                 r"|\bcryptoai\b|\bmcp-hubby\b|\bpontifex\b|\blendy\b"
+                 r"|(?<![a-z])fiddler(?:'s)?\b(?! (?:proxy|web debugg))")
+# Personal mailboxes at consumer providers. Role and placeholder local-parts
+# (user@, person@, you@, name@) are documentation, not people.
+PERSONAL_EMAIL = (r"\b(?!(?:user|person|you|name|example|someone)@)[a-z0-9._%+-]+"
+                  r"@(?:gmail|icloud|me|yahoo|hotmail|outlook|proton(?:mail)?)\.(?:com|me)\b")
 HOSTS = (r"\b[a-z]+s-mac-mini\b|\b[a-z]+s-imac\b|\bmac-studio\b|hex\.technick"
          r"|\bkenbot\b|\bshantima\b|\bbobsteel\b|(?<![a-z-])roxy\b")
 # Agent / persona names. These are fleet identifiers just like hostnames, and a
@@ -68,6 +81,8 @@ RULES = [
     ("fleet-host", HOSTS, "BLOCKER"),
     ("agent-name", AGENTS, "BLOCKER"),
     ("person", PEOPLE, "BLOCKER"),
+    ("private-repo", PRIVATE_REPOS, "BLOCKER"),
+    ("personal-email", PERSONAL_EMAIL, "BLOCKER"),
     ("home-path", PATHS, "warn"),
 ]
 COMPILED = [(n, re.compile(p, re.I), sev) for n, p, sev in RULES]
@@ -79,6 +94,12 @@ def scan(path: pathlib.Path):
     except OSError:
         return []
     out = []
+    # Line 0 is the file's own name. A clean body under `bosun-2026-06-05-cleanup.md`
+    # still ships the agent name and the incident date.
+    for name, rx, sev in COMPILED:
+        m = rx.search(path.name)
+        if m:
+            out.append((sev, name, 0, path.name[:100], m.group(0)))
     for i, line in enumerate(text.splitlines(), 1):
         for name, rx, sev in COMPILED:
             m = rx.search(line)

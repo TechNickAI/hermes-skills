@@ -6,7 +6,7 @@ description: >
   attention. Provides a Hermes-native workflow using cron, per-message sub-agent
   isolation, deterministic header heuristics, account adapters, visible Markdown state,
   reversible actions, and silent no-op runs.
-version: 1.0.0
+version: 1.0.1
 license: MIT
 metadata:
   hermes:

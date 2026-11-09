@@ -9,7 +9,7 @@ There can be **more than one PM2 God Daemon running on the same machine**, each 
 its own `PM2_HOME` and its own independent process table. A bare `pm2` command only
 talks to the daemon selected by the current `PM2_HOME` (or the default `~/.pm2`).
 
-Observed on Nick's Mac Studio:
+Observed on one Mac host:
 
 - Mini-apps (btc-recovery, etc.) are supervised by the daemon at **`PM2_HOME=/Users/<user>/.pm2`**.
 - A _separate_ Hermes-profile daemon runs at

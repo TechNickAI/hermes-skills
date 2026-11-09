@@ -1,7 +1,7 @@
 # Runner lessons — one occasion
 
-Session context: nightly PR review sweep across `carmentacollective` and `TechNickAI`,
-lookback 7 days, max 10 PRs, excluding `TechNickAI/openclaw-config`. Scanned 68 merged
+Session context: nightly PR review sweep across two orgs,
+lookback 7 days, max 10 PRs, excluding `<org-b>/<excluded-repo>`. Scanned 68 merged
 PRs (65 after exclusions), found 7 flagged, triaged 5 as self-healed/trivial (handled
 directly by orchestrator with reply+react), dispatched 2 to Claude Code, opened 2
 follow-up PRs. All 7 PRs verified at zero residual unhandled comments.
@@ -14,15 +14,15 @@ The Contents-API validation step (already in the skill) is highly effective at c
 self-healed findings before provisioning a Claude Code workshop. In this run, 5 of 7
 flagged PRs (71%) were dismissed as self-healed or deliberate design choices:
 
-- **antevorta #42** (7 comments): All 6 bot findings already fixed in merged code —
+- **<repo-a> #42** (7 comments): All 6 bot findings already fixed in merged code —
   `ttl<=0` bypass, `_safe_int` for Redis port, `_resolve_ttl` honors explicit 0 without
   `or` operator, ping failure sets client to None, `redis>=5.0` in pyproject optional deps.
   Three different bots (cursor, gemini, codex) all reviewed an earlier revision.
 - **<agent-f> #63** (1 comment): Merged code already used `{wh:g}` — bot reviewed earlier push.
 - **<agent-f> #37** (1 comment): Author deliberately kept redundant `CODMAP` + `COD` with
   explanatory comment "keep both for clarity" — declined as deliberate design choice.
-- **fiddler #42** (1 comment): Gemini said "unable to generate a review" — no finding at all.
-- **cryptoai #793** (3 comments): Positive claude[bot] reviews — reviewer explicitly said
+- **<repo-b> #42** (1 comment): Gemini said "unable to generate a review" — no finding at all.
+- **<repo-c> #793** (3 comments): Positive claude[bot] reviews — reviewer explicitly said
   "Not asking for the guard back — just flagging."
 
 All 13 comments on these 5 PRs were closed with a contextual reply + 👍 reaction in a single
@@ -68,8 +68,8 @@ pattern is intentional. This is a third outcome category beyond "self-healed" an
 
 ## Session-specific artifacts created
 
-- `carmentacollective/<agent-f>#71` — follow-up PR for bracket escaping in Telegram Markdown links.
-- `carmentacollective/fiddler#64` — follow-up PR for misleading log value rename + dead code removal.
+- `<org-a>/<agent-f>#71` — follow-up PR for bracket escaping in Telegram Markdown links.
+- `<org-a>/<repo-b>#64` — follow-up PR for misleading log value rename + dead code removal.
 
 Do not hard-code these artifact numbers into future sweeps; they are examples of the
 report content, not reusable targets.

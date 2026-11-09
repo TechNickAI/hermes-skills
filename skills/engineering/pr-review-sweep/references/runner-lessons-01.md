@@ -1,6 +1,6 @@
 # PR review sweep runner lessons — one occasion
 
-Condensed operational lessons from a successful 10-PR sweep across `carmentacollective` and `TechNickAI`.
+Condensed operational lessons from a successful 10-PR sweep across two orgs.
 
 ## Scan sizing
 

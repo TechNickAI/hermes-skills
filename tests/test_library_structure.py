@@ -202,6 +202,21 @@ PII_CASES = [
     ("running releases/standalone-2fc1229", True),
     ("at 7a8589e782427398f6acfa62d5078a17a9b20286", True),
     ("see releases/standalone-<sha>", False),
+    # First name alone, possessive included; the public org name is not a person.
+    ("when Nick asks for a review", True),
+    ("Nick's exact framing", True),
+    ("install from TechNickAI/hermes-skills", False),
+    ("pick a nickname for the host", False),
+    ("account jbudding needs a sweep", True),
+    # Private orgs and repos, and the common words they collide with.
+    ("swept carmentacollective/fiddler#60", True),
+    ("the antevorta PR", True),
+    ("Fiddler's knowledge folder", True),
+    ("capture traffic with the Fiddler proxy", False),
+    # Personal mailboxes vs documentation placeholders and role senders.
+    ("forward to someone.real@gmail.com", True),
+    ("iMessage;-;user@icloud.com", False),
+    ("from no-reply@accounts.google.com", False),
 ]
 
 # Exact incident dates are a WARNING, not a blocker, so the blocker-only table
@@ -238,6 +253,30 @@ def test_incident_dates_are_flagged(text, flagged, tmp_path):
     probe.write_text(text)
     hits = [h for h in pii.scan(probe) if h[1] == "incident-date"]
     assert bool(hits) == flagged, f"{text!r}: expected flagged={flagged}, got {hits}"
+
+
+@pytest.mark.parametrize(
+    "filename,flagged",
+    [
+        ("bosun-cleanup.md", True),
+        ("runner-lessons-2026-07-11.md", False),  # date is a warn, not a blocker
+        ("example-cleanup-inventory.md", False),
+    ],
+)
+def test_pii_scanner_checks_filenames(filename, flagged, tmp_path):
+    """Content was clean while the filename named the agent; the path is content too."""
+    sys.path.insert(0, str(ROOT / "scripts"))
+    try:
+        import importlib
+
+        pii = importlib.import_module("pii_scan")
+        importlib.reload(pii)
+    finally:
+        sys.path.pop(0)
+    probe = tmp_path / filename
+    probe.write_text("nothing identifying here")
+    hits = [h for h in pii.scan(probe) if h[0] == "BLOCKER" and h[2] == 0]
+    assert bool(hits) == flagged, f"{filename!r}: expected flagged={flagged}, got {hits}"
 
 
 @pytest.mark.parametrize("text,flagged", PII_CASES, ids=lambda v: str(v)[:40])

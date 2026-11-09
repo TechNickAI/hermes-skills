@@ -7,8 +7,8 @@ else sent you, or synthesizing a document plus its unresolved comment threads.
 ## Native Google Doc (mimeType application/vnd.google-apps.document)
 
 ```bash
-HOME=/Users/nick gog docs export <docId> --format txt --out /tmp/<name>/doc.txt
-HOME=/Users/nick gog drive comments list <docId> --json > /tmp/<name>/comments.json
+HOME=/Users/<user> gog docs export <docId> --format txt --out /tmp/<name>/doc.txt
+HOME=/Users/<user> gog drive comments list <docId> --json > /tmp/<name>/comments.json
 ```
 
 - `docs export --format txt` gives clean plain text. Read it with the `Read` tool
@@ -30,7 +30,7 @@ Google's own format. Check `mimeType` first with `gog drive get <id> --json` so 
 know which path applies, then:
 
 ```bash
-HOME=/Users/nick gog drive download <docId> --out /tmp/<name>/doc.docx
+HOME=/Users/<user> gog drive download <docId> --out /tmp/<name>/doc.docx
 ```
 
 The `Read` tool auto-extracts `.docx` to numbered plain text (no separate
