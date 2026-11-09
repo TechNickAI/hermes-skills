@@ -25,15 +25,16 @@ diff (50+ files) of unrelated formatting churn.
 ### Correct workflow
 
 1. **Reproduce locally**: `pre-commit run --all-files` to see what CI sees.
-2. **Verify pre-existing failures**: check out `main` and run the same
-   command. If main also fails the same hooks with the same errors, those
-   failures are pre-existing and not caused by the PR.
+2. **Verify pre-existing failures**: run the same command on `main` in a
+   throwaway clone, never by switching your PR checkout. Auto-fix hooks edit
+   files on `main`; if any of them differ on the PR branch, `git checkout
+<pr-branch>` aborts and a following `git stash pop` lands on `main`. If main
+   fails the same hooks with the same errors, those failures are pre-existing.
    ```bash
-   git stash  # save any local changes
-   git checkout main
-   pre-commit run --all-files 2>&1 | grep -E "Passed|Failed"
-   git checkout <pr-branch>
-   git stash pop  # restore changes
+   BASE=$(mktemp -d)
+   git clone -q --branch main "$(git rev-parse --show-toplevel)" "$BASE/main"
+   (cd "$BASE/main" && pre-commit run --all-files 2>&1 | grep -E "Passed|Failed")
+   rm -rf "$BASE"   # your PR checkout was never touched
    ```
 3. **Commit all auto-fixes anyway**: because CI runs `--all-files`, you must
    push ALL auto-fixes (even for files the PR didn't touch) to make the lint
